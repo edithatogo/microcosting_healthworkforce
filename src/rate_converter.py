@@ -11,21 +11,22 @@ import pandas as pd
 
 
 def convert_annual_cost_to_rates(
-    annual_costs_df: pd.DataFrame, original_data_df: pd.DataFrame
+    projected_costs_df: pd.DataFrame, original_data_df: pd.DataFrame
 ) -> pd.DataFrame:
     """
-    Converts calculated annual costs to hourly, daily, weekly, fortnightly,
-    and monthly rates.
+    Converts projected annual costs for multiple years into hourly, daily,
+    weekly, fortnightly, and monthly rates.
 
     Args:
-        annual_costs_df: DataFrame with calculated annual costs.
+        projected_costs_df: DataFrame with projected annual costs for multiple
+                            years (e.g., Calculated_Cost_LL_Y0, ..._Y1).
         original_data_df: The original input DataFrame, used for parameters
                           like 'hours per week'.
 
     Returns:
-        A DataFrame with all the newly calculated rate columns.
+        A DataFrame with all the newly calculated rate columns for each year.
     """
-    rates_df = pd.DataFrame(index=annual_costs_df.index)
+    rates_df = pd.DataFrame(index=projected_costs_df.index)
     hours_per_week = original_data_df["Grade(s)_Hours per week"]
 
     # --- Define Divisors ---
@@ -35,31 +36,55 @@ def convert_annual_cost_to_rates(
     total_annual_work_days = (work_days_per_week * 52).replace(0, np.nan)
     total_annual_hours = (hours_per_week * 52).replace(0, np.nan)
 
-    # --- Calculate Rates for Each Tier (LL, Mid, UL) ---
-    for tier in ["LL", "Mid", "UL"]:
-        cost_col = f"Calculated_Cost_{tier}"
-        annual_cost = annual_costs_df[cost_col]
+    # --- Identify Years from Columns ---
+    # Extracts "Y0", "Y1", etc. from the column names
+    years = sorted(
+        list(
+            set(
+                col.split("_")[-1]
+                for col in projected_costs_df.columns
+                if col.startswith("Calculated_Cost_")
+            )
+        )
+    )
 
-        # Hourly
-        hourly_col = f"Calculated_Hourly_{tier}"
-        rates_df[hourly_col] = annual_cost / total_annual_hours
-        # Apply hardcoded overrides for hourly rates
-        override_col = f"Base Salary + Costs (hourly)_{tier}"
-        if override_col in original_data_df:
-            rates_df[hourly_col] = rates_df[hourly_col].fillna(
-                original_data_df[override_col]
+    # --- Calculate Rates for Each Year and Tier ---
+    for year_suffix in years:  # e.g., "Y0", "Y1"
+        for tier in ["LL", "Mid", "UL"]:
+            cost_col = f"Calculated_Cost_{tier}_{year_suffix}"
+            if cost_col not in projected_costs_df:
+                continue
+
+            annual_cost = projected_costs_df[cost_col]
+
+            # Hourly
+            hourly_col = f"Calculated_Hourly_{tier}_{year_suffix}"
+            rates_df[hourly_col] = annual_cost / total_annual_hours
+
+            # Apply hardcoded overrides for hourly rates ONLY for Year 0
+            if year_suffix == "Y0":
+                override_col_name = f"Base Salary + Costs (hourly)_{tier}"
+                # The original sheet has "Mid-point" not "Mid"
+                if tier == "Mid":
+                    override_col_name = "Base Salary + Costs (hourly)_Mid-point"
+
+                if override_col_name in original_data_df:
+                    rates_df[hourly_col] = rates_df[hourly_col].fillna(
+                        original_data_df[override_col_name]
+                    )
+
+            # Daily
+            rates_df[f"Calculated_Daily_{tier}_{year_suffix}"] = (
+                annual_cost / total_annual_work_days
             )
 
-        # Daily
-        rates_df[f"Calculated_Daily_{tier}"] = annual_cost / total_annual_work_days
+            # Weekly
+            rates_df[f"Calculated_Weekly_{tier}_{year_suffix}"] = annual_cost / 52
 
-        # Weekly
-        rates_df[f"Calculated_Weekly_{tier}"] = annual_cost / 52
+            # Fortnightly
+            rates_df[f"Calculated_Fortnightly_{tier}_{year_suffix}"] = annual_cost / 26
 
-        # Fortnightly
-        rates_df[f"Calculated_Fortnightly_{tier}"] = annual_cost / 26
-
-        # Monthly
-        rates_df[f"Calculated_Monthly_{tier}"] = annual_cost / 12
+            # Monthly
+            rates_df[f"Calculated_Monthly_{tier}_{year_suffix}"] = annual_cost / 12
 
     return rates_df
