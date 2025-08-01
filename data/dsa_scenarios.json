@@ -1,0 +1,32 @@
+[
+  {
+    "name": "Super Rate +10%",
+    "parameter_to_vary": "super_rate",
+    "variation": { "type": "percentage", "value": 0.10 }
+  },
+  {
+    "name": "Super Rate -10%",
+    "parameter_to_vary": "super_rate",
+    "variation": { "type": "percentage", "value": -0.10 }
+  },
+  {
+    "name": "Productive Time +5%",
+    "parameter_to_vary": "productive_time_factor",
+    "variation": { "type": "percentage", "value": 0.05 }
+  },
+  {
+    "name": "Productive Time -5%",
+    "parameter_to_vary": "productive_time_factor",
+    "variation": { "type": "percentage", "value": -0.05 }
+  },
+  {
+    "name": "Prof. Dev. Allowance +$500",
+    "parameter_to_vary": "prof_dev_allowance",
+    "variation": { "type": "absolute", "value": 500 }
+  },
+  {
+    "name": "Prof. Dev. Allowance -$500",
+    "parameter_to_vary": "prof_dev_allowance",
+    "variation": { "type": "absolute", "value": -500 }
+  }
+]
