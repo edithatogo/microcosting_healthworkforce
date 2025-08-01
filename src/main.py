@@ -2,6 +2,7 @@ import numpy as np
 
 from src.data_loader import load_and_clean_data
 from src.formula_engine import apply_formulas, load_formulas
+from src.rate_converter import convert_annual_cost_to_rates
 
 
 def main() -> None:
@@ -29,40 +30,17 @@ def main() -> None:
         print(f"Failed to load formulas: {e}")
         return
 
-    # --- 2. Run Calculation Engine ---
-    print("Applying formulas using the new engine...")
-    calculated_results = apply_formulas(df, formulas_data)
+    # --- 2. Run Calculation Engine for Annual Costs ---
+    print("Applying formulas to calculate annual costs...")
+    annual_costs_df = apply_formulas(df, formulas_data)
 
-    # --- 3. Calculate Hourly Rates (Temporary) ---
-    # This logic will also be moved to the formula engine in the future.
-    print("Calculating hourly rates...")
-    total_annual_hours = df["Grade(s)_Hours per week"] * 52
-    # Avoid division by zero
-    total_annual_hours = total_annual_hours.replace(0, np.nan)
+    # --- 3. Convert Annual Costs to Rates ---
+    print("Converting annual costs to hourly rates...")
+    rates_df = convert_annual_cost_to_rates(annual_costs_df, df)
 
-    calculated_results["Calculated_Hourly_LL"] = (
-        calculated_results["Calculated_Cost_LL"] / total_annual_hours
-    )
-    calculated_results["Calculated_Hourly_Mid"] = (
-        calculated_results["Calculated_Cost_Mid"] / total_annual_hours
-    )
-    calculated_results["Calculated_Hourly_UL"] = (
-        calculated_results["Calculated_Cost_UL"] / total_annual_hours
-    )
-
-    # Handle hardcoded overrides for hourly rates
-    calculated_results["Calculated_Hourly_LL"] = calculated_results[
-        "Calculated_Hourly_LL"
-    ].fillna(df["Base Salary + Costs (hourly)_LL"])
-    calculated_results["Calculated_Hourly_Mid"] = calculated_results[
-        "Calculated_Hourly_Mid"
-    ].fillna(df["Base Salary + Costs (hourly)_Mid-point"])
-    calculated_results["Calculated_Hourly_UL"] = calculated_results[
-        "Calculated_Hourly_UL"
-    ].fillna(df["Base Salary + Costs (hourly)_UL"])
-
-    # --- 4. Validate Results ---
+    # --- 4. Combine and Validate Results ---
     print("Validating results...")
+    calculated_results = annual_costs_df.join(rates_df)
 
     comparison_map = {
         "Base Salary + Costs_LL": "Calculated_Cost_LL",
