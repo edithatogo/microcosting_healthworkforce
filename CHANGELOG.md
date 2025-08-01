@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Created `src/formula_engine.py` to load and orchestrate data-driven calculations.
+- Created `src/formula_parser.py` to safely evaluate mathematical expressions from the formula definitions.
 - Created `data/formulas.json` to begin abstracting the calculation logic. This file defines the parameters and mathematical expressions for the core cost calculation, moving the logic out of the Python code.
 - Initial project setup.
 - `ruff` for linting and formatting.
