@@ -11,3 +11,20 @@ lint:
 
 format:
 	pipenv run ruff format .
+
+typecheck:
+	pipenv run mypy
+
+security:
+	pipenv run bandit -r src
+
+all:
+	make format
+	make lint
+	make typecheck
+	make test
+	make security
+
+ci:
+	tox
+

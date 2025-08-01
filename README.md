@@ -26,3 +26,23 @@ This project is a Python-based tool to convert an Excel file with formulae into 
     make lint
     make format
     ```
+
+*   **Run type checks:**
+    ```bash
+    make typecheck
+    ```
+
+*   **Run security analysis:**
+    ```bash
+    make security
+    ```
+
+*   **Run all checks:**
+    ```bash
+    make all
+    ```
+
+*   **Run tests in multiple environments (requires `tox`):**
+    ```bash
+    tox
+    ```

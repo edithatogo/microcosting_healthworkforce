@@ -11,6 +11,10 @@ openpyxl = "*"
 ruff = "*"
 pre-commit = "*"
 pytest = "*"
+mypy = "*"
+bandit = "*"
+tox = "*"
+tox-pipenv = "*"
 
 [requires]
 python_version = "3.11"
