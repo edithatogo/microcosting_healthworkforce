@@ -14,3 +14,8 @@ files = ["src", "tests"]
 
 [tool.bandit]
 exclude_dirs = ["tests"]
+
+[tool.pytest.ini_options]
+addopts = "--cov=src --cov-report=term-missing"
+testpaths = ["tests"]
+

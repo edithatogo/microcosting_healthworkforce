@@ -15,6 +15,7 @@ mypy = "*"
 bandit = "*"
 tox = "*"
 tox-pipenv = "*"
+pytest-cov = "*"
 
 [requires]
 python_version = "3.11"
