@@ -34,4 +34,3 @@ def evaluate_expression(expression: str, parameters: Dict[str, Any]) -> Any:
         raise SyntaxError(f"Invalid syntax in expression: {expression}")
     except Exception as e:
         raise type(e)(f"An error occurred during expression evaluation: {e}")
-
