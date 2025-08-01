@@ -20,3 +20,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `.editorconfig` for consistent coding styles.
 - GitHub templates for issues and pull requests.
 - `LICENSE`, `CHANGELOG.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`.
+- `dependabot` for automated dependency updates.
+
