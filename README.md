@@ -11,13 +11,26 @@ The primary function of this application is to process the "Labour - Prices" she
 3.  **Formula Logic:** The engine handles two scenarios:
     *   It applies standard, defined formulas for most positions.
     *   It correctly uses hardcoded override values from the original Excel sheet for specific generic or averaged rows.
-4.  **Validation:** The script includes a validation step that compares the results of the Python calculation against the original values in the Excel file to ensure accuracy.
+4.  **Multi-Year Projections:** The tool projects costs into the future based on a defined indexation rate, allowing for sophisticated long-term financial analysis.
+5.  **Rate Conversion:** After calculating the annual costs, it converts them into multiple time-based rates (hourly, daily, weekly, etc.) for flexible reporting.
+6.  **Validation:** The script includes a validation step that compares the results of the Python calculation against the original values in the Excel file to ensure accuracy for the baseline year.
+
+## Analytical Capabilities
+
+Beyond simple cost translation, this tool is designed to support advanced analysis:
+
+-   **Budget Impact Analysis:** Understand the financial implications of workforce changes over time.
+-   **Long-Term Financial Forecasting:** Model total workforce costs over a multi-year horizon for strategic planning.
+-   **Cost-Effectiveness Analysis (CEA):** Provide foundational cost data for health economics models that compare different interventions.
+-   **Scenario & "What-If" Planning:** Easily model the financial impact of changes in indexation rates, staffing levels, or workforce composition.
 
 ## Core Components
 
 -   `src/main.py`: The main entry point that orchestrates the data loading, calculation, and validation process.
 -   `src/data_loader.py`: Handles reading and cleaning the Excel data.
--   `src/formula_engine.py`: Loads formula definitions and applies them to the data.
+-   `src/formula_engine.py`: Calculates the foundational "Year 0" annual costs based on definitions in `data/formulas.json`.
+-   `src/projection.py`: Takes the Year 0 costs and projects them into the future.
+-   `src/rate_converter.py`: Converts annual costs for each year into time-based rates.
 -   `src/formula_parser.py`: Safely evaluates the mathematical expressions defined in the formulas.
 -   `data/formulas.json`: A JSON file that defines the parameters, expressions, and output mappings for all calculations.
 
