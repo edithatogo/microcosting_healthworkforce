@@ -19,6 +19,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 - Deleted the old, hardcoded `src/calculations.py` module, as it has been replaced by the new formula engine.
 
+### Documentation
+- Updated `README.md` to reflect the new formula engine architecture, dependencies, and usage instructions.
+
 ### Dependencies
 - Added the `asteval` library for safely evaluating mathematical expressions.
 
