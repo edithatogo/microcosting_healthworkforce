@@ -42,7 +42,8 @@ def main() -> None:
     print("Validating results...")
     calculated_results = annual_costs_df.join(rates_df)
 
-    comparison_map = {
+    # Define which columns to validate against the original Excel file
+    validation_map = {
         "Base Salary + Costs_LL": "Calculated_Cost_LL",
         "Base Salary + Costs_Mid-point": "Calculated_Cost_Mid",
         "Base Salary + Costs_UL": "Calculated_Cost_UL",
@@ -52,8 +53,8 @@ def main() -> None:
     }
 
     # Prepare data for comparison
-    df_original_compare = df[list(comparison_map.keys())].fillna(0)
-    calculated_compare = calculated_results[list(comparison_map.values())].fillna(0)
+    df_original_compare = df[list(validation_map.keys())].fillna(0)
+    calculated_compare = calculated_results[list(validation_map.values())].fillna(0)
 
     are_close = np.isclose(
         df_original_compare.values,
@@ -76,17 +77,27 @@ def main() -> None:
         first_mismatch_idx = successful_rows.argmin()
         comparison_df = df.join(calculated_results)
         mismatched_row = comparison_df.iloc[[first_mismatch_idx]]
+
+        # Display only the columns that are being validated
         display_cols = (
             ["Personnel type"]
-            + list(comparison_map.keys())
-            + list(comparison_map.values())
+            + list(validation_map.keys())
+            + list(validation_map.values())
         )
         print(mismatched_row[display_cols].to_string())
     else:
         print(
-            "\n✅ All calculated values match the original Excel values "
+            "\n✅ All validated values match the original Excel values "
             "within tolerance."
         )
+
+    # --- 6. Display Full Results for a Sample Row (Optional) ---
+    # This shows all calculated columns for the first successfully matched row
+    if num_successful > 0:
+        print("\n--- Example of Full Calculated Output for a Matched Row ---")
+        first_success_idx = successful_rows.argmax()
+        full_output_row = calculated_results.iloc[[first_success_idx]]
+        print(full_output_row.to_string())
 
 
 if __name__ == "__main__":

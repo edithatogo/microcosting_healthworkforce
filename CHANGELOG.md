@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- Expanded `src/rate_converter.py` to calculate daily, weekly, fortnightly, and monthly rates in addition to hourly rates.
 - Refactored the rate conversion logic out of `src/main.py` and into the new `src/rate_converter.py` module, cleaning up the main workflow.
 - Integrated the new formula engine into `src/main.py`. The application now uses the data-driven approach defined in `data/formulas.json` to perform calculations.
 - Implemented the core logic in `src/formula_engine.py` to apply formulas to the dataset.
