@@ -1,63 +1,63 @@
-# Development Plan: Excel to Python Translation
+# Development Plan
 
-This document details the plan for translating a single sheet of an Excel workbook into a Python application.
+This plan outlines the next steps for the project, focusing on abstracting the core logic before implementing sensitivity analysis.
 
-### Guiding Principles
+### Current Status
 
-*   **Single Responsibility:** Each part of the code (data loading, calculations) will be in its own module. Functions will be small and focused.
-*   **Test-Driven:** Development will be guided by tests to ensure the Python implementation is accurate and reliable.
-*   **Maintainability:** The code will be clean, well-documented, and easy to understand for future development.
+The initial translation of the "Labour - Prices" sheet from Excel to Python is complete. The core calculations are currently hardcoded in `src/calculations.py`.
 
----
+### The Path Forward: Abstraction First
 
-### Phase 1: Setup and Analysis
-
-1.  **Dependencies:**
-    *   The `Pipfile` will be updated to include `pandas` for data manipulation and `openpyxl` for reading the Excel file.
-2.  **Project Structure:**
-    *   `data/`: This directory will hold the input Excel file.
-    *   `src/`: Will contain the core Python logic.
-    *   `tests/`: Will contain all tests.
-3.  **Excel Sheet Analysis:**
-    *   Before coding, the target sheet will be analyzed to:
-        *   Identify all input cells and data ranges.
-        *   Trace the logic of all formulas.
-        *   Understand the data flow from input to final output.
-    *   **Constraint:** Only one sheet will be translated. All other sheets in the Excel file will be ignored.
+Before implementing sensitivity analysis (DSA/PSA), we will abstract the formula logic. This will create a flexible and scalable foundation, preventing significant rework later.
 
 ---
 
-### Phase 2: Core Logic Implementation
+### Step 1: Design the Formula Data Structure
 
-1.  **Data Loading (`src/data_loader.py`):**
-    *   A function will be created to load the specified Excel sheet into a pandas DataFrame. This function will be configurable to easily change the file path or sheet name.
-2.  **Calculations (`src/calculations.py`):**
-    *   Each distinct formula from the Excel sheet will be translated into a corresponding Python function.
-    *   Pandas operations (`merge`, boolean indexing, etc.) will be used to replicate Excel functions like `VLOOKUP`, `SUMIF`, etc.
-3.  **Main Script (`src/main.py`):**
-    *   This script will serve as the entry point, orchestrating the workflow:
-        1.  Load data using the `data_loader` module.
-        2.  Execute calculations using the `calculations` module.
-        3.  Produce a final output, likely a pandas DataFrame, which can be saved to a file.
+- **Goal:** Define a clear, machine-readable structure for representing formulas.
+- **Considerations:**
+    - The structure must support variables, parameters, and mathematical operations.
+    - It should be extensible for future formula types.
+    - A `JSON` or `YAML` file is a likely candidate for storing this data.
+- **Action:**
+    - [ ] Draft a schema for the formula structure.
+    - [ ] Create a sample `formulas.json` (or similar) file representing one or two of the existing calculations.
 
 ---
 
-### Phase 3: Validation and Testing
+### Step 2: Build the Formula Engine
 
-1.  **Test Data:**
-    *   A small, non-sensitive version of the Excel file will be placed in `tests/fixtures/` to be used as a reliable test input.
-2.  **Unit Tests (`tests/test_calculations.py`):**
-    *   Each function in `src/calculations.py` will have a unit test to verify its correctness against a known result from Excel.
-3.  **Integration Test (`tests/test_main.py`):**
-    *   A test will be created to run the entire process from start to finish and compare the final Python output with the final Excel output.
+- **Goal:** Create a Python module that can parse the data structure and execute the calculations.
+- **Action:**
+    - [ ] Create `src/formula_engine.py`.
+    - [ ] Write a function to load and validate the `formulas.json` file.
+    - [ ] Implement a core function that takes the formula definition and input data, then returns the result.
+    - [ ] This engine will replace the hardcoded functions in `src/calculations.py`.
 
 ---
 
-### Phase 4: Finalization and Documentation
+### Step 3: Refactor Main Workflow
 
-1.  **Code Quality:**
-    *   The codebase will be linted and formatted with `ruff`.
-    *   Type hints will be used to support static analysis with `mypy`.
-2.  **Documentation:**
-    *   All new modules and functions will have clear docstrings.
-    *   The `README.md` will be updated to explain how to install dependencies and run the application.
+- **Goal:** Integrate the new formula engine into the main application.
+- **Action:**
+    - [ ] Update `src/main.py` to use `src/formula_engine.py` instead of `src/calculations.py`.
+    - [ ] Remove the old, hardcoded functions from `src/calculations.py`, or deprecate the file entirely.
+    - [ ] Ensure the final output still matches the validated results from the original Excel sheet.
+
+---
+
+### Step 4: Implement Sensitivity Analysis
+
+- **Goal:** Build the DSA and PSA capabilities on top of the new, flexible architecture.
+- **Action:**
+    - [ ] Design a module (`src/sensitivity_analysis.py`) that can interact with the formula engine.
+    - [ ] For DSA, the module will iterate through a list of parameters, modifying them one by one and recording the output.
+    - [ ] For PSA, the module will accept probability distributions for parameters and run Monte Carlo simulations.
+
+---
+
+### Documentation and Quality (Ongoing)
+
+- [ ] All new code will be documented with docstrings.
+- [ ] Tests will be written for the formula engine and sensitivity analysis modules.
+- [ ] Code will be kept clean and compliant with `ruff` standards.
