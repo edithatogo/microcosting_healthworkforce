@@ -1,32 +1,67 @@
 import numpy as np
 
-from src.calculations import calculate_year_0_costs
 from src.data_loader import load_and_clean_data
+from src.formula_engine import apply_formulas, load_formulas
 
 
 def main() -> None:
     """
-    Main function to run the Excel to Python translation and validation.
-    This iterates through each row and compares the Python calculation
-    to the original Excel value.
+    Main function to run the data-driven calculation engine and validate results.
     """
-    # --- 1. Load Data ---
-    file_path = "data/Labour Model - v3, 20240328.xlsx"
+    # --- 1. Load Data and Formulas ---
+    data_file_path = "data/Labour Model - v3, 20240328.xlsx"
     sheet_name = "Labour - Prices"
+    formulas_file_path = "data/formulas.json"
 
     print("Loading and cleaning data...")
     try:
-        df = load_and_clean_data(file_path, sheet_name)
+        df = load_and_clean_data(data_file_path, sheet_name)
         print("Data loaded successfully.")
     except Exception as e:
         print(f"Failed to load data: {e}")
         return
 
-    # --- 2. Run Calculation ---
-    print("Applying Year 0 cost calculations to each row...")
-    calculated_results = df.apply(calculate_year_0_costs, axis=1)
+    print(f"Loading formulas from '{formulas_file_path}'...")
+    try:
+        formulas_data = load_formulas(formulas_file_path)
+        print("Formulas loaded successfully.")
+    except Exception as e:
+        print(f"Failed to load formulas: {e}")
+        return
 
-    # --- 3. Validate Results ---
+    # --- 2. Run Calculation Engine ---
+    print("Applying formulas using the new engine...")
+    calculated_results = apply_formulas(df, formulas_data)
+
+    # --- 3. Calculate Hourly Rates (Temporary) ---
+    # This logic will also be moved to the formula engine in the future.
+    print("Calculating hourly rates...")
+    total_annual_hours = df["Grade(s)_Hours per week"] * 52
+    # Avoid division by zero
+    total_annual_hours = total_annual_hours.replace(0, np.nan)
+
+    calculated_results["Calculated_Hourly_LL"] = (
+        calculated_results["Calculated_Cost_LL"] / total_annual_hours
+    )
+    calculated_results["Calculated_Hourly_Mid"] = (
+        calculated_results["Calculated_Cost_Mid"] / total_annual_hours
+    )
+    calculated_results["Calculated_Hourly_UL"] = (
+        calculated_results["Calculated_Cost_UL"] / total_annual_hours
+    )
+
+    # Handle hardcoded overrides for hourly rates
+    calculated_results["Calculated_Hourly_LL"] = calculated_results[
+        "Calculated_Hourly_LL"
+    ].fillna(df["Base Salary + Costs (hourly)_LL"])
+    calculated_results["Calculated_Hourly_Mid"] = calculated_results[
+        "Calculated_Hourly_Mid"
+    ].fillna(df["Base Salary + Costs (hourly)_Mid-point"])
+    calculated_results["Calculated_Hourly_UL"] = calculated_results[
+        "Calculated_Hourly_UL"
+    ].fillna(df["Base Salary + Costs (hourly)_UL"])
+
+    # --- 4. Validate Results ---
     print("Validating results...")
 
     comparison_map = {
@@ -38,21 +73,19 @@ def main() -> None:
         "Base Salary + Costs (hourly)_UL": "Calculated_Hourly_UL",
     }
 
-    # Prepare data for comparison by filling potential NaN values
+    # Prepare data for comparison
     df_original_compare = df[list(comparison_map.keys())].fillna(0)
     calculated_compare = calculated_results[list(comparison_map.values())].fillna(0)
 
-    # Use np.isclose for safe floating-point comparison (0.1% relative tolerance)
     are_close = np.isclose(
         df_original_compare.values,
         calculated_compare.values,
         rtol=1e-03,
-        equal_nan=True,  # Treat NaN as equal to NaN
+        equal_nan=True,
     )
-
     all_match = are_close.all()
 
-    # --- 4. Report Summary ---
+    # --- 5. Report Summary ---
     successful_rows = np.all(are_close, axis=1)
     num_successful = successful_rows.sum()
     total_rows = len(df)
@@ -60,31 +93,11 @@ def main() -> None:
     print("\n--- Validation Summary ---")
     print(f"{num_successful} out of {total_rows} rows matched successfully.")
 
-    if num_successful > 0:
-        print("\n--- Example of a Successfully Calculated Row ---")
-        # Combine original and calculated for easy comparison
-        comparison_df = df.join(calculated_results)
-        # Find the first successful row
-        first_success_idx = successful_rows.argmax()
-        successful_row = comparison_df.iloc[[first_success_idx]]
-        display_cols = (
-            ["Personnel type"]
-            + list(comparison_map.keys())
-            + list(comparison_map.values())
-        )
-        print(successful_row[display_cols].to_string())
-
     if not all_match:
         print("\n❌ A discrepancy was found. Reporting the first failed row.")
-
-        # Find the index of the first row with any mismatch
         first_mismatch_idx = successful_rows.argmin()
-
-        # Combine original and calculated for easy comparison
         comparison_df = df.join(calculated_results)
         mismatched_row = comparison_df.iloc[[first_mismatch_idx]]
-
-        print("\n--- First Mismatched Row ---")
         display_cols = (
             ["Personnel type"]
             + list(comparison_map.keys())
@@ -93,8 +106,8 @@ def main() -> None:
         print(mismatched_row[display_cols].to_string())
     else:
         print(
-            "\n✅ All calculated values for all rows match the original"
-            " Excel values within the tolerance."
+            "\n✅ All calculated values match the original Excel values "
+            "within tolerance."
         )
 
 
