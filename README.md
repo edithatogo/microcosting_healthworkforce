@@ -46,3 +46,13 @@ This project is a Python-based tool to convert an Excel file with formulae into 
     ```bash
     tox
     ```
+
+*   **Build the documentation:**
+    ```bash
+    make docs
+    ```
+
+*   **Create a new release (bumps version, updates changelog, tags):**
+    ```bash
+    make release
+    ```

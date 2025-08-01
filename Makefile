@@ -28,3 +28,14 @@ all:
 ci:
 	tox
 
+docs:
+	$(MAKE) -C docs html
+
+changelog:
+	pipenv run cz bump --changelog
+
+release:
+	make changelog
+	git push --tags
+
+

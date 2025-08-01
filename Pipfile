@@ -16,6 +16,10 @@ bandit = "*"
 tox = "*"
 tox-pipenv = "*"
 pytest-cov = "*"
+commitizen = "*"
+sphinx = "*"
+furo = "*"
+myst-parser = "*"
 
 [requires]
 python_version = "3.11"

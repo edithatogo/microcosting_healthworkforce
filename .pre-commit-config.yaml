@@ -13,3 +13,8 @@ repos:
     hooks:
     -   id: bandit
         args: ["-r", "src"]
+-   repo: https://github.com/commitizen-tools/commitizen
+    rev: v3.27.0
+    hooks:
+    -   id: commitizen
+        stages: [commit-msg]
