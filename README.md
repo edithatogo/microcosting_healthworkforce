@@ -23,6 +23,7 @@ Beyond simple cost translation, this tool is designed to support advanced analys
 -   **Long-Term Financial Forecasting:** Model total workforce costs over a multi-year horizon for strategic planning.
 -   **Cost-Effectiveness Analysis (CEA):** Provide foundational cost data for health economics models that compare different interventions.
 -   **Scenario & "What-If" Planning:** Easily model the financial impact of changes in indexation rates, staffing levels, or workforce composition.
+-   **Deterministic Sensitivity Analysis (DSA):** Systematically analyze the impact of changing a single input parameter (e.g., "Superannuation Rate +/- 10%") on the final costs to identify the most influential variables in the model.
 
 ## Core Components
 
@@ -31,8 +32,10 @@ Beyond simple cost translation, this tool is designed to support advanced analys
 -   `src/formula_engine.py`: Calculates the foundational "Year 0" annual costs based on definitions in `data/formulas.json`.
 -   `src/projection.py`: Takes the Year 0 costs and projects them into the future.
 -   `src/rate_converter.py`: Converts annual costs for each year into time-based rates.
+-   `src/sensitivity_analysis.py`: Runs Deterministic Sensitivity Analysis (DSA) based on scenarios defined in `data/dsa_scenarios.json`.
 -   `src/formula_parser.py`: Safely evaluates the mathematical expressions defined in the formulas.
 -   `data/formulas.json`: A JSON file that defines the parameters, expressions, and output mappings for all calculations.
+-   `data/dsa_scenarios.json`: Defines the scenarios (e.g., parameter to vary, amount of variation) to be run by the DSA module.
 
 ## Setup
 

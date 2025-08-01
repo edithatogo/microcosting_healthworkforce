@@ -46,12 +46,28 @@ Before implementing sensitivity analysis (DSA/PSA), we will abstract the formula
 
 ---
 
-### Step 4: Implement Sensitivity Analysis
+### Step 4: Implement Deterministic Sensitivity Analysis (DSA)
 
-- **Goal:** Build the DSA and PSA capabilities on top of the new, flexible architecture.
+- **Goal:** Build the DSA capability on top of the new, flexible architecture to systematically test the impact of changing single parameters.
 - **Action:**
-    - [ ] Design a module (`src/sensitivity_analysis.py`) that can interact with the formula engine.
-    - [ ] For DSA, the module will iterate through a list of parameters, modifying them one by one and recording the output.
+    - [ ] **Create Scenario Definition File:**
+        - Create `data/dsa_scenarios.json`.
+        - This file will contain a list of scenarios, each specifying the `parameter_to_vary`, the `variation` type (`percentage` or `absolute`), and the `value`.
+    - [ ] **Build the DSA Engine (`src/sensitivity_analysis.py`):**
+        - Create a `run_dsa` function that loads scenarios from the JSON file.
+        - The function will iterate through each scenario, apply the variation to a copy of the data, and re-run the full calculation pipeline (`formula_engine` -> `projection` -> `rate_converter`).
+    - [ ] **Implement Flexible Overrides:**
+        - The `run_dsa` function will accept an optional `custom_scenarios` argument to allow for runtime-defined analyses.
+        - This custom scenario structure will support an optional `row_filter` key to allow variations to be applied to all rows (globally) or only to a specific subset of rows.
+    - [ ] **Integrate into Main Workflow:**
+        - Add a mechanism in `src/main.py` to trigger the DSA run and report the results, comparing each scenario's output to the base case.
+
+---
+
+### Step 5: Implement Probabilistic Sensitivity Analysis (PSA) (Future)
+
+- **Goal:** Build the PSA capability to analyze the impact of varying multiple parameters simultaneously based on probability distributions.
+- **Action:**
     - [ ] For PSA, the module will accept probability distributions for parameters and run Monte Carlo simulations.
 
 ---
