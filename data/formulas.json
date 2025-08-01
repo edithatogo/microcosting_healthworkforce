@@ -1,0 +1,78 @@
+{
+  "formulas": [
+    {
+      "id": "year_0_total_cost",
+      "description": "Calculates the total annual cost for a single position based on a base salary and various cost components. This is a template formula.",
+      "parameters": [
+        "base_salary",
+        "super_rate",
+        "avg_penalties",
+        "pub_holiday_penalty",
+        "private_practice_loading",
+        "retention_allowance",
+        "sick_leave",
+        "prof_dev_allowance",
+        "annual_leave_weeks",
+        "annual_leave_loading",
+        "productive_time_factor"
+      ],
+      "expression": "((base_salary + (base_salary * super_rate) + (base_salary * avg_penalties) + (base_salary * pub_holiday_penalty) + (base_salary * private_practice_loading) + (base_salary * retention_allowance) + (base_salary * sick_leave) + prof_dev_allowance + ((base_salary * ((52 + annual_leave_weeks) / 52)) * (1 + annual_leave_loading)))) / productive_time_factor"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "Calculated_Cost_LL",
+      "uses_formula": "year_0_total_cost",
+      "override_column": "Base Salary + Costs_LL",
+      "parameter_mapping": {
+        "base_salary": "Base Salary_LL",
+        "super_rate": "Grade(s)_Superannuation Rate (%)",
+        "avg_penalties": "Grade(s)_Average Penalties %",
+        "pub_holiday_penalty": "Grade(s)_Public Holiday Penalty %",
+        "private_practice_loading": "Grade(s)_Private Practice Loading %",
+        "retention_allowance": "Grade(s)_Attraction and Retention Allowance %",
+        "sick_leave": "Grade(s)_Sick Leave %",
+        "prof_dev_allowance": "Grade(s)_Professional Development Allowance ($)",
+        "annual_leave_weeks": "Grade(s)_Annual Leave Entitlement (Weeks)",
+        "annual_leave_loading": "Grade(s)_Annual Leave Loading (%)",
+        "productive_time_factor": "Grade(s)_Average productive time (%)"
+      }
+    },
+    {
+      "name": "Calculated_Cost_Mid",
+      "uses_formula": "year_0_total_cost",
+      "override_column": "Base Salary + Costs_Mid-point",
+      "parameter_mapping": {
+        "base_salary": "Base Salary_Mid-point",
+        "super_rate": "Grade(s)_Superannuation Rate (%)",
+        "avg_penalties": "Grade(s)_Average Penalties %",
+        "pub_holiday_penalty": "Grade(s)_Public Holiday Penalty %",
+        "private_practice_loading": "Grade(s)_Private Practice Loading %",
+        "retention_allowance": "Grade(s)_Attraction and Retention Allowance %",
+        "sick_leave": "Grade(s)_Sick Leave %",
+        "prof_dev_allowance": "Grade(s)_Professional Development Allowance ($)",
+        "annual_leave_weeks": "Grade(s)_Annual Leave Entitlement (Weeks)",
+        "annual_leave_loading": "Grade(s)_Annual Leave Loading (%)",
+        "productive_time_factor": "Grade(s)_Average productive time (%)"
+      }
+    },
+    {
+      "name": "Calculated_Cost_UL",
+      "uses_formula": "year_0_total_cost",
+      "override_column": "Base Salary + Costs_UL",
+      "parameter_mapping": {
+        "base_salary": "Base Salary_UL",
+        "super_rate": "Grade(s)_Superannuation Rate (%)",
+        "avg_penalties": "Grade(s)_Average Penalties %",
+        "pub_holiday_penalty": "Grade(s)_Public Holiday Penalty %",
+        "private_practice_loading": "Grade(s)_Private Practice Loading %",
+        "retention_allowance": "Grade(s)_Attraction and Retention Allowance %",
+        "sick_leave": "Grade(s)_Sick Leave %",
+        "prof_dev_allowance": "Grade(s)_Professional Development Allowance ($)",
+        "annual_leave_weeks": "Grade(s)_Annual Leave Entitlement (Weeks)",
+        "annual_leave_loading": "Grade(s)_Annual Leave Loading (%)",
+        "productive_time_factor": "Grade(s)_Average productive time (%)"
+      }
+    }
+  ]
+}
