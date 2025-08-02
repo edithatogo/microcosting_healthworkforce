@@ -20,6 +20,56 @@
     "variation": { "type": "percentage", "value": -0.05 }
   },
   {
+    "name": "Average Penalties +10%",
+    "parameter_to_vary": "avg_penalties",
+    "variation": { "type": "percentage", "value": 0.10 }
+  },
+  {
+    "name": "Average Penalties -10%",
+    "parameter_to_vary": "avg_penalties",
+    "variation": { "type": "percentage", "value": -0.10 }
+  },
+  {
+    "name": "Public Holiday Penalty +10%",
+    "parameter_to_vary": "pub_holiday_penalty",
+    "variation": { "type": "percentage", "value": 0.10 }
+  },
+  {
+    "name": "Public Holiday Penalty -10%",
+    "parameter_to_vary": "pub_holiday_penalty",
+    "variation": { "type": "percentage", "value": -0.10 }
+  },
+  {
+    "name": "Private Practice Loading +10%",
+    "parameter_to_vary": "private_practice_loading",
+    "variation": { "type": "percentage", "value": 0.10 }
+  },
+  {
+    "name": "Private Practice Loading -10%",
+    "parameter_to_vary": "private_practice_loading",
+    "variation": { "type": "percentage", "value": -0.10 }
+  },
+  {
+    "name": "Retention Allowance +10%",
+    "parameter_to_vary": "retention_allowance",
+    "variation": { "type": "percentage", "value": 0.10 }
+  },
+  {
+    "name": "Retention Allowance -10%",
+    "parameter_to_vary": "retention_allowance",
+    "variation": { "type": "percentage", "value": -0.10 }
+  },
+  {
+    "name": "Sick Leave +10%",
+    "parameter_to_vary": "sick_leave",
+    "variation": { "type": "percentage", "value": 0.10 }
+  },
+  {
+    "name": "Sick Leave -10%",
+    "parameter_to_vary": "sick_leave",
+    "variation": { "type": "percentage", "value": -0.10 }
+  },
+  {
     "name": "Prof. Dev. Allowance +$500",
     "parameter_to_vary": "professional_development_allowance",
     "variation": { "type": "absolute", "value": 500 }
@@ -28,5 +78,25 @@
     "name": "Prof. Dev. Allowance -$500",
     "parameter_to_vary": "professional_development_allowance",
     "variation": { "type": "absolute", "value": -500 }
+  },
+  {
+    "name": "Annual Leave +1 Week",
+    "parameter_to_vary": "annual_leave_weeks",
+    "variation": { "type": "absolute", "value": 1 }
+  },
+  {
+    "name": "Annual Leave -1 Week",
+    "parameter_to_vary": "annual_leave_weeks",
+    "variation": { "type": "absolute", "value": -1 }
+  },
+  {
+    "name": "Annual Leave Loading +10%",
+    "parameter_to_vary": "annual_leave_loading",
+    "variation": { "type": "percentage", "value": 0.10 }
+  },
+  {
+    "name": "Annual Leave Loading -10%",
+    "parameter_to_vary": "annual_leave_loading",
+    "variation": { "type": "percentage", "value": -0.10 }
   }
 ]

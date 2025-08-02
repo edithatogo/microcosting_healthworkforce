@@ -1,4 +1,4 @@
-# src/psa.py
+# src/psa_analysis.py
 """
 This module handles the Probabilistic Sensitivity Analysis (PSA).
 
@@ -28,7 +28,7 @@ def load_psa_scenarios(file_path: str) -> List[Dict[str, Any]]:
         raise ValueError(f"Invalid JSON format in PSA scenarios file: {file_path}")
 
 
-def run_psa(
+def run_psa_analysis(
     base_case_df: pd.DataFrame,
     formulas_data: Dict[str, Any],
     calculation_pipeline: Callable[[pd.DataFrame, Dict[str, Any]], pd.DataFrame],
@@ -87,7 +87,7 @@ def run_psa(
         mean_cost = result_df["Calculated_Cost_Mid_Y0"].mean()
         all_results.append({"iteration": i + 1, "mean_cost": mean_cost})
 
-    print("-------------------------------------\\n")
+    print("-------------------------------------\n")
     return pd.DataFrame(all_results)
 
 

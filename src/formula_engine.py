@@ -5,6 +5,7 @@ It is responsible for loading formula definitions from a JSON file and orchestra
 the calculation process based on those definitions.
 """
 
+import ast
 import json
 from typing import Any, Dict, cast
 
@@ -70,7 +71,19 @@ def apply_formulas(
 
             # Check for hardcoded override value first
             override_col = output_def.get("override_column")
-            if override_col and pd.notna(row.get(override_col)):
+            override_cond = output_def.get("override_condition")
+            use_override = False
+            if override_col and override_cond and pd.notna(row.get(override_col)):
+                try:
+                    # Safely evaluate the override condition
+                    if ast.literal_eval(override_cond):
+                        use_override = True
+                except Exception:  # nosec B110
+                    # Condition fails if column is missing, etc.
+                    # In this case, we just move on and don't use the override
+                    pass
+
+            if use_override:
                 calculated_value = row[override_col]
             else:
                 # Map parameters from the row to the formula's parameter names

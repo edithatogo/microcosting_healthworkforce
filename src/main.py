@@ -1,52 +1,28 @@
 import argparse
-from typing import Any, Dict
+import sys
 
 import numpy as np
-import pandas as pd
 
-from src.data_loader import load_and_clean_data
-from src.formula_engine import apply_formulas, load_formulas
-from src.projection import project_costs
-from src.psa import load_psa_scenarios, report_psa_results, run_psa
-from src.rate_converter import convert_annual_cost_to_rates
-from src.sensitivity_analysis import (
+from src.calculations import run_calculation_pipeline
+from src.data_loader import (
+    get_dsa_scenario_mapping,
+    load_and_clean_data,
+    load_dsa_validation_data,
+)
+from src.dsa_analysis import (
     load_dsa_scenarios,
     report_dsa_results,
-    run_dsa,
+    run_dsa_analysis,
 )
+from src.formula_engine import load_formulas
+from src.psa_analysis import (
+    load_psa_scenarios,
+    report_psa_results,
+    run_psa_analysis,
+)
+from src.validation import validate_dsa_results
 
 PROJECTION_YEARS = 5
-
-
-def run_calculation_pipeline(
-    input_df: pd.DataFrame,
-    formulas_data: Dict[str, Any],
-) -> pd.DataFrame:
-    """
-    Runs the full calculation pipeline on a given DataFrame.
-
-    Args:
-        input_df: The DataFrame with the input data.
-        formulas_data: The dictionary of formula definitions.
-
-    Returns:
-        A DataFrame with the final calculated results.
-    """
-    # --- 1. Run Calculation Engine for Base Year Annual Costs ---
-    base_year_costs_df = apply_formulas(input_df, formulas_data)
-
-    # Join the calculated costs with the original dataframe
-    # Overwrite existing columns in input_df with results from base_year_costs_df
-    joined_df = input_df.join(base_year_costs_df, how="left", lsuffix="_orig")
-
-    # --- 2. Project Costs for Future Years ---
-    projected_costs_df = project_costs(joined_df, joined_df, num_years=PROJECTION_YEARS)
-
-    # --- 3. Convert All Annual Costs to Rates ---
-    rates_df = convert_annual_cost_to_rates(projected_costs_df, joined_df)
-
-    # --- 4. Combine and Return Results ---
-    return projected_costs_df.join(rates_df)
 
 
 def main() -> None:
@@ -82,10 +58,11 @@ def main() -> None:
     print("Loading and cleaning data...")
     try:
         df = load_and_clean_data(data_file_path, sheet_name)
+        dsa_validation_df = load_dsa_validation_data(data_file_path)
         print("Data loaded successfully.")
     except Exception as e:
         print(f"Failed to load data: {e}")
-        return
+        sys.exit(1)
 
     print(f"Loading formulas from '{formulas_file_path}'...")
     try:
@@ -155,6 +132,7 @@ def main() -> None:
         print(full_output_row.to_string())
 
     # --- 6. Run Deterministic Sensitivity Analysis (DSA) ---
+    validation_passed = True
     try:
         scenarios_path = args.dsa_scenarios or "data/dsa_scenarios.json"
         print(f"\nLoading DSA scenarios from '{scenarios_path}'...")
@@ -164,7 +142,7 @@ def main() -> None:
             print("No DSA scenarios provided. Skipping.")
         else:
             print(f"\n--- Running {len(scenarios_to_run)} DSA Scenarios ---")
-            dsa_results = run_dsa(
+            dsa_results = run_dsa_analysis(
                 base_case_df=df,
                 formulas_data=formulas_data,
                 calculation_pipeline=run_calculation_pipeline,
@@ -172,11 +150,17 @@ def main() -> None:
             )
             print("-------------------------------------\n")
 
-            # --- 7. Report DSA Results ---
+            # --- 7. Report and Validate DSA Results ---
             report_dsa_results(dsa_results, base_case_results)
+            dsa_scenario_map = get_dsa_scenario_mapping()
+            if not validate_dsa_results(
+                dsa_results, dsa_validation_df, dsa_scenario_map
+            ):
+                validation_passed = False
 
     except Exception as e:
         print(f"Failed to run DSA: {e}")
+        validation_passed = False
 
     # --- 8. Run Probabilistic Sensitivity Analysis (PSA) ---
     if args.run_psa:
@@ -188,7 +172,7 @@ def main() -> None:
             if not psa_scenarios:
                 print("No PSA scenarios provided. Skipping.")
             else:
-                psa_results = run_psa(
+                psa_results = run_psa_analysis(
                     base_case_df=df,
                     formulas_data=formulas_data,
                     calculation_pipeline=run_calculation_pipeline,
@@ -196,9 +180,20 @@ def main() -> None:
                     iterations=args.psa_iterations,
                 )
                 report_psa_results(psa_results)
+                # Note: PSA validation is a placeholder.
+                # if not validate_psa_results(psa_results, psa_validation_df):
+                #     validation_passed = False
 
         except Exception as e:
             print(f"Failed to run PSA: {e}")
+            validation_passed = False
+
+    # --- 9. Final Validation Check ---
+    if not validation_passed:
+        print("\nValidation failed. Exiting with status 1.")
+        sys.exit(1)
+    else:
+        print("\nAll validations passed successfully.")
 
 
 if __name__ == "__main__":

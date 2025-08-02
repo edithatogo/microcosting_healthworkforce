@@ -1,4 +1,4 @@
-# src/sensitivity_analysis.py
+# src/dsa_analysis.py
 """
 This module handles the Deterministic Sensitivity Analysis (DSA).
 
@@ -27,7 +27,7 @@ def load_dsa_scenarios(file_path: str) -> List[Dict[str, Any]]:
         raise ValueError(f"Invalid JSON format in DSA scenarios file: {file_path}")
 
 
-def run_dsa(
+def run_dsa_analysis(
     base_case_df: pd.DataFrame,
     formulas_data: Dict[str, Any],
     calculation_pipeline: Callable[[pd.DataFrame, Dict[str, Any]], pd.DataFrame],
@@ -97,7 +97,7 @@ def report_dsa_results(
     Prints a summary report of the DSA results.
 
     Args:
-        dsa_results: A dictionary of the DSA results from the run_dsa function.
+        dsa_results: A dictionary of the DSA results from the run_dsa_analysis function.
         base_case_results: The DataFrame of the base case results for comparison.
     """
     print("\n--- DSA Results Summary (showing Year 0 Mid-point Cost) ---")
@@ -112,4 +112,7 @@ def report_dsa_results(
             f"Result: {scenario_cost:,.2f} | "
             f"Change: {percentage_change:+.2f}%"
         )
-    print("-----------------------------------------------------------\n")
+    print(
+        "-----------------------------------------------------------\
+"
+    )
