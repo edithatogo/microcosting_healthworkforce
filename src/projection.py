@@ -9,7 +9,7 @@ import pandas as pd
 
 def project_costs(
     base_year_costs_df: pd.DataFrame,
-    original_data_df: pd.DataFrame,
+    scenario_df: pd.DataFrame,
     num_years: int = 5,
 ) -> pd.DataFrame:
     """
@@ -17,8 +17,8 @@ def project_costs(
 
     Args:
         base_year_costs_df: DataFrame containing the calculated costs for Year 0.
-        original_data_df: The original input DataFrame, used to get the
-                          indexation rate for each row.
+        scenario_df: The scenario-specific DataFrame, used to get the
+                     indexation rate for each row.
         num_years: The number of years to project into the future.
 
     Returns:
@@ -27,7 +27,7 @@ def project_costs(
     projected_df = base_year_costs_df.copy()
     projected_df.columns = [f"{col}_Y0" for col in projected_df.columns]
 
-    indexation_rate = original_data_df["Grade(s)_Indexation per annum (%)"].fillna(0)
+    indexation_rate = scenario_df["Grade(s)_Indexation per annum (%)"].fillna(0)
 
     for year in range(1, num_years + 1):
         for tier in ["LL", "Mid", "UL"]:

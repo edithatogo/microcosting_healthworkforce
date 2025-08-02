@@ -11,7 +11,7 @@ import pandas as pd
 
 
 def convert_annual_cost_to_rates(
-    projected_costs_df: pd.DataFrame, original_data_df: pd.DataFrame
+    projected_costs_df: pd.DataFrame, scenario_df: pd.DataFrame
 ) -> pd.DataFrame:
     """
     Converts projected annual costs for multiple years into hourly, daily,
@@ -20,14 +20,14 @@ def convert_annual_cost_to_rates(
     Args:
         projected_costs_df: DataFrame with projected annual costs for multiple
                             years (e.g., Calculated_Cost_LL_Y0, ..._Y1).
-        original_data_df: The original input DataFrame, used for parameters
-                          like 'hours per week'.
+        scenario_df: The scenario-specific DataFrame, used for parameters
+                     like 'hours per week'.
 
     Returns:
         A DataFrame with all the newly calculated rate columns for each year.
     """
     rates_df = pd.DataFrame(index=projected_costs_df.index)
-    hours_per_week = original_data_df["Grade(s)_Hours per week"]
+    hours_per_week = scenario_df["Grade(s)_Hours per week"]
 
     # --- Define Divisors ---
     # Avoid division by zero by replacing 0 with NaN
@@ -68,9 +68,9 @@ def convert_annual_cost_to_rates(
                 if tier == "Mid":
                     override_col_name = "Base Salary + Costs (hourly)_Mid-point"
 
-                if override_col_name in original_data_df:
+                if override_col_name in scenario_df:
                     rates_df[hourly_col] = rates_df[hourly_col].fillna(
-                        original_data_df[override_col_name]
+                        scenario_df[override_col_name]
                     )
 
             # Daily
