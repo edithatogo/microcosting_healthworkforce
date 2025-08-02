@@ -11,7 +11,7 @@
         "private_practice_loading",
         "retention_allowance",
         "sick_leave",
-        "prof_dev_allowance",
+        "professional_development_allowance",
         "annual_leave_weeks",
         "annual_leave_loading",
         "productive_time_factor"
@@ -32,7 +32,7 @@
         "private_practice_loading": "Grade(s)_Private Practice Loading %",
         "retention_allowance": "Grade(s)_Attraction and Retention Allowance %",
         "sick_leave": "Grade(s)_Sick Leave %",
-        "prof_dev_allowance": "Grade(s)_Professional Development Allowance ($)",
+        "professional_development_allowance": "Grade(s)_Professional Development Allowance ($)",
         "annual_leave_weeks": "Grade(s)_Annual Leave Entitlement (Weeks)",
         "annual_leave_loading": "Grade(s)_Annual Leave Loading (%)",
         "productive_time_factor": "Grade(s)_Average productive time (%)"
@@ -50,7 +50,7 @@
         "private_practice_loading": "Grade(s)_Private Practice Loading %",
         "retention_allowance": "Grade(s)_Attraction and Retention Allowance %",
         "sick_leave": "Grade(s)_Sick Leave %",
-        "prof_dev_allowance": "Grade(s)_Professional Development Allowance ($)",
+        "professional_development_allowance": "Grade(s)_Professional Development Allowance ($)",
         "annual_leave_weeks": "Grade(s)_Annual Leave Entitlement (Weeks)",
         "annual_leave_loading": "Grade(s)_Annual Leave Loading (%)",
         "productive_time_factor": "Grade(s)_Average productive time (%)"
@@ -68,7 +68,7 @@
         "private_practice_loading": "Grade(s)_Private Practice Loading %",
         "retention_allowance": "Grade(s)_Attraction and Retention Allowance %",
         "sick_leave": "Grade(s)_Sick Leave %",
-        "prof_dev_allowance": "Grade(s)_Professional Development Allowance ($)",
+        "professional_development_allowance": "Grade(s)_Professional Development Allowance ($)",
         "annual_leave_weeks": "Grade(s)_Annual Leave Entitlement (Weeks)",
         "annual_leave_loading": "Grade(s)_Annual Leave Loading (%)",
         "productive_time_factor": "Grade(s)_Average productive time (%)"

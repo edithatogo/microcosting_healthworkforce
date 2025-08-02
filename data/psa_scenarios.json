@@ -1,0 +1,27 @@
+[
+  {
+    "parameter_to_vary": "super_rate",
+    "distribution": {
+      "type": "normal",
+      "mean": 0.105,
+      "std_dev": 0.01
+    }
+  },
+  {
+    "parameter_to_vary": "productive_time_factor",
+    "distribution": {
+      "type": "uniform",
+      "min": 0.95,
+      "max": 1.05
+    }
+  },
+  {
+    "parameter_to_vary": "professional_development_allowance",
+    "distribution": {
+      "type": "triangular",
+      "min": 0,
+      "mode": 500,
+      "max": 2000
+    }
+  }
+]

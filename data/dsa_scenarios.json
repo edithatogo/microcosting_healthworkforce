@@ -21,12 +21,12 @@
   },
   {
     "name": "Prof. Dev. Allowance +$500",
-    "parameter_to_vary": "prof_dev_allowance",
+    "parameter_to_vary": "professional_development_allowance",
     "variation": { "type": "absolute", "value": 500 }
   },
   {
     "name": "Prof. Dev. Allowance -$500",
-    "parameter_to_vary": "prof_dev_allowance",
+    "parameter_to_vary": "professional_development_allowance",
     "variation": { "type": "absolute", "value": -500 }
   }
 ]
