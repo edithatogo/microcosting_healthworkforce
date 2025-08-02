@@ -12,7 +12,7 @@ repos:
     rev: 1.7.9
     hooks:
     -   id: bandit
-        args: ["-r", "src"]
+        exclude: tests/
 -   repo: https://github.com/commitizen-tools/commitizen
     rev: v3.27.0
     hooks:
