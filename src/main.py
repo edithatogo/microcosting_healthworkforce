@@ -1,3 +1,4 @@
+import argparse
 from typing import Any, Dict
 
 import numpy as np
@@ -7,7 +8,7 @@ from src.data_loader import load_and_clean_data
 from src.formula_engine import apply_formulas, load_formulas
 from src.projection import project_costs
 from src.rate_converter import convert_annual_cost_to_rates
-from src.sensitivity_analysis import load_dsa_scenarios, run_dsa
+from src.sensitivity_analysis import load_dsa_scenarios
 
 PROJECTION_YEARS = 5
 
@@ -29,13 +30,15 @@ def run_calculation_pipeline(
     # --- 1. Run Calculation Engine for Base Year Annual Costs ---
     base_year_costs_df = apply_formulas(input_df, formulas_data)
 
+    # Join the calculated costs with the original dataframe
+    # Overwrite existing columns in input_df with results from base_year_costs_df
+    joined_df = input_df.join(base_year_costs_df, how="left", lsuffix="_orig")
+
     # --- 2. Project Costs for Future Years ---
-    projected_costs_df = project_costs(
-        base_year_costs_df, input_df, num_years=PROJECTION_YEARS
-    )
+    projected_costs_df = project_costs(joined_df, joined_df, num_years=PROJECTION_YEARS)
 
     # --- 3. Convert All Annual Costs to Rates ---
-    rates_df = convert_annual_cost_to_rates(projected_costs_df, input_df)
+    rates_df = convert_annual_cost_to_rates(projected_costs_df, joined_df)
 
     # --- 4. Combine and Return Results ---
     return projected_costs_df.join(rates_df)
@@ -45,6 +48,16 @@ def main() -> None:
     """
     Main function to run the data-driven calculation engine and validate results.
     """
+    parser = argparse.ArgumentParser(
+        description="Data-driven calculation engine for health workforce microcosting."
+    )
+    parser.add_argument(
+        "--dsa-scenarios",
+        type=str,
+        help="Path to a custom JSON file with DSA scenarios.",
+    )
+    args = parser.parse_args()
+
     # --- 1. Load Data and Formulas ---
     data_file_path = "data/Labour Model - v3, 20240328.xlsx"
     sheet_name = "Labour - Prices"
@@ -126,76 +139,79 @@ def main() -> None:
         print(full_output_row.to_string())
 
     # --- 6. Run Deterministic Sensitivity Analysis (DSA) ---
-    dsa_scenarios_path = "data/dsa_scenarios.json"
-    print(f"\nLoading DSA scenarios from '{dsa_scenarios_path}'...")
     try:
-        scenarios = load_dsa_scenarios(dsa_scenarios_path)
+        scenarios_to_run = None
+        if args.dsa_scenarios:
+            print(f"Loading custom scenarios from '{args.dsa_scenarios}'...")
+            scenarios_to_run = load_dsa_scenarios(args.dsa_scenarios)
+        else:
+            dsa_scenarios_path = "data/dsa_scenarios.json"
+            print(f"\nLoading DSA scenarios from '{dsa_scenarios_path}'...")
+            scenarios_to_run = load_dsa_scenarios(dsa_scenarios_path)
 
-        def dsa_pipeline(
-            scenario_df: pd.DataFrame, formulas: Dict[str, Any]
-        ) -> pd.DataFrame:
-            return run_calculation_pipeline(scenario_df, formulas)
+        if not scenarios_to_run:
+            print("No DSA scenarios provided. Skipping.")
+        else:
+            print(f"\n--- Running {len(scenarios_to_run)} DSA Scenarios ---")
+            dsa_results = {}
+            param_to_col_map = formulas_data["outputs"][0]["parameter_mapping"]
 
-        dsa_results = run_dsa(
-            base_case_df=df,
-            formulas_data=formulas_data,
-            calculation_pipeline=dsa_pipeline,
-            scenarios=scenarios,
-        )
+            for scenario in scenarios_to_run:
+                scenario_name = scenario["name"]
+                param_to_vary = scenario["parameter_to_vary"]
+                variation = scenario["variation"]
+                row_filter = scenario.get("row_filter")
+                print(f"  - Running scenario: {scenario_name}")
 
-        # --- 7. Report DSA Results ---
-        print("\n--- DSA Results Summary (showing Year 0 Mid-point Cost) ---")
-        base_case_cost = calculated_results["Calculated_Cost_Mid_Y0"].mean()
-        print(f"Base Case Average Cost: {base_case_cost:,.2f}")
+                scenario_df = df.copy(deep=True)
 
-        for scenario_name, result_df in dsa_results.items():
-            scenario_cost = result_df["Calculated_Cost_Mid_Y0"].mean()
-            percentage_change = (
-                (scenario_cost - base_case_cost) / base_case_cost
-            ) * 100
-            print(
-                f"  - {scenario_name:<25} | "
-                f"Result: {scenario_cost:,.2f} | "
-                f"Change: {percentage_change:+.2f}%"
-            )
-        print("-----------------------------------------------------------\n")
+                if param_to_vary not in param_to_col_map:
+                    print(
+                        f"Warning: Param '{param_to_vary}' not in formula mapping. Skipping."
+                    )
+                    continue
 
-        # --- 8. Run Custom DSA with Row-level Filtering ---
-        print("\n--- Running Custom DSA Scenario (with Row Filter) ---")
-        custom_scenarios = [
-            {
-                "name": "Lab Tech Super Rate +20%",
-                "parameter_to_vary": "super_rate",
-                "variation": {"type": "percentage", "value": 0.20},
-                "row_filter": {"Personnel type": "Lab technician"},
-            },
-            {
-                "name": "Medical Scientist Prof. Dev. +$1000",
-                "parameter_to_vary": "prof_dev_allowance",
-                "variation": {"type": "absolute", "value": 1000},
-                "row_filter": {"Personnel type": "Medical scientist"},
-            },
-        ]
+                column_to_vary = param_to_col_map[param_to_vary]
 
-        custom_dsa_results = run_dsa(
-            base_case_df=df,
-            formulas_data=formulas_data,
-            calculation_pipeline=dsa_pipeline,
-            custom_scenarios=custom_scenarios,
-        )
+                if row_filter:
+                    mask = pd.Series(True, index=scenario_df.index)
+                    for key, value in row_filter.items():
+                        mask &= scenario_df[key] == value
+                else:
+                    mask = pd.Series(True, index=scenario_df.index)
 
-        print("\n--- Custom DSA Results Summary ---")
-        for scenario_name, result_df in custom_dsa_results.items():
-            scenario_cost = result_df["Calculated_Cost_Mid_Y0"].mean()
-            percentage_change = (
-                (scenario_cost - base_case_cost) / base_case_cost
-            ) * 100
-            print(
-                f"  - {scenario_name:<35} | "
-                f"Result: {scenario_cost:,.2f} | "
-                f"Change: {percentage_change:+.2f}%"
-            )
-        print("------------------------------------\n")
+                if variation["type"] == "percentage":
+                    scenario_df.loc[mask, column_to_vary] *= 1 + variation["value"]
+                elif variation["type"] == "absolute":
+                    scenario_df.loc[mask, column_to_vary] += variation["value"]
+                else:
+                    print(
+                        f"Warning: Unknown variation type '{variation['type']}'. Skipping."
+                    )
+                    continue
+
+                # Run the full calculation pipeline with the modified data
+                scenario_results = run_calculation_pipeline(scenario_df, formulas_data)
+                dsa_results[scenario_name] = scenario_results
+
+            print("-------------------------------------\n")
+
+            # --- 7. Report DSA Results ---
+            print("\n--- DSA Results Summary (showing Year 0 Mid-point Cost) ---")
+            base_case_cost = calculated_results["Calculated_Cost_Mid_Y0"].mean()
+            print(f"Base Case Average Cost: {base_case_cost:,.2f}")
+
+            for scenario_name, result_df in dsa_results.items():
+                scenario_cost = result_df["Calculated_Cost_Mid_Y0"].mean()
+                percentage_change = (
+                    (scenario_cost - base_case_cost) / base_case_cost
+                ) * 100
+                print(
+                    f"  - {scenario_name:<25} | "
+                    f"Result: {scenario_cost:,.2f} | "
+                    f"Change: {percentage_change:+.2f}%"
+                )
+            print("-----------------------------------------------------------\n")
 
     except Exception as e:
         print(f"Failed to run DSA: {e}")
