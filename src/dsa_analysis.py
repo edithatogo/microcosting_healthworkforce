@@ -74,6 +74,11 @@ def run_dsa_analysis(
             mask = pd.Series(True, index=scenario_df.index)
 
         # Apply the variation to the selected rows
+        # Ensure the column to vary is of a float type before applying variations
+        # to prevent pandas FutureWarning about incompatible dtypes.
+        if pd.api.types.is_integer_dtype(scenario_df[column_to_vary]):
+            scenario_df[column_to_vary] = scenario_df[column_to_vary].astype(float)
+
         if variation["type"] == "percentage":
             scenario_df.loc[mask, column_to_vary] *= 1 + variation["value"]
         elif variation["type"] == "absolute":
