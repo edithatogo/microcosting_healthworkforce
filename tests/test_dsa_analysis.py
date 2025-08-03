@@ -3,6 +3,7 @@
 Tests for the dsa_analysis module.
 """
 
+import logging
 from typing import Any, Dict, List
 from unittest.mock import mock_open, patch
 
@@ -60,17 +61,17 @@ def test_run_dsa_analysis() -> None:
     assert dsa_results["Test Scenario"]["param1"][0] == pytest.approx(110)
 
 
-def test_report_dsa_results(capsys: Any) -> None:
+def test_report_dsa_results(caplog: Any) -> None:
     """
-    Tests that the report_dsa_results function prints a summary report correctly.
+    Tests that the report_dsa_results function logs a summary report correctly.
     """
     base_case_results = pd.DataFrame({"Calculated_Cost_Mid_Y0": [100]})
     dsa_results = {"Scenario A": pd.DataFrame({"Calculated_Cost_Mid_Y0": [110]})}
 
-    report_dsa_results(dsa_results, base_case_results)
+    with caplog.at_level(logging.INFO):
+        report_dsa_results(dsa_results, base_case_results)
 
-    captured = capsys.readouterr()
-    assert "DSA Results Summary" in captured.out
-    assert "Base Case Average Cost" in captured.out
-    assert "Scenario A" in captured.out
-    assert "+10.00%" in captured.out
+    assert "DSA Results Summary" in caplog.text
+    assert "Base Case Average Cost" in caplog.text
+    assert "Scenario A" in caplog.text
+    assert "+10.00%" in caplog.text

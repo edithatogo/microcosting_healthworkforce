@@ -8,29 +8,33 @@ import re
 import pandas as pd
 
 
+def _clean_column_names(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Cleans and standardizes the column names of a DataFrame.
+    """
+    # Clean up the multi-level column names into a single string
+    if isinstance(df.columns, pd.MultiIndex):
+        df.columns = ["_".join(map(str, col)).strip() for col in df.columns]
+
+    # Clean the column names by removing unwanted characters and patterns
+    df.columns = (
+        df.columns.str.replace(r"Unnamed: \d+_level_\d+", "", regex=True)
+        .str.replace(r"_\(hourly\)", "_hourly", regex=True)
+        .str.replace(r"_\s+", "_", regex=True)
+        .str.replace(r"_+", "_", regex=True)
+        .str.replace(r"Leave Loading \(%\)__", "Leave Loading (%)", regex=False)
+        .str.replace(r"_nan", "", regex=False)
+    )
+    return df
+
+
 def load_and_clean_data(file_path: str, sheet_name: str) -> pd.DataFrame:
     """
     Loads and cleans the primary data from the 'Labour - Prices' sheet.
     """
     # Load the sheet, skipping the top rows and setting the header
     df = pd.read_excel(file_path, sheet_name=sheet_name, header=[1, 2])
-
-    df.columns = ["_".join(map(str, col)).strip() for col in df.columns]
-    df.columns = pd.Index(
-        [re.sub(r"Unnamed: \d+_level_\d+", "", col) for col in df.columns]
-    )
-    df.columns = pd.Index(
-        [re.sub(r"_\(hourly\)", "_hourly", col) for col in df.columns]
-    )
-    df.columns = pd.Index([re.sub(r"_\s+", "_", col) for col in df.columns])
-    df.columns = pd.Index([re.sub(r"_+", "_", col) for col in df.columns])
-    df.columns = pd.Index(
-        [
-            col.replace(r"Leave Loading \(%\)__", "Leave Loading (%)")
-            for col in df.columns
-        ]
-    )
-    df.columns = pd.Index([col.replace(r"_nan", "") for col in df.columns])
+    df = _clean_column_names(df)
 
     # Rename the main columns for easier access
     df.rename(
@@ -54,34 +58,13 @@ def load_and_clean_data(file_path: str, sheet_name: str) -> pd.DataFrame:
     return df
 
 
-def load_dsa_validation_data(file_path: str) -> pd.DataFrame:
+def load_dsa_validation_data(file_path: str, sheet_name: str) -> pd.DataFrame:
     """
-    Loads and cleans the DSA validation data from the
-    'Labour - Prices (DSA, Values)' sheet.
+    Loads and cleans the DSA validation data from the specified sheet.
     """
     # Load the sheet with a multi-level header
-    df = pd.read_excel(
-        file_path, sheet_name="Labour - Prices (DSA, Values)", header=[0, 1, 2]
-    )
-
-    # Clean up the multi-level column names into a single string
-    df.columns = ["_".join(map(str, col)).strip() for col in df.columns]
-
-    # Clean the column names by removing unwanted characters and patterns
-    df.columns = pd.Index(
-        [re.sub(r"Unnamed: \d+_level_\d+_", "", col) for col in df.columns]
-    )
-    df.columns = pd.Index(
-        [re.sub(r"_\(hourly\)", "_hourly", col) for col in df.columns]
-    )
-    df.columns = pd.Index([re.sub(r"_\s+", "_", col) for col in df.columns])
-    df.columns = pd.Index([re.sub(r"_+", "_", col) for col in df.columns])
-    df.columns = pd.Index(
-        [
-            col.replace(r"Leave Loading \(%\)__", "Leave Loading (%)")
-            for col in df.columns
-        ]
-    )
+    df = pd.read_excel(file_path, sheet_name=sheet_name, header=[0, 1, 2])
+    df = _clean_column_names(df)
 
     # Rename the personnel type column for easier access
     df.rename(
@@ -99,41 +82,3 @@ def load_dsa_validation_data(file_path: str) -> pd.DataFrame:
     return df
 
 
-def get_dsa_scenario_mapping() -> dict[str, str]:
-    """
-    Returns a mapping from DSA scenario names to validation column names.
-    """
-    return {
-        "Super Rate +10%": "Superannuation Rate_Base Salary + Costs_MP",
-        "Super Rate -10%": "Superannuation Rate_Base Salary + Costs_MP",
-        "Productive Time +5%": "Hours worked per week_Base Salary + Costs_MP",
-        "Productive Time -5%": "Hours worked per week_Base Salary + Costs_MP",
-        "Average Penalties +10%": "Average Penalties_Base Salary + Costs_MP",
-        "Average Penalties -10%": "Average Penalties_Base Salary + Costs_MP",
-        "Public Holiday Penalty +10%": "Public Holiday Penalty_Base Salary + Costs_MP",
-        "Public Holiday Penalty -10%": "Public Holiday Penalty_Base Salary + Costs_MP",
-        "Private Practice Loading +10%": (
-            "Private Practice Loading_Base Salary + Costs_MP"
-        ),
-        "Private Practice Loading -10%": (
-            "Private Practice Loading_Base Salary + Costs_MP"
-        ),
-        "Retention Allowance +10%": (
-            "Attraction and Retention Allowance_Base Salary + Costs_MP"
-        ),
-        "Retention Allowance -10%": (
-            "Attraction and Retention Allowance_Base Salary + Costs_MP"
-        ),
-        "Sick Leave +10%": "Sick Leave_Base Salary + Costs_MP",
-        "Sick Leave -10%": "Sick Leave_Base Salary + Costs_MP",
-        "Prof. Dev. Allowance +$500": (
-            "Professional Development Allowance_Base Salary + Costs_MP"
-        ),
-        "Prof. Dev. Allowance -$500": (
-            "Professional Development Allowance_Base Salary + Costs_MP"
-        ),
-        "Annual Leave +1 Week": "Annual Leave_Base Salary + Costs_MP",
-        "Annual Leave -1 Week": "Annual Leave_Base Salary + Costs_MP",
-        "Annual Leave Loading +10%": "Leave Loading (%)_Base Salary + Costs_MP",
-        "Annual Leave Loading -10%": "Leave Loading (%)_Base Salary + Costs_MP",
-    }
