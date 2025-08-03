@@ -7,11 +7,10 @@ from typing import Any, Dict
 
 import pandas as pd
 
+from src import config
 from src.formula_engine import apply_formulas
 from src.projection import project_costs
 from src.rate_converter import convert_annual_cost_to_rates
-
-PROJECTION_YEARS = 5
 
 
 def run_calculation_pipeline(
@@ -36,7 +35,9 @@ def run_calculation_pipeline(
     joined_df = input_df.join(base_year_costs_df, how="left", lsuffix="_orig")
 
     # --- 2. Project Costs for Future Years ---
-    projected_costs_df = project_costs(joined_df, joined_df, num_years=PROJECTION_YEARS)
+    projected_costs_df = project_costs(
+        joined_df, joined_df, num_years=config.PROJECTION_YEARS
+    )
 
     # --- 3. Convert All Annual Costs to Rates ---
     rates_df = convert_annual_cost_to_rates(projected_costs_df, joined_df)

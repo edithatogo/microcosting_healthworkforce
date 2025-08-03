@@ -7,8 +7,8 @@ from unittest.mock import patch
 
 import pandas as pd
 
+from src import config
 from src.data_loader import (
-    get_dsa_scenario_mapping,
     load_and_clean_data,
     load_dsa_validation_data,
 )
@@ -62,23 +62,13 @@ def test_load_dsa_validation_data() -> None:
     mock_df.columns = pd.MultiIndex.from_tuples(mock_df.columns)
 
     with patch("pandas.read_excel", return_value=mock_df) as mock_read_excel:
-        df = load_dsa_validation_data("dummy_path.xlsx")
+        df = load_dsa_validation_data("dummy_path.xlsx", config.DSA_VALIDATION_SHEET)
         mock_read_excel.assert_called_once_with(
             "dummy_path.xlsx",
-            sheet_name="Labour - Prices (DSA, Values)",
+            sheet_name=config.DSA_VALIDATION_SHEET,
             header=[0, 1, 2],
         )
         assert "Personnel type" in df.columns
         assert df.shape[0] == 3
         assert df["Personnel type"].isna().sum() == 0
         assert "Superannuation Rate_Base Salary + Costs_MP" in df.columns
-
-
-def test_get_dsa_scenario_mapping() -> None:
-    """
-    Tests that the get_dsa_scenario_mapping function returns the expected dictionary.
-    """
-    mapping = get_dsa_scenario_mapping()
-    assert isinstance(mapping, dict)
-    assert "Super Rate +10%" in mapping
-    assert mapping["Super Rate +10%"] == "Superannuation Rate_Base Salary + Costs_MP"

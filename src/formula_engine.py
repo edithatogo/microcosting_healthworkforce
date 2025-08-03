@@ -45,18 +45,44 @@ def load_formulas(file_path: str) -> Dict[str, Any]:
     return cast(Dict[str, Any], formulas_data)
 
 
+def _check_for_override(row: pd.Series, output_def: Dict[str, Any]) -> Any:
+    """Checks if a hardcoded override value should be used."""
+    override_col = output_def.get("override_column")
+    override_cond = output_def.get("override_condition")
+    if override_col and override_cond and pd.notna(row.get(override_col)):
+        try:
+            if ast.literal_eval(override_cond):
+                return row[override_col]
+        except Exception:  # nosec B110
+            pass
+    return None
+
+
+def _calculate_value(
+    row: pd.Series,
+    output_def: Dict[str, Any],
+    formula: Dict[str, Any],
+) -> Any:
+    """Calculates a value using the defined formula expression."""
+    expression = formula["expression"]
+    parameters = {
+        param_name: row.get(source_col, 0)
+        for param_name, source_col in output_def["parameter_mapping"].items()
+    }
+    for p in formula["parameters"]:
+        parameters.setdefault(p, 0)
+
+    if parameters.get("productive_time_factor") == 0:
+        parameters["productive_time_factor"] = 1.0
+
+    return evaluate_expression(expression, parameters)
+
+
 def apply_formulas(
     data_df: pd.DataFrame, formulas_data: Dict[str, Any]
 ) -> pd.DataFrame:
     """
     Applies the defined formulas to the input DataFrame row by row.
-
-    Args:
-        data_df: The input DataFrame containing the source data.
-        formulas_data: The dictionary of formula definitions.
-
-    Returns:
-        A DataFrame with the calculated output columns.
     """
     results = []
     formulas_map = {f["id"]: f for f in formulas_data["formulas"]}
@@ -67,45 +93,12 @@ def apply_formulas(
             output_name = output_def["name"]
             formula_id = output_def["uses_formula"]
             formula = formulas_map[formula_id]
-            expression = formula["expression"]
 
-            # Check for hardcoded override value first
-            override_col = output_def.get("override_column")
-            override_cond = output_def.get("override_condition")
-            use_override = False
-            if override_col and override_cond and pd.notna(row.get(override_col)):
-                try:
-                    # Safely evaluate the override condition
-                    if ast.literal_eval(override_cond):
-                        use_override = True
-                except Exception:  # nosec B110
-                    # Condition fails if column is missing, etc.
-                    # In this case, we just move on and don't use the override
-                    pass
-
-            if use_override:
-                calculated_value = row[override_col]
+            override_value = _check_for_override(row, output_def)
+            if override_value is not None:
+                calculated_value = override_value
             else:
-                # Map parameters from the row to the formula's parameter names
-                parameters = {
-                    param_name: row.get(source_col, 0)
-                    for param_name, source_col in output_def[
-                        "parameter_mapping"
-                    ].items()
-                }
-                # Fill any missing parameters with 0
-                for p in formula["parameters"]:
-                    if p not in parameters:
-                        parameters[p] = 0
-
-                # Handle potential division by zero for productive_time_factor
-                if (
-                    "productive_time_factor" in parameters
-                    and parameters["productive_time_factor"] == 0
-                ):
-                    parameters["productive_time_factor"] = 1.0
-
-                calculated_value = evaluate_expression(expression, parameters)
+                calculated_value = _calculate_value(row, output_def, formula)
 
             row_results[output_name] = calculated_value
         results.append(row_results)
