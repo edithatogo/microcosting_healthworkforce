@@ -42,38 +42,41 @@ def run_dsa_analysis(
 
     for scenario in scenarios:
         scenario_name = scenario["name"]
-        param_to_vary = scenario["parameter_to_vary"]
-        variation = scenario["variation"]
+        params_to_vary = scenario["parameters_to_vary"]
+        variations = scenario["variations"]
         row_filter = scenario.get("row_filter")
         logging.info(f"Running scenario: {scenario_name}")
 
         scenario_df = base_case_df.copy(deep=True)
 
-        if param_to_vary not in param_to_col_map:
-            logging.warning(
-                f"Param '{param_to_vary}' not in formula mapping. Skipping."
-            )
-            continue
+        for i, param_to_vary in enumerate(params_to_vary):
+            variation = variations[i]
 
-        column_to_vary = param_to_col_map[param_to_vary]
+            if param_to_vary not in param_to_col_map:
+                logging.warning(
+                    f"Param '{param_to_vary}' not in formula mapping. Skipping."
+                )
+                continue
 
-        mask = pd.Series(True, index=scenario_df.index)
-        if row_filter:
-            for key, value in row_filter.items():
-                mask &= scenario_df[key] == value
+            column_to_vary = param_to_col_map[param_to_vary]
 
-        if pd.api.types.is_integer_dtype(scenario_df[column_to_vary]):
-            scenario_df[column_to_vary] = scenario_df[column_to_vary].astype(float)
+            mask = pd.Series(True, index=scenario_df.index)
+            if row_filter:
+                for key, value in row_filter.items():
+                    mask &= scenario_df[key] == value
 
-        if variation["type"] == "percentage":
-            scenario_df.loc[mask, column_to_vary] *= 1 + variation["value"]
-        elif variation["type"] == "absolute":
-            scenario_df.loc[mask, column_to_vary] += variation["value"]
-        else:
-            logging.warning(
-                f"Unknown variation type '{variation['type']}'. Skipping."
-            )
-            continue
+            if pd.api.types.is_integer_dtype(scenario_df[column_to_vary]):
+                scenario_df[column_to_vary] = scenario_df[column_to_vary].astype(float)
+
+            if variation["type"] == "percentage":
+                scenario_df.loc[mask, column_to_vary] *= 1 + variation["value"]
+            elif variation["type"] == "absolute":
+                scenario_df.loc[mask, column_to_vary] += variation["value"]
+            else:
+                logging.warning(
+                    f"Unknown variation type '{variation['type']}'. Skipping."
+                )
+                continue
 
         scenario_results = calculation_pipeline(scenario_df, formulas_data)
         dsa_results[scenario_name] = scenario_results

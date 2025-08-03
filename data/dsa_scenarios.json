@@ -1,102 +1,109 @@
 [
   {
-    "name": "Super Rate +10%",
-    "parameter_to_vary": "super_rate",
-    "variation": { "type": "percentage", "value": 0.10 }
+    "name": "Super Rate +10% and Productive Time +5%",
+    "parameters_to_vary": ["super_rate", "productive_time_factor"],
+    "variations": [
+      { "type": "percentage", "value": 0.10 },
+      { "type": "percentage", "value": 0.05 }
+    ]
   },
   {
     "name": "Super Rate -10%",
-    "parameter_to_vary": "super_rate",
-    "variation": { "type": "percentage", "value": -0.10 }
+    "parameters_to_vary": ["super_rate"],
+    "variations": [{ "type": "percentage", "value": -0.10 }]
   },
   {
-    "name": "Productive Time +5%",
-    "parameter_to_vary": "productive_time_factor",
-    "variation": { "type": "percentage", "value": 0.05 }
+    "name": "Productive Time +5% and Average Penalties +10% and Sick Leave -5%",
+    "parameters_to_vary": ["productive_time_factor", "avg_penalties", "sick_leave"],
+    "variations": [
+      { "type": "percentage", "value": 0.05 },
+      { "type": "percentage", "value": 0.10 },
+      { "type": "percentage", "value": -0.05 }
+    ]
   },
   {
     "name": "Productive Time -5%",
-    "parameter_to_vary": "productive_time_factor",
-    "variation": { "type": "percentage", "value": -0.05 }
+    "parameters_to_vary": ["productive_time_factor"],
+    "variations": [{ "type": "percentage", "value": -0.05 }]
   },
   {
     "name": "Average Penalties +10%",
-    "parameter_to_vary": "avg_penalties",
-    "variation": { "type": "percentage", "value": 0.10 }
+    "parameters_to_vary": ["avg_penalties"],
+    "variations": [{ "type": "percentage", "value": 0.10 }]
   },
   {
     "name": "Average Penalties -10%",
-    "parameter_to_vary": "avg_penalties",
-    "variation": { "type": "percentage", "value": -0.10 }
+    "parameters_to_vary": ["avg_penalties"],
+    "variations": [{ "type": "percentage", "value": -0.10 }]
   },
   {
     "name": "Public Holiday Penalty +10%",
-    "parameter_to_vary": "pub_holiday_penalty",
-    "variation": { "type": "percentage", "value": 0.10 }
+    "parameters_to_vary": ["pub_holiday_penalty"],
+    "variations": [{ "type": "percentage", "value": 0.10 }]
   },
   {
     "name": "Public Holiday Penalty -10%",
-    "parameter_to_vary": "pub_holiday_penalty",
-    "variation": { "type": "percentage", "value": -0.10 }
+    "parameters_to_vary": ["pub_holiday_penalty"],
+    "variations": [{ "type": "percentage", "value": -0.10 }]
   },
   {
     "name": "Private Practice Loading +10%",
-    "parameter_to_vary": "private_practice_loading",
-    "variation": { "type": "percentage", "value": 0.10 }
+    "parameters_to_vary": ["private_practice_loading"],
+    "variations": [{ "type": "percentage", "value": 0.10 }]
   },
   {
     "name": "Private Practice Loading -10%",
-    "parameter_to_vary": "private_practice_loading",
-    "variation": { "type": "percentage", "value": -0.10 }
+    "parameters_to_vary": ["private_practice_loading"],
+    "variations": [{ "type": "percentage", "value": -0.10 }]
   },
   {
     "name": "Retention Allowance +10%",
-    "parameter_to_vary": "retention_allowance",
-    "variation": { "type": "percentage", "value": 0.10 }
+    "parameters_to_vary": ["retention_allowance"],
+    "variations": [{ "type": "percentage", "value": 0.10 }]
   },
   {
     "name": "Retention Allowance -10%",
-    "parameter_to_vary": "retention_allowance",
-    "variation": { "type": "percentage", "value": -0.10 }
+    "parameters_to_vary": ["retention_allowance"],
+    "variations": [{ "type": "percentage", "value": -0.10 }]
   },
   {
     "name": "Sick Leave +10%",
-    "parameter_to_vary": "sick_leave",
-    "variation": { "type": "percentage", "value": 0.10 }
+    "parameters_to_vary": ["sick_leave"],
+    "variations": [{ "type": "percentage", "value": 0.10 }]
   },
   {
     "name": "Sick Leave -10%",
-    "parameter_to_vary": "sick_leave",
-    "variation": { "type": "percentage", "value": -0.10 }
+    "parameters_to_vary": ["sick_leave"],
+    "variations": [{ "type": "percentage", "value": -0.10 }]
   },
   {
     "name": "Prof. Dev. Allowance +$500",
-    "parameter_to_vary": "professional_development_allowance",
-    "variation": { "type": "absolute", "value": 500 }
+    "parameters_to_vary": ["professional_development_allowance"],
+    "variations": [{ "type": "absolute", "value": 500 }]
   },
   {
     "name": "Prof. Dev. Allowance -$500",
-    "parameter_to_vary": "professional_development_allowance",
-    "variation": { "type": "absolute", "value": -500 }
+    "parameters_to_vary": ["professional_development_allowance"],
+    "variations": [{ "type": "absolute", "value": -500 }]
   },
   {
     "name": "Annual Leave +1 Week",
-    "parameter_to_vary": "annual_leave_weeks",
-    "variation": { "type": "absolute", "value": 1 }
+    "parameters_to_vary": ["annual_leave_weeks"],
+    "variations": [{ "type": "absolute", "value": 1 }]
   },
   {
     "name": "Annual Leave -1 Week",
-    "parameter_to_vary": "annual_leave_weeks",
-    "variation": { "type": "absolute", "value": -1 }
+    "parameters_to_vary": ["annual_leave_weeks"],
+    "variations": [{ "type": "absolute", "value": -1 }]
   },
   {
     "name": "Annual Leave Loading +10%",
-    "parameter_to_vary": "annual_leave_loading",
-    "variation": { "type": "percentage", "value": 0.10 }
+    "parameters_to_vary": ["annual_leave_loading"],
+    "variations": [{ "type": "percentage", "value": 0.10 }]
   },
   {
     "name": "Annual Leave Loading -10%",
-    "parameter_to_vary": "annual_leave_loading",
-    "variation": { "type": "percentage", "value": -0.10 }
+    "parameters_to_vary": ["annual_leave_loading"],
+    "variations": [{ "type": "percentage", "value": -0.10 }]
   }
 ]
