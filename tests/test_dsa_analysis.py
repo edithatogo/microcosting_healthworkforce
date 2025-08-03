@@ -39,13 +39,23 @@ def test_run_dsa_analysis() -> None:
     returns results.
     """
     base_case_df = pd.DataFrame({"param1": [100], "param2": [200]})
-    formulas_data = {"outputs": [{"parameter_mapping": {"param1": "param1"}}]}
+    formulas_data = {
+        "outputs": [{"parameter_mapping": {"param1": "param1", "param2": "param2"}}]
+    }
     scenarios: List[Dict[str, Any]] = [
         {
-            "name": "Test Scenario",
-            "parameter_to_vary": "param1",
-            "variation": {"type": "percentage", "value": 0.1},
-        }
+            "name": "One-Way Scenario",
+            "parameters_to_vary": ["param1"],
+            "variations": [{"type": "percentage", "value": 0.1}],
+        },
+        {
+            "name": "Two-Way Scenario",
+            "parameters_to_vary": ["param1", "param2"],
+            "variations": [
+                {"type": "percentage", "value": 0.1},
+                {"type": "absolute", "value": -50},
+            ],
+        },
     ]
 
     def mock_calculation_pipeline(
@@ -57,8 +67,54 @@ def test_run_dsa_analysis() -> None:
         base_case_df, formulas_data, mock_calculation_pipeline, scenarios
     )
 
-    assert "Test Scenario" in dsa_results
-    assert dsa_results["Test Scenario"]["param1"][0] == pytest.approx(110)
+    assert "One-Way Scenario" in dsa_results
+    assert dsa_results["One-Way Scenario"]["param1"][0] == pytest.approx(110)
+    assert "Two-Way Scenario" in dsa_results
+    assert dsa_results["Two-Way Scenario"]["param1"][0] == pytest.approx(110)
+    assert dsa_results["Two-Way Scenario"]["param2"][0] == pytest.approx(150)
+
+
+def test_run_dsa_analysis_three_way() -> None:
+    """
+    Tests that the run_dsa_analysis function correctly applies three-way scenarios.
+    """
+    base_case_df = pd.DataFrame({"param1": [100], "param2": [200], "param3": [300]})
+    formulas_data = {
+        "outputs": [
+            {
+                "parameter_mapping": {
+                    "param1": "param1",
+                    "param2": "param2",
+                    "param3": "param3",
+                }
+            }
+        ]
+    }
+    scenarios: List[Dict[str, Any]] = [
+        {
+            "name": "Three-Way Scenario",
+            "parameters_to_vary": ["param1", "param2", "param3"],
+            "variations": [
+                {"type": "percentage", "value": 0.1},
+                {"type": "absolute", "value": -50},
+                {"type": "percentage", "value": 0.2},
+            ],
+        },
+    ]
+
+    def mock_calculation_pipeline(
+        df: pd.DataFrame, formulas: Dict[str, Any]
+    ) -> pd.DataFrame:
+        return df.copy()
+
+    dsa_results = run_dsa_analysis(
+        base_case_df, formulas_data, mock_calculation_pipeline, scenarios
+    )
+
+    assert "Three-Way Scenario" in dsa_results
+    assert dsa_results["Three-Way Scenario"]["param1"][0] == pytest.approx(110)
+    assert dsa_results["Three-Way Scenario"]["param2"][0] == pytest.approx(150)
+    assert dsa_results["Three-Way Scenario"]["param3"][0] == pytest.approx(360)
 
 
 def test_report_dsa_results(caplog: Any) -> None:

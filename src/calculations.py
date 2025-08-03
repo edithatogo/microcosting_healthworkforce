@@ -34,6 +34,7 @@ def run_calculation_pipeline(
     # Overwrite existing columns in input_df with results from base_year_costs_df
     joined_df = input_df.join(base_year_costs_df, how="left", lsuffix="_orig")
 
+
     # --- 2. Project Costs for Future Years ---
     projected_costs_df = project_costs(
         joined_df, joined_df, num_years=config.PROJECTION_YEARS

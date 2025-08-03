@@ -1,13 +1,16 @@
 [
   {
-    "name": "Super Rate +10%",
-    "parameter_to_vary": "super_rate",
-    "variation": { "type": "percentage", "value": 0.10 }
+    "name": "Super Rate +10% and Productive Time +5%",
+    "parameters_to_vary": ["super_rate", "productive_time_factor"],
+    "variations": [
+      { "type": "percentage", "value": 0.10 },
+      { "type": "percentage", "value": 0.05 }
+    ]
   },
   {
     "name": "Super Rate -10%",
-    "parameter_to_vary": "super_rate",
-    "variation": { "type": "percentage", "value": -0.10 }
+    "parameters_to_vary": ["super_rate"],
+    "variations": [{ "type": "percentage", "value": -0.10 }]
   },
   {
     "name": "Productive Time +5%",

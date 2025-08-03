@@ -33,12 +33,20 @@ DSA_SCENARIO_VALIDATION_MAPPING = {
     "Public Holiday Penalty -10%": "Public Holiday Penalty_Base Salary + Costs_MP",
     "Private Practice Loading +10%": "Private Practice Loading_Base Salary + Costs_MP",
     "Private Practice Loading -10%": "Private Practice Loading_Base Salary + Costs_MP",
-    "Retention Allowance +10%": "Attraction and Retention Allowance_Base Salary + Costs_MP",
-    "Retention Allowance -10%": "Attraction and Retention Allowance_Base Salary + Costs_MP",
+    "Retention Allowance +10%": (
+        "Attraction and Retention Allowance_Base Salary + Costs_MP"
+    ),
+    "Retention Allowance -10%": (
+        "Attraction and Retention Allowance_Base Salary + Costs_MP"
+    ),
     "Sick Leave +10%": "Sick Leave_Base Salary + Costs_MP",
     "Sick Leave -10%": "Sick Leave_Base Salary + Costs_MP",
-    "Prof. Dev. Allowance +$500": "Professional Development Allowance_Base Salary + Costs_MP",
-    "Prof. Dev. Allowance -$500": "Professional Development Allowance_Base Salary + Costs_MP",
+    "Prof. Dev. Allowance +$500": (
+        "Professional Development Allowance_Base Salary + Costs_MP"
+    ),
+    "Prof. Dev. Allowance -$500": (
+        "Professional Development Allowance_Base Salary + Costs_MP"
+    ),
     "Annual Leave +1 Week": "Annual Leave_Base Salary + Costs_MP",
     "Annual Leave -1 Week": "Annual Leave_Base Salary + Costs_MP",
     "Annual Leave Loading +10%": "Leave Loading (%)_Base Salary + Costs_MP",

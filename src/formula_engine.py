@@ -46,14 +46,23 @@ def load_formulas(file_path: str) -> Dict[str, Any]:
 
 
 def _check_for_override(row: pd.Series, output_def: Dict[str, Any]) -> Any:
-    """Checks if a hardcoded override value should be used."""
+    """
+    Checks if a hardcoded override value should be used for a given row and output.
+
+    Args:
+        row: A Series representing a row of the input DataFrame.
+        output_def: The definition of the output being calculated.
+
+    Returns:
+        The override value if the conditions are met, otherwise None.
+    """
     override_col = output_def.get("override_column")
     override_cond = output_def.get("override_condition")
     if override_col and override_cond and pd.notna(row.get(override_col)):
         try:
             if ast.literal_eval(override_cond):
                 return row[override_col]
-        except Exception:  # nosec B110
+        except (ValueError, TypeError, SyntaxError, MemoryError, RecursionError):  # nosec B110
             pass
     return None
 
@@ -63,7 +72,17 @@ def _calculate_value(
     output_def: Dict[str, Any],
     formula: Dict[str, Any],
 ) -> Any:
-    """Calculates a value using the defined formula expression."""
+    """
+    Calculates a value using the defined formula expression.
+
+    Args:
+        row: A Series representing a row of the input DataFrame.
+        output_def: The definition of the output being calculated.
+        formula: The formula definition to use for the calculation.
+
+    Returns:
+        The calculated value.
+    """
     expression = formula["expression"]
     parameters = {
         param_name: row.get(source_col, 0)
