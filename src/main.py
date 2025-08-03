@@ -1,11 +1,12 @@
 import argparse
+import logging
 import sys
 
 import numpy as np
 
+from src import config
 from src.calculations import run_calculation_pipeline
 from src.data_loader import (
-    get_dsa_scenario_mapping,
     load_and_clean_data,
     load_dsa_validation_data,
 )
@@ -22,13 +23,9 @@ from src.psa_analysis import (
 )
 from src.validation import validate_dsa_results
 
-PROJECTION_YEARS = 5
 
-
-def main() -> None:
-    """
-    Main function to run the data-driven calculation engine and validate results.
-    """
+def _setup_arg_parser() -> argparse.ArgumentParser:
+    """Sets up the argument parser."""
     parser = argparse.ArgumentParser(
         description="Data-driven calculation engine for health workforce microcosting."
     )
@@ -48,38 +45,40 @@ def main() -> None:
         default=1000,
         help="Number of iterations for the PSA.",
     )
-    args = parser.parse_args()
+    return parser
 
-    # --- 1. Load Data and Formulas ---
-    data_file_path = "data/Labour Model - v3, 20240328.xlsx"
-    sheet_name = "Labour - Prices"
-    formulas_file_path = "data/formulas.json"
 
-    print("Loading and cleaning data...")
+def _load_data():
+    """Loads all necessary data and formulas."""
+    logging.info("Loading and cleaning data...")
     try:
-        df = load_and_clean_data(data_file_path, sheet_name)
-        dsa_validation_df = load_dsa_validation_data(data_file_path)
-        print("Data loaded successfully.")
+        df = load_and_clean_data(config.DATA_FILE_PATH, config.LABOUR_PRICES_SHEET)
+        dsa_validation_df = load_dsa_validation_data(
+            config.DATA_FILE_PATH, config.DSA_VALIDATION_SHEET
+        )
+        logging.info("Data loaded successfully.")
     except Exception as e:
-        print(f"Failed to load data: {e}")
+        logging.error(f"Failed to load data: {e}")
         sys.exit(1)
 
-    print(f"Loading formulas from '{formulas_file_path}'...")
+    logging.info(f"Loading formulas from '{config.FORMULAS_FILE_PATH}'...")
     try:
-        formulas_data = load_formulas(formulas_file_path)
-        print("Formulas loaded successfully.")
+        formulas_data = load_formulas(config.FORMULAS_FILE_PATH)
+        logging.info("Formulas loaded successfully.")
     except Exception as e:
-        print(f"Failed to load formulas: {e}")
-        return
+        logging.error(f"Failed to load formulas: {e}")
+        sys.exit(1)
 
-    # --- 2. Run Base Case Calculation ---
-    print("Running base case calculation pipeline...")
+    return df, dsa_validation_df, formulas_data
+
+
+def _run_base_case_and_validate(df, formulas_data):
+    """Runs the base case calculation and validates the results."""
+    logging.info("Running base case calculation pipeline...")
     base_case_results = run_calculation_pipeline(df, formulas_data)
-    print("Base case calculation complete.")
+    logging.info("Base case calculation complete.")
 
-    # --- 3. Validate Results ---
-    print("\nValidating base year (Y0) results...")
-
+    logging.info("Validating base year (Y0) results...")
     validation_map = {
         "Base Salary + Costs_LL": "Calculated_Cost_LL_Y0",
         "Base Salary + Costs_Mid-point": "Calculated_Cost_Mid_Y0",
@@ -88,7 +87,6 @@ def main() -> None:
         "Base Salary + Costs (hourly)_Mid-point": "Calculated_Hourly_Mid_Y0",
         "Base Salary + Costs (hourly)_UL": "Calculated_Hourly_UL_Y0",
     }
-
     df_original_compare = df[list(validation_map.keys())].fillna(0)
     calculated_compare = base_case_results[list(validation_map.values())].fillna(0)
     are_close = np.isclose(
@@ -99,16 +97,13 @@ def main() -> None:
     )
     all_match = are_close.all()
 
-    # --- 4. Report Summary ---
     successful_rows = np.all(are_close, axis=1)
     num_successful = successful_rows.sum()
     total_rows = len(df)
-
-    print("\n--- Validation Summary ---")
-    print(f"{num_successful} out of {total_rows} rows matched successfully.")
+    logging.info(f"--- Validation Summary ---\n{num_successful} out of {total_rows} rows matched successfully.")
 
     if not all_match:
-        print("\n❌ A discrepancy was found. Reporting the first failed row.")
+        logging.warning("A discrepancy was found. Reporting the first failed row.")
         first_mismatch_idx = successful_rows.argmin()
         comparison_df = df.join(base_case_results)
         mismatched_row = comparison_df.iloc[[first_mismatch_idx]]
@@ -117,83 +112,99 @@ def main() -> None:
             + list(validation_map.keys())
             + list(validation_map.values())
         )
-        print(mismatched_row[display_cols].to_string())
+        logging.warning(mismatched_row[display_cols].to_string())
     else:
-        print(
-            "\n✅ All validated values match the original Excel values "
-            "within tolerance."
-        )
+        logging.info("All validated values match the original Excel values within tolerance.")
 
-    # --- 5. Display Full Results for a Sample Row (Optional) ---
     if num_successful > 0:
-        print("\n--- Example of Full Projected Output for a Matched Row ---")
+        logging.info("--- Example of Full Projected Output for a Matched Row ---")
         first_success_idx = successful_rows.argmax()
         full_output_row = base_case_results.iloc[[first_success_idx]]
-        print(full_output_row.to_string())
+        logging.info(full_output_row.to_string())
 
-    # --- 6. Run Deterministic Sensitivity Analysis (DSA) ---
+    return base_case_results
+
+
+def _run_dsa(args, df, formulas_data, base_case_results, dsa_validation_df):
+    """Runs the Deterministic Sensitivity Analysis."""
     validation_passed = True
     try:
-        scenarios_path = args.dsa_scenarios or "data/dsa_scenarios.json"
-        print(f"\nLoading DSA scenarios from '{scenarios_path}'...")
+        scenarios_path = args.dsa_scenarios or config.DSA_SCENARIOS_FILE_PATH
+        logging.info(f"Loading DSA scenarios from '{scenarios_path}'...")
         scenarios_to_run = load_dsa_scenarios(scenarios_path)
 
         if not scenarios_to_run:
-            print("No DSA scenarios provided. Skipping.")
+            logging.info("No DSA scenarios provided. Skipping.")
         else:
-            print(f"\n--- Running {len(scenarios_to_run)} DSA Scenarios ---")
+            logging.info(f"--- Running {len(scenarios_to_run)} DSA Scenarios ---")
             dsa_results = run_dsa_analysis(
                 base_case_df=df,
                 formulas_data=formulas_data,
                 calculation_pipeline=run_calculation_pipeline,
                 scenarios=scenarios_to_run,
             )
-            print("-------------------------------------\n")
-
-            # --- 7. Report and Validate DSA Results ---
             report_dsa_results(dsa_results, base_case_results)
-            dsa_scenario_map = get_dsa_scenario_mapping()
             if not validate_dsa_results(
-                dsa_results, dsa_validation_df, dsa_scenario_map
+                dsa_results,
+                dsa_validation_df,
+                config.DSA_SCENARIO_VALIDATION_MAPPING,
             ):
                 validation_passed = False
-
     except Exception as e:
-        print(f"Failed to run DSA: {e}")
+        logging.error(f"Failed to run DSA: {e}")
         validation_passed = False
+    return validation_passed
 
-    # --- 8. Run Probabilistic Sensitivity Analysis (PSA) ---
-    if args.run_psa:
-        try:
-            psa_scenarios_path = "data/psa_scenarios.json"
-            print(f"Loading PSA scenarios from '{psa_scenarios_path}'...")
-            psa_scenarios = load_psa_scenarios(psa_scenarios_path)
 
-            if not psa_scenarios:
-                print("No PSA scenarios provided. Skipping.")
-            else:
-                psa_results = run_psa_analysis(
-                    base_case_df=df,
-                    formulas_data=formulas_data,
-                    calculation_pipeline=run_calculation_pipeline,
-                    scenarios=psa_scenarios,
-                    iterations=args.psa_iterations,
-                )
-                report_psa_results(psa_results)
-                # Note: PSA validation is a placeholder.
-                # if not validate_psa_results(psa_results, psa_validation_df):
-                #     validation_passed = False
+def _run_psa(args, df, formulas_data):
+    """Runs the Probabilistic Sensitivity Analysis."""
+    if not args.run_psa:
+        return
 
-        except Exception as e:
-            print(f"Failed to run PSA: {e}")
-            validation_passed = False
+    try:
+        psa_scenarios_path = config.PSA_SCENARIOS_FILE_PATH
+        logging.info(f"Loading PSA scenarios from '{psa_scenarios_path}'...")
+        psa_scenarios = load_psa_scenarios(psa_scenarios_path)
 
-    # --- 9. Final Validation Check ---
-    if not validation_passed:
-        print("\nValidation failed. Exiting with status 1.")
+        if not psa_scenarios:
+            logging.info("No PSA scenarios provided. Skipping.")
+        else:
+            psa_results = run_psa_analysis(
+                base_case_df=df,
+                formulas_data=formulas_data,
+                calculation_pipeline=run_calculation_pipeline,
+                scenarios=psa_scenarios,
+                iterations=args.psa_iterations,
+            )
+            report_psa_results(psa_results)
+    except Exception as e:
+        logging.error(f"Failed to run PSA: {e}")
+
+
+def main() -> None:
+    """
+    Main function to run the data-driven calculation engine and validate results.
+    """
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(levelname)s - %(message)s",
+        stream=sys.stdout,
+    )
+
+    parser = _setup_arg_parser()
+    args = parser.parse_args()
+
+    df, dsa_validation_df, formulas_data = _load_data()
+    base_case_results = _run_base_case_and_validate(df, formulas_data)
+
+    dsa_validation_passed = _run_dsa(args, df, formulas_data, base_case_results, dsa_validation_df)
+    _run_psa(args, df, formulas_data)
+
+    if not dsa_validation_passed:
+        logging.error("Validation failed. Exiting with status 1.")
         sys.exit(1)
     else:
-        print("\nAll validations passed successfully.")
+        logging.info("All validations passed successfully.")
 
 
 if __name__ == "__main__":
