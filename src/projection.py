@@ -25,6 +25,7 @@ def project_costs(
         A DataFrame with the projected costs for each year.
     """
     projected_df = base_year_costs_df.copy()
+    projected_df.columns = [f"{col}_Y0" for col in projected_df.columns]
 
     indexation_rate = scenario_df["Grade(s)_Indexation per annum (%)"].fillna(0)
 

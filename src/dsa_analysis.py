@@ -42,8 +42,8 @@ def run_dsa_analysis(
 
     for scenario in scenarios:
         scenario_name = scenario["name"]
-        params_to_vary = scenario["parameters_to_vary"]
-        variations = scenario["variations"]
+        params_to_vary = scenario.get("parameters_to_vary", [])
+        variations = scenario.get("variations", [])
         row_filter = scenario.get("row_filter")
         logging.info(f"Running scenario: {scenario_name}")
 
