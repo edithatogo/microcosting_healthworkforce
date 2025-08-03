@@ -50,6 +50,11 @@ def _setup_arg_parser() -> argparse.ArgumentParser:
         default=1000,
         help="Number of iterations for the PSA.",
     )
+    parser.add_argument(
+        "--profile",
+        action="store_true",
+        help="Enable profiling.",
+    )
     return parser
 
 
@@ -243,6 +248,13 @@ def main() -> None:
     parser = _setup_arg_parser()
     args = parser.parse_args()
 
+    if args.profile:
+        import cProfile
+        import pstats
+
+        profiler = cProfile.Profile()
+        profiler.enable()
+
     df, dsa_validation_df, formulas_data = _load_data()
     base_case_results = _run_base_case_and_validate(df, formulas_data)
 
@@ -250,6 +262,11 @@ def main() -> None:
         args, df, formulas_data, base_case_results, dsa_validation_df
     )
     _run_psa(args, df, formulas_data)
+
+    if args.profile:
+        profiler.disable()
+        stats = pstats.Stats(profiler).sort_stats("cumulative")
+        stats.print_stats()
 
     if not dsa_validation_passed:
         logging.error("Validation failed. Exiting with status 1.")
