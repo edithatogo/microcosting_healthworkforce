@@ -7,7 +7,7 @@ test:
 	pipenv run pytest
 
 lint:
-	pipenv run ruff .
+	pipenv run ruff check .
 
 format:
 	pipenv run ruff format .

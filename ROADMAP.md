@@ -12,26 +12,34 @@ This document outlines the development plan for the Microcosting Health Workforc
 - [x] Implement the main script (`src/main.py`) to orchestrate the workflow.
 - [x] Validate the Python output against the original Excel file.
 
-## Phase 2: Formula Abstraction (In Progress)
+## Phase 2: Formula Abstraction (Complete)
 
-- [ ] **Goal:** Abstract the calculation logic to be data-driven rather than hardcoded in Python. This is a prerequisite for robust sensitivity analysis.
-- [ ] **Tasks:**
-    - [ ] Design a data structure (e.g., JSON, YAML, or a database schema) to define formulas, parameters, and their relationships.
-    - [ ] Refactor the calculation engine to interpret these formula definitions dynamically.
-    - [ ] This will allow for different formulas for each position and jurisdiction without changing the Python code.
+- [x] **Goal:** Abstract the calculation logic to be data-driven rather than hardcoded in Python. This is a prerequisite for robust sensitivity analysis.
+- [x] **Tasks:**
+    - [x] Design a data structure (e.g., JSON, YAML, or a database schema) to define formulas, parameters, and their relationships.
+    - [x] Refactor the calculation engine to interpret these formula definitions dynamically.
+    - [x] This will allow for different formulas for each position and jurisdiction without changing the Python code.
 
-## Phase 3: Sensitivity Analysis (Future)
+## Phase 3: Sensitivity Analysis (Complete)
 
-- [ ] **Goal:** Implement Deterministic and Probabilistic Sensitivity Analysis (DSA & PSA).
-- [ ] **Prerequisite:** Completion of Phase 2: Formula Abstraction.
-- [ ] **Tasks:**
-    - [ ] Develop a module to systematically vary input parameters defined in the new data-driven formula structure.
-    - [ ] Implement DSA to analyze the impact of changing one parameter at a time.
-    - [ ] Implement PSA to analyze the impact of varying multiple parameters simultaneously based on probability distributions.
+- [x] **Goal:** Implement Deterministic and Probabilistic Sensitivity Analysis (DSA & PSA).
+- [x] **Prerequisite:** Completion of Phase 2: Formula Abstraction.
+- [x] **Tasks:**
+    - [x] Develop a module to systematically vary input parameters defined in the new data-driven formula structure.
+    - [x] Implement DSA to analyze the impact of changing one parameter at a time.
+    - [x] Implement PSA to analyze the impact of varying multiple parameters simultaneously based on probability distributions.
 
-## Phase 4: Finalization and Documentation (Ongoing)
+## Phase 4: Code Refactoring (Complete)
 
-- [ ] Refactor the Python code for clarity, efficiency, and adherence to best practices.
+- [x] **Goal:** Improve the clarity, efficiency, and maintainability of the codebase.
+- [x] **Tasks:**
+    - [x] Centralize configuration into a single `src/config.py` file.
+    - [x] Reduce code duplication in `src/data_loader.py`.
+    - [x] Improve readability of `src/main.py` and `src/formula_engine.py`.
+    - [x] Implement a consistent logging strategy.
+
+## Phase 5: Finalization and Documentation (Ongoing)
+
 - [ ] Run linters and formatters (`ruff`) to ensure code quality.
 - [ ] Add comprehensive docstrings to all new modules and functions.
 - [ ] Update `README.md` with instructions on how to set up and run the project.

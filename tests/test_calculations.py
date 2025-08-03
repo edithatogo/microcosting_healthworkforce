@@ -36,20 +36,36 @@ def test_run_calculation_pipeline() -> None:
     formulas_data = {
         "formulas": [
             {
-                "id": "cost_ll",
-                "expression": "base_salary_ll * (1 + super_rate)",
-                "parameters": ["base_salary_ll", "super_rate"],
+                "id": "cost",
+                "expression": "base_salary * (1 + super_rate)",
+                "parameters": ["base_salary", "super_rate"],
             }
         ],
         "outputs": [
             {
                 "name": "Calculated_Cost_LL_Y0",
-                "uses_formula": "cost_ll",
+                "uses_formula": "cost",
                 "parameter_mapping": {
-                    "base_salary_ll": "Base Salary_LL",
+                    "base_salary": "Base Salary_LL",
                     "super_rate": "Superannuation Rate",
                 },
-            }
+            },
+            {
+                "name": "Calculated_Cost_Mid_Y0",
+                "uses_formula": "cost",
+                "parameter_mapping": {
+                    "base_salary": "Base Salary_Mid-point",
+                    "super_rate": "Superannuation Rate",
+                },
+            },
+            {
+                "name": "Calculated_Cost_UL_Y0",
+                "uses_formula": "cost",
+                "parameter_mapping": {
+                    "base_salary": "Base Salary_UL",
+                    "super_rate": "Superannuation Rate",
+                },
+            },
         ],
     }
     result_df = run_calculation_pipeline(input_df, formulas_data)
