@@ -29,9 +29,17 @@ This document outlines the development plan for the Microcosting Health Workforc
     - [x] Implement DSA to analyze the impact of changing one parameter at a time.
     - [x] Implement PSA to analyze the impact of varying multiple parameters simultaneously based on probability distributions.
 
-## Phase 4: Finalization and Documentation (Ongoing)
+## Phase 4: Code Refactoring (Complete)
 
-- [ ] Refactor the Python code for clarity, efficiency, and adherence to best practices.
+- [x] **Goal:** Improve the clarity, efficiency, and maintainability of the codebase.
+- [x] **Tasks:**
+    - [x] Centralize configuration into a single `src/config.py` file.
+    - [x] Reduce code duplication in `src/data_loader.py`.
+    - [x] Improve readability of `src/main.py` and `src/formula_engine.py`.
+    - [x] Implement a consistent logging strategy.
+
+## Phase 5: Finalization and Documentation (Ongoing)
+
 - [ ] Run linters and formatters (`ruff`) to ensure code quality.
 - [ ] Add comprehensive docstrings to all new modules and functions.
 - [ ] Update `README.md` with instructions on how to set up and run the project.
