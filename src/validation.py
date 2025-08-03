@@ -27,7 +27,9 @@ def validate_dsa_results(
     for scenario_name, result_df in dsa_results.items():
         validation_col = scenario_map.get(scenario_name)
         if not validation_col or validation_col not in validation_df.columns:
-            logging.warning(f"Scenario '{scenario_name}' not found in validation map.")
+            logging.warning(
+                f"Scenario '{scenario_name}' not found in validation map."
+            )
             continue
 
         calculated_values = result_df["Calculated_Cost_Mid_Y0"].values

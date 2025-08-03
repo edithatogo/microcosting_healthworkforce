@@ -70,7 +70,9 @@ def run_dsa_analysis(
         elif variation["type"] == "absolute":
             scenario_df.loc[mask, column_to_vary] += variation["value"]
         else:
-            logging.warning(f"Unknown variation type '{variation['type']}'. Skipping.")
+            logging.warning(
+                f"Unknown variation type '{variation['type']}'. Skipping."
+            )
             continue
 
         scenario_results = calculation_pipeline(scenario_df, formulas_data)

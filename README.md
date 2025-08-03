@@ -32,13 +32,10 @@ Beyond simple cost translation, this tool is designed to support advanced analys
 -   `src/formula_engine.py`: Calculates the foundational "Year 0" annual costs based on definitions in `data/formulas.json`.
 -   `src/projection.py`: Takes the Year 0 costs and projects them into the future.
 -   `src/rate_converter.py`: Converts annual costs for each year into time-based rates.
--   `src/dsa_analysis.py`: Runs Deterministic Sensitivity Analysis (DSA).
--   `src/psa_analysis.py`: Runs Probabilistic Sensitivity Analysis (PSA).
+-   `src/sensitivity_analysis.py`: Runs Deterministic Sensitivity Analysis (DSA) based on scenarios defined in `data/dsa_scenarios.json`.
 -   `src/formula_parser.py`: Safely evaluates the mathematical expressions defined in the formulas.
--   `src/config.py`: Central configuration file for paths, constants, and mappings.
 -   `data/formulas.json`: A JSON file that defines the parameters, expressions, and output mappings for all calculations.
--   `data/dsa_scenarios.json`: Defines the scenarios for the DSA module.
--   `data/psa_scenarios.json`: Defines the scenarios for the PSA module.
+-   `data/dsa_scenarios.json`: Defines the scenarios (e.g., parameter to vary, amount of variation) to be run by the DSA module.
 
 ## Setup
 
