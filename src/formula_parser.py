@@ -26,4 +26,11 @@ def evaluate_expression(expression: str, parameters: Dict[str, Any]) -> Any:
         SyntaxError: If the expression is not valid Python syntax.
     """
     aeval = Interpreter(symtable=parameters)
-    return aeval.eval(expression)
+    try:
+        return aeval.eval(expression)
+    except NameError as e:
+        raise NameError(f"A parameter in the expression is not defined: {e}")
+    except SyntaxError:
+        raise SyntaxError(f"Invalid syntax in expression: {expression}")
+    except Exception as e:
+        raise type(e)(f"An error occurred during expression evaluation: {e}")
