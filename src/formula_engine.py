@@ -62,7 +62,7 @@ def _check_for_override(row: pd.Series, output_def: Dict[str, Any]) -> Any:
         try:
             if ast.literal_eval(override_cond):
                 return row[override_col]
-        except Exception:  # nosec B110
+        except (ValueError, TypeError, SyntaxError, MemoryError, RecursionError):  # nosec B110
             pass
     return None
 
