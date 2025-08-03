@@ -90,7 +90,8 @@ def load_dsa_validation_data(file_path: str) -> pd.DataFrame:
     )
 
     # Forward-fill the 'Personnel type' column
-    df["Personnel type"].fillna(inplace=True)
+    if "Personnel type" in df.columns and df["Personnel type"].isna().any():
+        df["Personnel type"].fillna(inplace=True)
 
     # Drop rows where 'Personnel type' is still NaN
     df.dropna(subset=["Personnel type"], inplace=True)
