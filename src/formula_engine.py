@@ -115,7 +115,9 @@ def _topological_sort(formulas: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """
     formulas_map = {f["id"]: f for f in formulas}
     dependencies = {
-        f["id"]: f.get("dependencies", []) for f in formulas if f.get("type") == "dependent"
+        f["id"]: f.get("dependencies", [])
+        for f in formulas
+        if f.get("type") == "dependent"
     }
     sorted_order = []
     visited = set()
@@ -147,7 +149,7 @@ def apply_formulas(
     for _, row in data_df.iterrows():
         row_results = {}
         intermediate_results: Dict[str, Any] = {}
-        
+
         for output_def in formulas_data["outputs"]:
             parameter_mapping = output_def.get("parameter_mapping", {})
             for formula in sorted_formulas:
