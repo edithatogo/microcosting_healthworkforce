@@ -7,7 +7,7 @@ the calculation process based on those definitions.
 
 import ast
 import json
-from typing import Any, Dict, cast
+from typing import Any, Dict, List, cast
 
 import pandas as pd
 
@@ -69,32 +69,70 @@ def _check_for_override(row: pd.Series, output_def: Dict[str, Any]) -> Any:
 
 def _calculate_value(
     row: pd.Series,
-    output_def: Dict[str, Any],
     formula: Dict[str, Any],
+    intermediate_results: Dict[str, Any],
+    parameter_mapping: Dict[str, str],
 ) -> Any:
     """
     Calculates a value using the defined formula expression.
 
     Args:
         row: A Series representing a row of the input DataFrame.
-        output_def: The definition of the output being calculated.
         formula: The formula definition to use for the calculation.
+        intermediate_results: A dictionary of already calculated intermediate values.
+        parameter_mapping: A dictionary mapping formula parameters to DataFrame columns.
 
     Returns:
         The calculated value.
     """
     expression = formula["expression"]
-    parameters = {
-        param_name: row.get(source_col, 0)
-        for param_name, source_col in output_def["parameter_mapping"].items()
-    }
-    for p in formula["parameters"]:
-        parameters.setdefault(p, 0)
+    parameters = {}
+
+    for param_name in formula.get("parameters", []):
+        if param_name in intermediate_results:
+            parameters[param_name] = intermediate_results[param_name]
+        elif param_name in parameter_mapping:
+            source_col = parameter_mapping[param_name]
+            parameters[param_name] = row.get(source_col, 0)
+        else:
+            parameters[param_name] = 0
 
     if parameters.get("productive_time_factor") == 0:
         parameters["productive_time_factor"] = 1.0
 
     return evaluate_expression(expression, parameters)
+
+
+def _topological_sort(formulas: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """
+    Sorts formulas based on their dependencies.
+
+    Args:
+        formulas: A list of formula definitions.
+
+    Returns:
+        A sorted list of formula definitions.
+    """
+    formulas_map = {f["id"]: f for f in formulas}
+    dependencies = {
+        f["id"]: f.get("dependencies", []) for f in formulas if f.get("type") == "dependent"
+    }
+    sorted_order = []
+    visited = set()
+
+    def visit(formula_id: str) -> None:
+        if formula_id in visited:
+            return
+        visited.add(formula_id)
+        for dep_id in dependencies.get(formula_id, []):
+            visit(dep_id)
+        sorted_order.append(formulas_map[formula_id])
+
+    for formula in formulas:
+        if formula["id"] not in visited:
+            visit(formula["id"])
+
+    return sorted_order
 
 
 def apply_formulas(
@@ -104,22 +142,33 @@ def apply_formulas(
     Applies the defined formulas to the input DataFrame row by row.
     """
     results = []
-    formulas_map = {f["id"]: f for f in formulas_data["formulas"]}
+    sorted_formulas = _topological_sort(formulas_data["formulas"])
 
     for _, row in data_df.iterrows():
         row_results = {}
+        intermediate_results: Dict[str, Any] = {}
+        
+        for output_def in formulas_data["outputs"]:
+            parameter_mapping = output_def.get("parameter_mapping", {})
+            for formula in sorted_formulas:
+                formula_id = formula["id"]
+                if formula_id not in intermediate_results:
+                    calculated_value = _calculate_value(
+                        row, formula, intermediate_results, parameter_mapping
+                    )
+                    intermediate_results[formula_id] = calculated_value
+
         for output_def in formulas_data["outputs"]:
             output_name = output_def["name"]
-            formula_id = output_def["uses_formula"]
-            formula = formulas_map[formula_id]
+            final_formula_id = output_def["uses_formula"]
 
             override_value = _check_for_override(row, output_def)
             if override_value is not None:
-                calculated_value = override_value
+                final_value = override_value
             else:
-                calculated_value = _calculate_value(row, output_def, formula)
+                final_value = intermediate_results[final_formula_id]
 
-            row_results[output_name] = calculated_value
+            row_results[output_name] = final_value
         results.append(row_results)
 
     return pd.DataFrame(results, index=data_df.index)

@@ -1,22 +1,65 @@
 {
   "formulas": [
     {
-      "id": "year_0_total_cost",
-      "description": "Calculates the total annual cost for a single position based on a base salary and various cost components. This is a template formula.",
+      "id": "base_salary_with_super",
+      "type": "base",
+      "description": "Calculates the base salary including superannuation.",
+      "expression": "base_salary * (1 + super_rate)",
+      "parameters": ["base_salary", "super_rate"]
+    },
+    {
+      "id": "total_penalties",
+      "type": "base",
+      "description": "Calculates the total penalties.",
+      "expression": "base_salary * (avg_penalties + pub_holiday_penalty + private_practice_loading)",
       "parameters": [
         "base_salary",
-        "super_rate",
         "avg_penalties",
         "pub_holiday_penalty",
-        "private_practice_loading",
+        "private_practice_loading"
+      ]
+    },
+    {
+      "id": "total_allowances",
+      "type": "base",
+      "description": "Calculates the total allowances.",
+      "expression": "base_salary * retention_allowance + professional_development_allowance",
+      "parameters": [
+        "base_salary",
         "retention_allowance",
+        "professional_development_allowance"
+      ]
+    },
+    {
+      "id": "total_leave_costs",
+      "type": "base",
+      "description": "Calculates the total leave costs.",
+      "expression": "base_salary * sick_leave + ((base_salary * ((52 + annual_leave_weeks) / 52)) * (1 + annual_leave_loading))",
+      "parameters": [
+        "base_salary",
         "sick_leave",
-        "professional_development_allowance",
         "annual_leave_weeks",
-        "annual_leave_loading",
-        "productive_time_factor"
+        "annual_leave_loading"
+      ]
+    },
+    {
+      "id": "year_0_total_cost",
+      "type": "dependent",
+      "description": "Calculates the total annual cost for a single position.",
+      "dependencies": [
+        "base_salary_with_super",
+        "total_penalties",
+        "total_allowances",
+        "total_leave_costs"
       ],
-      "expression": "((base_salary + (base_salary * super_rate) + (base_salary * avg_penalties) + (base_salary * pub_holiday_penalty) + (base_salary * private_practice_loading) + (base_salary * retention_allowance) + (base_salary * sick_leave) + professional_development_allowance + ((base_salary * ((52 + annual_leave_weeks) / 52)) * (1 + annual_leave_loading)))) / productive_time_factor"
+      "expression": "(base_salary_with_super + total_penalties + total_allowances + total_leave_costs) / productive_time_factor",
+      "parameters": [
+        "base_salary_with_super",
+        "total_penalties",
+        "total_allowances",
+        "total_leave_costs",
+        "productive_time_factor"
+      ]
     }
   ],
   "outputs": [

@@ -16,7 +16,6 @@ files = ["src", "tests"]
 exclude_dirs = ["tests"]
 
 [tool.pytest.ini_options]
-addopts = "--cov=src --cov-report=term-missing"
 testpaths = ["tests"]
 
 [tool.commitizen]
