@@ -1,8 +1,10 @@
 import argparse
 import logging
 import sys
+from typing import Any, Dict, Tuple
 
 import numpy as np
+import pandas as pd
 
 from src import config
 from src.calculations import run_calculation_pipeline
@@ -58,7 +60,7 @@ def _setup_arg_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def _load_data():
+def _load_data() -> Tuple[pd.DataFrame, pd.DataFrame, Dict[str, Any]]:
     """
     Loads all necessary data and formulas from the configured file paths.
 
@@ -93,7 +95,9 @@ def _load_data():
     return df, dsa_validation_df, formulas_data
 
 
-def _run_base_case_and_validate(df, formulas_data):
+def _run_base_case_and_validate(
+    df: pd.DataFrame, formulas_data: Dict[str, Any]
+) -> pd.DataFrame:
     """
     Runs the base case calculation and validates the results against the original data.
 
@@ -160,7 +164,13 @@ def _run_base_case_and_validate(df, formulas_data):
     return base_case_results
 
 
-def _run_dsa(args, df, formulas_data, base_case_results, dsa_validation_df):
+def _run_dsa(
+    args: argparse.Namespace,
+    df: pd.DataFrame,
+    formulas_data: Dict[str, Any],
+    base_case_results: pd.DataFrame,
+    dsa_validation_df: pd.DataFrame,
+) -> bool:
     """
     Runs the Deterministic Sensitivity Analysis based on provided scenarios.
 
@@ -203,7 +213,9 @@ def _run_dsa(args, df, formulas_data, base_case_results, dsa_validation_df):
     return validation_passed
 
 
-def _run_psa(args, df, formulas_data):
+def _run_psa(
+    args: argparse.Namespace, df: pd.DataFrame, formulas_data: Dict[str, Any]
+) -> None:
     """
     Runs the Probabilistic Sensitivity Analysis if requested.
 
