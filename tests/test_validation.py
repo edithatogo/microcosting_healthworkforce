@@ -43,12 +43,40 @@ def test_validate_dsa_results_failure() -> None:
     assert not validate_dsa_results(dsa_results, validation_df, scenario_map)
 
 
-def test_validate_psa_results(caplog: Any) -> None:
+def test_validate_psa_results_success() -> None:
     """
-    Tests that the validate_psa_results function logs a warning.
+    Tests that the validate_psa_results function returns True when the mean cost
+    matches the expected value.
     """
     psa_results = pd.DataFrame({"mean_cost": [100, 110, 120]})
-    validation_df = pd.DataFrame()
-    with caplog.at_level(logging.WARNING):
-        validate_psa_results(psa_results, validation_df)
-    assert "PSA validation is not yet fully implemented." in caplog.text
+    validation_df = pd.DataFrame({"Expected Mean Cost": [110]})
+    assert validate_psa_results(psa_results, validation_df)
+
+
+def test_validate_psa_results_failure() -> None:
+    """
+    Tests that the validate_psa_results function returns False when the mean cost
+    does not match the expected value.
+    """
+    psa_results = pd.DataFrame({"mean_cost": [100, 110, 120]})
+    validation_df = pd.DataFrame({"Expected Mean Cost": [150]})
+    assert not validate_psa_results(psa_results, validation_df)
+
+
+def test_validate_psa_results_empty_results() -> None:
+    """
+    Tests that the validate_psa_results function returns True for empty results.
+    """
+    psa_results = pd.DataFrame({"mean_cost": []})
+    validation_df = pd.DataFrame({"Expected Mean Cost": [150]})
+    assert validate_psa_results(psa_results, validation_df)
+
+
+def test_validate_psa_results_missing_validation_column() -> None:
+    """
+    Tests that the validate_psa_results function returns False when the
+    validation data is missing the 'Expected Mean Cost' column.
+    """
+    psa_results = pd.DataFrame({"mean_cost": [100, 110, 120]})
+    validation_df = pd.DataFrame({"Some Other Column": [150]})
+    assert not validate_psa_results(psa_results, validation_df)

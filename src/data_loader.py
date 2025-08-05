@@ -133,3 +133,12 @@ def load_dsa_validation_data(file_path: str, sheet_name: str) -> pd.DataFrame:
         df.dropna(subset=["Personnel type"], inplace=True)
 
     return df
+
+
+def load_psa_validation_data(file_path: str, sheet_name: str) -> pd.DataFrame:
+    """
+    Loads the PSA validation data from the specified sheet.
+    """
+    # Load the sheet
+    df = pd.read_excel(file_path, sheet_name=sheet_name)
+    return df

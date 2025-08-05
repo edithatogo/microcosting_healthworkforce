@@ -76,5 +76,27 @@ def validate_psa_results(
     Validates the PSA results against pre-calculated values.
     """
     logging.info("--- PSA Validation Summary ---")
-    logging.warning("PSA validation is not yet fully implemented.")
-    return True
+    if psa_results.empty:
+        logging.warning("PSA results are empty. Skipping validation.")
+        return True
+
+    if "Expected Mean Cost" not in validation_df.columns:
+        logging.error("'Expected Mean Cost' column not found in validation data.")
+        return False
+
+    expected_mean_cost = validation_df["Expected Mean Cost"].iloc[0]
+    calculated_mean_cost = psa_results["mean_cost"].mean()
+
+    if np.isclose(expected_mean_cost, calculated_mean_cost, rtol=tolerance):
+        logging.info("✅ PSA mean cost matched successfully.")
+        return True
+    else:
+        logging.error("❌ PSA mean cost has a discrepancy.")
+        diff = calculated_mean_cost - expected_mean_cost
+        relative_diff = diff / expected_mean_cost if expected_mean_cost != 0 else np.inf
+        logging.error(
+            f"  Calculated Mean Cost={calculated_mean_cost:,.2f}, "
+            f"Expected Mean Cost={expected_mean_cost:,.2f}, "
+            f"Diff={diff:,.2f} ({relative_diff:.2%})"
+        )
+        return False
