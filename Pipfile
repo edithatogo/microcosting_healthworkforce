@@ -8,6 +8,8 @@ pandas = "*"
 openpyxl = "*"
 asteval = "*"
 pytest-cov = "*"
+matplotlib = "*"
+seaborn = "*"
 
 [dev-packages]
 ruff = "*"
