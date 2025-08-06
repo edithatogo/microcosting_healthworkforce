@@ -63,3 +63,15 @@ def save_dsa_results(
         logging.info(f"DSA summary saved to {summary_output_path}")
     except Exception as e:
         logging.error(f"Failed to save DSA summary: {e}")
+
+
+def save_psa_results(psa_results: pd.DataFrame, output_dir: str) -> None:
+    """
+    Saves the PSA results to a CSV file.
+    """
+    output_path = os.path.join(output_dir, "psa_results.csv")
+    try:
+        psa_results.to_csv(output_path, index=False)
+        logging.info(f"PSA results saved to {output_path}")
+    except Exception as e:
+        logging.error(f"Failed to save PSA results: {e}")

@@ -23,7 +23,7 @@ from src.psa_analysis import (
     report_psa_results,
     run_psa_analysis,
 )
-from src.reporting import save_base_case_results, save_dsa_results
+from src.reporting import save_base_case_results, save_dsa_results, save_psa_results
 from src.validation import validate_dsa_results
 
 
@@ -254,6 +254,8 @@ def _run_psa(
                 iterations=args.psa_iterations,
             )
             report_psa_results(psa_results)
+            if args.output_dir:
+                save_psa_results(psa_results, args.output_dir)
     except Exception as e:
         logging.error(f"Failed to run PSA: {e}")
 
