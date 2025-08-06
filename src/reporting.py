@@ -80,6 +80,8 @@ def save_psa_results(psa_results: pd.DataFrame, output_dir: str) -> None:
     except Exception as e:
         logging.error(f"Failed to save PSA results: {e}")
 
+    plot_psa_histogram(psa_results, output_dir)
+
 
 def plot_dsa_tornado(
     dsa_summary_df: pd.DataFrame,
@@ -105,4 +107,23 @@ def plot_dsa_tornado(
         logging.info(f"DSA tornado plot saved to {output_path}")
     except Exception as e:
         logging.error(f"Failed to save DSA tornado plot: {e}")
+    plt.close()
+
+
+def plot_psa_histogram(psa_results_df: pd.DataFrame, output_dir: str) -> None:
+    """
+    Generates and saves a histogram of the PSA results.
+    """
+    plt.figure(figsize=(10, 6))
+    sns.histplot(psa_results_df["mean_cost"], kde=True)
+    plt.xlabel("Mean Cost")
+    plt.ylabel("Frequency")
+    plt.title("PSA Results Distribution")
+    plt.tight_layout()
+    output_path = os.path.join(output_dir, "psa_histogram.png")
+    try:
+        plt.savefig(output_path)
+        logging.info(f"PSA histogram saved to {output_path}")
+    except Exception as e:
+        logging.error(f"Failed to save PSA histogram: {e}")
     plt.close()
