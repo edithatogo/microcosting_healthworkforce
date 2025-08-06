@@ -8,7 +8,9 @@ import logging
 import os
 from typing import Dict
 
+import matplotlib.pyplot as plt
 import pandas as pd
+import seaborn as sns
 
 
 def save_base_case_results(base_case_results: pd.DataFrame, output_dir: str) -> None:
@@ -64,6 +66,8 @@ def save_dsa_results(
     except Exception as e:
         logging.error(f"Failed to save DSA summary: {e}")
 
+    plot_dsa_tornado(summary_df, output_dir)
+
 
 def save_psa_results(psa_results: pd.DataFrame, output_dir: str) -> None:
     """
@@ -75,3 +79,30 @@ def save_psa_results(psa_results: pd.DataFrame, output_dir: str) -> None:
         logging.info(f"PSA results saved to {output_path}")
     except Exception as e:
         logging.error(f"Failed to save PSA results: {e}")
+
+
+def plot_dsa_tornado(
+    dsa_summary_df: pd.DataFrame,
+    output_dir: str,
+) -> None:
+    """
+    Generates and saves a tornado plot for the DSA results.
+    """
+    plt.figure(figsize=(10, 8))
+    sns.barplot(
+        x="percentage_change",
+        y="scenario_name",
+        data=dsa_summary_df.sort_values("percentage_change", ascending=False),
+        palette="vlag",
+    )
+    plt.xlabel("Percentage Change in Cost")
+    plt.ylabel("Scenario")
+    plt.title("DSA Tornado Plot")
+    plt.tight_layout()
+    output_path = os.path.join(output_dir, "dsa_tornado_plot.png")
+    try:
+        plt.savefig(output_path)
+        logging.info(f"DSA tornado plot saved to {output_path}")
+    except Exception as e:
+        logging.error(f"Failed to save DSA tornado plot: {e}")
+    plt.close()
