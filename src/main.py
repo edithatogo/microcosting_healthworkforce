@@ -23,7 +23,7 @@ from src.psa_analysis import (
     report_psa_results,
     run_psa_analysis,
 )
-from src.reporting import save_base_case_results
+from src.reporting import save_base_case_results, save_dsa_results
 from src.validation import validate_dsa_results
 
 
@@ -210,6 +210,8 @@ def _run_dsa(
                 dsa_results,
                 base_case_results,
             )
+            if args.output_dir:
+                save_dsa_results(dsa_results, base_case_results, args.output_dir)
             if not validate_dsa_results(
                 dsa_results,
                 dsa_validation_df,
