@@ -23,6 +23,7 @@ from src.psa_analysis import (
     report_psa_results,
     run_psa_analysis,
 )
+from src.reporting import save_base_case_results
 from src.validation import validate_dsa_results
 
 
@@ -56,6 +57,12 @@ def _setup_arg_parser() -> argparse.ArgumentParser:
         "--profile",
         action="store_true",
         help="Enable profiling.",
+    )
+    parser.add_argument(
+        "--output-dir",
+        type=str,
+        default=".",
+        help="Directory to save output files.",
     )
     return parser
 
@@ -142,8 +149,7 @@ def _run_base_case_and_validate(
     if not all_match:
         logging.warning("A discrepancy was found. Reporting the first failed row.")
         first_mismatch_idx = successful_rows.argmin()
-        comparison_df = df.join(base_case_results)
-        mismatched_row = comparison_df.iloc[[first_mismatch_idx]]
+        mismatched_row = base_case_results.iloc[[first_mismatch_idx]]
         display_cols = (
             ["Personnel type"]
             + list(validation_map.keys())
@@ -200,7 +206,10 @@ def _run_dsa(
                 calculation_pipeline=run_calculation_pipeline,
                 scenarios=scenarios_to_run,
             )
-            report_dsa_results(dsa_results, base_case_results)
+            report_dsa_results(
+                dsa_results,
+                base_case_results,
+            )
             if not validate_dsa_results(
                 dsa_results,
                 dsa_validation_df,
@@ -269,6 +278,9 @@ def main() -> None:
 
     df, dsa_validation_df, formulas_data = _load_data()
     base_case_results = _run_base_case_and_validate(df, formulas_data)
+
+    if args.output_dir:
+        save_base_case_results(base_case_results, args.output_dir)
 
     dsa_validation_passed = _run_dsa(
         args, df, formulas_data, base_case_results, dsa_validation_df
