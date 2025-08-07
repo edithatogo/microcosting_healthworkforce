@@ -34,7 +34,7 @@
       "id": "total_leave_costs",
       "type": "base",
       "description": "Calculates the total leave costs.",
-      "expression": "base_salary * sick_leave + ((base_salary * ((52 + annual_leave_weeks) / 52)) * (1 + annual_leave_loading))",
+      "expression": "base_salary * sick_leave + (base_salary * (annual_leave_weeks / 52) * annual_leave_loading)",
       "parameters": [
         "base_salary",
         "sick_leave",
@@ -60,33 +60,25 @@
         "total_leave_costs",
         "productive_time_factor"
       ]
+    },
+    {
+      "id": "weekly_rate_to_annual",
+      "type": "base",
+      "description": "Converts a weekly rate to an annual cost.",
+      "expression": "weekly_rate * 52",
+      "parameters": ["weekly_rate"]
     }
   ],
   "outputs": [
     {
       "name": "Calculated_Cost_LL",
-      "uses_formula": "year_0_total_cost",
-      "override_column": "Base Salary + Costs_LL",
-      "override_condition": "row['Personnel type'] == 'Override'",
-      "parameter_mapping": {
-        "base_salary": "Base Salary_LL",
-        "super_rate": "Grade(s)_Superannuation Rate (%)",
-        "avg_penalties": "Grade(s)_Average Penalties %",
-        "pub_holiday_penalty": "Grade(s)_Public Holiday Penalty %",
-        "private_practice_loading": "Grade(s)_Private Practice Loading %",
-        "retention_allowance": "Grade(s)_Attraction and Retention Allowance %",
-        "sick_leave": "Grade(s)_Sick Leave %",
-        "professional_development_allowance": "Grade(s)_Professional Development Allowance ($)",
-        "annual_leave_weeks": "Grade(s)_Annual Leave Entitlement (Weeks)",
-        "annual_leave_loading": "Grade(s)_Annual Leave Loading (%)",
-        "productive_time_factor": "Grade(s)_Average productive time (%)"
-      }
+      "calculation_type": "direct_input",
+      "source_column": "Base Salary + Costs_LL"
     },
     {
       "name": "Calculated_Cost_Mid",
+      "calculation_type": "formula",
       "uses_formula": "year_0_total_cost",
-      "override_column": "Base Salary + Costs_Mid-point",
-      "override_condition": "row['Personnel type'] == 'Override'",
       "parameter_mapping": {
         "base_salary": "Base Salary_Mid-point",
         "super_rate": "Grade(s)_Superannuation Rate (%)",
@@ -103,22 +95,8 @@
     },
     {
       "name": "Calculated_Cost_UL",
-      "uses_formula": "year_0_total_cost",
-      "override_column": "Base Salary + Costs_UL",
-      "override_condition": "row['Personnel type'] == 'Override'",
-      "parameter_mapping": {
-        "base_salary": "Base Salary_UL",
-        "super_rate": "Grade(s)_Superannuation Rate (%)",
-        "avg_penalties": "Grade(s)_Average Penalties %",
-        "pub_holiday_penalty": "Grade(s)_Public Holiday Penalty %",
-        "private_practice_loading": "Grade(s)_Private Practice Loading %",
-        "retention_allowance": "Grade(s)_Attraction and Retention Allowance %",
-        "sick_leave": "Grade(s)_Sick Leave %",
-        "professional_development_allowance": "Grade(s)_Professional Development Allowance ($)",
-        "annual_leave_weeks": "Grade(s)_Annual Leave Entitlement (Weeks)",
-        "annual_leave_loading": "Grade(s)_Annual Leave Loading (%)",
-        "productive_time_factor": "Grade(s)_Average productive time (%)"
-      }
+      "calculation_type": "direct_input",
+      "source_column": "Base Salary + Costs_UL"
     }
   ]
 }

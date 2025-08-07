@@ -150,27 +150,42 @@ def apply_formulas(
         row_results = {}
         intermediate_results: Dict[str, Any] = {}
 
-        for output_def in formulas_data["outputs"]:
-            parameter_mapping = output_def.get("parameter_mapping", {})
-            for formula in sorted_formulas:
-                formula_id = formula["id"]
-                if formula_id not in intermediate_results:
-                    calculated_value = _calculate_value(
-                        row, formula, intermediate_results, parameter_mapping
-                    )
-                    intermediate_results[formula_id] = calculated_value
+        # Pre-calculate all possible formulas for the row
+        for formula in sorted_formulas:
+            formula_id = formula["id"]
+            # Note: This assumes that the parameter mapping is the same for all formulas
+            # that might be used in a row. This is true for our current case.
+            parameter_mapping = formulas_data["outputs"][0].get("parameter_mapping", {})
+            calculated_value = _calculate_value(
+                row, formula, intermediate_results, parameter_mapping
+            )
+            intermediate_results[formula_id] = calculated_value
 
         for output_def in formulas_data["outputs"]:
-            output_name = output_def["name"]
-            final_formula_id = output_def["uses_formula"]
+            output_name = output_def["name"] + "_Y0"
+            calc_type = output_def.get("calculation_type", "formula")
 
+            final_value = 0
+            if calc_type == "direct_input":
+                source_col = output_def.get("source_column")
+                if source_col:
+                    final_value = row.get(source_col, 0)
+            elif calc_type == "weekly_rate":
+                source_col = output_def.get("source_column")
+                if source_col:
+                    weekly_rate = row.get(source_col, 0)
+                    final_value = weekly_rate * 52
+            else:  # Default to "formula"
+                final_formula_id = output_def["uses_formula"]
+                final_value = intermediate_results[final_formula_id]
+
+            # Override logic remains the same
             override_value = _check_for_override(row, output_def)
             if override_value is not None:
                 final_value = override_value
-            else:
-                final_value = intermediate_results[final_formula_id]
 
             row_results[output_name] = final_value
         results.append(row_results)
 
-    return pd.DataFrame(results, index=data_df.index)
+    results_df = pd.DataFrame(results, index=data_df.index)
+    return pd.concat([data_df, results_df], axis=1)
