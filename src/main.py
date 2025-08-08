@@ -64,6 +64,11 @@ def _setup_arg_parser() -> argparse.ArgumentParser:
         default=".",
         help="Directory to save output files.",
     )
+    parser.add_argument(
+        "--no-dsa-validation",
+        action="store_true",
+        help="Disable DSA validation.",
+    )
     return parser
 
 
@@ -201,7 +206,7 @@ def _run_dsa(
         else:
             logging.info(f"--- Running {len(scenarios_to_run)} DSA Scenarios ---")
             dsa_results = run_dsa_analysis(
-                base_case_df=df,
+                base_case_df=base_case_results,
                 formulas_data=formulas_data,
                 calculation_pipeline=run_calculation_pipeline,
                 scenarios=scenarios_to_run,
@@ -212,12 +217,13 @@ def _run_dsa(
             )
             if args.output_dir:
                 save_dsa_results(dsa_results, base_case_results, args.output_dir)
-            if not validate_dsa_results(
-                dsa_results,
-                dsa_validation_df,
-                config.DSA_SCENARIO_VALIDATION_MAPPING,
-            ):
-                validation_passed = False
+            if not args.no_dsa_validation:
+                if not validate_dsa_results(
+                    dsa_results,
+                    dsa_validation_df,
+                    config.DSA_SCENARIO_VALIDATION_MAPPING,
+                ):
+                    validation_passed = False
     except Exception as e:
         logging.error(f"Failed to run DSA: {e}")
         validation_passed = False
@@ -225,7 +231,9 @@ def _run_dsa(
 
 
 def _run_psa(
-    args: argparse.Namespace, df: pd.DataFrame, formulas_data: Dict[str, Any]
+    args: argparse.Namespace,
+    base_case_results: pd.DataFrame,
+    formulas_data: Dict[str, Any],
 ) -> None:
     """
     Runs the Probabilistic Sensitivity Analysis if requested.
@@ -247,7 +255,7 @@ def _run_psa(
             logging.info("No PSA scenarios provided. Skipping.")
         else:
             psa_results = run_psa_analysis(
-                base_case_df=df,
+                base_case_df=base_case_results,
                 formulas_data=formulas_data,
                 calculation_pipeline=run_calculation_pipeline,
                 scenarios=psa_scenarios,
@@ -289,7 +297,11 @@ def main() -> None:
     dsa_validation_passed = _run_dsa(
         args, df, formulas_data, base_case_results, dsa_validation_df
     )
-    _run_psa(args, df, formulas_data)
+    _run_psa(
+        args,
+        base_case_results,
+        formulas_data,
+    )
 
     if args.profile:
         profiler.disable()
