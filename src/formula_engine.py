@@ -5,9 +5,8 @@ It is responsible for loading formula definitions from a JSON file and orchestra
 the calculation process based on those definitions.
 """
 
-import ast
 import json
-from typing import Any, Dict, List, cast
+from typing import Any, Dict, cast
 
 import pandas as pd
 
@@ -45,28 +44,6 @@ def load_formulas(file_path: str) -> Dict[str, Any]:
     return cast(Dict[str, Any], formulas_data)
 
 
-def _check_for_override(row: pd.Series, output_def: Dict[str, Any]) -> Any:
-    """
-    Checks if a hardcoded override value should be used for a given row and output.
-
-    Args:
-        row: A Series representing a row of the input DataFrame.
-        output_def: The definition of the output being calculated.
-
-    Returns:
-        The override value if the conditions are met, otherwise None.
-    """
-    override_col = output_def.get("override_column")
-    override_cond = output_def.get("override_condition")
-    if override_col and override_cond and pd.notna(row.get(override_col)):
-        try:
-            if ast.literal_eval(override_cond):
-                return row[override_col]
-        except (ValueError, TypeError, SyntaxError, MemoryError, RecursionError):  # nosec B110
-            pass
-    return None
-
-
 def _calculate_value(
     row: pd.Series,
     formula: Dict[str, Any],
@@ -98,43 +75,14 @@ def _calculate_value(
             parameters[param_name] = 0
 
     if parameters.get("productive_time_factor") == 0:
+        import logging
+
+        logging.warning(
+            "Productive time factor is 0, setting to 1.0 to avoid division by zero."
+        )
         parameters["productive_time_factor"] = 1.0
 
     return evaluate_expression(expression, parameters)
-
-
-def _topological_sort(formulas: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    """
-    Sorts formulas based on their dependencies.
-
-    Args:
-        formulas: A list of formula definitions.
-
-    Returns:
-        A sorted list of formula definitions.
-    """
-    formulas_map = {f["id"]: f for f in formulas}
-    dependencies = {
-        f["id"]: f.get("dependencies", [])
-        for f in formulas
-        if f.get("type") == "dependent"
-    }
-    sorted_order = []
-    visited = set()
-
-    def visit(formula_id: str) -> None:
-        if formula_id in visited:
-            return
-        visited.add(formula_id)
-        for dep_id in dependencies.get(formula_id, []):
-            visit(dep_id)
-        sorted_order.append(formulas_map[formula_id])
-
-    for formula in formulas:
-        if formula["id"] not in visited:
-            visit(formula["id"])
-
-    return sorted_order
 
 
 def apply_formulas(
@@ -144,48 +92,47 @@ def apply_formulas(
     Applies the defined formulas to the input DataFrame row by row.
     """
     results = []
-    sorted_formulas = _topological_sort(formulas_data["formulas"])
+    formulas = {f["id"]: f for f in formulas_data.get("formulas", [])}
+    outputs = formulas_data.get("outputs", [])
 
     for _, row in data_df.iterrows():
         row_results = {}
         intermediate_results: Dict[str, Any] = {}
 
-        # Pre-calculate all possible formulas for the row
-        for formula in sorted_formulas:
-            formula_id = formula["id"]
-            # Note: This assumes that the parameter mapping is the same for all formulas
-            # that might be used in a row. This is true for our current case.
-            parameter_mapping = formulas_data["outputs"][0].get("parameter_mapping", {})
-            calculated_value = _calculate_value(
-                row, formula, intermediate_results, parameter_mapping
-            )
-            intermediate_results[formula_id] = calculated_value
-
-        for output_def in formulas_data["outputs"]:
+        for output_def in outputs:
             output_name = output_def["name"] + "_Y0"
-            calc_type = output_def.get("calculation_type", "formula")
-
+            calculation_method = output_def.get("calculation_method")
             final_value = 0
-            if calc_type == "direct_input":
+
+            if calculation_method == "direct":
                 source_col = output_def.get("source_column")
                 if source_col:
                     final_value = row.get(source_col, 0)
-            elif calc_type == "weekly_rate":
-                source_col = output_def.get("source_column")
-                if source_col:
-                    weekly_rate = row.get(source_col, 0)
-                    final_value = weekly_rate * 52
-            else:  # Default to "formula"
-                final_formula_id = output_def["uses_formula"]
-                final_value = intermediate_results[final_formula_id]
 
-            # Override logic remains the same
-            override_value = _check_for_override(row, output_def)
-            if override_value is not None:
-                final_value = override_value
+            elif calculation_method == "formula":
+                formula_id = output_def["uses_formula"]
+                formula_def = formulas[formula_id]
+                param_mapping = output_def.get("parameter_mapping", {})
+
+                # Calculate all dependencies, storing them in intermediate_results
+                for dep_id in formula_def.get("dependencies", []):
+                    if dep_id not in intermediate_results:
+                        dep_formula = formulas[dep_id]
+                        intermediate_results[dep_id] = _calculate_value(
+                            row, dep_formula, intermediate_results, param_mapping
+                        )
+
+                # Now calculate the final formula
+                final_value = _calculate_value(
+                    row, formula_def, intermediate_results, param_mapping
+                )
 
             row_results[output_name] = final_value
         results.append(row_results)
 
     results_df = pd.DataFrame(results, index=data_df.index)
+    # Drop columns from results_df that are already in data_df to avoid duplication
+    results_df = results_df.drop(
+        columns=[col for col in results_df.columns if col in data_df.columns]
+    )
     return pd.concat([data_df, results_df], axis=1)

@@ -37,6 +37,21 @@ Beyond simple cost translation, this tool is designed to support advanced analys
 -   `data/formulas.json`: A JSON file that defines the parameters, expressions, and output mappings for all calculations.
 -   `data/dsa_scenarios.json`: Defines the scenarios (e.g., parameter to vary, amount of variation) to be run by the DSA module.
 
+## Formulas
+
+The calculation engine is driven by the formulas defined in `data/formulas.json`. These formulas are used to calculate the total cost for each position. The following formulas are currently implemented:
+
+-   **`base_salary_with_super`**: Calculates the base salary including superannuation.
+    -   `base_salary * (1 + super_rate)`
+-   **`total_penalties`**: Calculates the total penalties.
+    -   `base_salary * (avg_penalties + pub_holiday_penalty + private_practice_loading)`
+-   **`total_allowances`**: Calculates the total allowances.
+    -   `base_salary * retention_allowance + professional_development_allowance`
+-   **`total_leave_costs`**: Calculates the total leave costs.
+    -   `base_salary * sick_leave + (base_salary * (annual_leave_weeks / 52) * annual_leave_loading)`
+-   **`year_0_total_cost`**: Calculates the total annual cost for a single position.
+    -   `(base_salary_with_super + total_penalties + total_allowances + total_leave_costs) / productive_time_factor`
+
 ## Setup
 
 1.  **Prerequisites:**
