@@ -41,7 +41,11 @@ def run_psa_analysis(
     """
     logging.info(f"--- Running {iterations} PSA Iterations ---")
     all_results = []
-    param_to_col_map = formulas_data["outputs"][0]["parameter_mapping"]
+
+    param_to_col_map: Dict[str, str] = {}
+    for output_def in formulas_data.get("outputs", []):
+        if "parameter_mapping" in output_def:
+            param_to_col_map.update(output_def["parameter_mapping"])
 
     for i in range(iterations):
         if (i + 1) % 100 == 0:

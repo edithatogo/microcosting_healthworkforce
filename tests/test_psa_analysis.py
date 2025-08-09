@@ -8,7 +8,6 @@ from typing import Any, Dict, List
 from unittest.mock import mock_open, patch
 
 import pandas as pd
-import pytest
 
 from src.psa_analysis import (
     load_psa_scenarios,

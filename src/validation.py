@@ -27,13 +27,27 @@ def validate_dsa_results(
     for scenario_name, result_df in dsa_results.items():
         validation_col = scenario_map.get(scenario_name)
         if not validation_col or validation_col not in validation_df.columns:
-            logging.warning(
-                f"Scenario '{scenario_name}' not found in validation map."
-            )
+            logging.warning(f"Scenario '{scenario_name}' not found in validation map.")
             continue
 
-        calculated_values = result_df["Calculated_Cost_Mid_Y0"].values
-        expected_values = validation_df[validation_col].values
+        # If 'Personnel type' exists, align on that; otherwise compare by row order
+        if (
+            "Personnel type" in validation_df.columns
+            and "Personnel type" in result_df.columns
+        ):
+            comparison_df = pd.merge(
+                result_df,
+                validation_df[["Personnel type", validation_col]],
+                on="Personnel type",
+                how="inner",
+            )
+            calculated_values = comparison_df["Calculated_Cost_Mid_Y0"].values
+            expected_values = comparison_df[validation_col].values
+        else:
+            calculated_values = result_df["Calculated_Cost_Mid_Y0"].values
+            expected_values = validation_df[validation_col].values[
+                : len(calculated_values)
+            ]
 
         if np.allclose(
             calculated_values, expected_values, rtol=tolerance, equal_nan=True

@@ -1,0 +1,129 @@
+2025-08-07 22:21:12,206 - INFO - Loading and cleaning data...
+Columns before cleaning: MultiIndex([(                'Jurisdiction', ...),
+            (              'Personnel type', ...),
+            (                       'Label', ...),
+            (                      'Award ', ...),
+            (                    'Grade(s)', ...),
+            (                    'Grade(s)', ...),
+            (                    'Grade(s)', ...),
+            (                    'Grade(s)', ...),
+            (                    'Grade(s)', ...),
+            (                    'Grade(s)', ...),
+            (                    'Grade(s)', ...),
+            (                    'Grade(s)', ...),
+            (                    'Grade(s)', ...),
+            (                    'Grade(s)', ...),
+            (                    'Grade(s)', ...),
+            (                    'Grade(s)', ...),
+            (                    'Grade(s)', ...),
+            (                    'Grade(s)', ...),
+            (                    'Grade(s)', ...),
+            (                    'Grade(s)', ...),
+            (                    'Grade(s)', ...),
+            (                 'Base Salary', ...),
+            (                 'Base Salary', ...),
+            (                 'Base Salary', ...),
+            (         'Base Salary + Costs', ...),
+            (         'Base Salary + Costs', ...),
+            (         'Base Salary + Costs', ...),
+            ('Base Salary + Costs (hourly)', ...),
+            ('Base Salary + Costs (hourly)', ...),
+            ('Base Salary + Costs (hourly)', ...),
+            (                 'Base Salary', ...),
+            (                 'Base Salary', ...),
+            (                 'Base Salary', ...),
+            (         'Base Salary + Costs', ...),
+            (         'Base Salary + Costs', ...),
+            (         'Base Salary + Costs', ...),
+            ('Base Salary + Costs (hourly)', ...),
+            ('Base Salary + Costs (hourly)', ...),
+            ('Base Salary + Costs (hourly)', ...),
+            (                 'Base Salary', ...),
+            (                 'Base Salary', ...),
+            (                 'Base Salary', ...),
+            (         'Base Salary + Costs', ...),
+            (         'Base Salary + Costs', ...),
+            (         'Base Salary + Costs', ...),
+            ('Base Salary + Costs (hourly)', ...),
+            ('Base Salary + Costs (hourly)', ...),
+            ('Base Salary + Costs (hourly)', ...),
+            (                 'Base Salary', ...),
+            (                 'Base Salary', ...),
+            (                 'Base Salary', ...),
+            (         'Base Salary + Costs', ...),
+            (         'Base Salary + Costs', ...),
+            (         'Base Salary + Costs', ...),
+            ('Base Salary + Costs (hourly)', ...),
+            ('Base Salary + Costs (hourly)', ...),
+            ('Base Salary + Costs (hourly)', ...),
+            (                 'Base Salary', ...),
+            (                 'Base Salary', ...),
+            (                 'Base Salary', ...),
+            (         'Base Salary + Costs', ...),
+            (         'Base Salary + Costs', ...),
+            (         'Base Salary + Costs', ...),
+            ('Base Salary + Costs (hourly)', ...),
+            ('Base Salary + Costs (hourly)', ...),
+            ('Base Salary + Costs (hourly)', ...)],
+           )
+Columns after cleaning: Index(['Jurisdiction', 'Personnel type', 'Label', 'Award ', 'Grade(s)',
+       'Grade(s)_Distribution desc', 'Grade(s)_References',
+       'Grade(s)_Rate of Pay (weekly, 38h) desc', 'Grade(s)_Year',
+       'Grade(s)_Superannuation Rate (%)', 'Grade(s)_Hours per week',
+       'Grade(s)_Average productive time (%)', 'Grade(s)_Average Penalties %',
+       'Grade(s)_Public Holiday Penalty %',
+       'Grade(s)_Private Practice Loading %',
+       'Grade(s)_Attraction and Retention Allowance %',
+       'Grade(s)_Sick Leave %',
+       'Grade(s)_Professional Development Allowance ($)',
+       'Grade(s)_Annual Leave Entitlement (Weeks)',
+       'Grade(s)_Annual Leave Loading (%)',
+       'Grade(s)_Indexation per annum (%)', 'Base Salary_LL',
+       'Base Salary_Mid-point', 'Base Salary_UL', 'Base Salary + Costs_LL',
+       'Base Salary + Costs_Mid-point', 'Base Salary + Costs_UL',
+       'Base Salary + Costs (hourly)_LL',
+       'Base Salary + Costs (hourly)_Mid-point',
+       'Base Salary + Costs (hourly)_UL', 'Base Salary_LL.1',
+       'Base Salary_Mid-point.1', 'Base Salary_UL.1',
+       'Base Salary + Costs_LL.1', 'Base Salary + Costs_Mid-point.1',
+       'Base Salary + Costs_UL.1', 'Base Salary + Costs (hourly)_LL.1',
+       'Base Salary + Costs (hourly)_Mid-point.1',
+       'Base Salary + Costs (hourly)_UL.1', 'Base Salary_LL.2',
+       'Base Salary_Mid-point.2', 'Base Salary_UL.2',
+       'Base Salary + Costs_LL.2', 'Base Salary + Costs_Mid-point.2',
+       'Base Salary + Costs_UL.2', 'Base Salary + Costs (hourly)_LL.2',
+       'Base Salary + Costs (hourly)_Mid-point.2',
+       'Base Salary + Costs (hourly)_UL.2', 'Base Salary_LL.3',
+       'Base Salary_Mid-point.3', 'Base Salary_UL.3',
+       'Base Salary + Costs_LL.3', 'Base Salary + Costs_Mid-point.3',
+       'Base Salary + Costs_UL.3', 'Base Salary + Costs (hourly)_LL.3',
+       'Base Salary + Costs (hourly)_Mid-point.3',
+       'Base Salary + Costs (hourly)_UL.3', 'Base Salary_LL.4',
+       'Base Salary_Mid-point.4', 'Base Salary_UL.4',
+       'Base Salary + Costs_LL.4', 'Base Salary + Costs_Mid-point.4',
+       'Base Salary + Costs_UL.4', 'Base Salary + Costs (hourly)_LL.4',
+       'Base Salary + Costs (hourly)_Mid-point.4',
+       'Base Salary + Costs (hourly)_UL.4'],
+      dtype='object')
+2025-08-07 22:21:12,304 - INFO - Data loaded successfully.
+2025-08-07 22:21:12,304 - INFO - Loading formulas from 'data/formulas.json'...
+2025-08-07 22:21:12,304 - INFO - Formulas loaded successfully.
+2025-08-07 22:21:12,304 - INFO - Running base case calculation pipeline...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/Users/doughnut/GitHub/microcosting_healthworkforce/src/main.py", line 307, in <module>
+    main()
+  File "/Users/doughnut/GitHub/microcosting_healthworkforce/src/main.py", line 284, in main
+    base_case_results = _run_base_case_and_validate(df, formulas_data)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/doughnut/GitHub/microcosting_healthworkforce/src/main.py", line 119, in _run_base_case_and_validate
+    base_case_results = run_calculation_pipeline(df, formulas_data)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/doughnut/GitHub/microcosting_healthworkforce/src/calculations.py", line 31, in run_calculation_pipeline
+    base_year_costs_df = apply_formulas(input_df, formulas_data)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/doughnut/GitHub/microcosting_healthworkforce/src/formula_engine.py", line 151, in apply_formulas
+    logging.info(f"Processing row {index}: {row['Personnel type']}")
+    ^^^^^^^
+NameError: name 'logging' is not defined

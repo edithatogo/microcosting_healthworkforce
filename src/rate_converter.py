@@ -26,7 +26,7 @@ def convert_annual_cost_to_rates(
     Returns:
         A DataFrame with all the newly calculated rate columns for each year.
     """
-    rates_df = pd.DataFrame(index=projected_costs_df.index)
+    rates_df = projected_costs_df.copy()
     hours_per_week = scenario_df["Grade(s)_Hours per week"]
 
     # --- Define Divisors ---

@@ -3,7 +3,7 @@
 This module contains the core calculation pipeline.
 """
 
-from typing import Any, Dict
+from typing import Any
 
 import pandas as pd
 
@@ -15,7 +15,7 @@ from src.rate_converter import convert_annual_cost_to_rates
 
 def run_calculation_pipeline(
     input_df: pd.DataFrame,
-    formulas_data: Dict[str, Any],
+    formulas_data: dict[str, Any],
 ) -> pd.DataFrame:
     """
     Runs the full calculation pipeline on a given DataFrame.
@@ -27,21 +27,16 @@ def run_calculation_pipeline(
     Returns:
         A DataFrame with the final calculated results.
     """
-    # --- 1. Run Calculation Engine for Base Year Annual Costs ---
+    # 1. Calculate base year costs
     base_year_costs_df = apply_formulas(input_df, formulas_data)
 
-    # Join the calculated costs with the original dataframe
-    # Overwrite existing columns in input_df with results from base_year_costs_df
-    joined_df = input_df.join(base_year_costs_df, how="left", lsuffix="_orig")
-
-
-    # --- 2. Project Costs for Future Years ---
+    # 2. Project costs for future years
     projected_costs_df = project_costs(
-        joined_df, joined_df, num_years=config.PROJECTION_YEARS
+        base_year_costs_df, base_year_costs_df, num_years=config.PROJECTION_YEARS
     )
 
-    # --- 3. Convert All Annual Costs to Rates ---
-    rates_df = convert_annual_cost_to_rates(projected_costs_df, joined_df)
+    # 3. Convert all annual costs to rates
+    final_df = convert_annual_cost_to_rates(projected_costs_df, base_year_costs_df)
 
-    # --- 4. Combine and Return Results ---
-    return projected_costs_df.join(rates_df)
+    # 4. Return the final results
+    return final_df

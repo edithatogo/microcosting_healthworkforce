@@ -6,14 +6,14 @@ the calculation process based on those definitions.
 """
 
 import json
-from typing import Any, Dict, cast
+from typing import Any, cast
 
 import pandas as pd
 
 from src.formula_parser import evaluate_expression
 
 
-def load_formulas(file_path: str) -> Dict[str, Any]:
+def load_formulas(file_path: str) -> dict[str, Any]:
     """
     Loads and validates the formula definitions from a specified JSON file.
 
@@ -28,7 +28,7 @@ def load_formulas(file_path: str) -> Dict[str, Any]:
         ValueError: If the JSON file is malformed or missing required keys.
     """
     try:
-        with open(file_path, "r") as f:
+        with open(file_path, "r") as f:  # noqa: UP015 - explicit mode for test clarity
             formulas_data = json.load(f)
     except FileNotFoundError:
         raise FileNotFoundError(f"Formula file not found at: {file_path}")
@@ -41,14 +41,14 @@ def load_formulas(file_path: str) -> Dict[str, Any]:
             f"'{file_path}' is missing required keys: 'formulas' and/or 'outputs'."
         )
 
-    return cast(Dict[str, Any], formulas_data)
+    return cast(dict[str, Any], formulas_data)
 
 
 def _calculate_value(
     row: pd.Series,
-    formula: Dict[str, Any],
-    intermediate_results: Dict[str, Any],
-    parameter_mapping: Dict[str, str],
+    formula: dict[str, Any],
+    intermediate_results: dict[str, Any],
+    parameter_mapping: dict[str, str],
 ) -> Any:
     """
     Calculates a value using the defined formula expression.
@@ -86,7 +86,7 @@ def _calculate_value(
 
 
 def apply_formulas(
-    data_df: pd.DataFrame, formulas_data: Dict[str, Any]
+    data_df: pd.DataFrame, formulas_data: dict[str, Any]
 ) -> pd.DataFrame:
     """
     Applies the defined formulas to the input DataFrame row by row.
@@ -97,7 +97,7 @@ def apply_formulas(
 
     for _, row in data_df.iterrows():
         row_results = {}
-        intermediate_results: Dict[str, Any] = {}
+        intermediate_results: dict[str, Any] = {}
 
         for output_def in outputs:
             output_name = output_def["name"] + "_Y0"

@@ -6,6 +6,7 @@ Tests for the calculations module.
 import pandas as pd
 
 from src.calculations import run_calculation_pipeline
+from src.formula_engine import load_formulas
 
 
 def test_run_calculation_pipeline() -> None:
@@ -19,57 +20,25 @@ def test_run_calculation_pipeline() -> None:
             "Base Salary_LL": [100],
             "Base Salary_Mid-point": [110],
             "Base Salary_UL": [120],
-            "Superannuation Rate": [0.1],
+            "Grade(s)_Superannuation Rate (%)": [0.1],
             "Grade(s)_Hours per week": [40],
-            "Average Penalties": [0.1],
-            "Public Holiday Penalty": [0.1],
-            "Private Practice Loading": [0.1],
-            "Attraction and Retention Allowance": [0.1],
-            "Sick Leave": [0.1],
-            "Professional Development Allowance": [0.1],
-            "Annual Leave": [4],
-            "Leave Loading (%)": [0.175],
-            "Productive Time Factor": [0.8],
+            "Grade(s)_Average Penalties %": [0.1],
+            "Grade(s)_Public Holiday Penalty %": [0.1],
+            "Grade(s)_Private Practice Loading %": [0.1],
+            "Grade(s)_Attraction and Retention Allowance %": [0.1],
+            "Grade(s)_Sick Leave %": [0.1],
+            "Grade(s)_Professional Development Allowance ($)": [500],
+            "Grade(s)_Annual Leave Entitlement (Weeks)": [4],
+            "Grade(s)_Annual Leave Loading (%)": [0.175],
+            "Grade(s)_Average productive time (%)": [0.8],
             "Grade(s)_Indexation per annum (%)": [0.02],
         }
     )
-    formulas_data = {
-        "formulas": [
-            {
-                "id": "cost",
-                "expression": "base_salary * (1 + super_rate)",
-                "parameters": ["base_salary", "super_rate"],
-            }
-        ],
-        "outputs": [
-            {
-                "name": "Calculated_Cost_LL_Y0",
-                "uses_formula": "cost",
-                "parameter_mapping": {
-                    "base_salary": "Base Salary_LL",
-                    "super_rate": "Superannuation Rate",
-                },
-            },
-            {
-                "name": "Calculated_Cost_Mid_Y0",
-                "uses_formula": "cost",
-                "parameter_mapping": {
-                    "base_salary": "Base Salary_Mid-point",
-                    "super_rate": "Superannuation Rate",
-                },
-            },
-            {
-                "name": "Calculated_Cost_UL_Y0",
-                "uses_formula": "cost",
-                "parameter_mapping": {
-                    "base_salary": "Base Salary_UL",
-                    "super_rate": "Superannuation Rate",
-                },
-            },
-        ],
-    }
+    formulas_data = load_formulas("data/formulas.json")
     result_df = run_calculation_pipeline(input_df, formulas_data)
     assert "Calculated_Cost_LL_Y0" in result_df.columns
+    assert "Calculated_Cost_Mid_Y0" in result_df.columns
+    assert "Calculated_Cost_UL_Y0" in result_df.columns
     assert "Calculated_Cost_LL_Y1" in result_df.columns
     assert "Calculated_Hourly_LL_Y0" in result_df.columns
     assert "Calculated_Hourly_LL_Y1" in result_df.columns

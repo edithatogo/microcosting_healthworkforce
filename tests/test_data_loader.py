@@ -23,7 +23,14 @@ def test_load_and_clean_data() -> None:
         {
             ("Jurisdiction_", "nan"): ["NSW", "NSW", "VIC"],
             ("Personnel type_", "nan"): ["Nurse", "Doctor", "Admin"],
-            ("Base Salary_LL", "nan"): [50000, 80000, 40000],
+            # Base Salary columns (needed for coalescing in loader)
+            ("Base Salary", "LL"): [50000, 80000, 40000],
+            ("Base Salary", "Mid-point"): [55000, 85000, 45000],
+            ("Base Salary", "UL"): [60000, 90000, 50000],
+            # Base Salary + Costs present; Mid/UL empty to be coalesced by loader
+            ("Base Salary + Costs", "LL"): [60000, 90000, 50000],
+            ("Base Salary + Costs", "Mid-point"): [None, None, None],
+            ("Base Salary + Costs", "UL"): [None, None, None],
         }
     )
     mock_df.columns = pd.MultiIndex.from_tuples(mock_df.columns)

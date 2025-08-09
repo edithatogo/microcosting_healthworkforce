@@ -31,12 +31,15 @@ def _clean_column_names(df: pd.DataFrame) -> pd.DataFrame:
 
     # Clean the column names by removing unwanted characters and patterns
     df.columns = (
-        df.columns.str.replace(r"Unnamed: \d+_level_\d+", "", regex=True)
+        pd.Series(df.columns)
+        .str.replace(r"Unnamed: \d+_level_\d+", "", regex=True)
         .str.replace(r"_\(hourly\)", "_hourly", regex=True)
         .str.replace(r"_\s+", "_", regex=True)
         .str.replace(r"_+", "_", regex=True)
         .str.replace(r"Leave Loading \(%\)__", "Leave Loading (%)", regex=False)
         .str.replace(r"_nan", "", regex=False)
+        .str.strip("_")
+        .to_list()
     )
     return df
 
@@ -47,7 +50,21 @@ def load_and_clean_data(file_path: str, sheet_name: str) -> pd.DataFrame:
     """
     # Load the sheet, skipping the top rows and setting the header
     df = pd.read_excel(file_path, sheet_name=sheet_name, header=[1, 2])
+    print("Columns before cleaning:", df.columns)
+
+    # Coalesce cost columns to handle data entry inconsistencies
+    df[("Base Salary + Costs", "LL")] = df[("Base Salary + Costs", "LL")].fillna(
+        df[("Base Salary", "LL")]
+    )
+    df[("Base Salary + Costs", "Mid-point")] = df[
+        ("Base Salary + Costs", "Mid-point")
+    ].fillna(df[("Base Salary", "Mid-point")])
+    df[("Base Salary + Costs", "UL")] = df[("Base Salary + Costs", "UL")].fillna(
+        df[("Base Salary", "UL")]
+    )
+
     df = _clean_column_names(df)
+    print("Columns after cleaning:", df.columns)
 
     # Rename the main columns for easier access
     df.rename(

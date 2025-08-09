@@ -3,8 +3,6 @@
 Tests for the formula_parser module.
 """
 
-import pytest
-
 from src.formula_parser import evaluate_expression
 
 

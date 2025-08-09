@@ -9,19 +9,19 @@ calculated costs.
 
 import json
 import logging
-from typing import Any, Callable, Dict, List, cast
+from typing import Any, Callable, cast
 
 import pandas as pd
 
 
-def load_dsa_scenarios(file_path: str) -> List[Dict[str, Any]]:
+def load_dsa_scenarios(file_path: str) -> list[dict[str, Any]]:
     """
     Loads the DSA scenario definitions from a specified JSON file.
     """
     try:
-        with open(file_path, "r") as f:
+        with open(file_path, "r") as f:  # noqa: UP015 - explicit mode for test clarity
             scenarios = json.load(f)
-        return cast(List[Dict[str, Any]], scenarios)
+        return cast(list[dict[str, Any]], scenarios)
     except FileNotFoundError:
         raise FileNotFoundError(f"DSA scenarios file not found at: {file_path}")
     except json.JSONDecodeError:
@@ -30,15 +30,19 @@ def load_dsa_scenarios(file_path: str) -> List[Dict[str, Any]]:
 
 def run_dsa_analysis(
     base_case_df: pd.DataFrame,
-    formulas_data: Dict[str, Any],
-    calculation_pipeline: Callable[[pd.DataFrame, Dict[str, Any]], pd.DataFrame],
-    scenarios: List[Dict[str, Any]],
-) -> Dict[str, pd.DataFrame]:
+    formulas_data: dict[str, Any],
+    calculation_pipeline: Callable[[pd.DataFrame, dict[str, Any]], pd.DataFrame],
+    scenarios: list[dict[str, Any]],
+) -> dict[str, pd.DataFrame]:
     """
     Runs a series of Deterministic Sensitivity Analysis scenarios.
     """
-    dsa_results: Dict[str, pd.DataFrame] = {}
-    param_to_col_map = formulas_data["outputs"][0]["parameter_mapping"]
+    dsa_results: dict[str, pd.DataFrame] = {}
+
+    param_to_col_map: dict[str, str] = {}
+    for output_def in formulas_data.get("outputs", []):
+        if "parameter_mapping" in output_def:
+            param_to_col_map.update(output_def["parameter_mapping"])
 
     for scenario in scenarios:
         scenario_name = scenario["name"]
@@ -85,7 +89,7 @@ def run_dsa_analysis(
 
 
 def report_dsa_results(
-    dsa_results: Dict[str, pd.DataFrame],
+    dsa_results: dict[str, pd.DataFrame],
     base_case_results: pd.DataFrame,
 ) -> None:
     """
