@@ -1,42 +1,18 @@
 {
   "formulas": [
     {
-      "id": "base_salary_with_super",
+      "id": "annual_raw_cost",
       "type": "base",
-      "description": "Calculates the base salary including superannuation.",
-      "expression": "base_salary * (1 + super_rate)",
-      "parameters": ["base_salary", "super_rate"]
-    },
-    {
-      "id": "total_penalties",
-      "type": "base",
-      "description": "Calculates the total penalties.",
-      "expression": "base_salary * (avg_penalties + pub_holiday_penalty + private_practice_loading)",
+      "description": "Year 0 raw annual cost before productive time adjustment.",
+      "expression": "base_salary + base_salary * (super_rate + avg_penalties + pub_holiday_penalty + private_practice_loading + retention_allowance + sick_leave) + professional_development_allowance + base_salary * ((52 + annual_leave_weeks) / 52) * (1 + annual_leave_loading)",
       "parameters": [
         "base_salary",
+        "super_rate",
         "avg_penalties",
         "pub_holiday_penalty",
-        "private_practice_loading"
-      ]
-    },
-    {
-      "id": "total_allowances",
-      "type": "base",
-      "description": "Calculates the total allowances.",
-      "expression": "base_salary * retention_allowance + professional_development_allowance",
-      "parameters": [
-        "base_salary",
+        "private_practice_loading",
         "retention_allowance",
-        "professional_development_allowance"
-      ]
-    },
-    {
-      "id": "total_leave_costs",
-      "type": "base",
-      "description": "Calculates the total leave costs.",
-      "expression": "base_salary * sick_leave + (base_salary * (annual_leave_weeks / 52) * annual_leave_loading)",
-      "parameters": [
-        "base_salary",
+        "professional_development_allowance",
         "sick_leave",
         "annual_leave_weeks",
         "annual_leave_loading"
@@ -45,39 +21,29 @@
     {
       "id": "year_0_total_cost",
       "type": "dependent",
-      "description": "Calculates the total annual cost for a single position.",
-      "dependencies": [
-        "base_salary_with_super",
-        "total_penalties",
-        "total_allowances",
-        "total_leave_costs"
-      ],
-      "expression": "(base_salary_with_super + total_penalties + total_allowances + total_leave_costs) / productive_time_factor",
-      "parameters": [
-        "base_salary_with_super",
-        "total_penalties",
-        "total_allowances",
-        "total_leave_costs",
-        "productive_time_factor"
-      ]
+      "description": "Year 0 total cost adjusted by productive time.",
+      "dependencies": ["annual_raw_cost"],
+      "expression": "annual_raw_cost / productive_time_factor",
+      "parameters": ["annual_raw_cost", "productive_time_factor"]
     },
     {
-      "id": "weekly_rate_to_annual",
-      "type": "base",
-      "description": "Converts a weekly rate to an annual cost.",
-      "expression": "weekly_rate * 52",
-      "parameters": ["weekly_rate"]
+      "id": "hourly_rate",
+      "type": "dependent",
+      "description": "Year 0 hourly rate from annual total cost.",
+      "dependencies": ["year_0_total_cost"],
+      "expression": "year_0_total_cost / 52 / hours_per_week",
+      "parameters": ["year_0_total_cost", "hours_per_week"]
     }
   ],
   "outputs": [
     {
       "name": "Calculated_Cost_LL",
-      "calculation_type": "direct_input",
+      "calculation_method": "direct",
       "source_column": "Base Salary + Costs_LL"
     },
     {
       "name": "Calculated_Cost_Mid",
-      "calculation_type": "formula",
+      "calculation_method": "formula",
       "uses_formula": "year_0_total_cost",
       "parameter_mapping": {
         "base_salary": "Base Salary_Mid-point",
@@ -90,12 +56,13 @@
         "professional_development_allowance": "Grade(s)_Professional Development Allowance ($)",
         "annual_leave_weeks": "Grade(s)_Annual Leave Entitlement (Weeks)",
         "annual_leave_loading": "Grade(s)_Annual Leave Loading (%)",
-        "productive_time_factor": "Grade(s)_Average productive time (%)"
+        "productive_time_factor": "Grade(s)_Average productive time (%)",
+        "hours_per_week": "Grade(s)_Hours per week"
       }
     },
     {
       "name": "Calculated_Cost_UL",
-      "calculation_type": "direct_input",
+      "calculation_method": "direct",
       "source_column": "Base Salary + Costs_UL"
     }
   ]

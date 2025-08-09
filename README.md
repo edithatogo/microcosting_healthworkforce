@@ -39,18 +39,20 @@ Beyond simple cost translation, this tool is designed to support advanced analys
 
 ## Formulas
 
-The calculation engine is driven by the formulas defined in `data/formulas.json`. These formulas are used to calculate the total cost for each position. The following formulas are currently implemented:
+The base-sheet logic is implemented as three concise formulas in `data/formulas.json`:
 
--   **`base_salary_with_super`**: Calculates the base salary including superannuation.
-    -   `base_salary * (1 + super_rate)`
--   **`total_penalties`**: Calculates the total penalties.
-    -   `base_salary * (avg_penalties + pub_holiday_penalty + private_practice_loading)`
--   **`total_allowances`**: Calculates the total allowances.
-    -   `base_salary * retention_allowance + professional_development_allowance`
--   **`total_leave_costs`**: Calculates the total leave costs.
-    -   `base_salary * sick_leave + (base_salary * (annual_leave_weeks / 52) * annual_leave_loading)`
--   **`year_0_total_cost`**: Calculates the total annual cost for a single position.
-    -   `(base_salary_with_super + total_penalties + total_allowances + total_leave_costs) / productive_time_factor`
+- `annual_raw_cost`: Year 0 raw annual cost before productive time adjustment.
+  - `base_salary + base_salary*(super_rate + avg_penalties + pub_holiday_penalty + private_practice_loading + retention_allowance + sick_leave) + professional_development_allowance + base_salary*((52+annual_leave_weeks)/52)*(1+annual_leave_loading)`
+- `year_0_total_cost`: Adjusts the raw cost by productive time.
+  - `annual_raw_cost / productive_time_factor`
+- `hourly_rate`: Converts annual total cost to hourly.
+  - `year_0_total_cost / 52 / hours_per_week`
+
+Output mapping mirrors the base sheet:
+- `Calculated_Cost_LL` and `Calculated_Cost_UL` are read directly from sheet columns.
+- `Calculated_Cost_Mid` is computed via `year_0_total_cost` using the row’s parameters.
+
+Note: Percentage-like inputs must be provided in consistent units (e.g., fractions such as `0.10`), and `productive_time_factor` should reflect a fraction (e.g., `0.8`).
 
 ## Setup
 
