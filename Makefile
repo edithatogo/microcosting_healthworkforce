@@ -26,7 +26,7 @@ all:
 	make security
 
 ci:
-	tox
+	make all
 
 docs:
 	$(MAKE) -C docs html
@@ -37,5 +37,4 @@ changelog:
 release:
 	make changelog
 	git push --tags
-
 

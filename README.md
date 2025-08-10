@@ -54,6 +54,16 @@ Output mapping mirrors the base sheet:
 
 Note: Percentage-like inputs must be provided in consistent units (e.g., fractions such as `0.10`), and `productive_time_factor` should reflect a fraction (e.g., `0.8`).
 
+### Base-Sheet Column Mapping
+- J → `super_rate` (`Grade(s)_Superannuation Rate (%)`)
+- K → `hours_per_week` (`Grade(s)_Hours per week`)
+- L → `productive_time_factor` (`Grade(s)_Average productive time (%)`)
+- R → `professional_development_allowance` (`Grade(s)_Professional Development Allowance ($)`)
+- S → `annual_leave_weeks` (`Grade(s)_Annual Leave Entitlement (Weeks)`)
+- T → `annual_leave_loading` (`Grade(s)_Annual Leave Loading (%)`)
+- Base salary (LL/Mid/UL): `Base Salary_LL`, `Base Salary_Mid-point`, `Base Salary_UL`
+- Total cost (LL/Mid/UL, sheet): `Base Salary + Costs_LL`, `..._Mid-point`, `..._UL`
+
 ## Setup
 
 1.  **Prerequisites:**

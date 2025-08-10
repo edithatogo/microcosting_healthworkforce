@@ -1,2 +1,19 @@
 # Custom DSA scenarios
 data/custom_dsa_scenarios.json
+
+# Generated analysis artifacts
+outputs/
+dsa_detailed/
+base_case_results.csv
+dsa_summary.csv
+psa_results.csv
+*.png
+
+# Helper script outputs
+sheet_contents.txt
+sheet_formulas.txt
+debug_log.txt
+profile.out
+
+# OS cruft
+.DS_Store
