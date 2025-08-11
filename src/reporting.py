@@ -91,11 +91,16 @@ def plot_dsa_tornado(
     Generates and saves a tornado plot for the DSA results.
     """
     plt.figure(figsize=(10, 8))
+    # Assign hue to the same variable as y to use a palette without triggering
+    # seaborn's deprecation (palette requires hue in seaborn >=0.14).
     sns.barplot(
         x="percentage_change",
         y="scenario_name",
         data=dsa_summary_df.sort_values("percentage_change", ascending=False),
+        hue="scenario_name",
         palette="vlag",
+        legend=False,
+        dodge=False,
     )
     plt.xlabel("Percentage Change in Cost")
     plt.ylabel("Scenario")
