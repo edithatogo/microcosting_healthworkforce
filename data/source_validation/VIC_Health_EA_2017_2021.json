@@ -1,0 +1,53 @@
+{
+  "document_name": "Victorian Public Health Sector (Medical Scientists, Pharmacists, Psychologists) Enterprise Agreement 2017-2021",
+  "source_file": "Vic Public Hlth Sector(Med Sci,Pharm,Psych) EA 2017-2021 Intranet.pdf",
+  "jurisdiction": "VIC",
+  "professions": {
+    "medical_scientist": {
+      "salary_grades": [
+        {"grade": "Grade 1 Year 1", "annual_salary": 59164},
+        {"grade": "Grade 1 Year 2", "annual_salary": 61370},
+        {"grade": "Grade 1 Year 3", "annual_salary": 63624},
+        {"grade": "Grade 1 Year 4", "annual_salary": 65931},
+        {"grade": "Grade 1 Year 5", "annual_salary": 68290},
+        {"grade": "Grade 1 Year 6", "annual_salary": 70698},
+        {"grade": "Grade 1 Year 7", "annual_salary": 73160},
+        {"grade": "Grade 1 Year 8", "annual_salary": 75670}
+      ],
+      "allowances": {
+        "professional_development": {
+          "Grade 1": 800,
+          "Grade 2": 1500
+        },
+        "higher_qualification_phd": {
+          "type": "percentage",
+          "value": 0.05
+        }
+      }
+    }
+  },
+  "general_parameters": {
+    "superannuation_guarantee": {
+      "source": "Superannuation Guarantee (Administration) Act 1992",
+      "comment": "Rate is as per federal legislation at the time of employment."
+    },
+    "annual_leave_days": 25,
+    "sick_leave_days": 10,
+    "penalty_rates": {
+      "overtime_mon_sat_first_2_hours": 1.5,
+      "overtime_mon_sat_after_2_hours": 2.0,
+      "overtime_sunday": 2.0,
+      "overtime_public_holiday": 2.5,
+      "shift_afternoon": 0.15,
+      "shift_night": 0.25,
+      "weekend_saturday": 1.5,
+      "weekend_sunday": 2.0
+    },
+    "allowances": {
+      "on_call_per_night_day": 28.00,
+      "on_call_24_hours": 42.00,
+      "uniform_per_day": 1.20,
+      "uniform_max_per_week": 6.00
+    }
+  }
+}
