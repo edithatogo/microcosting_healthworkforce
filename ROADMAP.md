@@ -38,25 +38,25 @@ This document outlines the development plan for the Microcosting Health Workforc
     - [x] Improve readability of `src/main.py` and `src/formula_engine.py`.
     - [x] Implement a consistent logging strategy.
 
-## Phase 5: Finalization and Documentation (Ongoing)
+## Phase 5: Finalization and Documentation (Complete)
 
-- [ ] Run linters and formatters (`ruff`) to ensure code quality.
-- [ ] Add comprehensive docstrings to all new modules and functions.
-- [ ] Update `README.md` with instructions on how to set up and run the project.
+- [x] Run linters and formatters (`ruff`) to ensure code quality.
+- [x] Add comprehensive docstrings to all new modules and functions.
+- [x] Update `README.md` with instructions on how to set up and run the project.
 
-## Phase 6: Reporting and Visualization (Planned)
+## Phase 6: Reporting and Visualization (Complete)
 
-- [ ] **Goal:** Develop a dedicated reporting module to save all outputs as files and create visualizations.
-- [ ] **Tasks:**
-    - [ ] Create a new `src/reporting.py` module.
-    - [ ] **File Outputs:**
-        - [ ] Implement functions to save the full base case results to a CSV file.
-        - [ ] Implement functions to save the detailed DSA results (one file per scenario) and a summary table to CSV.
-        - [ ] Implement functions to save the raw PSA iteration results to a CSV file.
-    - [ ] **Visualizations:**
-        - [ ] Add `matplotlib` and `seaborn` as project dependencies.
-        - [ ] For DSA, generate and save a tornado plot summarizing the most sensitive parameters.
-        - [ ] For PSA, generate and save a histogram (distribution plot) of the simulation outcomes.
-    - [ ] **Integration:**
-        - [ ] Integrate the new reporting functions into the `src/main.py` workflow.
-        - [ ] Add command-line arguments to control output generation (e.g., `--output-dir`).
+- [x] **Goal:** Develop a dedicated reporting module to save all outputs as files and create visualizations.
+- [x] **Tasks:**
+    - [x] Create a new `src/reporting.py` module.
+    - [x] **File Outputs:**
+        - [x] Implement functions to save the full base case results to a CSV file.
+        - [x] Implement functions to save the detailed DSA results (one file per scenario) and a summary table to CSV.
+        - [x] Implement functions to save the raw PSA iteration results to a CSV file.
+    - [x] **Visualizations:**
+        - [x] Add `matplotlib` and `seaborn` as project dependencies.
+        - [x] For DSA, generate and save a tornado plot summarizing the most sensitive parameters.
+        - [x] For PSA, generate and save a histogram (distribution plot) of the simulation outcomes.
+    - [x] **Integration:**
+        - [x] Integrate the new reporting functions into the `src/main.py` workflow.
+        - [x] Add command-line arguments to control output generation (e.g., `--output-dir`).
