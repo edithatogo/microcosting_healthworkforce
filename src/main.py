@@ -1,3 +1,23 @@
+"""
+Main script for the Microcosting Health Workforce project.
+
+This script serves as the main entry point for running the microcosting model.
+It orchestrates the entire workflow, including:
+- Parsing command-line arguments.
+- Loading and cleaning the input data and formula definitions.
+- Running the base case calculation pipeline.
+- Validating the base case results against the original Excel file.
+- Running Deterministic and Probabilistic Sensitivity Analyses (DSA & PSA).
+- Saving all results to CSV files and generating plots.
+
+The script is designed to be run from the command line and provides several
+options for customizing the analysis, such as specifying custom DSA scenarios,
+enabling PSA, and defining an output directory.
+
+Usage:
+    python src/main.py [--dsa-scenarios <path>] [--run-psa] [--output-dir <path>]
+"""
+
 import argparse
 import logging
 import sys
@@ -31,8 +51,13 @@ def _setup_arg_parser() -> argparse.ArgumentParser:
     """
     Sets up the argument parser for the command-line interface.
 
+    This function defines the command-line arguments that the script can accept,
+    including options for running different types of analyses and specifying
+    input/output paths.
+
     Returns:
-        An argparse.ArgumentParser instance.
+        An `argparse.ArgumentParser` instance configured with all the command-line
+        arguments for the application.
     """
     parser = argparse.ArgumentParser(
         description="Data-driven calculation engine for health workforce microcosting."
@@ -56,34 +81,42 @@ def _setup_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--profile",
         action="store_true",
-        help="Enable profiling.",
+        help="Enable profiling to measure code execution performance.",
     )
     parser.add_argument(
         "--output-dir",
         type=str,
         default=".",
-        help="Directory to save output files.",
+        help="Directory to save output files (CSVs and plots).",
     )
     parser.add_argument(
         "--no-dsa-validation",
         action="store_true",
-        help="Disable DSA validation.",
+        help="Disable the validation of DSA results against the Excel file.",
     )
     return parser
 
 
 def _load_data() -> Tuple[pd.DataFrame, pd.DataFrame, Dict[str, Any]]:
     """
-    Loads all necessary data and formulas from the configured file paths.
+    Loads all necessary data and formula definitions from their configured paths.
 
-    This function handles the loading of the main dataset, the DSA validation data,
-    and the formula definitions. It will exit the program if any file fails to load.
+    This function orchestrates the loading of three key pieces of data:
+    1. The main dataset from the "Labour - Prices" sheet.
+    2. The validation dataset for DSA from the "Labour - Prices (DSA, Values)" sheet.
+    3. The formula definitions from the `formulas.json` file.
+
+    It centralizes the data loading process and includes error handling to ensure
+    that the application exits gracefully if any file is not found or is malformed.
 
     Returns:
-        A tuple containing:
-        - df (pd.DataFrame): The main cleaned DataFrame.
+        A tuple containing the following loaded and cleaned data:
+        - df (pd.DataFrame): The main DataFrame with cleaned labour cost data.
         - dsa_validation_df (pd.DataFrame): The DataFrame for DSA validation.
         - formulas_data (dict): The dictionary of formula definitions.
+
+    Raises:
+        SystemExit: If any of the required files cannot be loaded or parsed.
     """
     logging.info("Loading and cleaning data...")
     try:
@@ -113,12 +146,19 @@ def _run_base_case_and_validate(
     """
     Runs the base case calculation and validates the results against the original data.
 
+    This function first runs the main calculation pipeline to generate the base case
+    results. It then compares these results against the corresponding values in the
+    original Excel file to ensure the calculations are accurate within a defined
+    tolerance. A summary of the validation is logged, and if discrepancies are
+    found, the first mismatched row is reported for debugging.
+
     Args:
-        df (pd.DataFrame): The main input DataFrame.
-        formulas_data (dict): The dictionary of formula definitions.
+        df: The main input DataFrame containing the original data.
+        formulas_data: The dictionary of formula definitions.
 
     Returns:
-        A pd.DataFrame containing the results of the base case calculation.
+        A DataFrame containing the full, validated results of the base case
+        calculation, including projections and rate conversions.
     """
     logging.info("Running base case calculation pipeline...")
     base_case_results = run_calculation_pipeline(df, formulas_data)
@@ -183,17 +223,22 @@ def _run_dsa(
     dsa_validation_df: pd.DataFrame,
 ) -> bool:
     """
-    Runs the Deterministic Sensitivity Analysis based on provided scenarios.
+    Runs the Deterministic Sensitivity Analysis (DSA).
+
+    This function loads the DSA scenarios, runs the analysis for each one,
+    reports the results, and saves the output to files. It also triggers the
+    validation of the DSA results against the pre-calculated values in the
+    Excel file, unless disabled by a command-line argument.
 
     Args:
-        args: The command-line arguments.
-        df (pd.DataFrame): The main input DataFrame.
-        formulas_data (dict): The dictionary of formula definitions.
-        base_case_results (pd.DataFrame): The results of the base case calculation.
-        dsa_validation_df (pd.DataFrame): The DataFrame for DSA validation.
+        args: The command-line arguments from `argparse`.
+        df: The main input DataFrame.
+        formulas_data: The dictionary of formula definitions.
+        base_case_results: The DataFrame containing the results of the base case.
+        dsa_validation_df: The DataFrame for DSA validation.
 
     Returns:
-        A boolean indicating if the DSA validation passed.
+        `True` if the DSA validation passes or is skipped, `False` otherwise.
     """
     validation_passed = True
     try:
@@ -236,12 +281,16 @@ def _run_psa(
     formulas_data: Dict[str, Any],
 ) -> None:
     """
-    Runs the Probabilistic Sensitivity Analysis if requested.
+    Runs the Probabilistic Sensitivity Analysis (PSA) if requested.
+
+    This function checks the command-line arguments to see if a PSA should be run.
+    If so, it loads the PSA scenarios, runs the Monte Carlo simulation, reports
+    the summary statistics, and saves the results to a file.
 
     Args:
-        args: The command-line arguments.
-        df (pd.DataFrame): The main input DataFrame.
-        formulas_data (dict): The dictionary of formula definitions.
+        args: The command-line arguments from `argparse`.
+        base_case_results: The DataFrame containing the results of the base case.
+        formulas_data: The dictionary of formula definitions.
     """
     if not args.run_psa:
         return
@@ -270,7 +319,16 @@ def _run_psa(
 
 def main() -> None:
     """
-    Main function to run the data-driven calculation engine and validate results.
+    Main entry point for the microcosting calculation engine.
+
+    This function orchestrates the entire process:
+    1. Sets up logging.
+    2. Parses command-line arguments.
+    3. Optionally enables profiling.
+    4. Loads all required data.
+    5. Runs and validates the base case.
+    6. Runs DSA and PSA if requested.
+    7. Reports validation status and exits.
     """
     logging.basicConfig(
         level=logging.INFO,

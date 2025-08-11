@@ -1,7 +1,11 @@
 # src/reporting.py
 """
-This module handles the generation of all file-based outputs, including tables
-and figures for the core simulation, DSA, and PSA results.
+This module handles the generation of all file-based outputs for the model.
+
+It includes functions to save tabular data (like base case results, DSA, and
+PSA) to CSV files, as well as functions to generate and save visualizations
+such as tornado plots for DSA and histograms for PSA. This centralizes all
+file I/O for reporting, making it easier to manage output formats and paths.
 """
 
 import logging
@@ -15,7 +19,14 @@ import seaborn as sns
 
 def save_base_case_results(base_case_results: pd.DataFrame, output_dir: str) -> None:
     """
-    Saves the base case results to a CSV file.
+    Saves the full base case results to a CSV file.
+
+    Args:
+        base_case_results: A DataFrame containing the complete results of the
+                           base case calculation, including all projections
+                           and rate conversions.
+        output_dir: The directory where the output file will be saved. The
+                    file will be named 'base_case_results.csv'.
     """
     output_path = os.path.join(output_dir, "base_case_results.csv")
     try:
@@ -31,7 +42,21 @@ def save_dsa_results(
     output_dir: str,
 ) -> None:
     """
-    Saves the DSA results to CSV files.
+    Saves the Deterministic Sensitivity Analysis (DSA) results to CSV files.
+
+    This function saves two types of outputs:
+    1.  **Detailed Results:** A separate CSV file for each scenario is saved in a
+        'dsa_detailed' subdirectory.
+    2.  **Summary Results:** A single CSV file summarizing the impact of each
+        scenario compared to the base case.
+    It also triggers the generation of the DSA tornado plot.
+
+    Args:
+        dsa_results: A dictionary where keys are scenario names and values are
+                     the corresponding result DataFrames.
+        base_case_results: The DataFrame of the base case results, used for
+                           comparison in the summary.
+        output_dir: The base directory for saving the outputs.
     """
     # Save detailed results for each scenario
     detailed_output_dir = os.path.join(output_dir, "dsa_detailed")
@@ -71,7 +96,15 @@ def save_dsa_results(
 
 def save_psa_results(psa_results: pd.DataFrame, output_dir: str) -> None:
     """
-    Saves the PSA results to a CSV file.
+    Saves the Probabilistic Sensitivity Analysis (PSA) results to a CSV file.
+
+    This function saves the raw results of each iteration of the Monte Carlo
+    simulation. It also triggers the generation of the PSA histogram plot.
+
+    Args:
+        psa_results: A DataFrame containing the results of each PSA iteration.
+        output_dir: The directory where the output file will be saved. The
+                    file will be named 'psa_results.csv'.
     """
     output_path = os.path.join(output_dir, "psa_results.csv")
     try:
@@ -89,6 +122,16 @@ def plot_dsa_tornado(
 ) -> None:
     """
     Generates and saves a tornado plot for the DSA results.
+
+    A tornado plot is a visualization that helps to compare the relative
+    importance of different variables. In this context, it shows how sensitive
+    the final cost is to changes in different input parameters.
+
+    Args:
+        dsa_summary_df: A DataFrame containing the summary of the DSA results,
+                        including the percentage change for each scenario.
+        output_dir: The directory where the plot will be saved. The file will
+                    be named 'dsa_tornado_plot.png'.
     """
     plt.figure(figsize=(10, 8))
     # Assign hue to the same variable as y to use a palette without triggering
@@ -117,7 +160,15 @@ def plot_dsa_tornado(
 
 def plot_psa_histogram(psa_results_df: pd.DataFrame, output_dir: str) -> None:
     """
-    Generates and saves a histogram of the PSA results.
+    Generates and saves a histogram of the PSA simulation results.
+
+    This plot shows the distribution of the mean cost from the Monte Carlo
+    simulation, providing insight into the uncertainty of the final cost estimate.
+
+    Args:
+        psa_results_df: A DataFrame containing the results of each PSA iteration.
+        output_dir: The directory where the plot will be saved. The file will
+                    be named 'psa_histogram.png'.
     """
     plt.figure(figsize=(10, 6))
     sns.histplot(psa_results_df["mean_cost"], kde=True)

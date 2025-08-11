@@ -1,7 +1,15 @@
 # src/data_loader.py
 """
-This module handles loading and cleaning data from the Excel file.
+This module handles the loading and cleaning of data from the source Excel file.
+
+It provides functions to load the main labour cost data, as well as the
+validation data for the Deterministic and Probabilistic Sensitivity Analyses
+(DSA and PSA). The cleaning functions are designed to handle the specific
+formatting quirks of the original Excel file, such as multi-level headers,
+inconsistent naming, and merged cells.
 """
+
+import logging
 
 import pandas as pd
 
@@ -10,20 +18,15 @@ def _clean_column_names(df: pd.DataFrame) -> pd.DataFrame:
     """
     Cleans and standardizes the column names of a DataFrame.
 
-    This function performs several cleaning steps:
-    - Joins multi-level columns into a single string.
-    - Removes "Unnamed" parts from column names.
-    - Replaces "(hourly)" with "_hourly".
-    - Replaces spaces with underscores.
-    - Replaces multiple underscores with a single underscore.
-    - Corrects a specific issue with "Leave Loading (%)".
-    - Removes "_nan" suffixes.
+    This private helper function is designed to address the specific formatting
+    issues found in the source Excel file's headers. It performs several
+    cleaning steps to create consistent and predictable column names.
 
     Args:
-        df: The DataFrame with dirty column names.
+        df: The DataFrame with potentially messy, multi-level column names.
 
     Returns:
-        The DataFrame with cleaned column names.
+        The DataFrame with a single, cleaned, and standardized header row.
     """
     # Clean up the multi-level column names into a single string
     if isinstance(df.columns, pd.MultiIndex):
@@ -47,10 +50,21 @@ def _clean_column_names(df: pd.DataFrame) -> pd.DataFrame:
 def load_and_clean_data(file_path: str, sheet_name: str) -> pd.DataFrame:
     """
     Loads and cleans the primary data from the 'Labour - Prices' sheet.
+
+    This function reads the main dataset, handles its specific multi-level
+    header, coalesces inconsistent cost columns, and performs various cleaning
+    operations to prepare the data for the calculation engine.
+
+    Args:
+        file_path: The absolute path to the source Excel file.
+        sheet_name: The name of the sheet to load (e.g., 'Labour - Prices').
+
+    Returns:
+        A cleaned and prepared DataFrame ready for analysis.
     """
     # Load the sheet, skipping the top rows and setting the header
     df = pd.read_excel(file_path, sheet_name=sheet_name, header=[1, 2])
-    print("Columns before cleaning:", df.columns)
+    logging.debug(f"Columns before cleaning: {df.columns}")
 
     # Coalesce cost columns to handle data entry inconsistencies
     df[("Base Salary + Costs", "LL")] = df[("Base Salary + Costs", "LL")].fillna(
@@ -68,7 +82,7 @@ def load_and_clean_data(file_path: str, sheet_name: str) -> pd.DataFrame:
         df[costs_col] = df[costs_col].fillna(df[base_col])
 
     df = _clean_column_names(df)
-    print("Columns after cleaning:", df.columns)
+    logging.debug(f"Columns after cleaning: {df.columns}")
 
     # Rename the main columns for easier access
     df.rename(
@@ -125,6 +139,17 @@ def load_and_clean_data(file_path: str, sheet_name: str) -> pd.DataFrame:
 def load_dsa_validation_data(file_path: str, sheet_name: str) -> pd.DataFrame:
     """
     Loads and cleans the DSA validation data from the specified sheet.
+
+    This function is specifically designed to load the sheet containing the
+    pre-calculated results for the DSA scenarios, which are used to validate
+    the model's outputs.
+
+    Args:
+        file_path: The absolute path to the source Excel file.
+        sheet_name: The name of the sheet containing DSA validation data.
+
+    Returns:
+        A cleaned DataFrame ready for use in validation checks.
     """
     # Load the sheet with a multi-level header
     df = pd.read_excel(file_path, sheet_name=sheet_name, header=[0, 1, 2])
@@ -159,6 +184,13 @@ def load_dsa_validation_data(file_path: str, sheet_name: str) -> pd.DataFrame:
 def load_psa_validation_data(file_path: str, sheet_name: str) -> pd.DataFrame:
     """
     Loads the PSA validation data from the specified sheet.
+
+    Args:
+        file_path: The absolute path to the source Excel file.
+        sheet_name: The name of the sheet containing PSA validation data.
+
+    Returns:
+        A DataFrame containing the PSA validation data.
     """
     # Load the sheet
     df = pd.read_excel(file_path, sheet_name=sheet_name)

@@ -1,6 +1,12 @@
 # src/validation.py
 """
 This module handles the validation of analysis results against baseline data.
+
+It provides functions to compare the calculated results from the Deterministic
+and Probabilistic Sensitivity Analyses (DSA and PSA) against pre-calculated,
+trusted values from the original Excel model. This ensures that any changes
+to the codebase do not introduce regressions and that the model's outputs
+remain accurate.
 """
 
 import logging
@@ -17,7 +23,26 @@ def validate_dsa_results(
     tolerance: float = 1e-3,
 ) -> bool:
     """
-    Validates the DSA results against pre-calculated values.
+    Validates the DSA results against pre-calculated values from a validation sheet.
+
+    This function iterates through each DSA scenario result, looks up the
+    corresponding validation column in the `validation_df` using the
+    `scenario_map`, and compares the calculated values against the expected
+    values using `np.allclose` to account for floating-point inaccuracies.
+
+    Args:
+        dsa_results: A dictionary where keys are scenario names and values are
+                     the corresponding result DataFrames.
+        validation_df: The DataFrame loaded from the DSA validation sheet,
+                       containing the expected outcomes.
+        scenario_map: A dictionary mapping DSA scenario names to the column
+                      names in the `validation_df`.
+        tolerance: The relative tolerance to use when comparing floating-point
+                   numbers. Defaults to 1e-3.
+
+    Returns:
+        `True` if all scenarios match their expected values within the given
+        tolerance, `False` otherwise.
     """
     logging.info("--- DSA Validation Summary ---")
     total_scenarios = len(dsa_results)
@@ -90,7 +115,16 @@ def validate_psa_results(
     tolerance: float = 1e-3,
 ) -> bool:
     """
-    Validates the PSA results against pre-calculated values.
+    Validates the PSA results against a pre-calculated expected mean cost.
+
+    Args:
+        psa_results: A DataFrame containing the results of each PSA iteration.
+        validation_df: A DataFrame containing the expected mean cost for validation.
+        tolerance: The relative tolerance to use for the comparison.
+
+    Returns:
+        `True` if the calculated mean cost matches the expected value within the
+        given tolerance, `False` otherwise.
     """
     logging.info("--- PSA Validation Summary ---")
     if psa_results.empty:
