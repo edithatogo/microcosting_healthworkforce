@@ -100,8 +100,12 @@ To promote transparency, reproducibility, and collaboration, the full source cod
 
 ## References
 
-[1] [Placeholder reference on health system expenditure]  
-[2] [Placeholder reference on the importance of costing in HTA]  
-[3] [Placeholder reference on workforce planning]  
-[4] [Placeholder reference on microcosting methodology]  
-[5] [Placeholder reference on limitations of spreadsheet models]
+[1] Organisation for Economic Co-operation and Development, Eurostat, World Health Organization. *A System of Health Accounts 2011: Revised edition*. OECD Publishing; 2017. doi:10.1787/9789264270985-en
+
+[2] Drummond MF, Jefferson TO. Guidelines for authors and peer reviewers of economic submissions to the BMJ. The BMJ. 1996;313(7052):275-283. doi:10.1136/bmj.313.7052.275
+
+[3] Dreesch N, Dolea C, Dal Poz MR, Goubarev A, Adams O, Aregawi M, et al. An approach to estimating human resource requirements to achieve the Millennium Development Goals. Health Policy and Planning. 2005;20(5):267-276. doi:10.1093/heapol/czi036
+
+[4] Drummond MF, Sculpher MJ, Claxton K, Stoddart GL, Torrance GW. *Methods for the Economic Evaluation of Health Care Programmes*. 4th ed. Oxford University Press; 2015.
+
+[5] Panko RR. What we know about spreadsheet errors. *Journal of Organizational and End User Computing*. 2008;10(2):15-21. doi:10.4018/joeuc.1998040102
