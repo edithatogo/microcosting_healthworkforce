@@ -22,15 +22,14 @@ def evaluate_expression(expression: str, parameters: Dict[str, Any]) -> Any:
         The result of the evaluated expression.
 
     Raises:
-        NameError: If the expression contains a variable not in the parameters.
-        SyntaxError: If the expression is not valid Python syntax.
+        ValueError: If an error occurs during expression evaluation.
     """
     aeval = Interpreter(symtable=parameters)
-    try:
-        return aeval.eval(expression)
-    except NameError as e:
-        raise NameError(f"A parameter in the expression is not defined: {e}")
-    except SyntaxError:
-        raise SyntaxError(f"Invalid syntax in expression: {expression}")
-    except Exception as e:
-        raise type(e)(f"An error occurred during expression evaluation: {e}")
+    result = aeval.eval(expression)
+
+    if aeval.error:
+        # Get the first error message from the internal error list
+        error_msg = aeval.error[0].get_error()
+        raise ValueError(f"Error in expression '{expression}': {error_msg}")
+
+    return result

@@ -5,6 +5,7 @@ name = "pypi"
 
 [packages]
 pandas = "*"
+numpy = "*"
 openpyxl = "*"
 asteval = "*"
 pytest-cov = "*"
@@ -17,13 +18,15 @@ pre-commit = "*"
 pytest = "*"
 mypy = "*"
 bandit = "*"
-tox = "*"
 tox-pipenv = "*"
 pytest-cov = "*"
 commitizen = "*"
 sphinx = "*"
 furo = "*"
 myst-parser = "*"
+tox = "*"
+exceptiongroup = {version = "*", markers = "python_version < '3.11'"}
+tomli = {version = "*", markers = "python_version < '3.11'"}
 
 [requires]
 python_version = "3.11"

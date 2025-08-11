@@ -3,6 +3,8 @@
 Tests for the formula_parser module.
 """
 
+import pytest
+
 from src.formula_parser import evaluate_expression
 
 
@@ -18,25 +20,33 @@ def test_evaluate_expression_success() -> None:
 
 def test_evaluate_expression_name_error() -> None:
     """
-    Tests that the evaluate_expression function raises a NameError when a
-    variable is not defined.
+    Tests that the evaluate_expression function raises a ValueError for an
+    undefined variable.
     """
     expression = "a + b"
     parameters = {"a": 1}
-    try:
+    # Use a raw string (r"...") for the regex to avoid syntax warnings
+    with pytest.raises(ValueError, match=r"Error in expression 'a \+ b'"):
         evaluate_expression(expression, parameters)
-    except Exception as e:
-        assert "is not defined" in str(e)
 
 
 def test_evaluate_expression_syntax_error() -> None:
     """
-    Tests that the evaluate_expression function raises a SyntaxError when the
-    expression is invalid.
+    Tests that the evaluate_expression function raises a ValueError for invalid
+    syntax.
     """
     expression = "a + "
     parameters = {"a": 1}
-    try:
+    with pytest.raises(ValueError, match=r"Error in expression 'a \+ '"):
         evaluate_expression(expression, parameters)
-    except Exception as e:
-        assert "invalid syntax" in str(e)
+
+
+def test_evaluate_expression_division_by_zero() -> None:
+    """
+    Tests that the evaluate_expression function raises a ValueError for
+    division by zero.
+    """
+    expression = "a / b"
+    parameters = {"a": 1, "b": 0}
+    with pytest.raises(ValueError, match=r"Error in expression 'a / b'"):
+        evaluate_expression(expression, parameters)

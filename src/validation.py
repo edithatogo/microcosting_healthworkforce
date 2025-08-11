@@ -50,7 +50,10 @@ def validate_dsa_results(
             ]
 
         if np.allclose(
-            calculated_values, expected_values, rtol=tolerance, equal_nan=True
+            np.asarray(calculated_values),
+            np.asarray(expected_values),
+            rtol=tolerance,
+            equal_nan=True,
         ):
             logging.info(f"✅ Scenario '{scenario_name}' matched successfully.")
             matched_scenarios += 1
@@ -59,8 +62,8 @@ def validate_dsa_results(
             logging.error(f"❌ Scenario '{scenario_name}' has a discrepancy.")
             discrepancy_idx = np.where(
                 ~np.isclose(
-                    calculated_values,
-                    expected_values,
+                    np.asarray(calculated_values),
+                    np.asarray(expected_values),
                     rtol=tolerance,
                     equal_nan=True,
                 )

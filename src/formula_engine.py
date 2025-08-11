@@ -45,7 +45,7 @@ def load_formulas(file_path: str) -> dict[str, Any]:
 
 
 def _calculate_value(
-    row: pd.Series,
+    row: "pd.Series[Any]",
     formula: dict[str, Any],
     intermediate_results: dict[str, Any],
     parameter_mapping: dict[str, str],
