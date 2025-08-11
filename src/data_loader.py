@@ -56,12 +56,16 @@ def load_and_clean_data(file_path: str, sheet_name: str) -> pd.DataFrame:
     df[("Base Salary + Costs", "LL")] = df[("Base Salary + Costs", "LL")].fillna(
         df[("Base Salary", "LL")]
     )
-    df[("Base Salary + Costs", "Mid-point")] = df[
-        ("Base Salary + Costs", "Mid-point")
-    ].fillna(df[("Base Salary", "Mid-point")])
-    df[("Base Salary + Costs", "UL")] = df[("Base Salary + Costs", "UL")].fillna(
-        df[("Base Salary", "UL")]
-    )
+    # Coalesce Mid-point and UL, ensuring numeric types to avoid warnings
+    for point in ["Mid-point", "UL"]:
+        costs_col = ("Base Salary + Costs", point)
+        base_col = ("Base Salary", point)
+
+        # Ensure both columns are numeric before filling
+        df[costs_col] = pd.to_numeric(df[costs_col], errors="coerce")
+        df[base_col] = pd.to_numeric(df[base_col], errors="coerce")
+
+        df[costs_col] = df[costs_col].fillna(df[base_col])
 
     df = _clean_column_names(df)
     print("Columns after cleaning:", df.columns)
