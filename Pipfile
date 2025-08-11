@@ -11,6 +11,8 @@ asteval = "*"
 pytest-cov = "*"
 matplotlib = "*"
 seaborn = "*"
+build = "*"
+twine = "*"
 
 [dev-packages]
 ruff = "*"

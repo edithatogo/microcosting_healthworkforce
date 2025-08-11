@@ -20,10 +20,31 @@ testpaths = ["tests"]
 
 [tool.commitizen]
 name = "cz_conventional_commits"
-version = "0.0.1"
+version = "0.1.0"
 tag_format = "v$version"
 version_files = [
     "pyproject.toml:version"
+]
+
+[project]
+name = "microcosting-healthworkforce"
+version = "0.1.0"
+description = "A data-driven calculation engine for microcosting a health workforce."
+readme = "README.md"
+requires-python = ">=3.9"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "pandas",
+    "numpy",
+    "openpyxl",
+    "asteval",
+    "pytest-cov",
+    "matplotlib",
+    "seaborn",
 ]
 
 
