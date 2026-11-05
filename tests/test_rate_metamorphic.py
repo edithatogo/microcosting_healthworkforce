@@ -113,6 +113,12 @@ def test_leave_cover_values_and_domain() -> None:
     result = productive_hourly_rates(frame)
     assert_that(math.isclose(result.item(0, "original_hourly"), 127720 / 1976))
     assert_that(math.isclose(result.item(0, "leave_cover_only_hourly"), 62720 / 1976))
+    tiny_hours = productive_hourly_rates(
+        frame.with_columns(pl.lit(0.001).alias("hours")),
+    )
+    assert_that(
+        math.isclose(tiny_hours.item(0, "original_hourly"), 127720 / 0.052),
+    )
     for column, value in (
         ("productive", 0.0),
         ("productive", -0.1),

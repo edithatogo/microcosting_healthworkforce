@@ -3,7 +3,8 @@
 Run `make all` with the repo-local Python 3.15.2 environment. It checks formatting,
 Ruff, strict typing, all tests and Bandit. CI additionally verifies the actual
 interpreter, installs and exercises the built wheel away from the checkout,
-profiles synthetic formulas and uploads full-suite coverage. Do not substitute
+profiles synthetic formulas and uploads full-suite coverage (75% minimum; the
+qualified local baseline is 77%). Do not substitute
 partial coverage or a skipped suite for this gate.
 
 Hypothesis tests check annual/hourly inversion. Metamorphic tests check monetary
@@ -17,7 +18,7 @@ zero. Known failures require a reason and strict xfail; skips require a real
 missing capability.
 
 The mutation workflow runs on demand and weekly, with two subprocess workers,
-a bounded job timeout, no pardons, and a committed score floor. Its target is
+a bounded job timeout, no pardons, and a 95% score floor. Its target is
 the rate-conversion boundary; this bounded pilot is not whole-program mutation
 coverage. Surviving or uncovered mutants require review before expanding scope.
 Keep mutation execution out of the normal fast pull-request lane.
