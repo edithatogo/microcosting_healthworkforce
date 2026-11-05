@@ -1,6 +1,7 @@
 name: Mutation
 on:
   workflow_dispatch:
+  workflow_call:
   schedule:
     - cron: '47 4 * * 1'
 permissions:
