@@ -99,3 +99,14 @@ activities are eligible, calculate multiple overtime tiers, apply minimum
 engagements, or combine penalties. The caller's completeness and review assertions
 must be supported outside the calculation. Unsupported combinations must remain
 outside this method until their actual interaction is modelled and verified.
+
+## Paid capacity and replacement-cover scenarios
+
+`src.capacity_costing.capacity_scenario` calculates paid cost from a dated
+condition release and subtracts explicitly supplied, disjoint lost hours from
+the original worker's paid hours. It adds explicitly supplied incremental cover
+hours and cost once, and records those inputs as scenario assumptions rather
+than industrial entitlements. The cost-per-productive-hour denominator describes
+the original worker only; any productive output from replacement cover is not
+included. It does not infer leave uptake, cash savings, overlap between absences,
+or the cost or productivity of cover.
