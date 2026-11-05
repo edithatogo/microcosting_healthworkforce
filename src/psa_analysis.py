@@ -57,12 +57,20 @@ def run_psa_analysis(
     all_results: list[dict[str, int | float]] = []
 
     param_to_col_map = parameter_mapping(formulas_data)
+    # A caller may pass the calculated base case, as the original CLI did.
+    # Derived costs must be recalculated after sampling, rather than cached.
+    derived = [
+        output["name"] + "_Y0"
+        for output in formulas_data.get("outputs", [])
+        if "name" in output
+    ]
+    base_inputs = base_case_df.drop(derived, strict=False)
 
     for i in range(iterations):
         if (i + 1) % 100 == 0:
             logger.info("Running iteration %s/%s...", i + 1, iterations)
 
-        iter_df = base_case_df.clone()
+        iter_df = base_inputs.clone()
 
         for scenario in scenarios:
             param = scenario["parameter_to_vary"]
@@ -102,15 +110,15 @@ def report_psa_results(psa_results_df: pl.DataFrame) -> None:
     mean_cost = numeric(psa_results_df["mean_cost"].mean())
     std_dev = numeric(psa_results_df["mean_cost"].std())
     confidence_interval = (
-        numeric(psa_results_df["mean_cost"].quantile(0.025)),
-        numeric(psa_results_df["mean_cost"].quantile(0.975)),
+        numeric(psa_results_df["mean_cost"].quantile(0.025, interpolation="linear")),
+        numeric(psa_results_df["mean_cost"].quantile(0.975, interpolation="linear")),
     )
 
     logger.info("Number of Iterations: %s", len(psa_results_df))
     logger.info("Average Mean Cost: %s", format(mean_cost, ",.2f"))
     logger.info("Standard Deviation: %s", format(std_dev, ",.2f"))
     logger.info(
-        "95%% Confidence Interval: (%s - %s)",
+        "95%% simulation percentile interval: (%s - %s)",
         format(confidence_interval[0], ",.2f"),
         format(confidence_interval[1], ",.2f"),
     )

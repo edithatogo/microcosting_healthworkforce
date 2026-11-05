@@ -10,6 +10,7 @@ import polars as pl
 import pytest
 lazy from _pytest.logging import LogCaptureFixture
 
+from src.formula_engine import apply_formulas
 from src.psa_analysis import (
     load_psa_scenarios,
     report_psa_results,
@@ -135,3 +136,50 @@ def test_report_psa_results_empty(caplog: LogCaptureFixture) -> None:
     with caplog.at_level(logging.INFO):
         report_psa_results(pl.DataFrame())
     assert_that("No PSA results to report" in caplog.text)
+
+
+def test_report_psa_results_linear_percentiles(caplog: LogCaptureFixture) -> None:
+    """Catch a changed quantile definition in the reported simulation interval."""
+    with caplog.at_level(logging.INFO):
+        report_psa_results(pl.DataFrame({"mean_cost": [100.0, 110.0, 120.0]}))
+    assert_that("(100.50 - 119.50)" in caplog.text)
+    assert_that("simulation percentile interval" in caplog.text)
+
+
+def test_psa_recomputes_precalculated_base_costs() -> None:
+    """Catch cached base costs suppressing an actual parameter perturbation."""
+    document: dict[str, Any] = {
+        "formulas": [
+            {
+                "id": "cost",
+                "expression": "salary * (1 + rate)",
+                "parameters": ["salary", "rate"],
+            },
+        ],
+        "outputs": [
+            {
+                "name": "Calculated_Cost_Mid",
+                "calculation_method": "formula",
+                "uses_formula": "cost",
+                "parameter_mapping": {"salary": "salary", "rate": "rate"},
+            },
+        ],
+    }
+    original = apply_formulas(
+        pl.DataFrame({"salary": [100.0, 200.0], "rate": [0.0, 0.0]}),
+        document,
+    )
+    result = run_psa_analysis(
+        original,
+        document,
+        apply_formulas,
+        [
+            {
+                "parameter_to_vary": "rate",
+                "distribution": {"type": "normal", "mean": 1.0, "std_dev": 0.0},
+            },
+        ],
+        iterations=1,
+    )
+    assert_that(result["mean_cost"].to_list() == [300.0])
+    assert_that(original["Calculated_Cost_Mid_Y0"].to_list() == [100.0, 200.0])

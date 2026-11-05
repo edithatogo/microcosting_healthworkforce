@@ -3,6 +3,7 @@
 """Reconcile calculated values against independent workbook references."""
 
 import logging
+import math
 
 import numpy as np
 import polars as pl
@@ -98,23 +99,43 @@ def validate_dsa_results(
     return all_passed and matched_scenarios == total_scenarios and total_scenarios > 0
 
 
+def _finite_costs(frame: pl.DataFrame, column: str) -> pl.Series | None:
+    """Require complete numeric evidence before reducing a cost column."""
+    if frame.is_empty() or column not in frame.columns:
+        return None
+    values = frame[column]
+    if not values.dtype.is_numeric() or values.null_count():
+        return None
+    costs = values.cast(pl.Float64)
+    return costs if costs.is_finite().all() else None
+
+
 def validate_psa_results(
     psa_results: pl.DataFrame,
     validation_df: pl.DataFrame,
     tolerance: float = 1e-3,
 ) -> bool:
-    """Validate the PSA results against pre-calculated values."""
-    logger.info("--- PSA Validation Summary ---")
-    if psa_results.is_empty():
-        logger.warning("PSA results are empty. Skipping validation.")
-        return True
+    """Compare a complete simulation mean with one finite reference.
 
-    if "Expected Mean Cost" not in validation_df.columns:
-        logger.error("'Expected Mean Cost' column not found in validation data.")
+    This scalar comparison does not qualify distributions or dependence.
+    """
+    logger.info("--- PSA Validation Summary ---")
+    costs = _finite_costs(psa_results, "mean_cost")
+    reference = _finite_costs(validation_df, "Expected Mean Cost")
+    if (
+        costs is None
+        or reference is None
+        or len(reference) != 1
+        or not math.isfinite(tolerance)
+        or tolerance < 0
+    ):
+        logger.error(
+            "PSA comparison requires finite draws, one reference and tolerance.",
+        )
         return False
 
-    expected_mean_cost = validation_df["Expected Mean Cost"][0]
-    calculated_mean_cost = numeric(psa_results["mean_cost"].mean())
+    expected_mean_cost = numeric(reference[0])
+    calculated_mean_cost = numeric(costs.mean())
 
     if np.isclose(expected_mean_cost, calculated_mean_cost, rtol=tolerance):
         logger.info("✅ PSA mean cost matched successfully.")
