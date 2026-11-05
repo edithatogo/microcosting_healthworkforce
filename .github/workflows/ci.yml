@@ -56,8 +56,3 @@ jobs:
           use_oidc: true
           files: coverage.xml
           fail_ci_if_error: true
-  mutation:
-    if: github.event_name == 'workflow_dispatch'
-    uses: $/.github/workflows/mutation.yml
-    permissions:
-      contents: read

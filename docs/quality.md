@@ -17,11 +17,11 @@ except local Unix sockets required by the workbook loader. Retries default to
 zero. Known failures require a reason and strict xfail; skips require a real
 missing capability.
 
-The mutation workflow runs on demand and weekly, with two subprocess workers,
+The mutation workflow runs on demand, weekly and for changes to its rate contracts, with two subprocess workers,
 a bounded job timeout, no pardons, and a 95% score floor. Its target is
 the rate-conversion boundary; this bounded pilot is not whole-program mutation
 coverage. Surviving or uncovered mutants require review before expanding scope.
-Keep mutation execution out of the normal fast pull-request lane.
+Unrelated pull requests retain the normal fast lane.
 
 Distributed-system testing is excluded: this library has no distributed state,
 consensus or concurrent service protocol. Network contract testing is excluded

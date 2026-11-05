@@ -1,7 +1,12 @@
 name: Mutation
 on:
   workflow_dispatch:
-  workflow_call:
+  pull_request:
+    paths:
+      - src/polars_rates.py
+      - tests/test_rate_metamorphic.py
+      - tests/test_cost_properties.py
+      - .github/workflows/mutation.yml
   schedule:
     - cron: '47 4 * * 1'
 permissions:
