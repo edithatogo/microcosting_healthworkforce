@@ -3,6 +3,7 @@
 """Test for the validation module."""
 
 import polars as pl
+import pytest
 
 from src.validation import validate_dsa_results, validate_psa_results
 from tests.checks import assert_that
@@ -39,10 +40,10 @@ def test_validate_psa_results_failure() -> None:
 
 
 def test_validate_psa_results_empty_results() -> None:
-    """Test that the validate_psa_results function returns True for empty results."""
+    """Reject an absent simulation instead of claiming successful validation."""
     psa_results = pl.DataFrame({"mean_cost": []})
     validation_df = pl.DataFrame({"Expected Mean Cost": [150]})
-    assert_that(validate_psa_results(psa_results, validation_df))
+    assert_that(not validate_psa_results(psa_results, validation_df))
 
 
 def test_validate_psa_results_missing_validation_column() -> None:
@@ -50,3 +51,84 @@ def test_validate_psa_results_missing_validation_column() -> None:
     psa_results = pl.DataFrame({"mean_cost": [100, 110, 120]})
     validation_df = pl.DataFrame({"Some Other Column": [150]})
     assert_that(not validate_psa_results(psa_results, validation_df))
+
+
+@pytest.mark.parametrize(
+    "values",
+    [[None, 110.0], [float("nan"), 110.0], [float("inf"), 110.0], ["110", "110"]],
+)
+def test_psa_validation_rejects_invalid_draws(values: list[object]) -> None:
+    """Catch missing, nonfinite or nonnumeric draws hidden by a mean summary."""
+    assert_that(
+        not validate_psa_results(
+            pl.DataFrame({"mean_cost": values}),
+            pl.DataFrame({"Expected Mean Cost": [110.0]}),
+        ),
+    )
+
+
+@pytest.mark.parametrize(
+    "values",
+    [[], [None], [float("nan")], [float("inf")], [110.0, 110.0], ["110"]],
+)
+def test_psa_validation_rejects_invalid_reference(
+    values: list[object],
+) -> None:
+    """Catch missing, ambiguous or invalid reference values before comparison."""
+    assert_that(
+        not validate_psa_results(
+            pl.DataFrame({"mean_cost": [110.0]}),
+            pl.DataFrame({"Expected Mean Cost": values}),
+        ),
+    )
+
+
+def test_psa_validation_requires_cost_column() -> None:
+    """Reject a result table without costs instead of raising during reduction."""
+    assert_that(
+        not validate_psa_results(
+            pl.DataFrame({"iteration": [1]}),
+            pl.DataFrame({"Expected Mean Cost": [110.0]}),
+        ),
+    )
+
+
+@pytest.mark.parametrize("tolerance", [-1.0, float("nan"), float("inf")])
+def test_psa_validation_rejects_invalid_tolerance(tolerance: float) -> None:
+    """Catch a tolerance that could bypass a meaningful relative comparison."""
+    assert_that(
+        not validate_psa_results(
+            pl.DataFrame({"mean_cost": [110.0]}),
+            pl.DataFrame({"Expected Mean Cost": [110.0]}),
+            tolerance,
+        ),
+    )
+
+
+def test_psa_comparison_exposes_absolute_tolerance() -> None:
+    """Catch an implicit near-zero tolerance defeating a requested exact comparison."""
+    results = pl.DataFrame({"mean_cost": [1e-9]})
+    reference = pl.DataFrame({"Expected Mean Cost": [0.0]})
+    assert_that(validate_psa_results(results, reference, tolerance=0.0))
+    assert_that(
+        not validate_psa_results(
+            results,
+            reference,
+            tolerance=0.0,
+            absolute_tolerance=0.0,
+        ),
+    )
+
+
+@pytest.mark.parametrize("absolute_tolerance", [-1.0, float("nan"), float("inf")])
+def test_psa_comparison_rejects_invalid_atol(
+    absolute_tolerance: float,
+) -> None:
+    """Reject an invalid absolute tolerance before comparing evidence."""
+    assert_that(
+        not validate_psa_results(
+            pl.DataFrame({"mean_cost": [0.0]}),
+            pl.DataFrame({"Expected Mean Cost": [0.0]}),
+            absolute_tolerance=absolute_tolerance,
+        ),
+    )

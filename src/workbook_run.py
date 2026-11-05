@@ -8,7 +8,6 @@ from typing import TYPE_CHECKING, Any
 lazy import argparse
 
 import matplotlib.pyplot as plt
-import numpy as np
 import openpyxl
 import pandera.polars as pa
 import polars as pl
@@ -17,22 +16,16 @@ if TYPE_CHECKING:
     from pandera.api.polars.types import PolarsData
 
     from src.contracts import FormulaDocument
-from pydantic import BaseModel, Field
 
 from src import config
 from src.formula_engine import apply_formulas, load_formulas
 from src.libreoffice import recalculate
 from src.numeric import numeric, row_filter
 from src.projection import project_costs
+from src.psa_analysis import run_psa_analysis
+from src.psa_simulation import SimulationSpec
 from src.rate_converter import convert_annual_cost_to_rates
 from src.scenario_oracle import compare_scenarios
-
-
-class SimulationSpec(BaseModel):
-    """Validated stochastic run settings."""
-
-    iterations: int = Field(gt=0, strict=True)
-    seed: int = Field(ge=0, strict=True)
 
 
 def positive_iterations(data: PolarsData) -> pl.LazyFrame:
@@ -230,36 +223,16 @@ class WorkforceRun:
     def run_psa(self) -> None:
         """Retain the seeded distributions and positive-iteration contract."""
         spec = SimulationSpec(iterations=self.args.psa_iterations, seed=self.args.seed)
-        rng = np.random.default_rng(spec.seed)
-        sims: list[dict[str, int | float]] = []
         scenarios = json.loads(Path(config.PSA_SCENARIOS_FILE_PATH).read_text())
-        for i in range(spec.iterations):
-            data = self.frame
-            for scenario in scenarios:
-                distribution = scenario["distribution"]
-                if distribution["type"] == "normal":
-                    value = rng.normal(distribution["mean"], distribution["std_dev"])
-                elif distribution["type"] == "uniform":
-                    value = rng.uniform(distribution["min"], distribution["max"])
-                elif distribution["type"] == "triangular":
-                    value = rng.triangular(
-                        distribution["min"],
-                        distribution["mode"],
-                        distribution["max"],
-                    )
-                else:
-                    message = "Unsupported distribution"
-                    raise ValueError(message)
-                data = data.with_columns(
-                    pl.lit(value).alias(self.mapping[scenario["parameter_to_vary"]]),
-                )
-            sims.append(
-                {
-                    "iteration": i + 1,
-                    "mean_cost": mean_cost(apply_formulas(data, self.formulas)),
-                },
-            )
-        psa = PSA_SCHEMA.validate(pl.DataFrame(sims))
+        simulations = run_psa_analysis(
+            self.frame,
+            dict(self.formulas),
+            apply_formulas,
+            scenarios,
+            spec.iterations,
+            seed=spec.seed,
+        )
+        psa = PSA_SCHEMA.validate(simulations)
         psa.write_csv(self.dest / "psa_results.csv")
         plot_psa(psa, self.dest)
 

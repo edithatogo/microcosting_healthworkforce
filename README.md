@@ -67,7 +67,7 @@ Note: Percentage-like inputs must be provided in consistent units (e.g., fractio
 ## Setup
 
 1.  **Prerequisites:**
-    -   Python 3.15.1
+    -   Python 3.15.2
     -   `uv`
 
 2.  **Install dependencies:**
@@ -115,7 +115,7 @@ Note: Percentage-like inputs must be provided in consistent units (e.g., fractio
 
 ## CI and local verification
 
-Use `uv sync --locked --python 3.15.1` and verify `.venv/bin/python --version`.
+Use `uv sync --locked --python 3.15.2` and verify `.venv/bin/python --version`.
 `make ci` runs the local checks through the locked environment. CI uses the same
 runtime and lock, with pytest coverage, Ruff formatting and ALL lint rules,
 strict basedpyright, Bandit, a wheel build and an installed CLI help check from
@@ -128,3 +128,43 @@ Pipenv and tox-pipenv are retired. Dependency changes belong in `pyproject.toml`
 and `uv.lock`; an old `Pipfile.lock` update does not qualify the active environment.
 The optional pre-commit configuration delegates to locked uv tools. Normal Git
 hooks stay enabled; setup does not install hooks into another owner's checkout.
+
+
+## PSA qualification boundaries
+
+PSA applies one absolute draw per declared parameter to every workforce row in an
+iteration. Parameters are sampled separately using NumPy's seeded Generator;
+this does not declare an empirically supported correlation model. The result is
+an unweighted mean across the workforce rows. Equal seeds across legacy NumPy
+RandomState and Generator implementations do not establish draw-level parity.
+
+The PSA API recalculates derived base costs after sampling, including when a
+caller supplies an already-calculated base case. Reported percentile intervals
+use explicit linear interpolation and describe simulation percentiles, rather
+than confidence intervals for an estimated population mean. Reference-mean
+comparison requires complete finite numeric draws and one finite reference;
+an empty simulation is not successful validation. Mean comparison alone does
+not qualify scientific distribution assumptions or joint uncertainty.
+
+The development environment includes pre-commit, pytest-timeout and pytest-socket.
+`make test` and hosted test jobs disable Python network sockets, permit local Unix
+sockets and enforce a 120-second test timeout. This does not disable networking
+in independently launched native processes. Scientific priors and original inputs
+remain unchanged; source specification and scientific acceptance are separate.
+
+
+Both PSA entry points share strict run/distribution validation and ordered
+sampling. Unknown or duplicate parameters, unsupported distributions, malformed
+bounds, nonfinite values and missing target columns fail before a successful
+result can be written. This intentionally replaces the legacy API's warning-and-
+skip behavior. Every calculated row must have a finite cost before aggregation.
+Relative and absolute reference tolerances are explicit (defaults 1e-3 and 1e-8);
+set both to zero for exact equality. A single draw is valid for execution checks,
+but its report does not claim an estimable sample deviation or percentile interval.
+
+The original workbook baseline uses nominal hours (productive-time fraction 1).
+Keep that baseline separate from explicitly labelled productive-hours scenarios.
+The retained PSA inputs are a conditional compatibility scenario: neither their
+absolute productive-time support nor their independent draws and unweighted
+aggregation constitute an approved uncertainty specification. No clipping or
+replacement priors are implied by software parity.

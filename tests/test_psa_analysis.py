@@ -8,8 +8,10 @@ from unittest.mock import mock_open, patch
 
 import polars as pl
 import pytest
+from pydantic import ValidationError
 lazy from _pytest.logging import LogCaptureFixture
 
+from src.formula_engine import apply_formulas
 from src.psa_analysis import (
     load_psa_scenarios,
     report_psa_results,
@@ -89,36 +91,32 @@ def test_run_psa_analysis_distributions(
     assert_that(psa_results["mean_cost"][0] != EXPECTED_200)
 
 
-def test_run_psa_analysis_unknown_param_warning(
+def test_run_psa_analysis_unknown_param_rejected(
     base_test_data: dict[str, Any],
-    caplog: LogCaptureFixture,
 ) -> None:
-    """Test that a warning is logged for a parameter not in the mapping."""
+    """Reject an unmapped parameter instead of silently omitting uncertainty."""
     scenarios = [
         {
             "parameter_to_vary": "unknown_param",
             "distribution": {"type": "normal", "mean": 1, "std_dev": 0.1},
         },
     ]
-    with caplog.at_level(logging.WARNING):
+    with pytest.raises(ValueError, match="unmapped parameter"):
         run_psa_analysis(**base_test_data, scenarios=scenarios, iterations=1)
-    assert_that("Param 'unknown_param' not in formula mapping" in caplog.text)
 
 
-def test_run_psa_analysis_unknown_dist_warning(
+def test_run_psa_analysis_unknown_dist_rejected(
     base_test_data: dict[str, Any],
-    caplog: LogCaptureFixture,
 ) -> None:
-    """Test that a warning is logged for an unknown distribution type."""
+    """Reject an unsupported distribution instead of running a partial model."""
     scenarios = [
         {
             "parameter_to_vary": "param1",
             "distribution": {"type": "unknown_dist"},
         },
     ]
-    with caplog.at_level(logging.WARNING):
+    with pytest.raises(ValidationError):
         run_psa_analysis(**base_test_data, scenarios=scenarios, iterations=1)
-    assert_that("Unknown distribution 'unknown_dist'" in caplog.text)
 
 
 def test_report_psa_results_summary(caplog: LogCaptureFixture) -> None:
@@ -135,3 +133,61 @@ def test_report_psa_results_empty(caplog: LogCaptureFixture) -> None:
     with caplog.at_level(logging.INFO):
         report_psa_results(pl.DataFrame())
     assert_that("No PSA results to report" in caplog.text)
+
+
+def test_report_psa_results_linear_percentiles(caplog: LogCaptureFixture) -> None:
+    """Catch a changed quantile definition in the reported simulation interval."""
+    with caplog.at_level(logging.INFO):
+        report_psa_results(pl.DataFrame({"mean_cost": [100.0, 110.0, 120.0]}))
+    assert_that("(100.50 - 119.50)" in caplog.text)
+    assert_that("simulation percentile interval" in caplog.text)
+
+
+def test_psa_recomputes_precalculated_base_costs() -> None:
+    """Catch cached base costs suppressing an actual parameter perturbation."""
+    document: dict[str, Any] = {
+        "formulas": [
+            {
+                "id": "cost",
+                "expression": "salary * (1 + rate)",
+                "parameters": ["salary", "rate"],
+            },
+        ],
+        "outputs": [
+            {
+                "name": "Calculated_Cost_Mid",
+                "calculation_method": "formula",
+                "uses_formula": "cost",
+                "parameter_mapping": {"salary": "salary", "rate": "rate"},
+            },
+        ],
+    }
+    original = apply_formulas(
+        pl.DataFrame({"salary": [100.0, 200.0], "rate": [0.0, 0.0]}),
+        document,
+    )
+    result = run_psa_analysis(
+        original,
+        document,
+        apply_formulas,
+        [
+            {
+                "parameter_to_vary": "rate",
+                "distribution": {"type": "normal", "mean": 1.0, "std_dev": 0.0},
+            },
+        ],
+        iterations=1,
+    )
+    assert_that(result["mean_cost"].to_list() == [300.0])
+    assert_that(original["Calculated_Cost_Mid_Y0"].to_list() == [100.0, 200.0])
+
+
+def test_single_iteration_report_does_not_invent_precision(
+    caplog: LogCaptureFixture,
+) -> None:
+    """Report a single draw without claiming estimable deviation or an interval."""
+    with caplog.at_level(logging.INFO):
+        report_psa_results(pl.DataFrame({"mean_cost": [110.0]}))
+    assert_that("Average Mean Cost: 110.00" in caplog.text)
+    assert_that("undefined" in caplog.text)
+    assert_that("not estimated" in caplog.text)

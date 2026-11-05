@@ -1,10 +1,10 @@
 .PHONY: install test lint format format-check typecheck security all ci docs
 
 install:
-	uv sync --locked --python 3.15.1
+	uv sync --locked --python 3.15.2
 
 test:
-	uv run --locked pytest
+	MPLBACKEND=Agg uv run --locked pytest --disable-socket --allow-unix-socket --timeout=120
 
 lint:
 	uv run --locked ruff check .

@@ -55,3 +55,7 @@ profile.out
 archived_dsa_comparison.csv
 delivered_validation.json
 dsa_validation.csv
+
+# Mutation reports and cache
+coverage/
+.gremlins_cache/

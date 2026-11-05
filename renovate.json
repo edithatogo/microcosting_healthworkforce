@@ -1,7 +1,7 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "local>edithatogo/renovate-config"
+    "github>edithatogo/renovate-config"
   ],
   "packageRules": [
     {
