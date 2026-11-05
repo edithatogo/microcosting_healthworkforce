@@ -103,3 +103,32 @@ def test_psa_validation_rejects_invalid_tolerance(tolerance: float) -> None:
             tolerance,
         ),
     )
+
+
+def test_psa_comparison_exposes_absolute_tolerance() -> None:
+    """Catch an implicit near-zero tolerance defeating a requested exact comparison."""
+    results = pl.DataFrame({"mean_cost": [1e-9]})
+    reference = pl.DataFrame({"Expected Mean Cost": [0.0]})
+    assert_that(validate_psa_results(results, reference, tolerance=0.0))
+    assert_that(
+        not validate_psa_results(
+            results,
+            reference,
+            tolerance=0.0,
+            absolute_tolerance=0.0,
+        ),
+    )
+
+
+@pytest.mark.parametrize("absolute_tolerance", [-1.0, float("nan"), float("inf")])
+def test_psa_comparison_rejects_invalid_atol(
+    absolute_tolerance: float,
+) -> None:
+    """Reject an invalid absolute tolerance before comparing evidence."""
+    assert_that(
+        not validate_psa_results(
+            pl.DataFrame({"mean_cost": [0.0]}),
+            pl.DataFrame({"Expected Mean Cost": [0.0]}),
+            absolute_tolerance=absolute_tolerance,
+        ),
+    )

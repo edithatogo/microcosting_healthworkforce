@@ -8,12 +8,12 @@ from pathlib import Path
 from typing import Any, NotRequired, TypedDict, Unpack, cast
 lazy from collections.abc import Callable
 
-import numpy as np
 import polars as pl
 from pydantic import ConfigDict, TypeAdapter, with_config
 
 from src.contracts import parameter_mapping
 from src.numeric import numeric
+from src.psa_simulation import SimulationSpec, complete_mean_cost, parameter_draws
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +53,7 @@ def run_psa_analysis(
     """Run a Probabilistic Sensitivity Analysis using Monte Carlo simulation."""
     logger.info("--- Running %s PSA Iterations ---", iterations)
     settings = SEED_OPTIONS.validate_python(options)
-    rng = np.random.default_rng(settings.get("seed", 20261103))
+    spec = SimulationSpec(iterations=iterations, seed=settings.get("seed", 20261103))
     all_results: list[dict[str, int | float]] = []
 
     param_to_col_map = parameter_mapping(formulas_data)
@@ -66,35 +66,16 @@ def run_psa_analysis(
     ]
     base_inputs = base_case_df.drop(derived, strict=False)
 
-    for i in range(iterations):
+    draws = parameter_draws(scenarios, param_to_col_map, set(base_inputs.columns), spec)
+    for i, sampled in enumerate(draws):
         if (i + 1) % 100 == 0:
             logger.info("Running iteration %s/%s...", i + 1, iterations)
-
-        iter_df = base_inputs.clone()
-
-        for scenario in scenarios:
-            param = scenario["parameter_to_vary"]
-            dist = scenario["distribution"]
-            column_to_vary = param_to_col_map.get(param)
-
-            if not column_to_vary:
-                logger.warning("Param '%s' not in formula mapping. Skipping.", param)
-                continue
-
-            if dist["type"] == "normal":
-                sampled_value = rng.normal(dist["mean"], dist["std_dev"])
-            elif dist["type"] == "uniform":
-                sampled_value = rng.uniform(dist["min"], dist["max"])
-            elif dist["type"] == "triangular":
-                sampled_value = rng.triangular(dist["min"], dist["mode"], dist["max"])
-            else:
-                logger.warning("Unknown distribution '%s'. Skipping.", dist["type"])
-                continue
-
-            iter_df = iter_df.with_columns(pl.lit(sampled_value).alias(column_to_vary))
+        iter_df = base_inputs.with_columns(
+            pl.lit(value).alias(column) for column, value in sampled.items()
+        )
 
         result_df = calculation_pipeline(iter_df, formulas_data)
-        mean_cost = numeric(result_df["Calculated_Cost_Mid_Y0"].mean())
+        mean_cost = complete_mean_cost(result_df, base_inputs.height)
         all_results.append({"iteration": i + 1, "mean_cost": mean_cost})
 
     return pl.DataFrame(all_results)
@@ -108,17 +89,21 @@ def report_psa_results(psa_results_df: pl.DataFrame) -> None:
         return
 
     mean_cost = numeric(psa_results_df["mean_cost"].mean())
+    logger.info("Number of Iterations: %s", len(psa_results_df))
+    logger.info("Average Mean Cost: %s", format(mean_cost, ",.2f"))
+    if psa_results_df.height == 1:
+        logger.info("Standard Deviation: undefined for one iteration")
+        logger.info("Simulation percentile interval: not estimated for one iteration")
+        return
     std_dev = numeric(psa_results_df["mean_cost"].std())
-    confidence_interval = (
+    percentile_interval = (
         numeric(psa_results_df["mean_cost"].quantile(0.025, interpolation="linear")),
         numeric(psa_results_df["mean_cost"].quantile(0.975, interpolation="linear")),
     )
 
-    logger.info("Number of Iterations: %s", len(psa_results_df))
-    logger.info("Average Mean Cost: %s", format(mean_cost, ",.2f"))
     logger.info("Standard Deviation: %s", format(std_dev, ",.2f"))
     logger.info(
         "95%% simulation percentile interval: (%s - %s)",
-        format(confidence_interval[0], ",.2f"),
-        format(confidence_interval[1], ",.2f"),
+        format(percentile_interval[0], ",.2f"),
+        format(percentile_interval[1], ",.2f"),
     )

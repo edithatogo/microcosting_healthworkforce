@@ -8,6 +8,7 @@ from unittest.mock import mock_open, patch
 
 import polars as pl
 import pytest
+from pydantic import ValidationError
 lazy from _pytest.logging import LogCaptureFixture
 
 from src.formula_engine import apply_formulas
@@ -90,36 +91,32 @@ def test_run_psa_analysis_distributions(
     assert_that(psa_results["mean_cost"][0] != EXPECTED_200)
 
 
-def test_run_psa_analysis_unknown_param_warning(
+def test_run_psa_analysis_unknown_param_rejected(
     base_test_data: dict[str, Any],
-    caplog: LogCaptureFixture,
 ) -> None:
-    """Test that a warning is logged for a parameter not in the mapping."""
+    """Reject an unmapped parameter instead of silently omitting uncertainty."""
     scenarios = [
         {
             "parameter_to_vary": "unknown_param",
             "distribution": {"type": "normal", "mean": 1, "std_dev": 0.1},
         },
     ]
-    with caplog.at_level(logging.WARNING):
+    with pytest.raises(ValueError, match="unmapped parameter"):
         run_psa_analysis(**base_test_data, scenarios=scenarios, iterations=1)
-    assert_that("Param 'unknown_param' not in formula mapping" in caplog.text)
 
 
-def test_run_psa_analysis_unknown_dist_warning(
+def test_run_psa_analysis_unknown_dist_rejected(
     base_test_data: dict[str, Any],
-    caplog: LogCaptureFixture,
 ) -> None:
-    """Test that a warning is logged for an unknown distribution type."""
+    """Reject an unsupported distribution instead of running a partial model."""
     scenarios = [
         {
             "parameter_to_vary": "param1",
             "distribution": {"type": "unknown_dist"},
         },
     ]
-    with caplog.at_level(logging.WARNING):
+    with pytest.raises(ValidationError):
         run_psa_analysis(**base_test_data, scenarios=scenarios, iterations=1)
-    assert_that("Unknown distribution 'unknown_dist'" in caplog.text)
 
 
 def test_report_psa_results_summary(caplog: LogCaptureFixture) -> None:
@@ -183,3 +180,14 @@ def test_psa_recomputes_precalculated_base_costs() -> None:
     )
     assert_that(result["mean_cost"].to_list() == [300.0])
     assert_that(original["Calculated_Cost_Mid_Y0"].to_list() == [100.0, 200.0])
+
+
+def test_single_iteration_report_does_not_invent_precision(
+    caplog: LogCaptureFixture,
+) -> None:
+    """Report a single draw without claiming estimable deviation or an interval."""
+    with caplog.at_level(logging.INFO):
+        report_psa_results(pl.DataFrame({"mean_cost": [110.0]}))
+    assert_that("Average Mean Cost: 110.00" in caplog.text)
+    assert_that("undefined" in caplog.text)
+    assert_that("not estimated" in caplog.text)

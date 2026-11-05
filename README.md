@@ -151,3 +151,13 @@ The development environment includes pre-commit, pytest-timeout and pytest-socke
 sockets and enforce a 120-second test timeout. This does not disable networking
 in independently launched native processes. Scientific priors and original inputs
 remain unchanged; source specification and scientific acceptance are separate.
+
+
+Both PSA entry points share strict run/distribution validation and ordered
+sampling. Unknown or duplicate parameters, unsupported distributions, malformed
+bounds, nonfinite values and missing target columns fail before a successful
+result can be written. This intentionally replaces the legacy API's warning-and-
+skip behavior. Every calculated row must have a finite cost before aggregation.
+Relative and absolute reference tolerances are explicit (defaults 1e-3 and 1e-8);
+set both to zero for exact equality. A single draw is valid for execution checks,
+but its report does not claim an estimable sample deviation or percentile interval.

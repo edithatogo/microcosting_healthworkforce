@@ -114,10 +114,14 @@ def validate_psa_results(
     psa_results: pl.DataFrame,
     validation_df: pl.DataFrame,
     tolerance: float = 1e-3,
+    *,
+    absolute_tolerance: float = 1e-8,
 ) -> bool:
     """Compare a complete simulation mean with one finite reference.
 
     This scalar comparison does not qualify distributions or dependence.
+    Relative and absolute tolerances preserve NumPy's previous defaults; set
+    both to zero when an exact numerical comparison is required.
     """
     logger.info("--- PSA Validation Summary ---")
     costs = _finite_costs(psa_results, "mean_cost")
@@ -128,6 +132,8 @@ def validate_psa_results(
         or len(reference) != 1
         or not math.isfinite(tolerance)
         or tolerance < 0
+        or not math.isfinite(absolute_tolerance)
+        or absolute_tolerance < 0
     ):
         logger.error(
             "PSA comparison requires finite draws, one reference and tolerance.",
@@ -137,7 +143,12 @@ def validate_psa_results(
     expected_mean_cost = numeric(reference[0])
     calculated_mean_cost = numeric(costs.mean())
 
-    if np.isclose(expected_mean_cost, calculated_mean_cost, rtol=tolerance):
+    if np.isclose(
+        expected_mean_cost,
+        calculated_mean_cost,
+        rtol=tolerance,
+        atol=absolute_tolerance,
+    ):
         logger.info("✅ PSA mean cost matched successfully.")
         return True
     logger.error("❌ PSA mean cost has a discrepancy.")
