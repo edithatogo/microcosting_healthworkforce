@@ -1,10 +1,13 @@
-import os
-import sys
+# Copyright 2025 doughnut. SPDX-License-Identifier: Apache-2.0
+"""Configure the project Sphinx documentation."""
 
-sys.path.insert(0, os.path.abspath("../../src"))
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
 project = "Microcosting Health Workforce"
-copyright = "2025, doughnut"
+copyright = "2025, doughnut"  # noqa: A001 - required Sphinx configuration key
 author = "doughnut"
 release = "0.0.1"
 

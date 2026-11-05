@@ -49,3 +49,9 @@ sheet_contents.txt
 sheet_formulas.txt
 debug_log.txt
 profile.out
+
+# Private workbook runs, local validation evidence and release scanning output
+.private-runs/
+archived_dsa_comparison.csv
+delivered_validation.json
+dsa_validation.csv

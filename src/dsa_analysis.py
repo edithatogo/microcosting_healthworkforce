@@ -1,86 +1,93 @@
+# Copyright 2026 Dylan. SPDX-License-Identifier: Apache-2.0
 # src/dsa_analysis.py
-"""
-This module handles the Deterministic Sensitivity Analysis (DSA).
-
-It provides functionality to run pre-defined or custom scenarios,
-systematically varying input parameters to assess their impact on the final
-calculated costs.
-"""
+"""Evaluate declared deterministic workforce scenarios."""
 
 import json
 import logging
-from typing import Any, Callable, cast
+from pathlib import Path
+from typing import Any, cast
+lazy from collections.abc import Callable
 
-import pandas as pd
+import polars as pl
+
+from src.contracts import parameter_mapping
+from src.numeric import numeric
+from src.numeric import row_filter as validate_row_filter
+
+logger = logging.getLogger(__name__)
 
 
 def load_dsa_scenarios(file_path: str) -> list[dict[str, Any]]:
-    """
-    Loads the DSA scenario definitions from a specified JSON file.
-    """
+    """Load the DSA scenario definitions from a specified JSON file."""
     try:
-        with open(file_path, "r") as f:  # noqa: UP015 - explicit mode for test clarity
+        with Path(file_path).open() as f:
             scenarios = json.load(f)
-        return cast(list[dict[str, Any]], scenarios)
-    except FileNotFoundError:
-        raise FileNotFoundError(f"DSA scenarios file not found at: {file_path}")
-    except json.JSONDecodeError:
-        raise ValueError(f"Invalid JSON format in DSA scenarios file: {file_path}")
+        return cast("list[dict[str, Any]]", scenarios)
+    except FileNotFoundError as error:
+        message = f"DSA scenarios file not found at: {file_path}"
+        raise FileNotFoundError(message) from error
+    except json.JSONDecodeError as error:
+        message = f"Invalid JSON format in DSA scenarios file: {file_path}"
+        raise ValueError(message) from error
 
 
 def run_dsa_analysis(
-    base_case_df: pd.DataFrame,
+    base_case_df: pl.DataFrame,
     formulas_data: dict[str, Any],
-    calculation_pipeline: Callable[[pd.DataFrame, dict[str, Any]], pd.DataFrame],
+    calculation_pipeline: Callable[[pl.DataFrame, dict[str, Any]], pl.DataFrame],
     scenarios: list[dict[str, Any]],
-) -> dict[str, pd.DataFrame]:
-    """
-    Runs a series of Deterministic Sensitivity Analysis scenarios.
-    """
-    dsa_results: dict[str, pd.DataFrame] = {}
+) -> dict[str, pl.DataFrame]:
+    """Run a series of Deterministic Sensitivity Analysis scenarios."""
+    dsa_results: dict[str, pl.DataFrame] = {}
 
-    param_to_col_map: dict[str, str] = {}
-    for output_def in formulas_data.get("outputs", []):
-        if "parameter_mapping" in output_def:
-            param_to_col_map.update(output_def["parameter_mapping"])
+    param_to_col_map = parameter_mapping(formulas_data)
 
     for scenario in scenarios:
         scenario_name = scenario["name"]
-        params_to_vary = scenario.get("parameters_to_vary", [])
-        variations = scenario.get("variations", [])
-        row_filter = scenario.get("row_filter")
-        logging.info(f"Running scenario: {scenario_name}")
+        params_to_vary = scenario.get(
+            "parameters_to_vary",
+            [scenario["parameter_to_vary"]] if "parameter_to_vary" in scenario else [],
+        )
+        variations = scenario.get(
+            "variations",
+            [scenario["variation"]] if "variation" in scenario else [],
+        )
+        row_filter = validate_row_filter(scenario.get("row_filter"))
+        logger.info("Running scenario: %s", scenario_name)
 
-        scenario_df = base_case_df.copy(deep=True)
+        scenario_df = base_case_df.clone()
 
         for i, param_to_vary in enumerate(params_to_vary):
             variation = variations[i]
 
             if param_to_vary not in param_to_col_map:
-                logging.warning(
-                    f"Param '{param_to_vary}' not in formula mapping. Skipping."
+                logger.warning(
+                    "Param '%s' not in formula mapping. Skipping.",
+                    param_to_vary,
                 )
                 continue
 
             column_to_vary = param_to_col_map[param_to_vary]
 
-            mask = pd.Series(True, index=scenario_df.index)
-            if row_filter:
-                for key, value in row_filter.items():
-                    mask &= scenario_df[key] == value
-
-            if pd.api.types.is_integer_dtype(scenario_df[column_to_vary]):
-                scenario_df[column_to_vary] = scenario_df[column_to_vary].astype(float)
-
+            mask = pl.lit(value=True)
+            for key, value in row_filter.items():
+                mask = mask & (pl.col(key) == value)
             if variation["type"] == "percentage":
-                scenario_df.loc[mask, column_to_vary] *= 1 + variation["value"]
+                expr = pl.col(column_to_vary) * (1 + variation["value"])
             elif variation["type"] == "absolute":
-                scenario_df.loc[mask, column_to_vary] += variation["value"]
+                expr = pl.col(column_to_vary) + variation["value"]
             else:
-                logging.warning(
-                    f"Unknown variation type '{variation['type']}'. Skipping."
+                logger.warning(
+                    "Unknown variation type %r. Skipping.",
+                    variation["type"],
                 )
                 continue
+            scenario_df = scenario_df.with_columns(
+                pl.when(mask)
+                .then(expr)
+                .otherwise(pl.col(column_to_vary))
+                .alias(column_to_vary),
+            )
 
         scenario_results = calculation_pipeline(scenario_df, formulas_data)
         dsa_results[scenario_name] = scenario_results
@@ -89,21 +96,20 @@ def run_dsa_analysis(
 
 
 def report_dsa_results(
-    dsa_results: dict[str, pd.DataFrame],
-    base_case_results: pd.DataFrame,
+    dsa_results: dict[str, pl.DataFrame],
+    base_case_results: pl.DataFrame,
 ) -> None:
-    """
-    Prints a summary report of the DSA results.
-    """
-    logging.info("--- DSA Results Summary (showing Year 0 Mid-point Cost) ---")
-    base_case_cost = base_case_results["Calculated_Cost_Mid_Y0"].mean()
-    logging.info(f"Base Case Average Cost: {base_case_cost:,.2f}")
+    """Print a summary report of the DSA results."""
+    logger.info("--- DSA Results Summary (showing Year 0 Mid-point Cost) ---")
+    base_case_cost = numeric(base_case_results["Calculated_Cost_Mid_Y0"].mean())
+    logger.info("Base Case Average Cost: %s", format(base_case_cost, ",.2f"))
 
     for scenario_name, result_df in dsa_results.items():
-        scenario_cost = result_df["Calculated_Cost_Mid_Y0"].mean()
+        scenario_cost = numeric(result_df["Calculated_Cost_Mid_Y0"].mean())
         percentage_change = ((scenario_cost - base_case_cost) / base_case_cost) * 100
-        logging.info(
-            f"  - {scenario_name:<25} | "
-            f"Result: {scenario_cost:,.2f} | "
-            f"Change: {percentage_change:+.2f}%"
+        logger.info(
+            "  - %s | Result: %s | Change: %s%%",
+            format(scenario_name, "<25"),
+            format(scenario_cost, ",.2f"),
+            format(percentage_change, "+.2f"),
         )

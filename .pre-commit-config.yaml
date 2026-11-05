@@ -1,20 +1,31 @@
 repos:
--   repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.5.0
+  - repo: local
     hooks:
-    -   id: ruff
-    -   id: ruff-format
--   repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.10.1
-    hooks:
-    -   id: mypy
--   repo: https://github.com/PyCQA/bandit
-    rev: 1.7.9
-    hooks:
-    -   id: bandit
-        exclude: tests/
--   repo: https://github.com/commitizen-tools/commitizen
-    rev: v3.27.0
-    hooks:
-    -   id: commitizen
+      - id: ruff
+        name: Ruff (locked Python 3.15.1 environment)
+        entry: uv run --locked ruff check
+        language: system
+        types_or: [python, pyi]
+      - id: ruff-format
+        name: Ruff format check
+        entry: uv run --locked ruff format --check
+        language: system
+        types_or: [python, pyi]
+      - id: basedpyright
+        name: Basedpyright strict
+        entry: uv run --locked basedpyright
+        language: system
+        pass_filenames: false
+        types_or: [python, pyi]
+      - id: bandit
+        name: Bandit
+        entry: uv run --locked bandit -r src
+        language: system
+        pass_filenames: false
+        types: [python]
+        exclude: ^tests/
+      - id: commitizen
+        name: Commitizen
+        entry: uv run --locked cz check --commit-msg-file
+        language: system
         stages: [commit-msg]

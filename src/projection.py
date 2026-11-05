@@ -1,39 +1,28 @@
-# src/projection.py
-"""
-This module handles the projection of costs over multiple years based on
-a given indexation rate.
-"""
+# Copyright 2026 Dylan. SPDX-License-Identifier: Apache-2.0
+"""Project annual costs using the scenario's annual indexation rate."""
 
-import pandas as pd
+import polars as pl
 
 
 def project_costs(
-    base_year_costs_df: pd.DataFrame,
-    scenario_df: pd.DataFrame,
+    base_year_costs_df: pl.DataFrame,
+    scenario_df: pl.DataFrame,
     num_years: int = 5,
-) -> pd.DataFrame:
-    """
-    Projects costs for a specified number of years based on an indexation rate.
-
-    Args:
-        base_year_costs_df: DataFrame containing the calculated costs for Year 0.
-        scenario_df: The scenario-specific DataFrame, used to get the
-                     indexation rate for each row.
-        num_years: The number of years to project into the future.
-
-    Returns:
-        A DataFrame with the projected costs for each year.
-    """
-    projected_df = base_year_costs_df.copy()
-
-    indexation_rate = scenario_df["Grade(s)_Indexation per annum (%)"].fillna(0)
-
+) -> pl.DataFrame:
+    """Compound each tier annually. Legacy callers keep their original index."""
+    column = "Grade(s)_Indexation per annum (%)"
+    frame = base_year_costs_df
+    rate = scenario_df[column]
+    if frame.height != len(rate):
+        message = "Scenario rows must align with base costs"
+        raise ValueError(message)
+    factor = 1 + rate.cast(pl.Float64).fill_nan(None).fill_null(0)
     for year in range(1, num_years + 1):
-        for tier in ["LL", "Mid", "UL"]:
-            prev_year_col = f"Calculated_Cost_{tier}_Y{year - 1}"
-            new_year_col = f"Calculated_Cost_{tier}_Y{year}"
-            projected_df[new_year_col] = projected_df[prev_year_col] * (
-                1 + indexation_rate
+        frame = frame.with_columns(
+            (pl.col(f"Calculated_Cost_{tier}_Y{year - 1}") * factor).alias(
+                f"Calculated_Cost_{tier}_Y{year}",
             )
+            for tier in ("LL", "Mid", "UL")
+        )
 
-    return projected_df
+    return frame

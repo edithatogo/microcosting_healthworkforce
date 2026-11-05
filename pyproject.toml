@@ -1,22 +1,22 @@
 [tool.ruff]
 line-length = 88
 
+
 [tool.ruff.lint]
-select = ["E", "F", "I"]
+select = ["ALL"]
 
 [tool.ruff.format]
 quote-style = "double"
 
-[tool.mypy]
-strict = true
-ignore_missing_imports = true
-files = ["src", "tests"]
 
 [tool.bandit]
 exclude_dirs = ["tests"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+addopts = "--strict-markers --strict-config"
+xfail_strict = true
+filterwarnings = ["error"]
 
 [tool.commitizen]
 name = "cz_conventional_commits"
@@ -27,3 +27,42 @@ version_files = [
 ]
 
 
+
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "microcosting-healthworkforce"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+version = "0.0.1"
+requires-python = "==3.15.1"
+dependencies = ["pydantic>=2,<3", "pandera[polars]","openpyxl", "polars", "numpy", "matplotlib", "pyarrow"]
+
+[project.scripts]
+microcosting-healthworkforce = "src.main:main"
+
+[tool.setuptools]
+packages = ["src"]
+
+[dependency-groups]
+profiling = ["scalene"]
+dev = [
+    "pytest",
+    "pytest-cov",
+    "ruff",
+    "basedpyright",
+    "hypothesis",
+    "pytest-gremlins",
+    "bandit",
+    "sphinx",
+    "furo",
+    "myst-parser",
+    "commitizen",
+]
+
+[tool.basedpyright]
+typeCheckingMode = "strict"
+pythonVersion = "3.15"
+include = ["src", "tests"]

@@ -1,165 +1,84 @@
-# src/data_loader.py
-"""
-This module handles loading and cleaning data from the Excel file.
-"""
+# Copyright 2026 Dylan. SPDX-License-Identifier: Apache-2.0
+"""Read delivered workforce tables with their original merged header levels."""
 
-import pandas as pd
+import tempfile
+from pathlib import Path
 
+import openpyxl
+import polars as pl
 
-def _clean_column_names(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Cleans and standardizes the column names of a DataFrame.
+from src import config
+from src.libreoffice import recalculate
+from src.workbook_run import parameters
 
-    This function performs several cleaning steps:
-    - Joins multi-level columns into a single string.
-    - Removes "Unnamed" parts from column names.
-    - Replaces "(hourly)" with "_hourly".
-    - Replaces spaces with underscores.
-    - Replaces multiple underscores with a single underscore.
-    - Corrects a specific issue with "Leave Loading (%)".
-    - Removes "_nan" suffixes.
-
-    Args:
-        df: The DataFrame with dirty column names.
-
-    Returns:
-        The DataFrame with cleaned column names.
-    """
-    # Clean up the multi-level column names into a single string
-    if isinstance(df.columns, pd.MultiIndex):
-        df.columns = ["_".join(map(str, col)).strip() for col in df.columns]
-
-    # Clean the column names by removing unwanted characters and patterns
-    df.columns = (
-        pd.Series(df.columns)
-        .str.replace(r"Unnamed: \d+_level_\d+", "", regex=True)
-        .str.replace(r"_\(hourly\)", "_hourly", regex=True)
-        .str.replace(r"_\s+", "_", regex=True)
-        .str.replace(r"_+", "_", regex=True)
-        .str.replace(r"Leave Loading \(%\)__", "Leave Loading (%)", regex=False)
-        .str.replace(r"_nan", "", regex=False)
-        .str.strip("_")
-        .to_list()
-    )
-    return df
+IDENTITY_COLUMN_COUNT = 2
 
 
-def load_and_clean_data(file_path: str, sheet_name: str) -> pd.DataFrame:
-    """
-    Loads and cleans the primary data from the 'Labour - Prices' sheet.
-    """
-    # Load the sheet, skipping the top rows and setting the header
-    df = pd.read_excel(file_path, sheet_name=sheet_name, header=[1, 2])
-    print("Columns before cleaning:", df.columns)
-
-    # Coalesce cost columns to handle data entry inconsistencies
-    df[("Base Salary + Costs", "LL")] = df[("Base Salary + Costs", "LL")].fillna(
-        df[("Base Salary", "LL")]
-    )
-    # Coalesce Mid-point and UL, ensuring numeric types to avoid warnings
-    for point in ["Mid-point", "UL"]:
-        costs_col = ("Base Salary + Costs", point)
-        base_col = ("Base Salary", point)
-
-        # Ensure both columns are numeric before filling
-        df[costs_col] = pd.to_numeric(df[costs_col], errors="coerce")
-        df[base_col] = pd.to_numeric(df[base_col], errors="coerce")
-
-        df[costs_col] = df[costs_col].fillna(df[base_col])
-
-    df = _clean_column_names(df)
-    print("Columns after cleaning:", df.columns)
-
-    # Rename the main columns for easier access
-    df.rename(
-        columns={
-            "Jurisdiction_": "Jurisdiction",
-            "Personnel type_": "Personnel type",
-        },
-        inplace=True,
-    )
-
-    # Forward-fill the 'Jurisdiction' and 'Personnel type' columns
-    if "Jurisdiction" in df.columns:
-        df["Jurisdiction"] = df["Jurisdiction"].ffill()
-    if "Personnel type" in df.columns:
-        df["Personnel type"] = df["Personnel type"].ffill()
-
-    # Drop rows where 'Personnel type' is still NaN (e.g., empty spacer rows)
-    if "Personnel type" in df.columns:
-        df.dropna(subset=["Personnel type"], inplace=True)
-
-    numeric_cols = [
-        "Base Salary_LL",
-        "Base Salary_Mid-point",
-        "Base Salary_UL",
-        "Base Salary + Costs_LL",
-        "Base Salary + Costs_Mid-point",
-        "Base Salary + Costs_UL",
-        "Base Salary + Costs (hourly)_LL",
-        "Base Salary + Costs (hourly)_Mid-point",
-        "Base Salary + Costs (hourly)_UL",
-    ]
-    for i in range(1, 5):
-        numeric_cols.extend(
-            [
-                f"Base Salary_LL.{i}",
-                f"Base Salary_Mid-point.{i}",
-                f"Base Salary_UL.{i}",
-                f"Base Salary + Costs_LL.{i}",
-                f"Base Salary + Costs_Mid-point.{i}",
-                f"Base Salary + Costs_UL.{i}",
-                f"Base Salary + Costs (hourly)_LL.{i}",
-                f"Base Salary + Costs (hourly)_Mid-point.{i}",
-                f"Base Salary + Costs (hourly)_UL.{i}",
-            ]
+def _table(file_path: str, sheet_name: str, skip: int, levels: int) -> pl.DataFrame:
+    book = openpyxl.load_workbook(file_path, read_only=True, data_only=True)
+    try:
+        rows = iter(book[sheet_name].values)
+        for _ in range(skip):
+            next(rows)
+        headers = [list(next(rows)) for _ in range(levels)]
+        names: list[str] = []
+        counts: dict[str, int] = {}
+        for i in range(len(headers[0])):
+            parts: list[str] = []
+            for level, row in enumerate(headers):
+                value = row[i]
+                if value is None and level < levels - 1 and i >= IDENTITY_COLUMN_COUNT:
+                    value = next((v for v in reversed(row[:i]) if v is not None), None)
+                if value is not None:
+                    parts.append(str(value).strip())
+            label = "_".join(parts) or f"column_{i}"
+            n = counts.get(label, 0)
+            names.append(label if n == 0 else f"{label}.{n}")
+            counts[label] = n + 1
+        return pl.DataFrame(
+            [[str(v) if v is not None else None for v in r] for r in rows],
+            schema=dict.fromkeys(names, pl.String),
+            orient="row",
         )
-
-    for col in numeric_cols:
-        if col in df.columns:
-            df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0)
-
-    return df
+    finally:
+        book.close()
 
 
-def load_dsa_validation_data(file_path: str, sheet_name: str) -> pd.DataFrame:
-    """
-    Loads and cleans the DSA validation data from the specified sheet.
-    """
-    # Load the sheet with a multi-level header
-    df = pd.read_excel(file_path, sheet_name=sheet_name, header=[0, 1, 2])
-    df = _clean_column_names(df)
+def load_and_clean_data(file_path: str, sheet_name: str) -> pl.DataFrame:
+    """Recalculate the original workbook and return validated workforce inputs."""
+    if sheet_name != config.LABOUR_PRICES_SHEET:
+        message = f"Unsupported primary sheet {sheet_name}"
+        raise ValueError(message)
+    source = Path(file_path).resolve()
+    with tempfile.TemporaryDirectory() as directory:
+        root = Path(directory)
+        recalculate([source], root, root / "profile")
+        book = openpyxl.load_workbook(
+            root / source.name,
+            read_only=True,
+            data_only=True,
+        )
+        try:
+            return parameters(book)
+        finally:
+            book.close()
 
-    # Rename the personnel type column for easier access
-    df.rename(
-        columns={"Jurisdiction_Personnel type_LL": "Personnel type_"},
-        inplace=True,
+
+def load_dsa_validation_data(file_path: str, sheet_name: str) -> pl.DataFrame:
+    """Read archived jurisdiction/role DSA values without manufacturing rows."""
+    frame = _table(file_path, sheet_name, 0, 3)
+    return frame.filter(
+        pl.col("Jurisdiction").is_in(["VIC", "QLD", "NSW", "SA", "WA"]),
+    ).with_columns(
+        pl.exclude("Jurisdiction", "Personnel type").cast(pl.Float64, strict=False),
     )
 
-    # Forward-fill the 'Personnel type' column
-    if "Personnel type_" in df.columns:
-        df["Personnel type_"] = df["Personnel type_"].ffill()
 
-    # Rename the main columns for easier access
-    df.rename(
-        columns={
-            "Jurisdiction_": "Jurisdiction",
-            "Personnel type_": "Personnel type",
-        },
-        inplace=True,
+def load_psa_validation_data(file_path: str, sheet_name: str) -> pl.DataFrame:
+    """Read archived simulation summaries and preserve missing means."""
+    frame = _table(file_path, sheet_name, 0, 1)
+    return (
+        frame.with_columns(pl.col("Expected Mean Cost").cast(pl.Float64, strict=False))
+        if "Expected Mean Cost" in frame.columns
+        else frame
     )
-
-    # Drop rows where 'Personnel type' is still NaN
-    if "Personnel type" in df.columns:
-        df.dropna(subset=["Personnel type"], inplace=True)
-
-    return df
-
-
-def load_psa_validation_data(file_path: str, sheet_name: str) -> pd.DataFrame:
-    """
-    Loads the PSA validation data from the specified sheet.
-    """
-    # Load the sheet
-    df = pd.read_excel(file_path, sheet_name=sheet_name)
-    return df
