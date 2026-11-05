@@ -70,3 +70,15 @@ must resolve the actual effective dates of first-full-pay-period changes; this
 method does not derive pay cycles. Source applicability and review are assertions
 supplied by the release author, not conclusions independently established by code.
 Candidate workbook values cannot be used in an accepted release without review.
+
+The separate `microcosting-healthworkforce-v2` command accepts a condition-release
+JSON file, an activity JSON file, a local IANA timezone and an output path:
+
+```sh
+microcosting-healthworkforce-v2 --release release.json --activity activity.json \
+  --timezone Australia/Brisbane --output result.json
+```
+
+It validates both input schemas and creates a new result file exclusively; it
+will not overwrite an existing result. The command uses the limited method and
+source assertions described above. The original CLI remains unchanged.
