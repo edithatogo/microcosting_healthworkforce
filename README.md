@@ -161,3 +161,10 @@ skip behavior. Every calculated row must have a finite cost before aggregation.
 Relative and absolute reference tolerances are explicit (defaults 1e-3 and 1e-8);
 set both to zero for exact equality. A single draw is valid for execution checks,
 but its report does not claim an estimable sample deviation or percentile interval.
+
+The original workbook baseline uses nominal hours (productive-time fraction 1).
+Keep that baseline separate from explicitly labelled productive-hours scenarios.
+The retained PSA inputs are a conditional compatibility scenario: neither their
+absolute productive-time support nor their independent draws and unweighted
+aggregation constitute an approved uncertainty specification. No clipping or
+replacement priors are implied by software parity.
