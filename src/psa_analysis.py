@@ -1,57 +1,68 @@
+# Copyright 2026 Dylan. SPDX-License-Identifier: Apache-2.0
 # src/psa_analysis.py
-"""
-This module handles the Probabilistic Sensitivity Analysis (PSA).
-
-It provides functionality to run Monte Carlo simulations, systematically
-varying input parameters based on probability distributions to assess their
-combined impact on the final calculated costs.
-"""
+"""Simulate workforce costs using declared parameter distributions."""
 
 import json
 import logging
-from typing import Any, Callable, Dict, List, cast
+from pathlib import Path
+from typing import Any, NotRequired, TypedDict, Unpack, cast
+lazy from collections.abc import Callable
 
 import numpy as np
-import pandas as pd
+import polars as pl
+from pydantic import ConfigDict, TypeAdapter, with_config
+
+from src.contracts import parameter_mapping
+from src.numeric import numeric
+
+logger = logging.getLogger(__name__)
 
 
-def load_psa_scenarios(file_path: str) -> List[Dict[str, Any]]:
-    """
-    Loads the PSA scenario definitions from a specified JSON file.
-    """
+def load_psa_scenarios(file_path: str) -> list[dict[str, Any]]:
+    """Load the PSA scenario definitions from a specified JSON file."""
     try:
-        with open(file_path, "r") as f:
+        with Path(file_path).open() as f:
             scenarios = json.load(f)
-        return cast(List[Dict[str, Any]], scenarios)
-    except FileNotFoundError:
-        raise FileNotFoundError(f"PSA scenarios file not found at: {file_path}")
-    except json.JSONDecodeError:
-        raise ValueError(f"Invalid JSON format in PSA scenarios file: {file_path}")
+        return cast("list[dict[str, Any]]", scenarios)
+    except FileNotFoundError as error:
+        message = f"PSA scenarios file not found at: {file_path}"
+        raise FileNotFoundError(message) from error
+    except json.JSONDecodeError as error:
+        message = f"Invalid JSON format in PSA scenarios file: {file_path}"
+        raise ValueError(message) from error
+
+
+@with_config(ConfigDict(strict=True, extra="forbid"))
+class SeedOptions(TypedDict):
+    """The optional named seed retains the legacy default."""
+
+    seed: NotRequired[int]
+
+
+SEED_OPTIONS = TypeAdapter(SeedOptions)
 
 
 def run_psa_analysis(
-    base_case_df: pd.DataFrame,
-    formulas_data: Dict[str, Any],
-    calculation_pipeline: Callable[[pd.DataFrame, Dict[str, Any]], pd.DataFrame],
-    scenarios: List[Dict[str, Any]],
+    base_case_df: pl.DataFrame,
+    formulas_data: dict[str, Any],
+    calculation_pipeline: Callable[[pl.DataFrame, dict[str, Any]], pl.DataFrame],
+    scenarios: list[dict[str, Any]],
     iterations: int,
-) -> pd.DataFrame:
-    """
-    Runs a Probabilistic Sensitivity Analysis using Monte Carlo simulation.
-    """
-    logging.info(f"--- Running {iterations} PSA Iterations ---")
-    all_results = []
+    **options: Unpack[SeedOptions],
+) -> pl.DataFrame:
+    """Run a Probabilistic Sensitivity Analysis using Monte Carlo simulation."""
+    logger.info("--- Running %s PSA Iterations ---", iterations)
+    settings = SEED_OPTIONS.validate_python(options)
+    rng = np.random.default_rng(settings.get("seed", 20261103))
+    all_results: list[dict[str, int | float]] = []
 
-    param_to_col_map: Dict[str, str] = {}
-    for output_def in formulas_data.get("outputs", []):
-        if "parameter_mapping" in output_def:
-            param_to_col_map.update(output_def["parameter_mapping"])
+    param_to_col_map = parameter_mapping(formulas_data)
 
     for i in range(iterations):
         if (i + 1) % 100 == 0:
-            logging.info(f"Running iteration {i + 1}/{iterations}...")
+            logger.info("Running iteration %s/%s...", i + 1, iterations)
 
-        iter_df = base_case_df.copy(deep=True)
+        iter_df = base_case_df.clone()
 
         for scenario in scenarios:
             param = scenario["parameter_to_vary"]
@@ -59,50 +70,47 @@ def run_psa_analysis(
             column_to_vary = param_to_col_map.get(param)
 
             if not column_to_vary:
-                logging.warning(f"Param '{param}' not in formula mapping. Skipping.")
+                logger.warning("Param '%s' not in formula mapping. Skipping.", param)
                 continue
 
             if dist["type"] == "normal":
-                sampled_value = np.random.normal(dist["mean"], dist["std_dev"])
+                sampled_value = rng.normal(dist["mean"], dist["std_dev"])
             elif dist["type"] == "uniform":
-                sampled_value = np.random.uniform(dist["min"], dist["max"])
+                sampled_value = rng.uniform(dist["min"], dist["max"])
             elif dist["type"] == "triangular":
-                sampled_value = np.random.triangular(
-                    dist["min"], dist["mode"], dist["max"]
-                )
+                sampled_value = rng.triangular(dist["min"], dist["mode"], dist["max"])
             else:
-                logging.warning(f"Unknown distribution '{dist['type']}'. Skipping.")
+                logger.warning("Unknown distribution '%s'. Skipping.", dist["type"])
                 continue
 
-            iter_df[column_to_vary] = sampled_value
+            iter_df = iter_df.with_columns(pl.lit(sampled_value).alias(column_to_vary))
 
         result_df = calculation_pipeline(iter_df, formulas_data)
-        mean_cost = result_df["Calculated_Cost_Mid_Y0"].mean()
+        mean_cost = numeric(result_df["Calculated_Cost_Mid_Y0"].mean())
         all_results.append({"iteration": i + 1, "mean_cost": mean_cost})
 
-    return pd.DataFrame(all_results)
+    return pl.DataFrame(all_results)
 
 
-def report_psa_results(psa_results_df: pd.DataFrame) -> None:
-    """
-    Prints a summary report of the PSA results.
-    """
-    logging.info("--- PSA Results Summary ---")
-    if psa_results_df.empty:
-        logging.info("No PSA results to report.")
+def report_psa_results(psa_results_df: pl.DataFrame) -> None:
+    """Print a summary report of the PSA results."""
+    logger.info("--- PSA Results Summary ---")
+    if psa_results_df.is_empty():
+        logger.info("No PSA results to report.")
         return
 
-    mean_cost = psa_results_df["mean_cost"].mean()
-    std_dev = psa_results_df["mean_cost"].std()
+    mean_cost = numeric(psa_results_df["mean_cost"].mean())
+    std_dev = numeric(psa_results_df["mean_cost"].std())
     confidence_interval = (
-        psa_results_df["mean_cost"].quantile(0.025),
-        psa_results_df["mean_cost"].quantile(0.975),
+        numeric(psa_results_df["mean_cost"].quantile(0.025)),
+        numeric(psa_results_df["mean_cost"].quantile(0.975)),
     )
 
-    logging.info(f"Number of Iterations: {len(psa_results_df)}")
-    logging.info(f"Average Mean Cost: {mean_cost:,.2f}")
-    logging.info(f"Standard Deviation: {std_dev:,.2f}")
-    logging.info(
-        f"95% Confidence Interval: ({confidence_interval[0]:,.2f} - "
-        f"{confidence_interval[1]:,.2f})"
+    logger.info("Number of Iterations: %s", len(psa_results_df))
+    logger.info("Average Mean Cost: %s", format(mean_cost, ",.2f"))
+    logger.info("Standard Deviation: %s", format(std_dev, ",.2f"))
+    logger.info(
+        "95%% Confidence Interval: (%s - %s)",
+        format(confidence_interval[0], ",.2f"),
+        format(confidence_interval[1], ",.2f"),
     )

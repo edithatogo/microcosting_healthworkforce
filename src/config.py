@@ -1,6 +1,6 @@
+# Copyright 2026 Dylan. SPDX-License-Identifier: Apache-2.0
 # src/config.py
-"""
-Central configuration file for the microcosting application.
+"""Central configuration file for the microcosting application.
 
 This file consolidates all hardcoded paths, constants, and mappings
 to make the application more maintainable and easier to configure.
@@ -52,3 +52,7 @@ DSA_SCENARIO_VALIDATION_MAPPING = {
     "Annual Leave Loading +10%": "Leave Loading (%)_Base Salary + Costs_MP",
     "Annual Leave Loading -10%": "Leave Loading (%)_Base Salary + Costs_MP",
 }
+
+# Delivered workbook layout and monetary reconciliation tolerance.
+EXPECTED_STATE_ROLE_ROWS = 25
+PARITY_TOLERANCE = 0.01

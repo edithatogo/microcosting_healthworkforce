@@ -1,21 +1,26 @@
+# Copyright 2026 Dylan. SPDX-License-Identifier: Apache-2.0
 # src/formula_engine.py
-"""
-This module provides the core functionality for the data-driven calculation engine.
-It is responsible for loading formula definitions from a JSON file and orchestrating
-the calculation process based on those definitions.
-"""
+"""Compile configured arithmetic into Polars expressions."""
 
+import ast
 import json
-from typing import Any, cast
+import logging
+import operator
+from pathlib import Path
+from typing import TYPE_CHECKING
 
-import pandas as pd
+import polars as pl
 
-from src.formula_parser import evaluate_expression
+from src.contracts import FORMULA_ADAPTER, FormulaDocument, OutputDefinition
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
+logger = logging.getLogger(__name__)
 
 
-def load_formulas(file_path: str) -> dict[str, Any]:
-    """
-    Loads and validates the formula definitions from a specified JSON file.
+def load_formulas(file_path: str) -> FormulaDocument:
+    """Load and validates the formula definitions from a specified JSON file.
 
     Args:
         file_path: The absolute path to the JSON file containing the formulas.
@@ -26,113 +31,134 @@ def load_formulas(file_path: str) -> dict[str, Any]:
     Raises:
         FileNotFoundError: If the specified file does not exist.
         ValueError: If the JSON file is malformed or missing required keys.
+
     """
     try:
-        with open(file_path, "r") as f:  # noqa: UP015 - explicit mode for test clarity
+        with Path(file_path).open() as f:
             formulas_data = json.load(f)
-    except FileNotFoundError:
-        raise FileNotFoundError(f"Formula file not found at: {file_path}")
-    except json.JSONDecodeError:
-        raise ValueError(f"Invalid JSON format in file: {file_path}")
+    except FileNotFoundError as error:
+        message = f"Formula file not found at: {file_path}"
+        raise FileNotFoundError(message) from error
+    except json.JSONDecodeError as error:
+        message = f"Invalid JSON format in file: {file_path}"
+        raise ValueError(message) from error
 
     # Basic validation to ensure the core keys are present
     if "formulas" not in formulas_data or "outputs" not in formulas_data:
-        raise ValueError(
+        message = (
             f"'{file_path}' is missing required keys: 'formulas' and/or 'outputs'."
         )
-
-    return cast(dict[str, Any], formulas_data)
-
-
-def _calculate_value(
-    row: "pd.Series[Any]",
-    formula: dict[str, Any],
-    intermediate_results: dict[str, Any],
-    parameter_mapping: dict[str, str],
-) -> Any:
-    """
-    Calculates a value using the defined formula expression.
-
-    Args:
-        row: A Series representing a row of the input DataFrame.
-        formula: The formula definition to use for the calculation.
-        intermediate_results: A dictionary of already calculated intermediate values.
-        parameter_mapping: A dictionary mapping formula parameters to DataFrame columns.
-
-    Returns:
-        The calculated value.
-    """
-    expression = formula["expression"]
-    parameters = {}
-
-    for param_name in formula.get("parameters", []):
-        if param_name in intermediate_results:
-            parameters[param_name] = intermediate_results[param_name]
-        elif param_name in parameter_mapping:
-            source_col = parameter_mapping[param_name]
-            parameters[param_name] = row.get(source_col, 0)
-        else:
-            parameters[param_name] = 0
-
-    if parameters.get("productive_time_factor") == 0:
-        import logging
-
-        logging.warning(
-            "Productive time factor is 0, setting to 1.0 to avoid division by zero."
+        raise ValueError(
+            message,
         )
-        parameters["productive_time_factor"] = 1.0
 
-    return evaluate_expression(expression, parameters)
+    return FORMULA_ADAPTER.validate_python(formulas_data)
+
+
+def compile_expression(node: ast.AST, parameters: dict[str, pl.Expr]) -> pl.Expr:
+    """Compile the supported arithmetic AST using explicit parameter bindings."""
+    operations: dict[type[ast.operator], Callable[[pl.Expr, pl.Expr], pl.Expr]] = {
+        ast.Add: operator.add,
+        ast.Sub: operator.sub,
+        ast.Mult: operator.mul,
+        ast.Div: lambda a, b: a / b,
+        ast.Pow: lambda a, b: a**b,
+    }
+    if isinstance(node, ast.Constant) and type(node.value) in (int, float):
+        return pl.lit(node.value)
+    if isinstance(node, ast.Name) and node.id in parameters:
+        return parameters[node.id]
+    if isinstance(node, ast.BinOp) and type(node.op) in operations:
+        return operations[type(node.op)](
+            compile_expression(node.left, parameters),
+            compile_expression(node.right, parameters),
+        )
+    if isinstance(node, ast.UnaryOp) and isinstance(node.op, (ast.UAdd, ast.USub)):
+        value = compile_expression(node.operand, parameters)
+        return -value if isinstance(node.op, ast.USub) else value
+    message = "Unsupported workforce formula expression"
+    raise ValueError(message)
+
+
+def _productive_factor(
+    data: pl.DataFrame,
+    column: str | None,
+    value: pl.Expr,
+) -> pl.Expr:
+    """Retain the legacy missing/zero-factor warning and neutral multiplier."""
+    if column is None or column not in data.columns or (data[column] == 0).any():
+        logger.warning("Productive time factor is 0 or missing; using 1.0")
+    return pl.when(value == 0).then(1.0).otherwise(value)
+
+
+def _direct_column(data: pl.DataFrame, name: str) -> pl.Expr:
+    """Preserve the source dtype for direct outputs and zero for missing columns."""
+    return pl.col(name) if name in data.columns else pl.lit(0.0)
 
 
 def apply_formulas(
-    data_df: pd.DataFrame, formulas_data: dict[str, Any]
-) -> pd.DataFrame:
-    """
-    Applies the defined formulas to the input DataFrame row by row.
-    """
-    results = []
-    formulas = {f["id"]: f for f in formulas_data.get("formulas", [])}
-    outputs = formulas_data.get("outputs", [])
+    data_df: pl.DataFrame,
+    formulas_data: object,
+) -> pl.DataFrame:
+    """Resolve each output's own mappings before compiling its expression tree."""
+    document = FORMULA_ADAPTER.validate_python(formulas_data)
+    formulas = {f["id"]: f for f in document["formulas"]}
+    outputs: list[pl.Expr] = []
 
-    for _, row in data_df.iterrows():
-        row_results = {}
-        intermediate_results: dict[str, Any] = {}
+    def column(name: str | None) -> pl.Expr:
+        if name is not None and name in data_df.columns:
+            return pl.col(name).cast(pl.Float64)
+        return pl.lit(0.0)
 
-        for output_def in outputs:
-            output_name = output_def["name"] + "_Y0"
-            calculation_method = output_def.get("calculation_method")
-            final_value = 0
+    def resolve(key: str, mapping: dict[str, str], visiting: set[str]) -> pl.Expr:
+        if key in visiting:
+            message = "Cyclic formula dependency"
+            raise ValueError(message)
+        definition = formulas[key]
+        if "parameters" not in definition:
+            message = f"Formula {key} has no parameter declaration"
+            raise ValueError(message)
+        deps = definition.get("dependencies", [])
+        args = {
+            p: resolve(p, mapping, visiting | {key})
+            if p in deps
+            else column(mapping.get(p))
+            for p in definition["parameters"]
+        }
+        if "productive_time_factor" in args:
+            args["productive_time_factor"] = _productive_factor(
+                data_df,
+                mapping.get("productive_time_factor"),
+                args["productive_time_factor"],
+            )
+        return compile_expression(
+            ast.parse(definition["expression"], mode="eval").body,
+            args,
+        )
 
-            if calculation_method == "direct":
-                source_col = output_def.get("source_column")
-                if source_col:
-                    final_value = row.get(source_col, 0)
+    for output in document["outputs"]:
+        name = str(output["name"]) + "_Y0"
+        if name in data_df.columns:
+            continue
+        expr = _output_expression(data_df, output, resolve)
+        outputs.append(expr.alias(name))
+    return data_df.with_columns(outputs)
 
-            elif calculation_method == "formula":
-                formula_id = output_def["uses_formula"]
-                formula_def = formulas[formula_id]
-                param_mapping = output_def.get("parameter_mapping", {})
 
-                # Calculate all dependencies, storing them in intermediate_results
-                for dep_id in formula_def.get("dependencies", []):
-                    if dep_id not in intermediate_results:
-                        dep_formula = formulas[dep_id]
-                        intermediate_results[dep_id] = _calculate_value(
-                            row, dep_formula, intermediate_results, param_mapping
-                        )
-
-                # Now calculate the final formula
-                final_value = _calculate_value(
-                    row, formula_def, intermediate_results, param_mapping
-                )
-
-            row_results[output_name] = final_value
-        results.append(row_results)
-
-    results_df = pd.DataFrame(results, index=data_df.index)
-    # Drop columns from results_df that are already in data_df to avoid duplication
-    results_df = results_df.drop(
-        columns=[col for col in results_df.columns if col in data_df.columns]
-    )
-    return pd.concat([data_df, results_df], axis=1)
+def _output_expression(
+    data: pl.DataFrame,
+    output: OutputDefinition,
+    resolve: Callable[[str, dict[str, str], set[str]], pl.Expr],
+) -> pl.Expr:
+    """Select the declared output method without altering formula resolution."""
+    if output["calculation_method"] == "direct" and "source_column" in output:
+        source = output["source_column"]
+        return _direct_column(data, source)
+    if (
+        output["calculation_method"] == "formula"
+        and "uses_formula" in output
+        and "parameter_mapping" in output
+    ):
+        return resolve(output["uses_formula"], output["parameter_mapping"], set())
+    message = "Unknown calculation method"
+    raise ValueError(message)

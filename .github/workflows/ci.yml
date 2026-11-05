@@ -1,31 +1,40 @@
 name: CI
-
-on: [push, pull_request]
-
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.9", "3.10", "3.11"]
-
+    timeout-minutes: 20
+    env:
+      MPLBACKEND: Agg
     steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install pipenv and tox
-      run: pip install pipenv tox tox-pipenv
-    - name: Run tox
-      run: tox -e py
-    - name: Upload coverage report
-      uses: actions/upload-artifact@v4
-      with:
-        name: coverage-report-${{ matrix.python-version }}
-        path: coverage.xml
-    - name: Upload profiling report
-      uses: actions/upload-artifact@v4
-      with:
-        name: profiling-report-${{ matrix.python-version }}
-        path: profile.out
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv python install 3.15.1
+      - name: Install workbook loader dependency
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libreoffice-calc
+      - run: uv sync --locked --python 3.15.1
+      - name: Verify selected runtime
+        run: .venv/bin/python -c 'import sys; print(sys.version); assert sys.version_info[:3] == (3, 15, 1)'
+      - name: Test model contracts and workbook loader
+        run: uv run --no-sync pytest --cov=src --cov-report=xml
+      - run: uv run --no-sync ruff format --check .
+      - run: uv run --no-sync ruff check .
+      - run: uv run --no-sync basedpyright
+      - run: uv run --no-sync bandit -r src
+      - run: uv build --wheel
+      - name: Exercise installed wheel outside the checkout
+        shell: bash
+        run: |
+          uv venv --python 3.15.1 "$RUNNER_TEMP/workforce-wheel"
+          uv export --locked --no-dev --no-emit-project --output-file "$RUNNER_TEMP/workforce-requirements.txt"
+          uv pip install --python "$RUNNER_TEMP/workforce-wheel/bin/python" --require-hashes -r "$RUNNER_TEMP/workforce-requirements.txt"
+          uv pip install --python "$RUNNER_TEMP/workforce-wheel/bin/python" --no-deps dist/*.whl
+          cd "$RUNNER_TEMP"
+          "$RUNNER_TEMP/workforce-wheel/bin/python" -c 'import sys; print(sys.version); assert sys.version_info[:3] == (3, 15, 1)'
+          "$RUNNER_TEMP/workforce-wheel/bin/microcosting-healthworkforce" --help
+      - name: Profile synthetic formula contracts
+        run: uv run --no-sync python -m cProfile -o profile.out -m pytest tests/test_formula_engine.py -q

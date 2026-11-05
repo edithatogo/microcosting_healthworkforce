@@ -1,81 +1,31 @@
-# tests/test_data_loader.py
-"""
-Tests for the data_loader module.
-"""
-
-from unittest.mock import patch
-
-import pandas as pd
+# Copyright 2026 Dylan. SPDX-License-Identifier: Apache-2.0
+"""Verify original workbook identity rows and positive reference costs."""
 
 from src import config
-from src.data_loader import (
-    load_and_clean_data,
-    load_dsa_validation_data,
-)
+from src.data_loader import load_and_clean_data, load_dsa_validation_data
+from src.numeric import numeric
+from tests.checks import assert_that
+
+EXPECTED_25 = 25
 
 
 def test_load_and_clean_data() -> None:
-    """
-    Tests that the load_and_clean_data function loads and cleans data correctly.
-    """
-    # Create a mock DataFrame to be returned by pd.read_excel
-    mock_df = pd.DataFrame(
-        {
-            ("Jurisdiction_", "nan"): ["NSW", "NSW", "VIC"],
-            ("Personnel type_", "nan"): ["Nurse", "Doctor", "Admin"],
-            # Base Salary columns (needed for coalescing in loader)
-            ("Base Salary", "LL"): [50000, 80000, 40000],
-            ("Base Salary", "Mid-point"): [55000, 85000, 45000],
-            ("Base Salary", "UL"): [60000, 90000, 50000],
-            # Base Salary + Costs present; Mid/UL empty to be coalesced by loader
-            ("Base Salary + Costs", "LL"): [60000, 90000, 50000],
-            ("Base Salary + Costs", "Mid-point"): [None, None, None],
-            ("Base Salary + Costs", "UL"): [None, None, None],
-        }
+    """Retain the complete, uniquely identified workforce input table."""
+    frame = load_and_clean_data(config.DATA_FILE_PATH, config.LABOUR_PRICES_SHEET)
+    assert_that(frame.height == EXPECTED_25)
+    assert_that(
+        frame.select("Jurisdiction", "Personnel type").unique().height == EXPECTED_25,
     )
-    mock_df.columns = pd.MultiIndex.from_tuples(mock_df.columns)
-
-    with patch("pandas.read_excel", return_value=mock_df) as mock_read_excel:
-        df = load_and_clean_data("dummy_path.xlsx", "dummy_sheet")
-        mock_read_excel.assert_called_once_with(
-            "dummy_path.xlsx", sheet_name="dummy_sheet", header=[1, 2]
-        )
-        assert "Jurisdiction" in df.columns
-        assert "Personnel type" in df.columns
-        assert df.shape[0] == 3
-        assert df["Jurisdiction"].isna().sum() == 0
-        assert df["Personnel type"].isna().sum() == 0
+    assert_that(frame["Personnel type"].null_count() == 0)
+    assert_that(numeric(frame["Base Salary_Mid-point"].min()) > 0)
 
 
 def test_load_dsa_validation_data() -> None:
-    """
-    Tests that the load_dsa_validation_data function loads and cleans data correctly.
-    """
-    # Create a mock DataFrame to be returned by pd.read_excel
-    mock_df = pd.DataFrame(
-        {
-            ("Jurisdiction", "Personnel type", "LL"): [
-                "Nurse",
-                "Doctor",
-                "Admin",
-            ],
-            ("Superannuation Rate", "Base Salary + Costs", "MP"): [
-                0.1,
-                0.12,
-                0.09,
-            ],
-        }
+    """Retain every archived workforce validation row and its reference costs."""
+    frame = load_dsa_validation_data(config.DATA_FILE_PATH, config.DSA_VALIDATION_SHEET)
+    assert_that(frame.height == EXPECTED_25)
+    assert_that(
+        frame.select("Jurisdiction", "Personnel type").unique().height == EXPECTED_25,
     )
-    mock_df.columns = pd.MultiIndex.from_tuples(mock_df.columns)
-
-    with patch("pandas.read_excel", return_value=mock_df) as mock_read_excel:
-        df = load_dsa_validation_data("dummy_path.xlsx", config.DSA_VALIDATION_SHEET)
-        mock_read_excel.assert_called_once_with(
-            "dummy_path.xlsx",
-            sheet_name=config.DSA_VALIDATION_SHEET,
-            header=[0, 1, 2],
-        )
-        assert "Personnel type" in df.columns
-        assert df.shape[0] == 3
-        assert df["Personnel type"].isna().sum() == 0
-        assert "Superannuation Rate_Base Salary + Costs_MP" in df.columns
+    assert_that(frame["Personnel type"].null_count() == 0)
+    assert_that(numeric(frame["Superannuation Rate_Base Salary + Costs_MP"].min()) > 0)

@@ -1,25 +1,28 @@
-.PHONY: install test lint
+.PHONY: install test lint format format-check typecheck security all ci docs
 
 install:
-	pipenv install --dev
+	uv sync --locked --python 3.15.1
 
 test:
-	pipenv run pytest
+	uv run --locked pytest
 
 lint:
-	pipenv run ruff check .
+	uv run --locked ruff check .
 
 format:
-	pipenv run ruff format .
+	uv run --locked ruff format .
+
+format-check:
+	uv run --locked ruff format --check .
 
 typecheck:
-	pipenv run mypy
+	uv run --locked basedpyright
 
 security:
-	pipenv run bandit -r src
+	uv run --locked bandit -r src
 
 all:
-	make format
+	make format-check
 	make lint
 	make typecheck
 	make test
@@ -29,10 +32,10 @@ ci:
 	make all
 
 docs:
-	$(MAKE) -C docs html
+	uv run --locked sphinx-build -M html docs/source docs/build
 
 changelog:
-	pipenv run cz bump --changelog
+	uv run --locked cz bump --changelog
 
 release:
 	make changelog
