@@ -82,3 +82,20 @@ microcosting-healthworkforce-v2 --release release.json --activity activity.json 
 It validates both input schemas and creates a new result file exclusively; it
 will not overwrite an existing result. The command uses the limited method and
 source assertions described above. The original CLI remains unchanged.
+
+## Explicit cumulative overtime
+
+`src.roster_costing.cost_overtime_period` supports one specified resource in one
+explicit pay period. The caller supplies a reviewed, source-linked threshold and
+salary-only multiplier, the complete eligible activity list, prior eligible hours,
+and a history boundary at the first activity. The method rejects overlapping
+activities, missing history, uncovered rule dates and source-hash mismatches.
+It applies the multiplier increment to salary only; other components are unchanged.
+Totals retain each segment's conditions, rule ID, citation and source hash.
+
+This is a narrowly defined arithmetic method, not an award interpreter. It does
+not decide eligibility, reconstruct pay-period history, determine whether all
+activities are eligible, calculate multiple overtime tiers, apply minimum
+engagements, or combine penalties. The caller's completeness and review assertions
+must be supported outside the calculation. Unsupported combinations must remain
+outside this method until their actual interaction is modelled and verified.
