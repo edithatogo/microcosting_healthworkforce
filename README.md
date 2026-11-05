@@ -128,3 +128,26 @@ Pipenv and tox-pipenv are retired. Dependency changes belong in `pyproject.toml`
 and `uv.lock`; an old `Pipfile.lock` update does not qualify the active environment.
 The optional pre-commit configuration delegates to locked uv tools. Normal Git
 hooks stay enabled; setup does not install hooks into another owner's checkout.
+
+
+## PSA qualification boundaries
+
+PSA applies one absolute draw per declared parameter to every workforce row in an
+iteration. Parameters are sampled separately using NumPy's seeded Generator;
+this does not declare an empirically supported correlation model. The result is
+an unweighted mean across the workforce rows. Equal seeds across legacy NumPy
+RandomState and Generator implementations do not establish draw-level parity.
+
+The PSA API recalculates derived base costs after sampling, including when a
+caller supplies an already-calculated base case. Reported percentile intervals
+use explicit linear interpolation and describe simulation percentiles, rather
+than confidence intervals for an estimated population mean. Reference-mean
+comparison requires complete finite numeric draws and one finite reference;
+an empty simulation is not successful validation. Mean comparison alone does
+not qualify scientific distribution assumptions or joint uncertainty.
+
+The development environment includes pre-commit, pytest-timeout and pytest-socket.
+`make test` and hosted test jobs disable Python network sockets, permit local Unix
+sockets and enforce a 120-second test timeout. This does not disable networking
+in independently launched native processes. Scientific priors and original inputs
+remain unchanged; source specification and scientific acceptance are separate.

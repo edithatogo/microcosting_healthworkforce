@@ -38,7 +38,15 @@ license = "Apache-2.0"
 license-files = ["LICENSE"]
 version = "0.0.1"
 requires-python = "==3.15.1"
-dependencies = ["pydantic>=2,<3", "pandera[polars]","openpyxl", "polars", "numpy", "matplotlib", "pyarrow"]
+dependencies = [
+    "pydantic>=2.14.3,<3",
+    "pandera[polars]",
+    "openpyxl",
+    "polars",
+    "numpy",
+    "matplotlib",
+    "pyarrow",
+]
 
 [project.scripts]
 microcosting-healthworkforce = "src.main:main"
@@ -51,7 +59,7 @@ profiling = ["scalene"]
 dev = [
     "pytest",
     "pytest-cov",
-    "ruff",
+    "ruff>=0.17.4",
     "basedpyright",
     "hypothesis",
     "pytest-gremlins",
@@ -60,6 +68,9 @@ dev = [
     "furo",
     "myst-parser",
     "commitizen",
+    "pytest-timeout>=2.4.0",
+    "pytest-socket>=0.8.1",
+    "pre-commit>=4.7.0",
 ]
 
 [tool.basedpyright]

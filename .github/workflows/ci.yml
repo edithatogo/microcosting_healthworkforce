@@ -20,7 +20,7 @@ jobs:
       - name: Verify selected runtime
         run: .venv/bin/python -c 'import sys; print(sys.version); assert sys.version_info[:3] == (3, 15, 1)'
       - name: Test model contracts and workbook loader
-        run: uv run --no-sync pytest --cov=src --cov-report=xml
+        run: uv run --no-sync pytest --disable-socket --allow-unix-socket --timeout=120 --cov=src --cov-report=xml
       - run: uv run --no-sync ruff format --check .
       - run: uv run --no-sync ruff check .
       - run: uv run --no-sync basedpyright
@@ -37,4 +37,4 @@ jobs:
           "$RUNNER_TEMP/workforce-wheel/bin/python" -c 'import sys; print(sys.version); assert sys.version_info[:3] == (3, 15, 1)'
           "$RUNNER_TEMP/workforce-wheel/bin/microcosting-healthworkforce" --help
       - name: Profile synthetic formula contracts
-        run: uv run --no-sync python -m cProfile -o profile.out -m pytest tests/test_formula_engine.py -q
+        run: uv run --no-sync python -m cProfile -o profile.out -m pytest tests/test_formula_engine.py --disable-socket --allow-unix-socket --timeout=120 -q
