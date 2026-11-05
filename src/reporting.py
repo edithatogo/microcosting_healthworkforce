@@ -1,54 +1,53 @@
+# Copyright 2026 Dylan. SPDX-License-Identifier: Apache-2.0
 # src/reporting.py
-"""
-This module handles the generation of all file-based outputs, including tables
-and figures for the core simulation, DSA, and PSA results.
-"""
+"""Save workforce result tables and statistical figures."""
 
 import logging
-import os
-from typing import Dict
+from pathlib import Path
 
 import matplotlib.pyplot as plt
-import pandas as pd
-import seaborn as sns
+import polars as pl
+
+from src.numeric import numeric
+
+logger = logging.getLogger(__name__)
 
 
-def save_base_case_results(base_case_results: pd.DataFrame, output_dir: str) -> None:
-    """
-    Saves the base case results to a CSV file.
-    """
-    output_path = os.path.join(output_dir, "base_case_results.csv")
+def save_base_case_results(base_case_results: pl.DataFrame, output_dir: str) -> None:
+    """Save the base case results to a CSV file."""
+    output_path = Path(output_dir) / "base_case_results.csv"
     try:
-        base_case_results.to_csv(output_path, index=False)
-        logging.info(f"Base case results saved to {output_path}")
-    except Exception as e:
-        logging.error(f"Failed to save base case results: {e}")
+        base_case_results.write_csv(output_path)
+        logger.info("Base case results saved to %s", output_path)
+    except Exception:
+        logger.exception("Failed to save base case results")
 
 
 def save_dsa_results(
-    dsa_results: Dict[str, pd.DataFrame],
-    base_case_results: pd.DataFrame,
+    dsa_results: dict[str, pl.DataFrame],
+    base_case_results: pl.DataFrame,
     output_dir: str,
 ) -> None:
-    """
-    Saves the DSA results to CSV files.
-    """
+    """Save the DSA results to CSV files."""
     # Save detailed results for each scenario
-    detailed_output_dir = os.path.join(output_dir, "dsa_detailed")
-    os.makedirs(detailed_output_dir, exist_ok=True)
+    detailed_output_dir = Path(output_dir) / "dsa_detailed"
+    detailed_output_dir.mkdir(parents=True, exist_ok=True)
     for scenario_name, result_df in dsa_results.items():
-        output_path = os.path.join(detailed_output_dir, f"{scenario_name}.csv")
+        output_path = Path(detailed_output_dir) / f"{scenario_name}.csv"
         try:
-            result_df.to_csv(output_path, index=False)
-            logging.info(f"DSA results for '{scenario_name}' saved to {output_path}")
-        except Exception as e:
-            logging.error(f"Failed to save DSA results for '{scenario_name}': {e}")
+            result_df.write_csv(output_path)
+            logger.info("DSA results for '%s' saved to %s", scenario_name, output_path)
+        except Exception:
+            logger.exception(
+                "Failed to save DSA results for '%s'",
+                scenario_name,
+            )
 
     # Save summary results
-    summary_data = []
-    base_case_cost = base_case_results["Calculated_Cost_Mid_Y0"].mean()
+    summary_data: list[dict[str, str | float]] = []
+    base_case_cost = numeric(base_case_results["Calculated_Cost_Mid_Y0"].mean())
     for scenario_name, result_df in dsa_results.items():
-        scenario_cost = result_df["Calculated_Cost_Mid_Y0"].mean()
+        scenario_cost = numeric(result_df["Calculated_Cost_Mid_Y0"].mean())
         percentage_change = ((scenario_cost - base_case_cost) / base_case_cost) * 100
         summary_data.append(
             {
@@ -56,79 +55,66 @@ def save_dsa_results(
                 "base_case_cost": base_case_cost,
                 "scenario_cost": scenario_cost,
                 "percentage_change": percentage_change,
-            }
+            },
         )
-    summary_df = pd.DataFrame(summary_data)
-    summary_output_path = os.path.join(output_dir, "dsa_summary.csv")
+    summary_df = pl.DataFrame(summary_data)
+    summary_output_path = Path(output_dir) / "dsa_summary.csv"
     try:
-        summary_df.to_csv(summary_output_path, index=False)
-        logging.info(f"DSA summary saved to {summary_output_path}")
-    except Exception as e:
-        logging.error(f"Failed to save DSA summary: {e}")
+        summary_df.write_csv(summary_output_path)
+        logger.info("DSA summary saved to %s", summary_output_path)
+    except Exception:
+        logger.exception("Failed to save DSA summary")
 
     plot_dsa_tornado(summary_df, output_dir)
 
 
-def save_psa_results(psa_results: pd.DataFrame, output_dir: str) -> None:
-    """
-    Saves the PSA results to a CSV file.
-    """
-    output_path = os.path.join(output_dir, "psa_results.csv")
+def save_psa_results(psa_results: pl.DataFrame, output_dir: str) -> None:
+    """Save the PSA results to a CSV file."""
+    output_path = Path(output_dir) / "psa_results.csv"
     try:
-        psa_results.to_csv(output_path, index=False)
-        logging.info(f"PSA results saved to {output_path}")
-    except Exception as e:
-        logging.error(f"Failed to save PSA results: {e}")
+        psa_results.write_csv(output_path)
+        logger.info("PSA results saved to %s", output_path)
+    except Exception:
+        logger.exception("Failed to save PSA results")
 
     plot_psa_histogram(psa_results, output_dir)
 
 
 def plot_dsa_tornado(
-    dsa_summary_df: pd.DataFrame,
+    dsa_summary_df: pl.DataFrame,
     output_dir: str,
 ) -> None:
-    """
-    Generates and saves a tornado plot for the DSA results.
-    """
+    """Generate and saves a tornado plot for the DSA results."""
     plt.figure(figsize=(10, 8))
     # Assign hue to the same variable as y to use a palette without triggering
     # seaborn's deprecation (palette requires hue in seaborn >=0.14).
-    sns.barplot(
-        x="percentage_change",
-        y="scenario_name",
-        data=dsa_summary_df.sort_values("percentage_change", ascending=False),
-        hue="scenario_name",
-        palette="vlag",
-        legend=False,
-        dodge=False,
-    )
+    ordered = dsa_summary_df.sort("percentage_change")
+    plt.barh(ordered["scenario_name"].to_list(), ordered["percentage_change"].to_list())
     plt.xlabel("Percentage Change in Cost")
     plt.ylabel("Scenario")
     plt.title("DSA Tornado Plot")
     plt.tight_layout()
-    output_path = os.path.join(output_dir, "dsa_tornado_plot.png")
+    output_path = Path(output_dir) / "dsa_tornado_plot.png"
     try:
         plt.savefig(output_path)
-        logging.info(f"DSA tornado plot saved to {output_path}")
-    except Exception as e:
-        logging.error(f"Failed to save DSA tornado plot: {e}")
+        logger.info("DSA tornado plot saved to %s", output_path)
+    except Exception:
+        logger.exception("Failed to save DSA tornado plot")
     plt.close()
 
 
-def plot_psa_histogram(psa_results_df: pd.DataFrame, output_dir: str) -> None:
-    """
-    Generates and saves a histogram of the PSA results.
-    """
+def plot_psa_histogram(psa_results_df: pl.DataFrame, output_dir: str) -> None:
+    """Generate and saves a histogram of the PSA results."""
     plt.figure(figsize=(10, 6))
-    sns.histplot(psa_results_df["mean_cost"], kde=True)
+    plt.hist(psa_results_df["mean_cost"].to_numpy())
     plt.xlabel("Mean Cost")
     plt.ylabel("Frequency")
     plt.title("PSA Results Distribution")
     plt.tight_layout()
-    output_path = os.path.join(output_dir, "psa_histogram.png")
+    output_path = Path(output_dir) / "psa_histogram.png"
     try:
         plt.savefig(output_path)
-        logging.info(f"PSA histogram saved to {output_path}")
-    except Exception as e:
-        logging.error(f"Failed to save PSA histogram: {e}")
+        logger.info("PSA histogram saved to %s", output_path)
+    except Exception:
+        logger.exception("Failed to save PSA histogram")
     plt.close()

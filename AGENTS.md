@@ -18,28 +18,28 @@ data/
 ```
 
 ## Build, Test, and Development Commands
-- Install deps: `make install` (via Pipenv).
-- Activate env: `pipenv shell`.
-- Run app: `PYTHONPATH=. python3 src/main.py`.
+- Install deps: `uv sync --locked`.
+- Activate env: `uv run`.
+- Run app: `uv run microcosting-healthworkforce`.
 - Unit tests: `make test` (pytest).
 - Lint/format: `make lint` / `make format` (Ruff).
-- Type check: `make typecheck` (mypy, strict).
+- Type check: `make typecheck` (basedpyright, strict).
 - Security scan: `make security` (bandit).
 - All checks: `make all`.
-- CI suite: `make ci` (tox: tests, lint, mypy, bandit, profiling).
+- CI suite: `make ci` (locked uv tests, lint, basedpyright and bandit); hosted CI also builds a wheel and profiles synthetic formula tests.
 - Docs: `make docs`.
 
 ## Coding Style & Naming Conventions
-- Python 3.10+; 4-space indentation; max line length 88; double quotes (Ruff config).
-- Types: required; mypy `strict = true` on `src/` and `tests/`.
+- Repo-local Python 3.15.1; 4-space indentation; max line length 88; double quotes (Ruff config).
+- Types: required; basedpyright `typeCheckingMode = "strict"` on `src/` and `tests/`.
 - Naming: modules/functions `snake_case`, classes `PascalCase`, constants `UPPER_SNAKE_CASE`.
 - Imports: sorted by Ruff; prefer explicit over wildcard.
-- Pre-commit: Ruff (lint/format), mypy, bandit, Commitizen.
+- Pre-commit: Ruff (lint/format), basedpyright, bandit, Commitizen.
 
 ## Testing Guidelines
 - Framework: pytest; tests live in `tests/` and named `test_*.py` with `test_*` functions.
 - Coverage: CI runs `pytest --cov=src`; add tests alongside new modules.
-- Run locally: `make test`; target a module with `pipenv run pytest tests/test_data_loader.py -q`.
+- Run locally: `make test`; target a module with `uv run pytest tests/test_data_loader.py -q`.
 
 ## Commit & Pull Request Guidelines
 - Conventional Commits via Commitizen: e.g., `feat: add DSA plot export`, `fix: handle empty sheet`. Scope optional: `feat(loader): ...`.

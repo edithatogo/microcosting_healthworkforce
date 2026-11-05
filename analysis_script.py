@@ -1,28 +1,32 @@
-import pandas as pd
+# Copyright 2026 Dylan. SPDX-License-Identifier: Apache-2.0
+"""Inspect workbook headers locally."""
+
+import sys
+from itertools import islice
+
+import openpyxl
 
 
 def inspect_raw_headers(file_path: str, sheet_name: str) -> None:
-    """
-    Reads the first 10 rows of an Excel sheet without header processing
-    to inspect the raw multi-level header structure.
-    """
+    """Report the first ten workbook rows without modifying the source."""
+    book = openpyxl.load_workbook(file_path, read_only=True, data_only=True)
     try:
-        # Read the top 10 rows, without assuming any header row.
-        # This gives us a raw look at the data.
-        df_raw: pd.DataFrame = pd.read_excel(
-            file_path, sheet_name=sheet_name, header=None, nrows=10
-        )
-
-        # Convert to a format that is easy to print and inspect.
-        print("Raw header structure (first 10 rows):")
-        print(df_raw.to_string())
-
-    except Exception as e:
-        print(f"An error occurred: {e}")
+        for row in islice(book[sheet_name].values, 10):
+            sys.stdout.write(str(row) + "\n")
+    finally:
+        book.close()
 
 
 if __name__ == "__main__":
+    from src import config
     from src.data_loader import load_and_clean_data
 
-    df = load_and_clean_data("data/Labour Model - v3, 20240328.xlsx", "Labour - Prices")
-    print(df.head().to_string())
+    sys.stdout.write(
+        str(
+            load_and_clean_data(
+                config.DATA_FILE_PATH,
+                config.LABOUR_PRICES_SHEET,
+            ).head(),
+        )
+        + "\n",
+    )

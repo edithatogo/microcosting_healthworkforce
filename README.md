@@ -6,7 +6,7 @@ This project is a Python-based tool to translate a specific Excel cost model int
 
 The primary function of this application is to process the "Labour - Prices" sheet from the `data/Labour Model - v3, 20240328.xlsx` file. It performs the following key tasks:
 
-1.  **Data Loading:** It reads the specified Excel sheet, handles its multi-level headers, and cleans the data into a structured pandas DataFrame.
+1.  **Data Loading:** It reads the specified Excel sheet, handles its multi-level headers, and cleans the data into a typed Polars DataFrame.
 2.  **Data-Driven Calculation:** It uses a formula engine that dynamically calculates costs based on definitions in `data/formulas.json`. This approach allows for easy modification and extension of formulas without changing the core Python code.
 3.  **Formula Logic:** The engine handles two scenarios:
     *   It applies standard, defined formulas for most positions.
@@ -67,18 +67,18 @@ Note: Percentage-like inputs must be provided in consistent units (e.g., fractio
 ## Setup
 
 1.  **Prerequisites:**
-    -   Python 3.10+
-    -   `pipenv`
+    -   Python 3.15.1
+    -   `uv`
 
 2.  **Install dependencies:**
-    This project uses `pipenv` to manage dependencies, which include `pandas`, `openpyxl`, and `asteval`.
+    This project uses a locked uv environment with Polars, openpyxl and NumPy.
     ```bash
     make install
     ```
 
 3.  **Activate the virtual environment:**
     ```bash
-    pipenv shell
+    source .venv/bin/activate
     ```
 
 ## Usage
@@ -86,7 +86,7 @@ Note: Percentage-like inputs must be provided in consistent units (e.g., fractio
 -   **Run the main application:**
     To execute the data loading, calculation, and validation process, run the following command from the project root:
     ```bash
-    PYTHONPATH=. python3 src/main.py
+    uv run --locked microcosting-healthworkforce
     ```
 
 -   **Run tests:**
@@ -111,3 +111,20 @@ Note: Percentage-like inputs must be provided in consistent units (e.g., fractio
     make docs
     ```
     The output will be in the `docs/_build/html` directory.
+
+
+## CI and local verification
+
+Use `uv sync --locked --python 3.15.1` and verify `.venv/bin/python --version`.
+`make ci` runs the local checks through the locked environment. CI uses the same
+runtime and lock, with pytest coverage, Ruff formatting and ALL lint rules,
+strict basedpyright, Bandit, a wheel build and an installed CLI help check from
+outside the checkout. Profiling exercises synthetic formula tests. Loader tests
+use the pre-existing tracked workbook and require LibreOffice; full workbook
+reconciliation remains a separate local acceptance gate. CI does not
+upload workbooks, generated tables, figures or private run receipts.
+
+Pipenv and tox-pipenv are retired. Dependency changes belong in `pyproject.toml`
+and `uv.lock`; an old `Pipfile.lock` update does not qualify the active environment.
+The optional pre-commit configuration delegates to locked uv tools. Normal Git
+hooks stay enabled; setup does not install hooks into another owner's checkout.

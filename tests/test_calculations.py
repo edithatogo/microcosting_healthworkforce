@@ -1,20 +1,17 @@
+# Copyright 2026 Dylan. SPDX-License-Identifier: Apache-2.0
 # tests/test_calculations.py
-"""
-Tests for the calculations module.
-"""
+"""Test for the calculations module."""
 
-import pandas as pd
+import polars as pl
 
 from src.calculations import run_calculation_pipeline
 from src.formula_engine import load_formulas
+from tests.checks import assert_that
 
 
 def test_run_calculation_pipeline() -> None:
-    """
-    Tests that the run_calculation_pipeline function returns a DataFrame with
-    the expected columns.
-    """
-    input_df = pd.DataFrame(
+    """Verify the calculation pipeline returns every expected output column."""
+    input_df = pl.DataFrame(
         {
             "Personnel type": ["Test"],
             "Base Salary_LL": [100],
@@ -32,13 +29,13 @@ def test_run_calculation_pipeline() -> None:
             "Grade(s)_Annual Leave Loading (%)": [0.175],
             "Grade(s)_Average productive time (%)": [0.8],
             "Grade(s)_Indexation per annum (%)": [0.02],
-        }
+        },
     )
     formulas_data = load_formulas("data/formulas.json")
     result_df = run_calculation_pipeline(input_df, formulas_data)
-    assert "Calculated_Cost_LL_Y0" in result_df.columns
-    assert "Calculated_Cost_Mid_Y0" in result_df.columns
-    assert "Calculated_Cost_UL_Y0" in result_df.columns
-    assert "Calculated_Cost_LL_Y1" in result_df.columns
-    assert "Calculated_Hourly_LL_Y0" in result_df.columns
-    assert "Calculated_Hourly_LL_Y1" in result_df.columns
+    assert_that("Calculated_Cost_LL_Y0" in result_df.columns)
+    assert_that("Calculated_Cost_Mid_Y0" in result_df.columns)
+    assert_that("Calculated_Cost_UL_Y0" in result_df.columns)
+    assert_that("Calculated_Cost_LL_Y1" in result_df.columns)
+    assert_that("Calculated_Hourly_LL_Y0" in result_df.columns)
+    assert_that("Calculated_Hourly_LL_Y1" in result_df.columns)
