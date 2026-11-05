@@ -1,6 +1,15 @@
 {
-    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-    "extends": [
-        "local>edithatogo/renovate-config"
-    ]
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "local>edithatogo/renovate-config"
+  ],
+  "packageRules": [
+    {
+      "description": "Require reviewed merges after passing CI",
+      "matchPackageNames": [
+        "*"
+      ],
+      "automerge": false
+    }
+  ]
 }
