@@ -2,7 +2,7 @@ repos:
   - repo: local
     hooks:
       - id: ruff
-        name: Ruff (locked Python 3.15.1 environment)
+        name: Ruff (locked Python 3.15.2 environment)
         entry: uv run --locked ruff check
         language: system
         types_or: [python, pyi]

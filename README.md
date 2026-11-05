@@ -67,7 +67,7 @@ Note: Percentage-like inputs must be provided in consistent units (e.g., fractio
 ## Setup
 
 1.  **Prerequisites:**
-    -   Python 3.15.1
+    -   Python 3.15.2
     -   `uv`
 
 2.  **Install dependencies:**
@@ -115,7 +115,7 @@ Note: Percentage-like inputs must be provided in consistent units (e.g., fractio
 
 ## CI and local verification
 
-Use `uv sync --locked --python 3.15.1` and verify `.venv/bin/python --version`.
+Use `uv sync --locked --python 3.15.2` and verify `.venv/bin/python --version`.
 `make ci` runs the local checks through the locked environment. CI uses the same
 runtime and lock, with pytest coverage, Ruff formatting and ALL lint rules,
 strict basedpyright, Bandit, a wheel build and an installed CLI help check from

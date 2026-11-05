@@ -2,25 +2,31 @@ name: CI
 on: [push, pull_request, workflow_dispatch]
 permissions:
   contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    permissions:
+      contents: read
+      id-token: write
     env:
       MPLBACKEND: Agg
     steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v6
-      - run: uv python install 3.15.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+      - run: uv python install 3.15.2
       - name: Install workbook loader dependency
         run: |
           sudo apt-get update
           sudo apt-get install -y libreoffice-calc
-      - run: uv sync --locked --python 3.15.1
+      - run: uv sync --locked --python 3.15.2
       - name: Verify selected runtime
-        run: .venv/bin/python -c 'import sys; print(sys.version); assert sys.version_info[:3] == (3, 15, 1)'
+        run: .venv/bin/python -c 'import sys; print(sys.version); assert sys.version_info[:3] == (3, 15, 2)'
       - name: Test model contracts and workbook loader
-        run: uv run --no-sync pytest --disable-socket --allow-unix-socket --timeout=120 --cov=src --cov-report=xml
+        run: uv run --no-sync pytest --disable-socket --allow-unix-socket --timeout=120 --cov=src --cov-report=xml --cov-fail-under=75
       - run: uv run --no-sync ruff format --check .
       - run: uv run --no-sync ruff check .
       - run: uv run --no-sync basedpyright
@@ -29,12 +35,18 @@ jobs:
       - name: Exercise installed wheel outside the checkout
         shell: bash
         run: |
-          uv venv --python 3.15.1 "$RUNNER_TEMP/workforce-wheel"
+          uv venv --python 3.15.2 "$RUNNER_TEMP/workforce-wheel"
           uv export --locked --no-dev --no-emit-project --output-file "$RUNNER_TEMP/workforce-requirements.txt"
           uv pip install --python "$RUNNER_TEMP/workforce-wheel/bin/python" --require-hashes -r "$RUNNER_TEMP/workforce-requirements.txt"
           uv pip install --python "$RUNNER_TEMP/workforce-wheel/bin/python" --no-deps dist/*.whl
           cd "$RUNNER_TEMP"
-          "$RUNNER_TEMP/workforce-wheel/bin/python" -c 'import sys; print(sys.version); assert sys.version_info[:3] == (3, 15, 1)'
+          "$RUNNER_TEMP/workforce-wheel/bin/python" -c 'import sys; print(sys.version); assert sys.version_info[:3] == (3, 15, 2)'
           "$RUNNER_TEMP/workforce-wheel/bin/microcosting-healthworkforce" --help
       - name: Profile synthetic formula contracts
         run: uv run --no-sync python -m cProfile -o profile.out -m pytest tests/test_formula_engine.py --disable-socket --allow-unix-socket --timeout=120 -q
+      - name: Upload coverage using GitHub OIDC
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7
+        with:
+          use_oidc: true
+          files: coverage.xml
+          fail_ci_if_error: true

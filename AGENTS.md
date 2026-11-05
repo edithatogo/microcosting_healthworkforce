@@ -30,7 +30,7 @@ data/
 - Docs: `make docs`.
 
 ## Coding Style & Naming Conventions
-- Repo-local Python 3.15.1; 4-space indentation; max line length 88; double quotes (Ruff config).
+- Repo-local Python 3.15.2; 4-space indentation; max line length 88; double quotes (Ruff config).
 - Types: required; basedpyright `typeCheckingMode = "strict"` on `src/` and `tests/`.
 - Naming: modules/functions `snake_case`, classes `PascalCase`, constants `UPPER_SNAKE_CASE`.
 - Imports: sorted by Ruff; prefer explicit over wildcard.
