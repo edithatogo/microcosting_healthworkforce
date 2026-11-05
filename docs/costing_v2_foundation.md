@@ -43,3 +43,30 @@ represent explicit, distinct resource use. A declared review is not legal advice
 independent source verification, or evidence that a rate is scientifically valid.
 Condition extraction, rule coverage, release governance, semantic workbook mapping,
 and the requested command-line interface remain in the implementation track.
+
+## Table segmentation and condition releases
+
+`src.workbook_tables.extract_tables` applies explicit rectangular definitions to a
+workbook catalog, rejects overlapping assignments and unknown sheets, and reports
+unassigned cells and empty sheets. A definition may declare column names, units,
+roles and header rows. Columns without a reviewed mapping remain unknown; one
+physical region may need several definitions, and definitions do not validate the
+substantive meaning of archived data by themselves.
+
+`src.source_gaps.screen_gaps` links deliberately scoped discovery leads to
+jurisdiction/profession/sector screening targets. It preserves
+`applicability_unassessed` whether or not a lead exists; keyword matches and an
+empty lead list are neither proof of coverage nor proof an instrument is absent.
+
+`src.conditions.ConditionRelease` stores explicitly reviewed, dated conditions
+with source hashes and citations. `annual_salary_components_v1` divides annual
+salary and fixed annual components by explicitly supplied annual paid hours, and
+applies each specified fraction to salary only. It does not infer which fractions
+share a base, derive annual hours from weekly hours, or calculate leave coverage.
+`cost_condition_activity` applies those dated conditions to an activity by local
+calendar day, using actual elapsed time and retaining condition identities in
+each segment. Release citations provide the provenance of each identity. Callers
+must resolve the actual effective dates of first-full-pay-period changes; this
+method does not derive pay cycles. Source applicability and review are assertions
+supplied by the release author, not conclusions independently established by code.
+Candidate workbook values cannot be used in an accepted release without review.
