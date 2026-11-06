@@ -6,7 +6,7 @@ from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal
 from itertools import pairwise
 from typing import Literal, Self
-from zoneinfo import ZoneInfo
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from pydantic import Field, field_validator, model_validator
 
@@ -49,7 +49,11 @@ class StartedUnitRule(QuoteModel):
     @model_validator(mode="after")
     def valid_rule(self) -> Self:
         """Reject an unreviewed grouping or an empty quantum/operative interval."""
-        ZoneInfo(self.local_timezone)
+        try:
+            ZoneInfo(self.local_timezone)
+        except ZoneInfoNotFoundError as error:
+            msg = "Started-unit policy requires a known timezone"
+            raise ValueError(msg) from error
         if (
             not self.reviewed
             or _micros(self.quantum) <= 0

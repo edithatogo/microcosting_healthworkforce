@@ -179,6 +179,7 @@ def test_overlap_duplicate_and_outside_intervals_fail() -> None:
         {"reviewed": False},
         {"method": "round_each_fragment"},
         {"grouping_basis": " "},
+        {"local_timezone": "Invalid/NoSuchZone"},
         {"source_sha256": "c" * 64},
         {"component": "other"},
         {"unit": "hour"},
@@ -190,7 +191,10 @@ def test_policy_review_scope_and_basis_cannot_be_bypassed(
 ) -> None:
     """Require reviewed ceiling policy and matching price context."""
     p = policy().model_copy(update=changes)
-    with pytest.raises(ValueError, match=r"review|method|blank|hash|quote|scope"):
+    with pytest.raises(
+        ValueError,
+        match=r"review|method|blank|hash|quote|scope|timezone",
+    ):
         price_started_units(p, release(), (window(),))
 
 
@@ -256,7 +260,7 @@ def test_dated_groups_price_versions_and_keep_row_assumptions() -> None:
 
 
 def test_dst_uses_explicit_elapsed_basis_without_roster_hour_conversion() -> None:
-    """A23elapsed-hour local day contributes23quanta, not24rosterhours."""
+    """Use 23 elapsed hours on a DST day without inventing roster hours."""
     zone = ZoneInfo("Australia/Sydney")
     start, end = datetime(2026, 10, 4, tzinfo=zone), datetime(2026, 10, 5, tzinfo=zone)
     a = ExposureInterval(interval_id="dst", starts_at=start, ends_at=end)
