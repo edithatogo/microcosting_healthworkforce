@@ -106,11 +106,14 @@ def price_highest_quotes(
     rule = HighestQuoteRule.model_validate(dict(rule) | {"selection": policy})
     release = UnitQuoteRelease.model_validate(release.model_dump())
     rebuilt = tuple(
-        HighestQuoteCase(
-            exposure=QuoteExposureWindow.model_validate(dict(c.exposure)),
-            alternatives=tuple(
-                QuoteEligibility.model_validate(dict(a)) for a in c.alternatives
-            ),
+        HighestQuoteCase.model_validate(
+            dict(c)
+            | {
+                "exposure": QuoteExposureWindow.model_validate(dict(c.exposure)),
+                "alternatives": tuple(
+                    QuoteEligibility.model_validate(dict(a)) for a in c.alternatives
+                ),
+            },
         )
         for c in cases
     )

@@ -331,3 +331,10 @@ def test_window_boundary_coverage_is_preserved() -> None:
             release(),
             (c.model_copy(update={"exposure": exposure}),),
         )
+
+
+def test_forged_outer_case_extra_fields_are_rejected() -> None:
+    """Preserve the outer strict schema while rebuilding nested unchecked inputs."""
+    forged = case().model_copy(update={"unknown_basis": "unreviewed"})
+    with pytest.raises(ValueError, match="Extra inputs are not permitted"):
+        price_highest_quotes(policy(), release(), (forged,))
