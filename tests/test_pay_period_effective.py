@@ -1,7 +1,7 @@
 # Copyright 2026 Dylan. SPDX-License-Identifier: Apache-2.0
 """Synthetic first-full-period boundaries and source qualification."""
 
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal
 
 import pytest
@@ -10,11 +10,14 @@ from src.costing import Activity, cost_dynamic
 from src.pay_period_effective import (
     FirstFullPeriodRule,
     PeriodCalendar,
+    RetrospectiveAuthority,
     first_full_period,
 )
+from src.source_registry import SourceRegistry
 from tests.checks import assert_that
 from tests.test_costing import release as flat_release
 from tests.test_roster_costing import release
+from tests.test_source_registry import source
 
 
 def rule(trigger: datetime) -> FirstFullPeriodRule:
@@ -120,3 +123,102 @@ def test_resolved_boundary_drives_dynamic_rate_transition() -> None:
     result = cost_dynamic(selected, (activity,))
     assert_that(result.total == Decimal(120))
     assert_that([row.starts_at for row in result.rows] == [activity.starts_at, change])
+
+
+def test_retrospective_authority_needs_reviewed_interval_and_known_date() -> None:
+    """Later authority can cover earlier pay dates only with an explicit assertion."""
+    later = source().model_copy(
+        update={
+            "effective_from": date(2024, 1, 26),
+            "verified_through": date(2027, 1, 1),
+        },
+    )
+    sources = SourceRegistry(records=(later,))
+    period = PeriodCalendar(
+        calendar_id="prior",
+        boundaries=(
+            datetime(2023, 5, 25, tzinfo=UTC),
+            datetime(2023, 6, 8, tzinfo=UTC),
+            datetime(2023, 6, 22, tzinfo=UTC),
+        ),
+        complete=True,
+    )
+    original = rule(datetime(2023, 6, 1, tzinfo=UTC))
+    with pytest.raises(ValueError, match="coverage"):
+        first_full_period(original, period, sources)
+    authority = RetrospectiveAuthority(
+        entitlement_from=date(2023, 6, 1),
+        entitlement_to=date(2023, 7, 1),
+        known_from=date(2024, 1, 26),
+        as_known_at=date(2024, 2, 1),
+        citation="synthetic retrospective clause",
+        reviewed=True,
+    )
+    selected = first_full_period(
+        original.model_copy(update={"retrospective": authority}),
+        period,
+        sources,
+    )
+    assert_that(selected.starts_at == datetime(2023, 6, 8, tzinfo=UTC))
+    assert_that(selected.rule.retrospective == authority)
+    with pytest.raises(ValueError, match="knowledge"):
+        first_full_period(
+            original.model_copy(
+                update={
+                    "retrospective": authority.model_copy(
+                        update={"as_known_at": date(2024, 1, 25)},
+                    ),
+                },
+            ),
+            period,
+            sources,
+        )
+    with pytest.raises(ValueError, match="interval"):
+        first_full_period(
+            original.model_copy(
+                update={
+                    "retrospective": authority.model_copy(
+                        update={"entitlement_to": date(2023, 6, 8)},
+                    ),
+                },
+            ),
+            period,
+            sources,
+        )
+    with pytest.raises(ValueError, match="review"):
+        first_full_period(
+            original.model_copy(
+                update={
+                    "retrospective": authority.model_copy(update={"reviewed": False}),
+                },
+            ),
+            period,
+            sources,
+        )
+
+
+def test_retrospective_authority_cannot_bypass_source_scope_or_hash() -> None:
+    """Review cannot substitute a different employer or document edition."""
+    history = RetrospectiveAuthority(
+        entitlement_from=date(2026, 1, 1),
+        entitlement_to=date(2026, 7, 1),
+        known_from=date(2026, 6, 1),
+        as_known_at=date(2026, 6, 3),
+        citation="synthetic retrospective clause",
+        reviewed=True,
+    )
+    base = rule(datetime(2026, 6, 3, tzinfo=UTC)).model_copy(
+        update={"retrospective": history},
+    )
+    with pytest.raises(ValueError, match="coverage"):
+        first_full_period(
+            base.model_copy(update={"employer": "Other"}),
+            calendar(),
+            release().sources,
+        )
+    with pytest.raises(ValueError, match="hash"):
+        first_full_period(
+            base.model_copy(update={"source_sha256": "b" * 64}),
+            calendar(),
+            release().sources,
+        )
