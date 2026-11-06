@@ -1,8 +1,9 @@
 # Copyright 2026 Dylan. SPDX-License-Identifier: Apache-2.0
 """Synthetic versioned condition and explicit salary-loading rule contracts."""
 
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal
+from fractions import Fraction
 
 import pytest
 
@@ -171,3 +172,66 @@ def test_condition_release_rejects_overlap_and_source_horizon() -> None:
             sources=SourceRegistry(records=(source(),)),
             conditions=(expired,),
         )
+
+
+def test_exact_activity_totals_remain_equal_under_fractional_hour_segmentation() -> (
+    None
+):
+    """Three 20-minute pieces retain the exact same cost as a full hour."""
+    current = ConditionRelease(
+        release_id="exact",
+        jurisdiction="QLD",
+        employer="Synthetic employer",
+        classification="Synthetic grade",
+        sources=SourceRegistry(records=(source(),)),
+        conditions=(
+            condition("salary", "salary", "100000", "AUD/year"),
+            condition("hours", "paid_hours", "2000", "hours/year"),
+        ),
+    )
+
+    def cost(start_minute: int, end_minute: int) -> Fraction:
+        start = datetime(2026, 6, 2, 9, start_minute, tzinfo=UTC)
+        end = datetime(2026, 6, 2, 9, tzinfo=UTC) + timedelta(minutes=end_minute)
+        activity = Activity(
+            activity_id=str(start_minute),
+            resource_id="worker",
+            starts_at=start,
+            ends_at=end,
+            resources=Decimal(1),
+        )
+        result = cost_condition_activity(current, activity, "UTC")
+        return Fraction(result.exact_total_numerator, result.exact_total_denominator)
+
+    assert_that(
+        cost(0, 60)
+        == sum((cost(a, b) for a, b in ((0, 20), (20, 40), (40, 60))), Fraction(0))
+        == Fraction(50),
+    )
+
+
+def test_exact_total_preserves_nonterminating_annual_rate() -> None:
+    """A nonterminating annual salary/hour ratio remains exact in the ledger."""
+    current = ConditionRelease(
+        release_id="fraction",
+        jurisdiction="QLD",
+        employer="Synthetic employer",
+        classification="Synthetic grade",
+        sources=SourceRegistry(records=(source(),)),
+        conditions=(
+            condition("salary", "salary", "100", "AUD/year"),
+            condition("hours", "paid_hours", "3", "hours/year"),
+        ),
+    )
+    activity = Activity(
+        activity_id="fraction",
+        resource_id="worker",
+        starts_at=datetime(2026, 6, 2, 9, tzinfo=UTC),
+        ends_at=datetime(2026, 6, 2, 10, tzinfo=UTC),
+        resources=Decimal(1),
+    )
+    result = cost_condition_activity(current, activity, "UTC")
+    assert_that(
+        Fraction(result.exact_total_numerator, result.exact_total_denominator)
+        == Fraction(100, 3),
+    )

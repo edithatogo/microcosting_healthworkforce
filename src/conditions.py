@@ -2,6 +2,7 @@
 """Versioned, explicitly reviewed conditions and limited hourly costing rules."""
 
 from datetime import UTC, date, datetime, time, timedelta
+from fractions import Fraction
 from typing import Literal, Self
 from zoneinfo import ZoneInfo
 lazy from decimal import Decimal
@@ -149,7 +150,30 @@ class ConditionCostResult(BaseModel):
     resource_id: str
     timezone: str
     total: Decimal
+    exact_total_numerator: int
+    exact_total_denominator: int = Field(gt=0)
     segments: tuple[ConditionCostSegment, ...]
+
+
+def _exact_rate_sum(release: ConditionRelease, when: date) -> Fraction:
+    """Keep annual condition ratios exact until the caller chooses rounding."""
+    current = [
+        c for c in release.conditions if c.effective_from <= when < c.effective_to
+    ]
+    salaries = [c for c in current if c.kind == "salary"]
+    hours = [c for c in current if c.kind == "paid_hours"]
+    if len(salaries) != 1 or len(hours) != 1:
+        msg = "Exactly one salary and paid-hours condition must cover the date"
+        raise ValueError(msg)
+    salary = Fraction(salaries[0].value)
+    annual_hours = Fraction(hours[0].value)
+    annual = salary
+    for item in current:
+        if item.kind == "fixed_annual":
+            annual += Fraction(item.value)
+        elif item.kind == "salary_fraction":
+            annual += salary * Fraction(item.value)
+    return annual / annual_hours
 
 
 def cost_condition_activity(
@@ -168,6 +192,7 @@ def cost_condition_activity(
     cursor = activity.starts_at.astimezone(UTC)
     end = activity.ends_at.astimezone(UTC)
     segments: list[ConditionCostSegment] = []
+    exact_total = Fraction(0)
     while cursor < end:
         day = cursor.astimezone(zone).date()
         next_day = datetime.combine(day + timedelta(days=1), time.min, zone).astimezone(
@@ -182,6 +207,11 @@ def cost_condition_activity(
             duration.microseconds,
         ) / Decimal(1000000)
         hours = seconds / Decimal(3600) * activity.resources
+        microseconds = (
+            duration.days * 86400 + duration.seconds
+        ) * 1000000 + duration.microseconds
+        exact_hours = Fraction(microseconds, 3600000000) * Fraction(activity.resources)
+        exact_total += _exact_rate_sum(release, day) * exact_hours
         rates = hourly_components(release, day)
         active = tuple(
             c.condition_id
@@ -206,5 +236,7 @@ def cost_condition_activity(
         resource_id=activity.resource_id,
         timezone=local_timezone,
         total=total,
+        exact_total_numerator=exact_total.numerator,
+        exact_total_denominator=exact_total.denominator,
         segments=tuple(segments),
     )
