@@ -7,6 +7,7 @@ from fractions import Fraction
 
 import pytest
 
+from src.condition_history import release_sha256
 from src.conditions import ConditionRelease
 from src.periodic_allowance import (
     AllowancePeriod,
@@ -87,3 +88,27 @@ def test_invalid_or_changing_period_is_rejected() -> None:
         cost_periodic_allowance(release(), "training", excessive)
     with pytest.raises(ValueError, match="unique"):
         period(portion("same", "1", "1", "1"), portion("same", "1", "1", "1"))
+
+
+def test_split_period_retains_nominal_denominator_and_condition_lineage() -> None:
+    """A mid-period rate change is split without charging a full period twice."""
+    first = condition("first", "fixed_annual", "1975", "AUD/year").model_copy(
+        update={"component": "training", "effective_to": date(2026, 6, 8)},
+    )
+    second = condition("second", "fixed_annual", "3950", "AUD/year").model_copy(
+        update={"component": "training", "effective_from": date(2026, 6, 8)},
+    )
+    dated = release().model_copy(update={"conditions": (first, second)})
+    first_half = period(portion("first-half", "38", "1", "1")).model_copy(
+        update={"ends_on": date(2026, 6, 8)},
+    )
+    second_half = period(portion("second-half", "38", "1", "1")).model_copy(
+        update={"starts_on": date(2026, 6, 8)},
+    )
+    before = cost_periodic_allowance(dated, "training", first_half)
+    after = cost_periodic_allowance(dated, "training", second_half)
+    assert_that(before.payable + after.payable == Fraction(5925, 52))
+    assert_that(before.condition.condition_id == "first")
+    assert_that(after.condition.condition_id == "second")
+    assert_that(before.release_sha256 == after.release_sha256)
+    assert_that(before.release_sha256 == release_sha256(dated))

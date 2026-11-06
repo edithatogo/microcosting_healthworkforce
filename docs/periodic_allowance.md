@@ -14,8 +14,11 @@ justify the period divisor; it is not inferred from a calendar or an annual
 amount. A half-pay portion can use distinct accrual and payment factors if the
 applicable source supports those assumptions.
 
-The entire period must be covered by one accepted condition. Split periods
-explicitly at changes. Labels, hours and factors are caller assertions: this
+The entire calculation interval must be covered by one accepted condition.
+Split it explicitly at changes, keeping the full-time hours and annual divisor
+for the same nominal payroll period in each fragment; supply only that
+fragment's actual allocated hours. Selecting smaller full-time hours for each
+fragment can overstate the result. Labels, hours and factors are caller assertions: this
 API does not determine eligibility, payroll dates, leave, overtime, policy
 history or individual entitlements. Allocation hours may not exceed the
 specified full-time hours. This is a separate calculation, not a cash-flow model;

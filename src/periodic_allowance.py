@@ -9,6 +9,7 @@ lazy from decimal import Decimal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from src.condition_history import release_sha256
 from src.conditions import Condition, ConditionRelease
 
 
@@ -72,6 +73,7 @@ class PeriodicAllowanceCost:
     """Separate exact accrual and payment; no implicit ledger combination."""
 
     release_id: str
+    release_sha256: str
     condition: Condition
     period: AllowancePeriod
     portions: tuple[AllowancePortionCost, ...]
@@ -120,6 +122,7 @@ def cost_periodic_allowance(
     )
     return PeriodicAllowanceCost(
         release.release_id,
+        release_sha256(release),
         selected,
         period,
         rows,
