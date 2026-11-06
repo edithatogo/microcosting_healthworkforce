@@ -1,0 +1,80 @@
+{
+  "release_id": "synthetic-unit-example-1",
+  "method_id": "direct_unit_quote_v1",
+  "currency": "AUD",
+  "as_known_on": "2026-02-01",
+  "jurisdiction": "QLD",
+  "employer": "Synthetic employer",
+  "classification": "Synthetic grade",
+  "sources": {
+    "schema_version": 1,
+    "records": [
+      {
+        "source_id": "synthetic-award-1",
+        "title": "Synthetic schema fixture, not an actual instrument",
+        "uri": "https://example.org/instrument",
+        "edition": "test-1",
+        "jurisdiction": "QLD",
+        "kind": "agreement",
+        "holding": "held",
+        "authority": "primary",
+        "applicability": "verified",
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "retrieved_at": "2026-01-01T00:00:00Z",
+        "effective_from": "2026-01-01",
+        "effective_to": null,
+        "verified_through": "2027-01-01",
+        "nominal_expiry": null,
+        "employers": [
+          "Synthetic employer"
+        ],
+        "classifications": [
+          "Synthetic grade"
+        ],
+        "supersedes": [],
+        "reason": "Fictional source metadata/hash solely for runnable synthetic examples; no real document, wage or eligibility is represented"
+      }
+    ]
+  },
+  "quotes": [
+    {
+      "quote_id": "period-1",
+      "component": "development",
+      "unit": "fortnight",
+      "amount": "100.01",
+      "starts_on": "2026-01-01",
+      "ends_on": "2026-07-01",
+      "known_from": "2026-01-01",
+      "source_id": "synthetic-award-1",
+      "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "citation": "Synthetic table row 1, fortnight column",
+      "status": "accepted"
+    },
+    {
+      "quote_id": "period-2",
+      "component": "development",
+      "unit": "fortnight",
+      "amount": "110.01",
+      "starts_on": "2026-07-01",
+      "ends_on": "2027-01-01",
+      "known_from": "2026-01-01",
+      "source_id": "synthetic-award-1",
+      "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "citation": "Synthetic table row 1, fortnight column",
+      "status": "accepted"
+    },
+    {
+      "quote_id": "annual-1",
+      "component": "registration",
+      "unit": "annum",
+      "amount": "2700",
+      "starts_on": "2026-01-01",
+      "ends_on": "2027-01-01",
+      "known_from": "2026-01-01",
+      "source_id": "synthetic-award-1",
+      "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "citation": "Synthetic table row 1, fortnight column",
+      "status": "accepted"
+    }
+  ]
+}

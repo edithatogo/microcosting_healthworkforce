@@ -170,3 +170,19 @@ aggregation constitute an approved uncertainty specification. No clipping or
 replacement priors are implied by software parity.
 The PSA summary labels the results as exploratory; the CSV retains its existing
 numeric columns and does not embed the scenario's scientific qualification.
+
+## Static and dynamic microcosting
+
+The original command preserves the legacy workbook model. The separate
+`microcosting-healthworkforce-v2` command accepts explicit condition-based
+snapshots or timed activities with effective-dated conditions. The
+`microcosting-healthworkforce-units` command prices explicitly selected unit
+quantities as a common-date snapshot or a dated event series using the same
+`price_units` library function.
+
+Start with the [runnable synthetic unit examples and input/output guide](docs/unit_quote_cli.md)
+and the [library capability guide](docs/costing_v2_foundation.md).
+The examples provide no real award rates or worker eligibility. Source-backed
+accepted releases, roster history and supported rule interactions remain explicit
+requirements; dynamic costing does not mean PSA, and a cost change does not
+establish a cash saving.
