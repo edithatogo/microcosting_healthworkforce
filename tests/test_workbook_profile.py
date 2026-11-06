@@ -38,3 +38,56 @@ def test_candidate_profile_does_not_apply_to_other_source() -> None:
     """Coordinates from one historical workbook are never inferred for another."""
     with pytest.raises(ValueError, match="SHA-256"):
         load_candidate_profile().table_definitions("0" * 64)
+
+
+def test_primary_component_formulas_and_candidate_meanings() -> None:
+    """Check every jurisdiction-role component against its actual formula basis."""
+    catalog = read_workbook_catalog(Path("data/Labour Model - v3, 20240328.xlsx"))
+    profile = load_candidate_profile()
+    extraction = extract_tables(catalog, profile.table_definitions(catalog.sha256))
+    tables = {table.definition.table_id: table for table in extraction.tables}
+    columns = ("J", "M", "N", "O", "P", "Q", "R", "S", "T", "V", "W", "X")
+    meanings = (
+        "superannuation",
+        "average_penalties",
+        "public_holiday_penalty",
+        "private_practice_loading",
+        "attraction_retention_allowance",
+        "sick_leave_proxy",
+        "professional_development_allowance",
+        "annual_leave_proxy",
+        "annual_leave_loading_proxy",
+        "salary_lower",
+        "salary_midpoint",
+        "salary_upper",
+    )
+    for block, (source, dollars, shares) in enumerate(
+        zip(
+            (4, 10, 16, 22, 28),
+            (47, 53, 59, 65, 71),
+            (90, 96, 102, 108, 114),
+            strict=True,
+        ),
+    ):
+        dollar_table = tables[f"WS01-R{8 + block:02}"]
+        share_table = tables[f"WS01-R{15 + block:02}"]
+        dollar_cells = {cell.coordinate: cell for cell in dollar_table.cells}
+        share_cells = {cell.coordinate: cell for cell in share_table.cells}
+        for offset in range(5):
+            row = source + offset
+            for column, meaning in zip(columns, meanings, strict=True):
+                term = f"{column}{row}"
+                if column in "JMNOPQT":
+                    term += f"*$W{row}"
+                elif column == "S":
+                    term += f"/52*$W{row}"
+                expected_dollar = f"=({term})" if column in "JMNOPQST" else f"={term}"
+                amount = dollar_cells[f"{column}{dollars + offset}"]
+                share = share_cells[f"{column}{shares + offset}"]
+                assert_that(amount.source.value == expected_dollar)
+                assert_that(share.source.value == f"=({term})/$Z{row}")
+                assert_that(amount.unit == "AUD/year" and share.unit == "fraction")
+                assert_that(amount.column_name == f"{meaning}_annual")
+                assert_that(share.column_name == f"{meaning}_share_of_midpoint_cost")
+                if column in ("V", "X"):
+                    assert_that(amount.role == share.role == "alternative_salary_bound")
