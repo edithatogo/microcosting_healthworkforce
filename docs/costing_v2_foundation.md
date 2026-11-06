@@ -189,4 +189,3 @@ qualified method. Annual and fortnight inputs must not represent the same cost
 twice; no automatic combination with hourly/fixed-annual ledgers is performed.
 The API does not assert a source-specific payroll rule, a full employment cost,
 or empirical PSA validity. No real source rates or private records are bundled.
-
