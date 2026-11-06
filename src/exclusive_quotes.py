@@ -56,15 +56,14 @@ class ExclusiveQuoteRule(QuoteModel):
         return self
 
 
-class ExclusiveQuoteAllocation(QuoteModel):
-    """An upstream-reviewed eligible window, chosen context and explicit quantity."""
+class QuoteExposureWindow(QuoteModel):
+    """An upstream-reviewed eligible window and explicit quantity."""
 
     allocation_id: str
     resource_id: str
     starts_at: datetime
     ends_at: datetime
     valued_on: date
-    quote_id: str
     quantity: NonnegativeQuantity
     eligibility_verified: bool
     history_complete: bool
@@ -99,6 +98,12 @@ class ExclusiveQuoteAllocation(QuoteModel):
         return self
 
 
+class ExclusiveQuoteAllocation(QuoteExposureWindow):
+    """One chosen alternative for an upstream-qualified exposure window."""
+
+    quote_id: str
+
+
 @dataclass(frozen=True)
 class ExclusiveQuoteResult:
     """Retain reviewed policy, selected windows and exact shared price ledger."""
@@ -109,23 +114,15 @@ class ExclusiveQuoteResult:
     prices: UnitQuoteResult
 
 
-def price_exclusive_quotes(
+def validate_quote_exposures(
     rule: ExclusiveQuoteRule,
     release: UnitQuoteRelease,
-    allocations: tuple[ExclusiveQuoteAllocation, ...],
-) -> ExclusiveQuoteResult:
-    """Prevent overlapping alternatives within one supplied complete allocation set.
-
-    The caller qualifies the windows, quantities, eligibility and context choice.
-    No geographical selection, time proration, maximum comparison, 24-hour rolling
-    cap, salary inclusion, cross-call duplicate detection or automatic zero applies.
-    Price/policy changes inside a window require explicit non-overlapping splits.
-    """
+    exposures: tuple[QuoteExposureWindow, ...],
+) -> None:
+    """Validate complete source-qualified windows independently of price selection."""
     rule = ExclusiveQuoteRule.model_validate(dict(rule))
     release = UnitQuoteRelease.model_validate(release.model_dump())
-    allocations = tuple(
-        ExclusiveQuoteAllocation.model_validate(dict(a)) for a in allocations
-    )
+    exposures = tuple(QuoteExposureWindow.model_validate(dict(a)) for a in exposures)
     if (rule.jurisdiction, rule.employer, rule.classification) != (
         release.jurisdiction,
         release.employer,
@@ -133,17 +130,10 @@ def price_exclusive_quotes(
     ) or rule.as_known_on != release.as_known_on:
         msg = "Exclusive policy and prices require matching scope and knowledge date"
         raise ValueError(msg)
-    if not allocations or len({a.allocation_id for a in allocations}) != len(
-        allocations,
-    ):
+    if not exposures or len({a.allocation_id for a in exposures}) != len(exposures):
         msg = "Supply a nonempty allocation set with unique identities"
         raise ValueError(msg)
-    ordered = tuple(
-        sorted(
-            allocations,
-            key=lambda a: (a.resource_id, a.starts_at, a.allocation_id),
-        ),
-    )
+    ordered = sorted(exposures, key=lambda a: (a.resource_id, a.starts_at))
     if any(
         a.resource_id == b.resource_id and b.starts_at < a.ends_at
         for a, b in pairwise(ordered)
@@ -151,8 +141,6 @@ def price_exclusive_quotes(
         msg = "Alternative allocation windows overlap for the same resource"
         raise ValueError(msg)
     zone = ZoneInfo(rule.local_timezone)
-    quotes = {q.quote_id: q for q in release.quotes}
-    quantities: list[QuoteQuantity] = []
     for allocation in ordered:
         first = allocation.starts_at.astimezone(zone).date()
         last = (allocation.ends_at - timedelta(microseconds=1)).astimezone(zone).date()
@@ -182,6 +170,42 @@ def price_exclusive_quotes(
             ):
                 msg = "Exclusive policy requires matching held hash and known source"
                 raise ValueError(msg)
+
+
+def price_exclusive_quotes(
+    rule: ExclusiveQuoteRule,
+    release: UnitQuoteRelease,
+    allocations: tuple[ExclusiveQuoteAllocation, ...],
+) -> ExclusiveQuoteResult:
+    """Prevent overlapping alternatives within one complete supplied allocation set.
+
+    No geography, proration, maximum choice, rolling cap or cross-call duplication
+    is inferred. Price/policy changes require explicit non-overlapping splits.
+    """
+    rule = ExclusiveQuoteRule.model_validate(dict(rule))
+    release = UnitQuoteRelease.model_validate(release.model_dump())
+    allocations = tuple(
+        ExclusiveQuoteAllocation.model_validate(dict(a)) for a in allocations
+    )
+    exposures = tuple(
+        QuoteExposureWindow.model_validate(
+            {k: v for k, v in dict(a).items() if k != "quote_id"},
+        )
+        for a in allocations
+    )
+    validate_quote_exposures(rule, release, exposures)
+    ordered = tuple(
+        sorted(
+            allocations,
+            key=lambda a: (a.resource_id, a.starts_at, a.allocation_id),
+        ),
+    )
+    zone = ZoneInfo(rule.local_timezone)
+    quotes = {q.quote_id: q for q in release.quotes}
+    quantities: list[QuoteQuantity] = []
+    for allocation in ordered:
+        first = allocation.starts_at.astimezone(zone).date()
+        last = (allocation.ends_at - timedelta(microseconds=1)).astimezone(zone).date()
         quote = quotes.get(allocation.quote_id)
         if (
             quote is None
