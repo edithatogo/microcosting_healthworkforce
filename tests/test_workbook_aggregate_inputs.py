@@ -52,7 +52,12 @@ def test_component_displays_retain_formula_bases() -> None:
         load_candidate_profile().table_definitions(catalog.sha256),
     )
     tables = {t.definition.table_id: t for t in extraction.tables}
-    for identity, start, shares in (("WS01-R14", 83, False), ("WS01-R20", 120, True)):
+    for identity, start, shares in (
+        ("WS01-R14", 83, False),
+        ("WS01-R20", 120, True),
+        ("WS02-R16", 95, False),
+        ("WS02-R24", 144, True),
+    ):
         table = tables[identity]
         cells = {c.coordinate: c for c in table.cells}
         for offset in range(5):
@@ -97,3 +102,25 @@ def test_jurisdiction_summary_displays_link_numeric_cells() -> None:
     assert_that(
         all(c.role == "identity" and c.unit is None for c in placeholders.cells),
     )
+
+
+def test_weighted_summary_display_links_weighted_numeric_block() -> None:
+    """The WM annual/hourly displays use their selected weighted bounds."""
+    catalog = read_workbook_catalog(Path("data/Labour Model - v3, 20240328.xlsx"))
+    extraction = extract_tables(
+        catalog,
+        load_candidate_profile().table_definitions(catalog.sha256),
+    )
+    table = next(t for t in extraction.tables if t.definition.table_id == "WS02-R09")
+    cells = {c.coordinate: c for c in table.cells}
+    for row in range(52, 57):
+        source = row - 6
+        for col, mid, lower, upper in (("Y", "Z", "Y", "AA"), ("AB", "AC", "AB", "AD")):
+            cell = cells[f"{col}{row}"]
+            expected = (
+                f'=TEXT({mid}{source}, "0,0") & " (" & '
+                f'TEXT({lower}{source}, "0,0") & " - " & '
+                f'TEXT({upper}{source}, "0,0") & ")"'
+            )
+            assert_that(cell.source.value == expected)
+            assert_that(cell.role == "presentation" and cell.unit == "text")
