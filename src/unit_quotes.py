@@ -10,12 +10,17 @@ from dataclasses import dataclass
 from datetime import date, timedelta
 from fractions import Fraction
 from hashlib import sha256
-from typing import Literal, Self
+from typing import Annotated, Literal, Self
 lazy from decimal import Decimal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 lazy from src.source_registry import SourceRegistry
+
+type NonnegativeQuantity = (
+    Annotated[Decimal, Field(ge=0, allow_inf_nan=False)]
+    | Annotated[Fraction, Field(ge=0)]
+)
 
 
 class QuoteModel(BaseModel):
@@ -115,7 +120,7 @@ class QuoteQuantity(QuoteModel):
     quantity_id: str
     quote_id: str
     unit: str
-    quantity: Decimal = Field(ge=0, allow_inf_nan=False)
+    quantity: NonnegativeQuantity
     valued_on: date
     quantity_kind: Literal["observed_use", "analyst_assumption"]
     basis: str
@@ -157,7 +162,8 @@ def price_units(
     across ledgers and payment/accrual rules before supplying these quantities.
     """
     release = UnitQuoteRelease.model_validate(release.model_dump())
-    quantities = tuple(QuoteQuantity.model_validate(q.model_dump()) for q in quantities)
+    # Raw flat fields preserve Fraction/Decimal types for strict revalidation.
+    quantities = tuple(QuoteQuantity.model_validate(dict(q)) for q in quantities)
     if len({q.quantity_id for q in quantities}) != len(quantities):
         msg = "Duplicate quantity identity"
         raise ValueError(msg)

@@ -225,3 +225,37 @@ interpret service credit, establish variable-part-time/parental eligibility,
 calculate leave accrual/payment, or infer cover/cash savings. The unresolved source
 normalization convention remains visible even when a scenario's arithmetic passes.
 No real employee histories or private instrument extracts are bundled.
+
+## Exact selected-hours pricing and allowance interactions
+
+`QuoteQuantity.quantity` accepts a nonnegative finite Decimal or an exact
+Fraction. Existing Decimal inputs keep their behavior. Fractions remain exact
+through pricing and JSON roundtrip, with no conversion to a context-rounded
+Decimal quantity. Use `model_validate_json` for JSON; runtime revalidation retains
+raw typed fields so an unchecked Python float copy is still rejected.
+
+`src.normal_pay.price_selected_hours` connects a `NormalHoursSelection` to an
+explicit `HoursPricingRequest` and accepted `UnitQuoteRelease`. It recomputes the
+selection from its original rule/request/history, requires matching source scope
+and knowledge date, and multiplies selected hours/week by the supplied exact week
+quantity and an explicitly named hour quote. The request's valuation date selects
+the applicable price; it does not assert a cash date or earned leave period.
+Repeated calls can price separately qualified dated exposure partitions.
+
+Supply additional allowance `QuoteQuantity` records separately in their own
+source units at the same snapshot. A fixed fortnight quantity is not scaled a
+second time by salary hours or the week exposure. Caller-declared base inclusions
+and their basis are mandatory; an allowance already included in the base or a
+second quote for the same component is rejected. Explicit exclusive-component
+groups and an interaction basis are also mandatory (an empty tuple is a deliberate
+no-groups declaration). Alternative categories cannot be combined, including when
+one is already loaded into the base or has a zero supplied quantity. The engine
+does not discover these source-specific groups from component names.
+
+For the existing synthetic 2100/73 hours/week selection, one explicit week at
+30 AUD/hour costs exactly 63000/73 AUD. A separately supplied half-fortnight at
+100.01 AUD/fortnight adds exactly 10001/200 AUD. Results retain the recomputed
+selection, exposure/inclusion/interaction declarations, source quotes and exact
+component ledger. Monetary results are price exposures, not an assertion of pay
+due. Eligibility, continuing status, allowance proration, calendar normalization,
+paid/unpaid leave/accrual and employment endpoints remain separate qualifications.
