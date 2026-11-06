@@ -78,3 +78,6 @@ dev = [
 typeCheckingMode = "strict"
 pythonVersion = "3.15"
 include = ["src", "tests"]
+
+[tool.setuptools.package-data]
+src = ["workbook_candidate_profile.json"]
