@@ -6,6 +6,7 @@ from decimal import Decimal
 
 import pytest
 
+from src.condition_history import ConditionHistory, ReleaseEdition, ReleasePin
 from src.conditions import (
     ConditionRelease,
     cost_condition_activity,
@@ -116,3 +117,27 @@ def test_retroactive_scope_hash_and_knowledge_fail_closed() -> None:
         RetrospectiveAuthority.model_validate(
             authority.model_copy(update={"reviewed": False}).model_dump(),
         )
+
+
+def test_history_never_selects_or_replays_before_release_knowledge() -> None:
+    """A dated edition cannot leak later-reviewed retrospective evidence."""
+    release = retrospective_release()
+    with pytest.raises(ValueError, match="predate its knowledge"):
+        ConditionHistory(
+            editions=(ReleaseEdition(release=release, known_from=date(2026, 1, 1)),),
+        )
+    history = ConditionHistory(
+        editions=(ReleaseEdition(release=release, known_from=date(2026, 2, 1)),),
+    )
+    with pytest.raises(ValueError, match="No release known"):
+        history.select(date(2026, 1, 31))
+    selected, pin = history.select(date(2026, 2, 1))
+    assert_that(selected.release_id == release.release_id)
+    assert_that(history.replay(pin) == release)
+    forged = ReleasePin(
+        release_id=pin.release_id,
+        release_sha256=pin.release_sha256,
+        knowledge_date=date(2026, 1, 31),
+    )
+    with pytest.raises(ValueError, match="not known"):
+        history.replay(forged)

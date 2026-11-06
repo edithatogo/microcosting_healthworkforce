@@ -61,6 +61,12 @@ class ConditionHistory(BaseModel):
         previous: ReleaseEdition | None = None
         for item in self.editions:
             release = item.release
+            if (
+                release.as_known_at is not None
+                and item.known_from < release.as_known_at
+            ):
+                msg = "Release edition cannot predate its knowledge date"
+                raise ValueError(msg)
             if release.release_id in identities:
                 msg = "Release identities must be unique"
                 raise ValueError(msg)
