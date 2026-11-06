@@ -33,6 +33,7 @@ class Condition(BaseModel):
     citation: str = Field(min_length=1)
     status: Literal["candidate", "accepted", "rejected"]
     retrospective: RetrospectiveAuthority | None = None
+    included_components: tuple[str, ...] = ()
 
     @model_validator(mode="after")
     def valid_condition(self) -> Self:
@@ -54,6 +55,16 @@ class Condition(BaseModel):
             raise ValueError(msg)
         if self.kind == "paid_hours" and self.value == 0:
             msg = "Paid hours must be positive"
+            raise ValueError(msg)
+        if (
+            (self.included_components and self.kind != "salary")
+            or any(
+                not name.strip() or name == self.component
+                for name in self.included_components
+            )
+            or len(set(self.included_components)) != len(self.included_components)
+        ):
+            msg = "Included components require distinct named salary inclusions"
             raise ValueError(msg)
         return self
 
@@ -87,12 +98,18 @@ class ConditionRelease(BaseModel):
             self._validate_source(item)
         for index, left in enumerate(self.conditions):
             for right in self.conditions[index + 1 :]:
-                if (
-                    left.component == right.component
-                    and left.effective_from < right.effective_to
+                overlap = (
+                    left.effective_from < right.effective_to
                     and right.effective_from < left.effective_to
-                ):
+                )
+                if overlap and left.component == right.component:
                     msg = "Overlapping condition component periods"
+                    raise ValueError(msg)
+                if overlap and (
+                    left.component in right.included_components
+                    or right.component in left.included_components
+                ):
+                    msg = "Separate condition duplicates a salary inclusion"
                     raise ValueError(msg)
         return self
 
