@@ -337,3 +337,128 @@ def cost_dynamic(release: CostRelease, activities: tuple[Activity, ...]) -> Cost
             )
             cursor = stop
     return _result(release, rows, exact)
+
+
+class DatedResourceUse(FrozenModel):
+    """An explicit resource-hour quantity with a selected temporal distribution."""
+
+    quantity_id: str = Field(min_length=1)
+    resource_id: str = Field(min_length=1)
+    starts_at: datetime
+    ends_at: datetime
+    hours: Decimal = Field(ge=0, allow_inf_nan=False)
+    unit: Literal["resource_hours"]
+    distribution: Literal["uniform_elapsed_v1"]
+    quantity_kind: Literal["observed_use", "analyst_assumption"]
+    quantity_basis: str = Field(min_length=1)
+    allocation_id: str | None = None
+
+    @model_validator(mode="after")
+    def valid_quantity(self) -> Self:
+        """Reject missing units/conventions and impossible individual allocations."""
+        if self.starts_at.utcoffset() is None or self.ends_at.utcoffset() is None:
+            msg = "Quantity times must be timezone-aware"
+            raise ValueError(msg)
+        duration = self.ends_at.astimezone(UTC) - self.starts_at.astimezone(UTC)
+        if duration <= timedelta(0) or any(
+            not name.strip()
+            for name in (self.quantity_id, self.resource_id, self.quantity_basis)
+        ):
+            msg = "Quantity requires a positive interval and nonblank identities"
+            raise ValueError(msg)
+        if self.allocation_id is not None and (
+            not self.allocation_id.strip()
+            or Fraction(self.hours) > Fraction(_duration_micros(duration), 3600000000)
+        ):
+            msg = (
+                "An individual quantity needs a nonblank allocation and feasible hours"
+            )
+            raise ValueError(msg)
+        return self
+
+
+class DatedQuantityCost(FrozenModel):
+    """Retain assumed quantities separately from their exact hourly price ledger."""
+
+    quantity_method_id: Literal["uniform_elapsed_quantity_v1"]
+    quantities: tuple[DatedResourceUse, ...]
+    ledger: CostResult
+
+
+def _duration_micros(duration: timedelta) -> int:
+    return (duration.days * 86400 + duration.seconds) * 1000000 + duration.microseconds
+
+
+def _quantity_order(
+    quantities: tuple[DatedResourceUse, ...],
+) -> tuple[DatedResourceUse, ...]:
+    ordered = tuple(
+        sorted(quantities, key=lambda q: (q.starts_at.astimezone(UTC), q.quantity_id)),
+    )
+    if len({q.quantity_id for q in ordered}) != len(ordered):
+        msg = "Duplicate dated quantity identity"
+        raise ValueError(msg)
+    allocations: dict[str, datetime] = {}
+    for quantity in ordered:
+        if quantity.allocation_id is None:
+            continue
+        if (
+            quantity.allocation_id in allocations
+            and quantity.starts_at.astimezone(
+                UTC,
+            )
+            < allocations[quantity.allocation_id]
+        ):
+            msg = "Dated quantities overlap for an explicit allocation identity"
+            raise ValueError(msg)
+        allocations[quantity.allocation_id] = quantity.ends_at.astimezone(UTC)
+    return ordered
+
+
+def cost_dated_quantities(
+    release: CostRelease,
+    quantities: tuple[DatedResourceUse, ...],
+) -> DatedQuantityCost:
+    """Price declared resource hours spread uniformly over selected elapsed intervals.
+
+    Each interval's total quantity is independent of its clock duration. Split
+    amounts use exact elapsed fractions at rate boundaries. The caller explicitly
+    selects this distribution; no roster, leave use or payroll allocation is inferred.
+    """
+    release = _validated(release)
+    quantities = _quantity_order(
+        tuple(DatedResourceUse.model_validate(q.model_dump()) for q in quantities),
+    )
+    rows: list[CostRow] = []
+    exact = Fraction(0)
+    for quantity in quantities:
+        cursor = quantity.starts_at.astimezone(UTC)
+        end = quantity.ends_at.astimezone(UTC)
+        duration = _duration_micros(end - cursor)
+        while cursor < end:
+            rate = _rate(release, quantity.resource_id, cursor)
+            stop = min(end, rate.ends_at) if rate.ends_at is not None else end
+            _rate(release, quantity.resource_id, stop - timedelta(microseconds=1))
+            hours = Fraction(quantity.hours) * Fraction(
+                _duration_micros(stop - cursor),
+                duration,
+            )
+            exact += hours * sum(
+                (Fraction(value) for value in rate.components.values()),
+                Fraction(0),
+            )
+            rows.append(
+                _row(
+                    rate,
+                    (quantity.quantity_id, quantity.allocation_id),
+                    cursor,
+                    stop,
+                    hours,
+                ),
+            )
+            cursor = stop
+    return DatedQuantityCost(
+        quantity_method_id="uniform_elapsed_quantity_v1",
+        quantities=quantities,
+        ledger=_result(release, rows, exact),
+    )
