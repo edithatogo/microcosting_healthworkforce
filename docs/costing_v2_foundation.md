@@ -130,7 +130,7 @@ rate as a declared allocation method; their actual timing is not inferred. This
 method does not combine the minimum with overtime, shift penalties, multiple
 engagements or changes across local dates.
 
-Condition-activity results also expose `exact_total_numerator` and
+Flat-rate and condition-activity results also expose `exact_total_numerator` and
 `exact_total_denominator`: an unrounded rational total calculated directly from
 the supplied decimal conditions and elapsed microseconds. The existing Decimal
 `total` and component segments remain for compatibility and can differ by small

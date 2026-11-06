@@ -7,6 +7,7 @@ Dates and source review assertions are supplied by the release author.
 
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
+from fractions import Fraction
 from typing import Literal, Self
 from zoneinfo import ZoneInfo
 
@@ -163,6 +164,8 @@ class CostResult(FrozenModel):
     method_id: str
     currency: str
     total: Decimal
+    exact_total_numerator: int
+    exact_total_denominator: int = Field(gt=0)
     components: dict[str, Decimal]
     rows: tuple[CostRow, ...]
 
@@ -211,7 +214,7 @@ def _row(
     )
 
 
-def _result(release: CostRelease, rows: list[CostRow]) -> CostResult:
+def _result(release: CostRelease, rows: list[CostRow], exact: Fraction) -> CostResult:
     components: dict[str, Decimal] = {}
     for row in rows:
         for key, amount in row.components.items():
@@ -221,6 +224,8 @@ def _result(release: CostRelease, rows: list[CostRow]) -> CostResult:
         method_id=release.method_id,
         currency=release.currency,
         total=sum(components.values(), Decimal(0)),
+        exact_total_numerator=exact.numerator,
+        exact_total_denominator=exact.denominator,
         components=components,
         rows=tuple(rows),
     )
@@ -237,23 +242,31 @@ def cost_static(
 ) -> CostResult:
     """Cost explicit resource hours at one effective instant."""
     release = _validated(release)
+    resources = tuple(ResourceUse.model_validate(r.model_dump()) for r in resources)
     if len({r.resource_id for r in resources}) != len(resources):
         msg = "Duplicate static resource identity"
         raise ValueError(msg)
-    rows = [
-        _row(_rate(release, r.resource_id, at), "snapshot", at, None, r.hours)
-        for r in resources
-    ]
-    return _result(release, rows)
+    rows: list[CostRow] = []
+    exact = Fraction(0)
+    for resource in resources:
+        rate = _rate(release, resource.resource_id, at)
+        rows.append(_row(rate, "snapshot", at, None, resource.hours))
+        exact += Fraction(resource.hours) * sum(
+            (Fraction(value) for value in rate.components.values()),
+            Fraction(0),
+        )
+    return _result(release, rows, exact)
 
 
 def cost_dynamic(release: CostRelease, activities: tuple[Activity, ...]) -> CostResult:
     """Cost elapsed activities, splitting at rate changes and rejecting gaps."""
     release = _validated(release)
+    activities = tuple(Activity.model_validate(a.model_dump()) for a in activities)
     if len({a.activity_id for a in activities}) != len(activities):
         msg = "Duplicate activity identity"
         raise ValueError(msg)
     rows: list[CostRow] = []
+    exact = Fraction(0)
     for activity in activities:
         cursor = activity.starts_at.astimezone(UTC)
         end = activity.ends_at.astimezone(UTC)
@@ -266,6 +279,17 @@ def cost_dynamic(release: CostRelease, activities: tuple[Activity, ...]) -> Cost
                 duration.microseconds,
             ) / Decimal(1000000)
             hours = seconds / Decimal(3600) * activity.resources
+            micros = (
+                duration.days * 86400 + duration.seconds
+            ) * 1000000 + duration.microseconds
+            exact += (
+                Fraction(micros, 3600000000)
+                * Fraction(activity.resources)
+                * sum(
+                    (Fraction(value) for value in rate.components.values()),
+                    Fraction(0),
+                )
+            )
             rows.append(_row(rate, activity.activity_id, cursor, stop, hours))
             cursor = stop
-    return _result(release, rows)
+    return _result(release, rows, exact)

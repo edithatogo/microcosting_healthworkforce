@@ -1,8 +1,9 @@
 # Copyright 2026 Dylan. SPDX-License-Identifier: Apache-2.0
 """Independent arithmetic and boundary checks for static/dynamic costing."""
 
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from decimal import Decimal
+from fractions import Fraction
 
 import pytest
 
@@ -157,3 +158,75 @@ def test_altered_rate_source_hash_is_rejected() -> None:
     changed = current.model_copy(update={"rates": (altered, *current.rates[1:])})
     with pytest.raises(ValueError, match="hash"):
         cost_static(changed, datetime(2026, 1, 1, 11, tzinfo=UTC), ())
+
+
+def test_exact_flat_activity_cost_is_invariant_to_fractional_hour_splits() -> None:
+    """Flat hourly costs keep an exact rational total across three 20-minute slices."""
+    start = datetime(2026, 1, 1, 9, tzinfo=UTC)
+    whole = Activity(
+        activity_id="whole",
+        resource_id="staff",
+        starts_at=start,
+        ends_at=start + timedelta(hours=1),
+        resources=Decimal(1),
+    )
+    parts = tuple(
+        Activity(
+            activity_id=str(i),
+            resource_id="staff",
+            starts_at=start + timedelta(minutes=i),
+            ends_at=start + timedelta(minutes=i + 20),
+            resources=Decimal(1),
+        )
+        for i in (0, 20, 40)
+    )
+    a = cost_dynamic(release(), (whole,))
+    b = cost_dynamic(release(), parts)
+    assert_that(
+        Fraction(a.exact_total_numerator, a.exact_total_denominator) == Fraction(50),
+    )
+    assert_that(
+        Fraction(a.exact_total_numerator, a.exact_total_denominator)
+        == Fraction(b.exact_total_numerator, b.exact_total_denominator),
+    )
+
+
+def test_flat_cost_revalidates_copied_resource_quantities_and_activity() -> None:
+    """Unvalidated model copies cannot bypass nonnegative quantity and time checks."""
+    use = ResourceUse(resource_id="staff", hours=Decimal(1)).model_copy(
+        update={"hours": Decimal(-1)},
+    )
+    with pytest.raises(ValueError, match="greater than or equal to 0"):
+        cost_static(release(), datetime(2026, 1, 1, 10, tzinfo=UTC), (use,))
+    activity = Activity(
+        activity_id="a",
+        resource_id="staff",
+        starts_at=datetime(2026, 1, 1, 10, tzinfo=UTC),
+        ends_at=datetime(2026, 1, 1, 11, tzinfo=UTC),
+        resources=Decimal(1),
+    ).model_copy(update={"resources": Decimal(-1)})
+    with pytest.raises(ValueError, match="greater than or equal to 0"):
+        cost_dynamic(release(), (activity,))
+
+
+def test_flat_exact_static_and_dynamic_cost_agree_for_constant_rate() -> None:
+    """Equivalent one-hour snapshot and activity produce identical rational costs."""
+    start = datetime(2026, 1, 1, 9, tzinfo=UTC)
+    snap = cost_static(
+        release(),
+        start,
+        (ResourceUse(resource_id="staff", hours=Decimal(1)),),
+    )
+    activity = Activity(
+        activity_id="work",
+        resource_id="staff",
+        starts_at=start,
+        ends_at=start + timedelta(hours=1),
+        resources=Decimal(1),
+    )
+    dynamic = cost_dynamic(release(), (activity,))
+    assert_that(
+        Fraction(snap.exact_total_numerator, snap.exact_total_denominator)
+        == Fraction(dynamic.exact_total_numerator, dynamic.exact_total_denominator)
+        == Fraction(50),
+    )
