@@ -19,6 +19,7 @@ from src.conditions import (
     exact_hourly_components,
 )
 from src.costing import Activity
+lazy from src.pay_period_effective import RetrospectiveAuthority
 
 
 class DerivedComponentRule(BaseModel):
@@ -35,6 +36,7 @@ class DerivedComponentRule(BaseModel):
     effective_from: date
     effective_to: date
     reviewed: bool
+    retrospective: RetrospectiveAuthority | None = None
 
     @model_validator(mode="after")
     def valid_rule(self) -> Self:
@@ -91,16 +93,7 @@ def _rows(
         if not rule.effective_from <= when < rule.effective_to:
             msg = "Derived rule does not cover costing date"
             raise ValueError(msg)
-        source = release.sources.require_applicable(
-            rule.source_id,
-            when,
-            release.jurisdiction,
-            release.employer,
-            release.classification,
-        )
-        if source.sha256 != rule.source_sha256:
-            msg = "Derived rule source hash mismatch"
-            raise ValueError(msg)
+        _require_rule_source(release, rule, when)
         if any(name not in rates for name in rule.bases):
             msg = "Derived rule base is missing or not yet defined"
             raise ValueError(msg)
@@ -109,6 +102,37 @@ def _rows(
         rates[rule.component] = hourly
         result.append(DerivedRow(when, rule, base, hourly, quantity, hourly * quantity))
     return tuple(result)
+
+
+def _require_rule_source(
+    release: ConditionRelease,
+    rule: DerivedComponentRule,
+    when: date,
+) -> None:
+    """Qualify source scope and any separately reviewed retrospective date."""
+    authority = rule.retrospective
+    dates = (when,)
+    if authority is not None:
+        if release.as_known_at is None or authority.as_known_at != release.as_known_at:
+            msg = "Derived retrospective rule requires the release knowledge date"
+            raise ValueError(msg)
+        dates += (authority.known_from, authority.as_known_at)
+    for day in dates:
+        if authority is not None and day < authority.known_from:
+            if not authority.entitlement_from <= day < authority.entitlement_to:
+                msg = "Date outside derived retrospective entitlement interval"
+                raise ValueError(msg)
+            continue
+        source = release.sources.require_applicable(
+            rule.source_id,
+            day,
+            release.jurisdiction,
+            release.employer,
+            release.classification,
+        )
+        if source.sha256 != rule.source_sha256:
+            msg = "Derived rule source hash mismatch"
+            raise ValueError(msg)
 
 
 def cost_derived_snapshot(
