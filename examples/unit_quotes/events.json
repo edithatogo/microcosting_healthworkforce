@@ -1,0 +1,23 @@
+{
+  "mode": "events",
+  "quantities": [
+    {
+      "quantity_id": "event-1",
+      "quote_id": "period-1",
+      "unit": "fortnight",
+      "quantity": "1",
+      "valued_on": "2026-06-30",
+      "quantity_kind": "analyst_assumption",
+      "basis": "One explicitly selected period price scenario"
+    },
+    {
+      "quantity_id": "event-2",
+      "quote_id": "period-2",
+      "unit": "fortnight",
+      "quantity": "1",
+      "valued_on": "2026-07-01",
+      "quantity_kind": "analyst_assumption",
+      "basis": "One explicitly selected period price scenario"
+    }
+  ]
+}
