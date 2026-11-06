@@ -230,3 +230,51 @@ def test_flat_exact_static_and_dynamic_cost_agree_for_constant_rate() -> None:
         == Fraction(dynamic.exact_total_numerator, dynamic.exact_total_denominator)
         == Fraction(50),
     )
+
+
+def test_explicit_allocations_reject_overlaps_but_allow_parallel_workers() -> None:
+    """Worker identity, not the shared rate category, determines overlap."""
+    start = datetime(2026, 1, 1, 10, tzinfo=UTC)
+    first = Activity(
+        activity_id="first",
+        resource_id="staff",
+        allocation_id="opaque-1",
+        starts_at=start,
+        ends_at=start + timedelta(hours=1),
+        resources=Decimal(1),
+    )
+    overlapping = first.model_copy(update={"activity_id": "second"})
+    with pytest.raises(ValueError, match="overlap"):
+        cost_dynamic(release(), (first, overlapping))
+    second = overlapping.model_copy(update={"allocation_id": "opaque-2"})
+    result = cost_dynamic(release(), (first, second))
+    assert_that(result.total == Decimal(100))
+    assert_that([row.allocation_id for row in result.rows] == ["opaque-1", "opaque-2"])
+    adjacent = first.model_copy(
+        update={
+            "activity_id": "next",
+            "starts_at": first.ends_at,
+            "ends_at": first.ends_at + timedelta(hours=1),
+        },
+    )
+    assert_that(
+        [r.activity_id for r in cost_dynamic(release(), (adjacent, first)).rows]
+        == ["next", "first"],
+    )
+
+
+def test_allocation_identity_requires_one_resource_and_nonblank_id() -> None:
+    """An individual allocation cannot represent several workers or a blank ID."""
+    base = {
+        "activity_id": "a",
+        "resource_id": "staff",
+        "starts_at": datetime(2026, 1, 1, 10, tzinfo=UTC),
+        "ends_at": datetime(2026, 1, 1, 11, tzinfo=UTC),
+        "resources": Decimal(2),
+        "allocation_id": "opaque",
+    }
+    with pytest.raises(ValueError, match="one resource"):
+        Activity.model_validate(base)
+    base.update({"resources": Decimal(1), "allocation_id": " "})
+    with pytest.raises(ValueError, match="blank"):
+        Activity.model_validate(base)
