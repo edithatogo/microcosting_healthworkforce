@@ -1,7 +1,7 @@
 # Copyright 2026 Dylan. SPDX-License-Identifier: Apache-2.0
 """Resolve explicitly supplied first-full-pay-period commencement boundaries."""
 
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from typing import Self
 from zoneinfo import ZoneInfo
 
@@ -38,6 +38,33 @@ class PeriodCalendar(BaseModel):
         return self
 
 
+class RetrospectiveAuthority(BaseModel):
+    """Reviewed, explicit entitlement interval and its known-at boundary."""
+
+    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
+    entitlement_from: date
+    entitlement_to: date
+    known_from: date
+    as_known_at: date
+    citation: str = Field(min_length=1)
+    reviewed: bool
+
+    @model_validator(mode="after")
+    def valid_authority(self) -> Self:
+        """Reject unreviewed, unbounded or not-yet-known authority."""
+        if (
+            not self.reviewed
+            or not self.citation.strip()
+            or self.entitlement_to <= self.entitlement_from
+            or self.as_known_at < self.known_from
+        ):
+            msg = (
+                "Retrospective authority requires review, dates and available knowledge"
+            )
+            raise ValueError(msg)
+        return self
+
+
 class FirstFullPeriodRule(BaseModel):
     """A reviewed rule for a specific scope and explicit trigger instant."""
 
@@ -52,6 +79,7 @@ class FirstFullPeriodRule(BaseModel):
     source_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
     citation: str = Field(min_length=1)
     reviewed: bool
+    retrospective: RetrospectiveAuthority | None = None
 
     @model_validator(mode="after")
     def valid_rule(self) -> Self:
@@ -108,15 +136,33 @@ def first_full_period(
         raise ValueError(msg)
     start, end = calendar.boundaries[candidate : candidate + 2]
     zone = ZoneInfo(rule.timezone)
+    evidence = rule.retrospective
+    if evidence is not None:
+        for known_date in (evidence.known_from, evidence.as_known_at):
+            source = sources.require_applicable(
+                rule.source_id,
+                known_date,
+                rule.jurisdiction,
+                rule.employer,
+                rule.classification,
+            )
+            if source.sha256 != rule.source_sha256:
+                msg = "Pay-period rule source hash mismatch"
+                raise ValueError(msg)
     for day in (trigger.astimezone(zone).date(), start.astimezone(zone).date()):
-        source = sources.require_applicable(
-            rule.source_id,
-            day,
-            rule.jurisdiction,
-            rule.employer,
-            rule.classification,
-        )
-        if source.sha256 != rule.source_sha256:
-            msg = "Pay-period rule source hash mismatch"
-            raise ValueError(msg)
+        if evidence is not None and day < evidence.known_from:
+            if not evidence.entitlement_from <= day < evidence.entitlement_to:
+                msg = "Date outside reviewed retrospective entitlement interval"
+                raise ValueError(msg)
+        else:
+            source = sources.require_applicable(
+                rule.source_id,
+                day,
+                rule.jurisdiction,
+                rule.employer,
+                rule.classification,
+            )
+            if source.sha256 != rule.source_sha256:
+                msg = "Pay-period rule source hash mismatch"
+                raise ValueError(msg)
     return ResolvedPeriod(rule=rule, calendar=calendar, starts_at=start, ends_at=end)
