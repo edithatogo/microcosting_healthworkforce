@@ -12,7 +12,8 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # Ubuntu mirror downloads can be slow; retain the workbook loader and tests.
+    timeout-minutes: 60
     permissions:
       contents: read
       id-token: write
