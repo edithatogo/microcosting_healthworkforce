@@ -32,8 +32,19 @@ class ReleasePin(BaseModel):
 def release_sha256(release: ConditionRelease) -> str:
     """Hash complete canonical release content, including condition source scope."""
     release = ConditionRelease.model_validate(release.model_dump())
+    legacy = release.as_known_at is None and all(
+        item.retrospective is None for item in release.conditions
+    )
+    payload = (
+        release.model_dump(
+            mode="json",
+            exclude={"as_known_at": True, "conditions": {"__all__": {"retrospective"}}},
+        )
+        if legacy
+        else release.model_dump(mode="json")
+    )
     encoded = json.dumps(
-        release.model_dump(mode="json"),
+        payload,
         sort_keys=True,
         ensure_ascii=False,
         separators=(",", ":"),
@@ -61,6 +72,12 @@ class ConditionHistory(BaseModel):
         previous: ReleaseEdition | None = None
         for item in self.editions:
             release = item.release
+            if (
+                release.as_known_at is not None
+                and item.known_from < release.as_known_at
+            ):
+                msg = "Release edition cannot predate its knowledge date"
+                raise ValueError(msg)
             if release.release_id in identities:
                 msg = "Release identities must be unique"
                 raise ValueError(msg)
