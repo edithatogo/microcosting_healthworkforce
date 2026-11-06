@@ -112,3 +112,26 @@ def test_non_overlapping_edition_is_not_rejected() -> None:
         {**base.model_dump(), "conditions": (*later, allowance)},
     )
     assert_that(candidate.conditions[-1].effective_to == date(2026, 7, 1))
+
+
+def test_overlapping_salaries_cannot_claim_the_same_inclusion() -> None:
+    """A release rejects duplicate bundled claims before any costing call."""
+    base = bundled_release()
+    other = condition("other_salary", "salary", "90000", "AUD/year").model_copy(
+        update={"included_components": ("development",)},
+    )
+    with pytest.raises(ValueError, match="Overlapping salaries duplicate"):
+        ConditionRelease.model_validate(
+            {**base.model_dump(), "conditions": (*base.conditions, other)},
+        )
+    later = tuple(
+        item.model_copy(update={"effective_to": date(2026, 7, 1)})
+        if item.kind == "salary"
+        else item
+        for item in base.conditions
+    )
+    next_edition = other.model_copy(update={"effective_from": date(2026, 7, 1)})
+    release = ConditionRelease.model_validate(
+        {**base.model_dump(), "conditions": (*later, next_edition)},
+    )
+    assert_that(release.conditions[-1].included_components == ("development",))

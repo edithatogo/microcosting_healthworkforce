@@ -111,6 +111,11 @@ class ConditionRelease(BaseModel):
                 ):
                     msg = "Separate condition duplicates a salary inclusion"
                     raise ValueError(msg)
+                if overlap and set(left.included_components).intersection(
+                    right.included_components,
+                ):
+                    msg = "Overlapping salaries duplicate an included component"
+                    raise ValueError(msg)
         return self
 
     def _validate_source(self, item: Condition) -> None:
