@@ -85,6 +85,54 @@
           "name": "indexation",
           "unit": "fraction/year",
           "role": "value"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "C",
+          "name": "personnel_label",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "D",
+          "name": "instrument_alias",
+          "unit": null,
+          "role": "source_reference"
+        },
+        {
+          "column": "E",
+          "name": "reported_classification",
+          "unit": null,
+          "role": "source_reference"
+        },
+        {
+          "column": "F",
+          "name": "distribution_description",
+          "unit": null,
+          "role": "assumption_note"
+        },
+        {
+          "column": "G",
+          "name": "source_citation",
+          "unit": null,
+          "role": "source_reference"
+        },
+        {
+          "column": "H",
+          "name": "reported_pay_description",
+          "unit": null,
+          "role": "source_description"
         }
       ],
       "header_rows": [
@@ -517,6 +565,54 @@
           "name": "indexation",
           "unit": "fraction/year",
           "role": "value"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "C",
+          "name": "personnel_label",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "D",
+          "name": "instrument_alias",
+          "unit": null,
+          "role": "source_reference"
+        },
+        {
+          "column": "E",
+          "name": "reported_classification",
+          "unit": null,
+          "role": "source_reference"
+        },
+        {
+          "column": "F",
+          "name": "distribution_description",
+          "unit": null,
+          "role": "assumption_note"
+        },
+        {
+          "column": "G",
+          "name": "source_citation",
+          "unit": null,
+          "role": "source_reference"
+        },
+        {
+          "column": "H",
+          "name": "reported_pay_description",
+          "unit": null,
+          "role": "source_description"
         }
       ],
       "header_rows": [
@@ -949,6 +1045,54 @@
           "name": "indexation",
           "unit": "fraction/year",
           "role": "value"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "C",
+          "name": "personnel_label",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "D",
+          "name": "instrument_alias",
+          "unit": null,
+          "role": "source_reference"
+        },
+        {
+          "column": "E",
+          "name": "reported_classification",
+          "unit": null,
+          "role": "source_reference"
+        },
+        {
+          "column": "F",
+          "name": "distribution_description",
+          "unit": null,
+          "role": "assumption_note"
+        },
+        {
+          "column": "G",
+          "name": "source_citation",
+          "unit": null,
+          "role": "source_reference"
+        },
+        {
+          "column": "H",
+          "name": "reported_pay_description",
+          "unit": null,
+          "role": "source_description"
         }
       ],
       "header_rows": [
@@ -1381,6 +1525,54 @@
           "name": "indexation",
           "unit": "fraction/year",
           "role": "value"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "C",
+          "name": "personnel_label",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "D",
+          "name": "instrument_alias",
+          "unit": null,
+          "role": "source_reference"
+        },
+        {
+          "column": "E",
+          "name": "reported_classification",
+          "unit": null,
+          "role": "source_reference"
+        },
+        {
+          "column": "F",
+          "name": "distribution_description",
+          "unit": null,
+          "role": "assumption_note"
+        },
+        {
+          "column": "G",
+          "name": "source_citation",
+          "unit": null,
+          "role": "source_reference"
+        },
+        {
+          "column": "H",
+          "name": "reported_pay_description",
+          "unit": null,
+          "role": "source_description"
         }
       ],
       "header_rows": [
@@ -1813,6 +2005,54 @@
           "name": "indexation",
           "unit": "fraction/year",
           "role": "value"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "C",
+          "name": "personnel_label",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "D",
+          "name": "instrument_alias",
+          "unit": null,
+          "role": "source_reference"
+        },
+        {
+          "column": "E",
+          "name": "reported_classification",
+          "unit": null,
+          "role": "source_reference"
+        },
+        {
+          "column": "F",
+          "name": "distribution_description",
+          "unit": null,
+          "role": "assumption_note"
+        },
+        {
+          "column": "G",
+          "name": "source_citation",
+          "unit": null,
+          "role": "source_reference"
+        },
+        {
+          "column": "H",
+          "name": "reported_pay_description",
+          "unit": null,
+          "role": "source_description"
         }
       ],
       "header_rows": [
@@ -2239,6 +2479,18 @@
           "name": "indexation_unweighted_mean",
           "unit": "fraction/year",
           "role": "archived_aggregate_input"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
         }
       ],
       "header_rows": []
@@ -2641,6 +2893,18 @@
           "name": "indexation_mean_min_max_display",
           "unit": "text",
           "role": "presentation"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
         }
       ],
       "header_rows": []
@@ -3031,9 +3295,23 @@
           "name": "salary_upper_annual",
           "unit": "AUD/year",
           "role": "alternative_salary_bound"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
         }
       ],
-      "header_rows": []
+      "header_rows": [
+        46
+      ]
     },
     {
       "table_id": "WS01-R09",
@@ -3113,6 +3391,18 @@
           "name": "salary_upper_annual",
           "unit": "AUD/year",
           "role": "alternative_salary_bound"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
         }
       ],
       "header_rows": []
@@ -3195,6 +3485,18 @@
           "name": "salary_upper_annual",
           "unit": "AUD/year",
           "role": "alternative_salary_bound"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
         }
       ],
       "header_rows": []
@@ -3277,6 +3579,18 @@
           "name": "salary_upper_annual",
           "unit": "AUD/year",
           "role": "alternative_salary_bound"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
         }
       ],
       "header_rows": []
@@ -3359,6 +3673,18 @@
           "name": "salary_upper_annual",
           "unit": "AUD/year",
           "role": "alternative_salary_bound"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
         }
       ],
       "header_rows": []
@@ -3441,6 +3767,18 @@
           "name": "salary_upper_annual",
           "unit": "AUD/year",
           "role": "mean_alternative_salary_bound"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
         }
       ],
       "header_rows": []
@@ -3523,6 +3861,18 @@
           "name": "salary_upper_annual_display",
           "unit": "text",
           "role": "presentation"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
         }
       ],
       "header_rows": []
@@ -3605,9 +3955,23 @@
           "name": "salary_upper_share_of_midpoint_cost",
           "unit": "fraction",
           "role": "alternative_salary_bound"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
         }
       ],
-      "header_rows": []
+      "header_rows": [
+        89
+      ]
     },
     {
       "table_id": "WS01-R16",
@@ -3687,6 +4051,18 @@
           "name": "salary_upper_share_of_midpoint_cost",
           "unit": "fraction",
           "role": "alternative_salary_bound"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
         }
       ],
       "header_rows": []
@@ -3769,6 +4145,18 @@
           "name": "salary_upper_share_of_midpoint_cost",
           "unit": "fraction",
           "role": "alternative_salary_bound"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
         }
       ],
       "header_rows": []
@@ -3851,6 +4239,18 @@
           "name": "salary_upper_share_of_midpoint_cost",
           "unit": "fraction",
           "role": "alternative_salary_bound"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
         }
       ],
       "header_rows": []
@@ -3933,6 +4333,18 @@
           "name": "salary_upper_share_of_midpoint_cost",
           "unit": "fraction",
           "role": "alternative_salary_bound"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
         }
       ],
       "header_rows": []
@@ -4015,6 +4427,18 @@
           "name": "salary_upper_annual_share_display",
           "unit": "text",
           "role": "presentation"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
         }
       ],
       "header_rows": []
@@ -4103,6 +4527,54 @@
           "name": "indexation",
           "unit": "fraction/year",
           "role": "value"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "C",
+          "name": "personnel_label",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "D",
+          "name": "instrument_alias",
+          "unit": null,
+          "role": "source_reference"
+        },
+        {
+          "column": "E",
+          "name": "reported_classification",
+          "unit": null,
+          "role": "source_reference"
+        },
+        {
+          "column": "F",
+          "name": "distribution_description",
+          "unit": null,
+          "role": "assumption_note"
+        },
+        {
+          "column": "G",
+          "name": "source_citation",
+          "unit": null,
+          "role": "source_reference"
+        },
+        {
+          "column": "H",
+          "name": "reported_pay_description",
+          "unit": null,
+          "role": "source_description"
         }
       ],
       "header_rows": [
@@ -4535,6 +5007,54 @@
           "name": "indexation",
           "unit": "fraction/year",
           "role": "value"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "C",
+          "name": "personnel_label",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "D",
+          "name": "instrument_alias",
+          "unit": null,
+          "role": "source_reference"
+        },
+        {
+          "column": "E",
+          "name": "reported_classification",
+          "unit": null,
+          "role": "source_reference"
+        },
+        {
+          "column": "F",
+          "name": "distribution_description",
+          "unit": null,
+          "role": "assumption_note"
+        },
+        {
+          "column": "G",
+          "name": "source_citation",
+          "unit": null,
+          "role": "source_reference"
+        },
+        {
+          "column": "H",
+          "name": "reported_pay_description",
+          "unit": null,
+          "role": "source_description"
         }
       ],
       "header_rows": [
@@ -4967,6 +5487,54 @@
           "name": "indexation",
           "unit": "fraction/year",
           "role": "value"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "C",
+          "name": "personnel_label",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "D",
+          "name": "instrument_alias",
+          "unit": null,
+          "role": "source_reference"
+        },
+        {
+          "column": "E",
+          "name": "reported_classification",
+          "unit": null,
+          "role": "source_reference"
+        },
+        {
+          "column": "F",
+          "name": "distribution_description",
+          "unit": null,
+          "role": "assumption_note"
+        },
+        {
+          "column": "G",
+          "name": "source_citation",
+          "unit": null,
+          "role": "source_reference"
+        },
+        {
+          "column": "H",
+          "name": "reported_pay_description",
+          "unit": null,
+          "role": "source_description"
         }
       ],
       "header_rows": [
@@ -5399,6 +5967,54 @@
           "name": "indexation",
           "unit": "fraction/year",
           "role": "value"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "C",
+          "name": "personnel_label",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "D",
+          "name": "instrument_alias",
+          "unit": null,
+          "role": "source_reference"
+        },
+        {
+          "column": "E",
+          "name": "reported_classification",
+          "unit": null,
+          "role": "source_reference"
+        },
+        {
+          "column": "F",
+          "name": "distribution_description",
+          "unit": null,
+          "role": "assumption_note"
+        },
+        {
+          "column": "G",
+          "name": "source_citation",
+          "unit": null,
+          "role": "source_reference"
+        },
+        {
+          "column": "H",
+          "name": "reported_pay_description",
+          "unit": null,
+          "role": "source_description"
         }
       ],
       "header_rows": [
@@ -5831,6 +6447,54 @@
           "name": "indexation",
           "unit": "fraction/year",
           "role": "value"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "C",
+          "name": "personnel_label",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "D",
+          "name": "instrument_alias",
+          "unit": null,
+          "role": "source_reference"
+        },
+        {
+          "column": "E",
+          "name": "reported_classification",
+          "unit": null,
+          "role": "source_reference"
+        },
+        {
+          "column": "F",
+          "name": "distribution_description",
+          "unit": null,
+          "role": "assumption_note"
+        },
+        {
+          "column": "G",
+          "name": "source_citation",
+          "unit": null,
+          "role": "source_reference"
+        },
+        {
+          "column": "H",
+          "name": "reported_pay_description",
+          "unit": null,
+          "role": "source_description"
         }
       ],
       "header_rows": [
@@ -6257,6 +6921,18 @@
           "name": "indexation_unweighted_mean",
           "unit": "fraction/year",
           "role": "archived_aggregate_input"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
         }
       ],
       "header_rows": []
@@ -6659,6 +7335,18 @@
           "name": "indexation_mean_min_max_display",
           "unit": "text",
           "role": "presentation"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
         }
       ],
       "header_rows": []
@@ -7013,6 +7701,18 @@
           "name": "weighted_hourly_upper",
           "unit": "AUD/hour",
           "role": "maximum_bound_not_quantile"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
         }
       ],
       "header_rows": []
@@ -7129,9 +7829,23 @@
           "name": "component_X",
           "unit": "AUD/year",
           "role": "archived_component"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
         }
       ],
-      "header_rows": []
+      "header_rows": [
+        58
+      ]
     },
     {
       "table_id": "WS02-R11",
@@ -7211,6 +7925,18 @@
           "name": "component_X",
           "unit": "AUD/year",
           "role": "archived_component"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
         }
       ],
       "header_rows": []
@@ -7293,6 +8019,18 @@
           "name": "component_X",
           "unit": "AUD/year",
           "role": "archived_component"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
         }
       ],
       "header_rows": []
@@ -7375,6 +8113,18 @@
           "name": "component_X",
           "unit": "AUD/year",
           "role": "archived_component"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
         }
       ],
       "header_rows": []
@@ -7457,6 +8207,18 @@
           "name": "component_X",
           "unit": "AUD/year",
           "role": "archived_component"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
         }
       ],
       "header_rows": []
@@ -7539,6 +8301,18 @@
           "name": "component_X",
           "unit": "AUD/year",
           "role": "archived_component"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
         }
       ],
       "header_rows": []
@@ -7621,6 +8395,18 @@
           "name": "salary_upper_annual_display",
           "unit": "text",
           "role": "presentation"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
         }
       ],
       "header_rows": []
@@ -7747,9 +8533,23 @@
           "name": "component_X",
           "unit": "fraction",
           "role": "archived_component"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
         }
       ],
-      "header_rows": []
+      "header_rows": [
+        113
+      ]
     },
     {
       "table_id": "WS02-R20",
@@ -7829,6 +8629,18 @@
           "name": "component_X",
           "unit": "fraction",
           "role": "archived_component"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
         }
       ],
       "header_rows": []
@@ -7911,6 +8723,18 @@
           "name": "component_X",
           "unit": "fraction",
           "role": "archived_component"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
         }
       ],
       "header_rows": []
@@ -7993,6 +8817,18 @@
           "name": "component_X",
           "unit": "fraction",
           "role": "archived_component"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
         }
       ],
       "header_rows": []
@@ -8075,6 +8911,18 @@
           "name": "component_X",
           "unit": "fraction",
           "role": "archived_component"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
         }
       ],
       "header_rows": []
@@ -8157,6 +9005,18 @@
           "name": "salary_upper_annual_share_display",
           "unit": "text",
           "role": "presentation"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
         }
       ],
       "header_rows": []
@@ -8281,6 +9141,12 @@
           "name": "jurisdiction_J",
           "unit": "card_count",
           "role": "historical_reference"
+        },
+        {
+          "column": "A",
+          "name": "persons_per_card_bucket_label",
+          "unit": null,
+          "role": "identity"
         }
       ],
       "header_rows": [
@@ -8347,6 +9213,12 @@
           "name": "jurisdiction_J",
           "unit": "card_count",
           "role": "historical_reference"
+        },
+        {
+          "column": "A",
+          "name": "measure_label",
+          "unit": null,
+          "role": "label"
         }
       ],
       "header_rows": []
@@ -8411,6 +9283,12 @@
           "name": "jurisdiction_J",
           "unit": "person_count",
           "role": "historical_reference"
+        },
+        {
+          "column": "A",
+          "name": "measure_label",
+          "unit": null,
+          "role": "label"
         }
       ],
       "header_rows": []
@@ -8475,6 +9353,12 @@
           "name": "jurisdiction_J",
           "unit": "persons/card",
           "role": "historical_reference"
+        },
+        {
+          "column": "A",
+          "name": "measure_label",
+          "unit": null,
+          "role": "label"
         }
       ],
       "header_rows": []
@@ -8811,6 +9695,60 @@
           "name": "indexation",
           "unit": "fraction/year",
           "role": "sensitivity_input"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "C",
+          "name": "personnel_label",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "D",
+          "name": "instrument_alias",
+          "unit": null,
+          "role": "source_reference"
+        },
+        {
+          "column": "E",
+          "name": "reported_classification",
+          "unit": null,
+          "role": "source_reference"
+        },
+        {
+          "column": "F",
+          "name": "distribution_description",
+          "unit": null,
+          "role": "assumption_note"
+        },
+        {
+          "column": "G",
+          "name": "source_citation",
+          "unit": null,
+          "role": "source_reference"
+        },
+        {
+          "column": "H",
+          "name": "reported_pay_description",
+          "unit": null,
+          "role": "source_description"
+        },
+        {
+          "column": "I",
+          "name": "reported_year",
+          "unit": "year",
+          "role": "historical_reference"
         }
       ],
       "header_rows": [
@@ -9597,6 +10535,60 @@
           "name": "indexation",
           "unit": "fraction/year",
           "role": "sensitivity_input"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "C",
+          "name": "personnel_label",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "D",
+          "name": "instrument_alias",
+          "unit": null,
+          "role": "source_reference"
+        },
+        {
+          "column": "E",
+          "name": "reported_classification",
+          "unit": null,
+          "role": "source_reference"
+        },
+        {
+          "column": "F",
+          "name": "distribution_description",
+          "unit": null,
+          "role": "assumption_note"
+        },
+        {
+          "column": "G",
+          "name": "source_citation",
+          "unit": null,
+          "role": "source_reference"
+        },
+        {
+          "column": "H",
+          "name": "reported_pay_description",
+          "unit": null,
+          "role": "source_description"
+        },
+        {
+          "column": "I",
+          "name": "reported_year",
+          "unit": "year",
+          "role": "historical_reference"
         }
       ],
       "header_rows": [
@@ -10383,6 +11375,60 @@
           "name": "indexation",
           "unit": "fraction/year",
           "role": "sensitivity_input"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "C",
+          "name": "personnel_label",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "D",
+          "name": "instrument_alias",
+          "unit": null,
+          "role": "source_reference"
+        },
+        {
+          "column": "E",
+          "name": "reported_classification",
+          "unit": null,
+          "role": "source_reference"
+        },
+        {
+          "column": "F",
+          "name": "distribution_description",
+          "unit": null,
+          "role": "assumption_note"
+        },
+        {
+          "column": "G",
+          "name": "source_citation",
+          "unit": null,
+          "role": "source_reference"
+        },
+        {
+          "column": "H",
+          "name": "reported_pay_description",
+          "unit": null,
+          "role": "source_description"
+        },
+        {
+          "column": "I",
+          "name": "reported_year",
+          "unit": "year",
+          "role": "historical_reference"
         }
       ],
       "header_rows": [
@@ -11169,6 +12215,60 @@
           "name": "indexation",
           "unit": "fraction/year",
           "role": "sensitivity_input"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "C",
+          "name": "personnel_label",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "D",
+          "name": "instrument_alias",
+          "unit": null,
+          "role": "source_reference"
+        },
+        {
+          "column": "E",
+          "name": "reported_classification",
+          "unit": null,
+          "role": "source_reference"
+        },
+        {
+          "column": "F",
+          "name": "distribution_description",
+          "unit": null,
+          "role": "assumption_note"
+        },
+        {
+          "column": "G",
+          "name": "source_citation",
+          "unit": null,
+          "role": "source_reference"
+        },
+        {
+          "column": "H",
+          "name": "reported_pay_description",
+          "unit": null,
+          "role": "source_description"
+        },
+        {
+          "column": "I",
+          "name": "reported_year",
+          "unit": "year",
+          "role": "historical_reference"
         }
       ],
       "header_rows": [
@@ -11955,6 +13055,60 @@
           "name": "indexation",
           "unit": "fraction/year",
           "role": "sensitivity_input"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "C",
+          "name": "personnel_label",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "D",
+          "name": "instrument_alias",
+          "unit": null,
+          "role": "source_reference"
+        },
+        {
+          "column": "E",
+          "name": "reported_classification",
+          "unit": null,
+          "role": "source_reference"
+        },
+        {
+          "column": "F",
+          "name": "distribution_description",
+          "unit": null,
+          "role": "assumption_note"
+        },
+        {
+          "column": "G",
+          "name": "source_citation",
+          "unit": null,
+          "role": "source_reference"
+        },
+        {
+          "column": "H",
+          "name": "reported_pay_description",
+          "unit": null,
+          "role": "source_description"
+        },
+        {
+          "column": "I",
+          "name": "reported_year",
+          "unit": "year",
+          "role": "historical_reference"
         }
       ],
       "header_rows": [
@@ -13403,6 +14557,18 @@
           "name": "leave_loading_hourly_lower_midpoint_upper_display",
           "unit": "text",
           "role": "presentation"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
         }
       ],
       "header_rows": []
@@ -13485,9 +14651,23 @@
           "name": "dsa_component_AT",
           "unit": "AUD/year",
           "role": "archived_sensitivity_component"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
         }
       ],
-      "header_rows": []
+      "header_rows": [
+        46
+      ]
     },
     {
       "table_id": "WS06-R08",
@@ -13567,6 +14747,18 @@
           "name": "dsa_component_AT",
           "unit": "AUD/year",
           "role": "archived_sensitivity_component"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
         }
       ],
       "header_rows": []
@@ -13649,6 +14841,18 @@
           "name": "dsa_component_AT",
           "unit": "AUD/year",
           "role": "archived_sensitivity_component"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
         }
       ],
       "header_rows": []
@@ -13731,6 +14935,18 @@
           "name": "dsa_component_AT",
           "unit": "AUD/year",
           "role": "archived_sensitivity_component"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
         }
       ],
       "header_rows": []
@@ -13813,6 +15029,18 @@
           "name": "dsa_component_AT",
           "unit": "AUD/year",
           "role": "archived_sensitivity_component"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
         }
       ],
       "header_rows": []
@@ -13895,6 +15123,18 @@
           "name": "dsa_component_AT",
           "unit": "AUD/year",
           "role": "archived_sensitivity_component"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
         }
       ],
       "header_rows": []
@@ -13977,6 +15217,18 @@
           "name": "salary_upper_annual_display",
           "unit": "text",
           "role": "presentation"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
         }
       ],
       "header_rows": []
@@ -14059,9 +15311,23 @@
           "name": "dsa_component_AT",
           "unit": "fraction",
           "role": "archived_sensitivity_component"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
         }
       ],
-      "header_rows": []
+      "header_rows": [
+        89
+      ]
     },
     {
       "table_id": "WS06-R15",
@@ -14141,6 +15407,18 @@
           "name": "dsa_component_AT",
           "unit": "fraction",
           "role": "archived_sensitivity_component"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
         }
       ],
       "header_rows": []
@@ -14223,6 +15501,18 @@
           "name": "dsa_component_AT",
           "unit": "fraction",
           "role": "archived_sensitivity_component"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
         }
       ],
       "header_rows": []
@@ -14305,6 +15595,18 @@
           "name": "dsa_component_AT",
           "unit": "fraction",
           "role": "archived_sensitivity_component"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
         }
       ],
       "header_rows": []
@@ -14387,6 +15689,18 @@
           "name": "dsa_component_AT",
           "unit": "fraction",
           "role": "archived_sensitivity_component"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
         }
       ],
       "header_rows": []
@@ -14469,6 +15783,18 @@
           "name": "salary_upper_share_display",
           "unit": "text",
           "role": "presentation"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
         }
       ],
       "header_rows": []
@@ -15091,6 +16417,24 @@
           "name": "hourly_I",
           "unit": "AUD/hour",
           "role": "bound"
+        },
+        {
+          "column": "A",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "jurisdiction",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "C",
+          "name": "scenario_name",
+          "unit": null,
+          "role": "identity"
         }
       ],
       "header_rows": [
@@ -15122,6 +16466,24 @@
           "name": "bound_F",
           "unit": "AUD/hour",
           "role": "archived_bound_not_psa_draw"
+        },
+        {
+          "column": "A",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "jurisdiction",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "C",
+          "name": "scenario_name",
+          "unit": null,
+          "role": "identity"
         }
       ],
       "header_rows": [
@@ -15788,6 +17150,24 @@
           "name": "bound_F",
           "unit": "AUD/year",
           "role": "archived_bound_not_psa_draw"
+        },
+        {
+          "column": "A",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "jurisdiction",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "C",
+          "name": "scenario_name",
+          "unit": null,
+          "role": "identity"
         }
       ],
       "header_rows": [
@@ -15818,6 +17198,24 @@
           "name": "bound_F",
           "unit": "AUD/hour",
           "role": "archived_bound_not_psa_draw"
+        },
+        {
+          "column": "A",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "jurisdiction",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "C",
+          "name": "scenario_name",
+          "unit": null,
+          "role": "identity"
         }
       ],
       "header_rows": [
@@ -15900,6 +17298,18 @@
           "name": "hourly_bound_H",
           "unit": "AUD/hour",
           "role": "archived_bound"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
         }
       ],
       "header_rows": [
@@ -15949,6 +17359,18 @@
           "name": "hourly_bound_H",
           "unit": "AUD/hour",
           "role": "archived_bound"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
         }
       ],
       "header_rows": [
@@ -15998,6 +17420,18 @@
           "name": "hourly_bound_H",
           "unit": "AUD/hour",
           "role": "archived_bound"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
         }
       ],
       "header_rows": [
@@ -16047,6 +17481,18 @@
           "name": "hourly_bound_H",
           "unit": "AUD/hour",
           "role": "archived_bound"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
         }
       ],
       "header_rows": [
@@ -16096,6 +17542,18 @@
           "name": "hourly_bound_H",
           "unit": "AUD/hour",
           "role": "archived_bound"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
         }
       ],
       "header_rows": [
@@ -16145,6 +17603,18 @@
           "name": "hourly_bound_H",
           "unit": "AUD/hour",
           "role": "archived_bound"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
         }
       ],
       "header_rows": [
@@ -17106,6 +18576,18 @@
           "name": "component_N",
           "unit": "AUD",
           "role": "value"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
         }
       ],
       "header_rows": [
@@ -17250,6 +18732,18 @@
           "name": "hourly_X",
           "unit": "AUD/hour",
           "role": "bound"
+        },
+        {
+          "column": "A",
+          "name": "jurisdiction_or_aggregate",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
         }
       ],
       "header_rows": [
