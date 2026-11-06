@@ -1,11 +1,13 @@
 # Copyright 2026 Dylan. SPDX-License-Identifier: Apache-2.0
 """Explicit minimum engagement and worked-hours overtime composition."""
 
+from datetime import UTC, date
 from decimal import Decimal
 from fractions import Fraction
-from typing import Literal
+from typing import Literal, Self
+from zoneinfo import ZoneInfo
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from src.minimum_engagement import MinimumEngagementRule, cost_minimum_engagement
 from src.roster_costing import OvertimeRule, PayPeriod, cost_overtime_period
@@ -23,6 +25,10 @@ class InteractionResult(BaseModel):
     total: Decimal
     exact_total_numerator: int
     exact_total_denominator: int = Field(gt=0)
+    interaction_rule_id: str
+    interaction_source_id: str
+    interaction_source_sha256: str
+    interaction_citation: str
     minimum_rule_id: str
     overtime_rule_id: str
     minimum_source_id: str
@@ -40,6 +46,25 @@ class InteractionRules(BaseModel):
     method: Literal["worked_overtime_ordinary_minimum_v1"]
     minimum: MinimumEngagementRule
     overtime: OvertimeRule
+    rule_id: str = Field(min_length=1)
+    source_id: str = Field(min_length=1)
+    source_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
+    citation: str = Field(min_length=1)
+    effective_from: date
+    effective_to: date
+    reviewed: bool
+
+    @model_validator(mode="after")
+    def validate_interaction(self) -> Self:
+        """Require an independently reviewed, bounded interaction assertion."""
+        if (
+            not self.reviewed
+            or not self.citation.strip()
+            or self.effective_to <= self.effective_from
+        ):
+            msg = "Interaction requires review, citation and effective dates"
+            raise ValueError(msg)
+        return self
 
 
 def cost_minimum_with_overtime(
@@ -55,6 +80,20 @@ def cost_minimum_with_overtime(
     not treat unworked guaranteed hours as overtime-eligible work.
     """
     rules = InteractionRules.model_validate(rules.model_dump())
+    day = activity.starts_at.astimezone(UTC).astimezone(ZoneInfo(local_timezone)).date()
+    if not rules.effective_from <= day < rules.effective_to:
+        msg = "Interaction rule does not cover activity date"
+        raise ValueError(msg)
+    source = release.sources.require_applicable(
+        rules.source_id,
+        day,
+        release.jurisdiction,
+        release.employer,
+        release.classification,
+    )
+    if source.sha256 != rules.source_sha256:
+        msg = "Interaction source hash mismatch"
+        raise ValueError(msg)
     minimum = rules.minimum
     overtime = rules.overtime
     guaranteed = cost_minimum_engagement(release, minimum, activity, local_timezone)
@@ -78,6 +117,10 @@ def cost_minimum_with_overtime(
         total=guaranteed.total + increment,
         exact_total_numerator=exact.numerator,
         exact_total_denominator=exact.denominator,
+        interaction_rule_id=rules.rule_id,
+        interaction_source_id=rules.source_id,
+        interaction_source_sha256=rules.source_sha256,
+        interaction_citation=rules.citation,
         minimum_rule_id=minimum.rule_id,
         overtime_rule_id=overtime.rule_id,
         minimum_source_id=minimum.source_id,
