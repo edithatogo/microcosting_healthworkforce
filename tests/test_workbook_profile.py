@@ -40,6 +40,28 @@ def test_candidate_profile_does_not_apply_to_other_source() -> None:
         load_candidate_profile().table_definitions("0" * 64)
 
 
+def test_all_component_formulas_expose_first_jurisdiction_salary_basis() -> None:
+    """Preserve the historical aggregation without making it an accepted mean."""
+    catalog = read_workbook_catalog(Path("data/Labour Model - v3, 20240328.xlsx"))
+    profile = load_candidate_profile()
+    extraction = extract_tables(catalog, profile.table_definitions(catalog.sha256))
+    table = next(t for t in extraction.tables if t.definition.table_id == "WS01-R13")
+    cells = {cell.coordinate: cell for cell in table.cells}
+    for offset in range(5):
+        rows = tuple(start + offset for start in (28, 22, 16, 10, 4))
+        for column in "JMNOPQST":
+            refs = ",".join(f"{column}{row}" for row in rows)
+            weeks = "/52" if column == "S" else ""
+            cell = cells[f"{column}{77 + offset}"]
+            assert_that(cell.source.value == f"=AVERAGE({refs}){weeks}*$W{4 + offset}")
+            assert_that(cell.role == "mean_input_first_jurisdiction_salary")
+        for column in "RVWX":
+            refs = ",".join(f"{column}{row}" for row in rows)
+            cell = cells[f"{column}{77 + offset}"]
+            assert_that(cell.source.value == f"=AVERAGE({refs})")
+            assert_that(cell.unit == "AUD/year")
+
+
 def test_primary_component_formulas_and_candidate_meanings() -> None:
     """Check every jurisdiction-role component against its actual formula basis."""
     catalog = read_workbook_catalog(Path("data/Labour Model - v3, 20240328.xlsx"))
