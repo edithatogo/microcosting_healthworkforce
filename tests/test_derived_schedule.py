@@ -108,6 +108,31 @@ def test_ordered_dependency_uses_each_selected_allowance() -> None:
     assert_that(result.exact_total == Fraction(473, 4))
 
 
+def test_schedule_revalidates_and_rejects_unordered_dependencies() -> None:
+    """Copied malformed schedules and forward dependencies do not execute."""
+    series = schedule().series[0]
+    old, new = series.editions
+    repeated = new.model_copy(update={"rule_id": old.rule_id})
+    with pytest.raises(ValueError, match="Duplicate derived rule identity"):
+        RuleSeries(component="allowance", editions=(old, repeated))
+    overlap = new.model_copy(update={"effective_from": date(2026, 6, 2)})
+    changed = series.model_copy(update={"editions": (old, overlap)})
+    copied = schedule().model_copy(update={"series": (changed,)})
+    with pytest.raises(ValueError, match="overlap"):
+        copied.select(date(2026, 6, 2))
+    oncost = rule("oncost", "allowance_super", ("allowance",), "0.1")
+    reversed_order = DerivedSchedule(
+        series=(RuleSeries(component="allowance_super", editions=(oncost,)), series),
+    )
+    with pytest.raises(ValueError, match="missing or not yet"):
+        cost_scheduled_snapshot(
+            baseline(),
+            date(2026, 6, 2),
+            Decimal(1),
+            reversed_order,
+        )
+
+
 def test_subsecond_activity_retains_exact_rational_total() -> None:
     """No rounded decimal duration is used as the exact-cost quantity."""
     start = datetime(2026, 6, 2, 9, tzinfo=UTC)
