@@ -299,3 +299,43 @@ with their own qualified units/continuation basis. The full and half profiles ha
 equal constant-price salary exposure; a wage increase during the longer half-pay
 period can make their dated prices differ. This is exposure costing, not the
 valuation or execution of an actual advance payroll payment.
+
+## Keeping-in-touch history and extension decisions
+
+`src.keeping_in_touch.evaluate_kit` validates a complete KIT history/scenario
+against an explicitly reviewed rule and approved paid/unpaid chronology. The rule
+must declare waiting-day thresholds, per-period versus whole-episode count scope,
+a unique-local-calendar-day method and an interpretation kind/basis. No fourteen/
+fifteen-day boundary or definition/operative count interpretation is selected by
+default. Initial leave and an optional immediately following unpaid extension
+must have complete nonoverlapping classifications and explicit approval.
+
+Positive work fragments require return-to-employment purpose, both consents,
+paid-work verification, quantity provenance and a supplied local day. Fragments
+across entities on the same local day consume one day, while exact actual hours
+remain separate. External records need their own qualification basis; they consume
+count capacity but do not automatically become current-employer work or extension.
+The current employer's request wait does not adjudicate another entity's terms.
+Counts remain conditional on complete relevant cross-entity history.
+
+Source scope/hash/date checks apply at assessment and supplied work dates. An
+approved future endpoint alone does not require future source coverage to count
+today's history; projected work dates still need coverage. Observed work cannot
+be after the knowledge/assessment date. Planned quantities remain explicitly
+labelled assumptions.
+
+Each counted day needs exactly one extension decision, independent of its number
+of fragments. For current-employer work during paid leave, a positive calendar-
+week delta requires source-review or analyst-assumption status/basis, or stays
+null when unresolved. No part-day-to-full-day conversion is inferred. Unpaid or
+external-only work requires a non-applicable primary extension decision and has
+zero primary paid/unpaid extension. Known extension subtotals remain separate
+when the total contains unknowns.
+
+Results retain original work/decisions, day ordinals, count scope, exact total and
+current-employer hours, rule hash and source/context declarations. Current-employer
+actual hours can be supplied separately to an applicable hourly pricing method;
+foreign hours must not be priced under that employer's quote. The method does not
+move an approved leave endpoint, pause/reallocate parental salary/accrual or
+execute a payment. Applying extensions to the leave/cost ledger still requires
+qualified conversion, timing, contract and entitlement interactions.
