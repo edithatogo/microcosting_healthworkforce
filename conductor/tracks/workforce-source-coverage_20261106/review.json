@@ -1,0 +1,16 @@
+{
+  "track_id_proposed": "workforce-source-coverage_20261106",
+  "type": "chore",
+  "spec_approved": true,
+  "spec_approved_date": "2026-11-06",
+  "spec_approval": "Explicit user reply in this chat",
+  "spec_sha256": "2a92bac9787764fc7c2ec9002a665fdfa3898be8a5fba8a1299137ee5106c082",
+  "plan_status": "approved",
+  "plan_sha256": "8145c59cb40ef16ecd0e6508bc149c21a0e993ad1a9e99ef31bf74006e5533fb",
+  "registered": true,
+  "implementation_started": false,
+  "updated_at": "2026-11-06T09:15:04.236478+10:00",
+  "catalog_review": "No relevant missing Firebase/GCP skills; no installation required.",
+  "plan_approved_date": "2026-11-06",
+  "implementation_authorized": true
+}
