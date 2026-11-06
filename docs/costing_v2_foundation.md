@@ -275,7 +275,8 @@ accrual-cap and caller split boundaries partition the approved episode. Half-pay
 exposure beyond the independently declared accrual cap does not accrue additional
 eligible weeks. An unknown paid cap or unpaid accrual factor remains null; the
 known accrual subtotal is retained separately and is not an actual accrued-leave
-credit. No twenty-working-day rule is inferred from calendar days.
+credit. A numeric unpaid factor requires an explicit source-review or analyst-
+assumption kind and basis; unresolved review requires null. No twenty-working-day rule is inferred from calendar days.
 
 Entitlement offsets require a review kind and rationale. An unresolved offset
 leaves debit/remaining-budget outputs null. Calendar-absence and normal-pay-

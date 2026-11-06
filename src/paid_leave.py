@@ -70,6 +70,11 @@ class PaidLeaveRequest(QuoteModel):
     offset_review_kind: Literal["source_reviewed", "analyst_assumption", "unresolved"]
     offset_rationale: str
     unpaid_accrual_factor: Annotated[NonnegativeQuantity, Field(le=1)] | None
+    unpaid_accrual_review_kind: Literal[
+        "source_reviewed",
+        "analyst_assumption",
+        "unresolved",
+    ]
     unpaid_accrual_basis: str
     split_on: tuple[date, ...]
 
@@ -105,6 +110,11 @@ class PaidLeaveRequest(QuoteModel):
             self.offset_review_kind == "unresolved"
         ):
             msg = "Entitlement offset basis and review kind must agree"
+            raise ValueError(msg)
+        if (self.unpaid_accrual_factor is None) != (
+            self.unpaid_accrual_review_kind == "unresolved"
+        ):
+            msg = "Unpaid accrual factor and review kind must agree"
             raise ValueError(msg)
         if len(set(self.split_on)) != len(self.split_on) or any(
             not self.starts_on < day < self.approved_ends_on for day in self.split_on

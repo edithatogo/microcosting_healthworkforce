@@ -78,6 +78,7 @@ def request(**changes: object) -> PaidLeaveRequest:
         "offset_review_kind": "unresolved",
         "offset_rationale": "Half-pay entitlement debit remains unqualified",
         "unpaid_accrual_factor": None,
+        "unpaid_accrual_review_kind": "unresolved",
         "unpaid_accrual_basis": "Working-day accrual treatment unreviewed",
         "split_on": (),
     }
@@ -162,7 +163,14 @@ def test_offset_scenarios_are_explicit_not_inferred(
 
 def test_explicit_unpaid_accrual_and_unknown_paid_limit() -> None:
     """Unknown accrual is not zero; a supplied factor keeps its own basis."""
-    known = build_paid_leave(policy(), request(unpaid_accrual_factor=Fraction(0)))
+    known = build_paid_leave(
+        policy(),
+        request(
+            unpaid_accrual_factor=Fraction(0),
+            unpaid_accrual_review_kind="analyst_assumption",
+            unpaid_accrual_basis="Explicit synthetic no-accrual scenario",
+        ),
+    )
     assert_that(known.accrual_exposure_weeks == Fraction(18))
     unknown = build_paid_leave(policy(paid_accrual_limit_weeks=None), request())
     assert_that(unknown.accrual_exposure_weeks is None)
@@ -272,7 +280,11 @@ def test_advance_option_and_source_knowledge_require_admission() -> None:
 
 def test_unknown_and_fractional_accrual_roundtrip_is_explicit() -> None:
     """Rational accrual factors survive JSON and strict copied-input checks."""
-    data = request(unpaid_accrual_factor=Fraction(1, 2))
+    data = request(
+        unpaid_accrual_factor=Fraction(1, 2),
+        unpaid_accrual_review_kind="analyst_assumption",
+        unpaid_accrual_basis="Explicit synthetic half-accrual scenario",
+    )
     restored = PaidLeaveRequest.model_validate_json(data.model_dump_json())
     result = build_paid_leave(policy(), restored)
     assert_that(result.accrual_exposure_weeks == Fraction(35))
@@ -382,3 +394,11 @@ def test_wage_change_distinguishes_full_and_half_payment_exposure() -> None:
     assert_that(
         salary_cost(half, rates) - salary_cost(full, rates) == Fraction(76500, 73),
     )
+
+
+def test_unpaid_accrual_value_cannot_hide_unresolved_review() -> None:
+    """Unknown treatment cannot become a numeric factor through a missing review."""
+    with pytest.raises(ValueError, match="accrual factor"):
+        request(unpaid_accrual_factor=Fraction(0))
+    with pytest.raises(ValueError, match="accrual factor"):
+        request(unpaid_accrual_review_kind="source_reviewed")
