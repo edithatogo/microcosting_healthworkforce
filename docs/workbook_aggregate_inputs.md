@@ -36,3 +36,9 @@ numeric results from rows 46:50. The component displays J95:X99 and J144:X148
 instead retain unweighted input AVERAGE/MIN/MAX formulas and first-jurisdiction
 salary/denominator references. The mapping keeps these distinct formula bases;
 a WM sheet title does not establish that every displayed quantity is weighted.
+
+DSA component displays in rows 83:87 and 120:124 are presentation text.
+Their mean and observed bounds use the DSA input columns, first-jurisdiction
+salary AS, annual-cost denominator AV for shares, and annual-leave scaling by
+52. The archived component proxy arithmetic remains distinct from an accepted
+leave, loading or payroll rule.

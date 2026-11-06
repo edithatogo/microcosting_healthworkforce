@@ -124,3 +124,30 @@ def test_weighted_summary_display_links_weighted_numeric_block() -> None:
             )
             assert_that(cell.source.value == expected)
             assert_that(cell.role == "presentation" and cell.unit == "text")
+
+
+def test_dsa_component_displays_preserve_archived_bases() -> None:
+    """DSA presentation retains its own source columns and denominators."""
+    catalog = read_workbook_catalog(Path("data/Labour Model - v3, 20240328.xlsx"))
+    extraction = extract_tables(
+        catalog,
+        load_candidate_profile().table_definitions(catalog.sha256),
+    )
+    tables = {t.definition.table_id: t for t in extraction.tables}
+    columns = ("K", "T", "W", "Z", "AC", "AF", "AI", "AL", "AO", "AR", "AS", "AT")
+    for identity, start, share in (("WS06-R13", 83, False), ("WS06-R19", 120, True)):
+        cells = {c.coordinate: c for c in tables[identity].cells}
+        for offset in range(5):
+            for col in columns:
+                cell = cells[f"{col}{start + offset}"]
+                value = str(cell.source.value)
+                refs = ",".join(f"{col}{r + offset}" for r in (28, 22, 16, 10, 4))
+                for operation in ("AVERAGE", "MIN", "MAX"):
+                    assert_that(f"{operation}({refs})" in value)
+                if col not in ("AI", "AR", "AS", "AT"):
+                    assert_that(f"$AS{4 + offset}" in value)
+                if share:
+                    assert_that(f"/$AV{4 + offset}" in value)
+                if col == "AL":
+                    assert_that("/52" in value)
+                assert_that(cell.unit == "text" and cell.role == "presentation")
