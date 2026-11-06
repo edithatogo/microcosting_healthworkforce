@@ -18,3 +18,9 @@ not establish award applicability, actual leave replacement expenditure,
 eligibility or a validated contemporary cost. Candidate metadata is not an
 accepted conditions release, and archived proxy components must not be added
 automatically to nominal-hour costing.
+
+The historical `ALL` rows use a different basis: they average the five
+jurisdiction input fractions, then multiply by the first jurisdiction's
+midpoint salary. Fixed allowances and salary bounds are averaged instead. This
+is not generally the mean of the jurisdiction-specific component amounts and
+does not establish an intended or accepted national average.
