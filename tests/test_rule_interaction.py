@@ -49,6 +49,11 @@ def test_minimum_and_overtime_do_not_double_count_base() -> None:
         Fraction(result.exact_total_numerator, result.exact_total_denominator)
         == Fraction(175),
     )
+    assert_that(result.minimum_result.release_id == "synthetic")
+    assert_that(result.minimum_result.activity_id == "shift")
+    assert_that(result.minimum_result.condition_ids == ("salary", "hours"))
+    assert_that(result.overtime_result.rows[0].activity_id == "shift")
+    assert_that(result.overtime_result.rows[0].condition_ids == ("salary", "hours"))
     assert_that(result.minimum_source_sha256 == minimum_rule().source_sha256)
     assert_that(result.overtime_citation == overtime.citation)
 
