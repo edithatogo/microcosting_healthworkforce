@@ -118,3 +118,14 @@ premium. Hours above a later threshold also appear in earlier threshold totals;
 these are cumulative, not mutually exclusive bands. Decreasing multipliers,
 shift-specific thresholds, premium stacking and minimum engagements are not
 supported by this method.
+
+## Explicit minimum engagement
+
+`src.minimum_engagement.cost_minimum_engagement` supports one explicitly eligible
+engagement contained within a local calendar date. It pays all base components
+for worked hours and adds any guaranteed minimum hours using only the components
+specified in the reviewed rule. It rejects unknown components, uncovered source
+or rule dates and unconfirmed eligibility. Additional hours use the local-day
+rate as a declared allocation method; their actual timing is not inferred. This
+method does not combine the minimum with overtime, shift penalties, multiple
+engagements or changes across local dates.
