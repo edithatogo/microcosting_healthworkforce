@@ -209,3 +209,36 @@ def test_release_hash_changes_with_price_and_quantity_retains_basis() -> None:
     assert_that(first.release_sha256 != second.release_sha256)
     assert_that(first.rows[0].quantity.basis == quantity().basis)
     assert_that(first.rows[0].quote.source_sha256 == "a" * 64)
+
+
+def test_exact_rational_quantity_is_preserved_through_json_and_pricing() -> None:
+    """A derived nonterminating quantity must not be rounded to Decimal first."""
+    data = quantity(quantity=Fraction(2100, 73))
+    restored = QuoteQuantity.model_validate_json(data.model_dump_json())
+    assert_that(restored.quantity == Fraction(2100, 73))
+    with localcontext() as ctx:
+        ctx.prec = 3
+        result = price_units(release(), (restored,))
+    assert_that(result.total == Fraction(210021, 73))
+    assert_that(result.rows[0].quantity.quantity == Fraction(2100, 73))
+
+
+@pytest.mark.parametrize("value", [Fraction(-1, 3), 0.5, True])
+def test_rational_extension_preserves_strict_nonnegative_quantity_admission(
+    value: object,
+) -> None:
+    """Neither negative rationals nor implicit float/bool conversions are valid."""
+    with pytest.raises(ValueError, match=r"greater|instance|Decimal"):
+        quantity(quantity=value)
+
+
+def test_rational_zero_denominator_json_and_unchecked_float_fail() -> None:
+    """Malformed rational strings and copied floats cannot bypass strict admission."""
+    data = quantity(quantity=Fraction(1, 3))
+    with pytest.raises(ValueError, match=r"fraction|Fraction|decimal"):
+        QuoteQuantity.model_validate_json(
+            data.model_dump_json().replace('"1/3"', '"1/0"'),
+        )
+    copied = quantity().model_copy(update={"quantity": 0.5})
+    with pytest.raises(ValueError, match=r"instance|Decimal"):
+        price_units(release(), (copied,))
