@@ -15,3 +15,25 @@ multiple allocations fail. This method requires qualification against the
 selected source's grouping interpretation and complete event evidence. It does
 not establish employee eligibility, entitlement, loaded rates, multipliers,
 rounding, payroll payment or integration with cumulative overtime.
+
+## Effective-dated pricing
+
+`cost_recall_windows` accepts an explicit `CostRelease`, resource identity,
+events, minimum and grouping method. It prices each planned interval from its
+start through its paid end using `cost_dynamic`. The returned `RecallCost`
+retains both the original worked events and the component/rate/source ledger,
+with pricing method `anchored_window_flat_rate_v1`. Rates must already include
+any qualified loading or component composition; this adapter derives neither
+a recall multiplier nor legal eligibility.
+
+For example, a 30-minute guarantee starting at 11:50, priced at 50/hour before
+noon and 70/hour afterwards, costs exactly 95/3 currency units. Actual calls
+lasting five minutes at 11:50 and five minutes at 12:05 remain ten minutes of
+work. All 30 guaranteed minutes require rate coverage, even when the actual
+calls fit within a shorter covered interval. Rate changes split the pricing
+ledger. Empty event evidence creates no windows or charges.
+
+The adapter supplies planned flat-rate guarantee costing. Combining guarantees
+with work-based cumulative overtime, source-specific eligibility, payroll
+rounding or separately payable overlapping duties requires explicit rule
+qualification; guarantee time must not silently become overtime work history.
