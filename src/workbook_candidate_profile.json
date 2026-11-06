@@ -2812,79 +2812,79 @@
       "sheet": "Labour - Prices",
       "area": "A46:X51",
       "status": "archived_candidate",
-      "purpose": "Legacy monetary components, source formulas preserved",
+      "purpose": "Workbook annual component or salary bound based on midpoint salary",
       "columns": [
         {
           "column": "J",
-          "name": "component_J",
+          "name": "superannuation_annual",
           "unit": "AUD/year",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "M",
-          "name": "component_M",
+          "name": "average_penalties_annual",
           "unit": "AUD/year",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "N",
-          "name": "component_N",
+          "name": "public_holiday_penalty_annual",
           "unit": "AUD/year",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "O",
-          "name": "component_O",
+          "name": "private_practice_loading_annual",
           "unit": "AUD/year",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "P",
-          "name": "component_P",
+          "name": "attraction_retention_allowance_annual",
           "unit": "AUD/year",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "Q",
-          "name": "component_Q",
+          "name": "sick_leave_proxy_annual",
           "unit": "AUD/year",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "R",
-          "name": "component_R",
+          "name": "professional_development_allowance_annual",
           "unit": "AUD/year",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "S",
-          "name": "component_S",
+          "name": "annual_leave_proxy_annual",
           "unit": "AUD/year",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "T",
-          "name": "component_T",
+          "name": "annual_leave_loading_proxy_annual",
           "unit": "AUD/year",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "V",
-          "name": "component_V",
+          "name": "salary_lower_annual",
           "unit": "AUD/year",
-          "role": "archived_component"
+          "role": "alternative_salary_bound"
         },
         {
           "column": "W",
-          "name": "component_W",
+          "name": "salary_midpoint_annual",
           "unit": "AUD/year",
-          "role": "archived_component"
+          "role": "salary_midpoint"
         },
         {
           "column": "X",
-          "name": "component_X",
+          "name": "salary_upper_annual",
           "unit": "AUD/year",
-          "role": "archived_component"
+          "role": "alternative_salary_bound"
         }
       ],
       "header_rows": []
@@ -2894,79 +2894,79 @@
       "sheet": "Labour - Prices",
       "area": "A53:X57",
       "status": "archived_candidate",
-      "purpose": "Legacy monetary components, source formulas preserved",
+      "purpose": "Workbook annual component or salary bound based on midpoint salary",
       "columns": [
         {
           "column": "J",
-          "name": "component_J",
+          "name": "superannuation_annual",
           "unit": "AUD/year",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "M",
-          "name": "component_M",
+          "name": "average_penalties_annual",
           "unit": "AUD/year",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "N",
-          "name": "component_N",
+          "name": "public_holiday_penalty_annual",
           "unit": "AUD/year",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "O",
-          "name": "component_O",
+          "name": "private_practice_loading_annual",
           "unit": "AUD/year",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "P",
-          "name": "component_P",
+          "name": "attraction_retention_allowance_annual",
           "unit": "AUD/year",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "Q",
-          "name": "component_Q",
+          "name": "sick_leave_proxy_annual",
           "unit": "AUD/year",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "R",
-          "name": "component_R",
+          "name": "professional_development_allowance_annual",
           "unit": "AUD/year",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "S",
-          "name": "component_S",
+          "name": "annual_leave_proxy_annual",
           "unit": "AUD/year",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "T",
-          "name": "component_T",
+          "name": "annual_leave_loading_proxy_annual",
           "unit": "AUD/year",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "V",
-          "name": "component_V",
+          "name": "salary_lower_annual",
           "unit": "AUD/year",
-          "role": "archived_component"
+          "role": "alternative_salary_bound"
         },
         {
           "column": "W",
-          "name": "component_W",
+          "name": "salary_midpoint_annual",
           "unit": "AUD/year",
-          "role": "archived_component"
+          "role": "salary_midpoint"
         },
         {
           "column": "X",
-          "name": "component_X",
+          "name": "salary_upper_annual",
           "unit": "AUD/year",
-          "role": "archived_component"
+          "role": "alternative_salary_bound"
         }
       ],
       "header_rows": []
@@ -2976,79 +2976,79 @@
       "sheet": "Labour - Prices",
       "area": "A59:X63",
       "status": "archived_candidate",
-      "purpose": "Legacy monetary components, source formulas preserved",
+      "purpose": "Workbook annual component or salary bound based on midpoint salary",
       "columns": [
         {
           "column": "J",
-          "name": "component_J",
+          "name": "superannuation_annual",
           "unit": "AUD/year",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "M",
-          "name": "component_M",
+          "name": "average_penalties_annual",
           "unit": "AUD/year",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "N",
-          "name": "component_N",
+          "name": "public_holiday_penalty_annual",
           "unit": "AUD/year",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "O",
-          "name": "component_O",
+          "name": "private_practice_loading_annual",
           "unit": "AUD/year",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "P",
-          "name": "component_P",
+          "name": "attraction_retention_allowance_annual",
           "unit": "AUD/year",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "Q",
-          "name": "component_Q",
+          "name": "sick_leave_proxy_annual",
           "unit": "AUD/year",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "R",
-          "name": "component_R",
+          "name": "professional_development_allowance_annual",
           "unit": "AUD/year",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "S",
-          "name": "component_S",
+          "name": "annual_leave_proxy_annual",
           "unit": "AUD/year",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "T",
-          "name": "component_T",
+          "name": "annual_leave_loading_proxy_annual",
           "unit": "AUD/year",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "V",
-          "name": "component_V",
+          "name": "salary_lower_annual",
           "unit": "AUD/year",
-          "role": "archived_component"
+          "role": "alternative_salary_bound"
         },
         {
           "column": "W",
-          "name": "component_W",
+          "name": "salary_midpoint_annual",
           "unit": "AUD/year",
-          "role": "archived_component"
+          "role": "salary_midpoint"
         },
         {
           "column": "X",
-          "name": "component_X",
+          "name": "salary_upper_annual",
           "unit": "AUD/year",
-          "role": "archived_component"
+          "role": "alternative_salary_bound"
         }
       ],
       "header_rows": []
@@ -3058,79 +3058,79 @@
       "sheet": "Labour - Prices",
       "area": "A65:X69",
       "status": "archived_candidate",
-      "purpose": "Legacy monetary components, source formulas preserved",
+      "purpose": "Workbook annual component or salary bound based on midpoint salary",
       "columns": [
         {
           "column": "J",
-          "name": "component_J",
+          "name": "superannuation_annual",
           "unit": "AUD/year",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "M",
-          "name": "component_M",
+          "name": "average_penalties_annual",
           "unit": "AUD/year",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "N",
-          "name": "component_N",
+          "name": "public_holiday_penalty_annual",
           "unit": "AUD/year",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "O",
-          "name": "component_O",
+          "name": "private_practice_loading_annual",
           "unit": "AUD/year",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "P",
-          "name": "component_P",
+          "name": "attraction_retention_allowance_annual",
           "unit": "AUD/year",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "Q",
-          "name": "component_Q",
+          "name": "sick_leave_proxy_annual",
           "unit": "AUD/year",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "R",
-          "name": "component_R",
+          "name": "professional_development_allowance_annual",
           "unit": "AUD/year",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "S",
-          "name": "component_S",
+          "name": "annual_leave_proxy_annual",
           "unit": "AUD/year",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "T",
-          "name": "component_T",
+          "name": "annual_leave_loading_proxy_annual",
           "unit": "AUD/year",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "V",
-          "name": "component_V",
+          "name": "salary_lower_annual",
           "unit": "AUD/year",
-          "role": "archived_component"
+          "role": "alternative_salary_bound"
         },
         {
           "column": "W",
-          "name": "component_W",
+          "name": "salary_midpoint_annual",
           "unit": "AUD/year",
-          "role": "archived_component"
+          "role": "salary_midpoint"
         },
         {
           "column": "X",
-          "name": "component_X",
+          "name": "salary_upper_annual",
           "unit": "AUD/year",
-          "role": "archived_component"
+          "role": "alternative_salary_bound"
         }
       ],
       "header_rows": []
@@ -3140,79 +3140,79 @@
       "sheet": "Labour - Prices",
       "area": "A71:X75",
       "status": "archived_candidate",
-      "purpose": "Legacy monetary components, source formulas preserved",
+      "purpose": "Workbook annual component or salary bound based on midpoint salary",
       "columns": [
         {
           "column": "J",
-          "name": "component_J",
+          "name": "superannuation_annual",
           "unit": "AUD/year",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "M",
-          "name": "component_M",
+          "name": "average_penalties_annual",
           "unit": "AUD/year",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "N",
-          "name": "component_N",
+          "name": "public_holiday_penalty_annual",
           "unit": "AUD/year",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "O",
-          "name": "component_O",
+          "name": "private_practice_loading_annual",
           "unit": "AUD/year",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "P",
-          "name": "component_P",
+          "name": "attraction_retention_allowance_annual",
           "unit": "AUD/year",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "Q",
-          "name": "component_Q",
+          "name": "sick_leave_proxy_annual",
           "unit": "AUD/year",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "R",
-          "name": "component_R",
+          "name": "professional_development_allowance_annual",
           "unit": "AUD/year",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "S",
-          "name": "component_S",
+          "name": "annual_leave_proxy_annual",
           "unit": "AUD/year",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "T",
-          "name": "component_T",
+          "name": "annual_leave_loading_proxy_annual",
           "unit": "AUD/year",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "V",
-          "name": "component_V",
+          "name": "salary_lower_annual",
           "unit": "AUD/year",
-          "role": "archived_component"
+          "role": "alternative_salary_bound"
         },
         {
           "column": "W",
-          "name": "component_W",
+          "name": "salary_midpoint_annual",
           "unit": "AUD/year",
-          "role": "archived_component"
+          "role": "salary_midpoint"
         },
         {
           "column": "X",
-          "name": "component_X",
+          "name": "salary_upper_annual",
           "unit": "AUD/year",
-          "role": "archived_component"
+          "role": "alternative_salary_bound"
         }
       ],
       "header_rows": []
@@ -3313,79 +3313,79 @@
       "sheet": "Labour - Prices",
       "area": "A89:X94",
       "status": "archived_candidate",
-      "purpose": "Legacy fractional components, source formulas preserved",
+      "purpose": "Workbook component share of midpoint annual cost",
       "columns": [
         {
           "column": "J",
-          "name": "component_J",
+          "name": "superannuation_share_of_midpoint_cost",
           "unit": "fraction",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "M",
-          "name": "component_M",
+          "name": "average_penalties_share_of_midpoint_cost",
           "unit": "fraction",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "N",
-          "name": "component_N",
+          "name": "public_holiday_penalty_share_of_midpoint_cost",
           "unit": "fraction",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "O",
-          "name": "component_O",
+          "name": "private_practice_loading_share_of_midpoint_cost",
           "unit": "fraction",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "P",
-          "name": "component_P",
+          "name": "attraction_retention_allowance_share_of_midpoint_cost",
           "unit": "fraction",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "Q",
-          "name": "component_Q",
+          "name": "sick_leave_proxy_share_of_midpoint_cost",
           "unit": "fraction",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "R",
-          "name": "component_R",
+          "name": "professional_development_allowance_share_of_midpoint_cost",
           "unit": "fraction",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "S",
-          "name": "component_S",
+          "name": "annual_leave_proxy_share_of_midpoint_cost",
           "unit": "fraction",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "T",
-          "name": "component_T",
+          "name": "annual_leave_loading_proxy_share_of_midpoint_cost",
           "unit": "fraction",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "V",
-          "name": "component_V",
+          "name": "salary_lower_share_of_midpoint_cost",
           "unit": "fraction",
-          "role": "archived_component"
+          "role": "alternative_salary_bound"
         },
         {
           "column": "W",
-          "name": "component_W",
+          "name": "salary_midpoint_share_of_midpoint_cost",
           "unit": "fraction",
-          "role": "archived_component"
+          "role": "salary_midpoint"
         },
         {
           "column": "X",
-          "name": "component_X",
+          "name": "salary_upper_share_of_midpoint_cost",
           "unit": "fraction",
-          "role": "archived_component"
+          "role": "alternative_salary_bound"
         }
       ],
       "header_rows": []
@@ -3395,79 +3395,79 @@
       "sheet": "Labour - Prices",
       "area": "A96:X100",
       "status": "archived_candidate",
-      "purpose": "Legacy fractional components, source formulas preserved",
+      "purpose": "Workbook component share of midpoint annual cost",
       "columns": [
         {
           "column": "J",
-          "name": "component_J",
+          "name": "superannuation_share_of_midpoint_cost",
           "unit": "fraction",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "M",
-          "name": "component_M",
+          "name": "average_penalties_share_of_midpoint_cost",
           "unit": "fraction",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "N",
-          "name": "component_N",
+          "name": "public_holiday_penalty_share_of_midpoint_cost",
           "unit": "fraction",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "O",
-          "name": "component_O",
+          "name": "private_practice_loading_share_of_midpoint_cost",
           "unit": "fraction",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "P",
-          "name": "component_P",
+          "name": "attraction_retention_allowance_share_of_midpoint_cost",
           "unit": "fraction",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "Q",
-          "name": "component_Q",
+          "name": "sick_leave_proxy_share_of_midpoint_cost",
           "unit": "fraction",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "R",
-          "name": "component_R",
+          "name": "professional_development_allowance_share_of_midpoint_cost",
           "unit": "fraction",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "S",
-          "name": "component_S",
+          "name": "annual_leave_proxy_share_of_midpoint_cost",
           "unit": "fraction",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "T",
-          "name": "component_T",
+          "name": "annual_leave_loading_proxy_share_of_midpoint_cost",
           "unit": "fraction",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "V",
-          "name": "component_V",
+          "name": "salary_lower_share_of_midpoint_cost",
           "unit": "fraction",
-          "role": "archived_component"
+          "role": "alternative_salary_bound"
         },
         {
           "column": "W",
-          "name": "component_W",
+          "name": "salary_midpoint_share_of_midpoint_cost",
           "unit": "fraction",
-          "role": "archived_component"
+          "role": "salary_midpoint"
         },
         {
           "column": "X",
-          "name": "component_X",
+          "name": "salary_upper_share_of_midpoint_cost",
           "unit": "fraction",
-          "role": "archived_component"
+          "role": "alternative_salary_bound"
         }
       ],
       "header_rows": []
@@ -3477,79 +3477,79 @@
       "sheet": "Labour - Prices",
       "area": "A102:X106",
       "status": "archived_candidate",
-      "purpose": "Legacy fractional components, source formulas preserved",
+      "purpose": "Workbook component share of midpoint annual cost",
       "columns": [
         {
           "column": "J",
-          "name": "component_J",
+          "name": "superannuation_share_of_midpoint_cost",
           "unit": "fraction",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "M",
-          "name": "component_M",
+          "name": "average_penalties_share_of_midpoint_cost",
           "unit": "fraction",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "N",
-          "name": "component_N",
+          "name": "public_holiday_penalty_share_of_midpoint_cost",
           "unit": "fraction",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "O",
-          "name": "component_O",
+          "name": "private_practice_loading_share_of_midpoint_cost",
           "unit": "fraction",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "P",
-          "name": "component_P",
+          "name": "attraction_retention_allowance_share_of_midpoint_cost",
           "unit": "fraction",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "Q",
-          "name": "component_Q",
+          "name": "sick_leave_proxy_share_of_midpoint_cost",
           "unit": "fraction",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "R",
-          "name": "component_R",
+          "name": "professional_development_allowance_share_of_midpoint_cost",
           "unit": "fraction",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "S",
-          "name": "component_S",
+          "name": "annual_leave_proxy_share_of_midpoint_cost",
           "unit": "fraction",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "T",
-          "name": "component_T",
+          "name": "annual_leave_loading_proxy_share_of_midpoint_cost",
           "unit": "fraction",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "V",
-          "name": "component_V",
+          "name": "salary_lower_share_of_midpoint_cost",
           "unit": "fraction",
-          "role": "archived_component"
+          "role": "alternative_salary_bound"
         },
         {
           "column": "W",
-          "name": "component_W",
+          "name": "salary_midpoint_share_of_midpoint_cost",
           "unit": "fraction",
-          "role": "archived_component"
+          "role": "salary_midpoint"
         },
         {
           "column": "X",
-          "name": "component_X",
+          "name": "salary_upper_share_of_midpoint_cost",
           "unit": "fraction",
-          "role": "archived_component"
+          "role": "alternative_salary_bound"
         }
       ],
       "header_rows": []
@@ -3559,79 +3559,79 @@
       "sheet": "Labour - Prices",
       "area": "A108:X112",
       "status": "archived_candidate",
-      "purpose": "Legacy fractional components, source formulas preserved",
+      "purpose": "Workbook component share of midpoint annual cost",
       "columns": [
         {
           "column": "J",
-          "name": "component_J",
+          "name": "superannuation_share_of_midpoint_cost",
           "unit": "fraction",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "M",
-          "name": "component_M",
+          "name": "average_penalties_share_of_midpoint_cost",
           "unit": "fraction",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "N",
-          "name": "component_N",
+          "name": "public_holiday_penalty_share_of_midpoint_cost",
           "unit": "fraction",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "O",
-          "name": "component_O",
+          "name": "private_practice_loading_share_of_midpoint_cost",
           "unit": "fraction",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "P",
-          "name": "component_P",
+          "name": "attraction_retention_allowance_share_of_midpoint_cost",
           "unit": "fraction",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "Q",
-          "name": "component_Q",
+          "name": "sick_leave_proxy_share_of_midpoint_cost",
           "unit": "fraction",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "R",
-          "name": "component_R",
+          "name": "professional_development_allowance_share_of_midpoint_cost",
           "unit": "fraction",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "S",
-          "name": "component_S",
+          "name": "annual_leave_proxy_share_of_midpoint_cost",
           "unit": "fraction",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "T",
-          "name": "component_T",
+          "name": "annual_leave_loading_proxy_share_of_midpoint_cost",
           "unit": "fraction",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "V",
-          "name": "component_V",
+          "name": "salary_lower_share_of_midpoint_cost",
           "unit": "fraction",
-          "role": "archived_component"
+          "role": "alternative_salary_bound"
         },
         {
           "column": "W",
-          "name": "component_W",
+          "name": "salary_midpoint_share_of_midpoint_cost",
           "unit": "fraction",
-          "role": "archived_component"
+          "role": "salary_midpoint"
         },
         {
           "column": "X",
-          "name": "component_X",
+          "name": "salary_upper_share_of_midpoint_cost",
           "unit": "fraction",
-          "role": "archived_component"
+          "role": "alternative_salary_bound"
         }
       ],
       "header_rows": []
@@ -3641,79 +3641,79 @@
       "sheet": "Labour - Prices",
       "area": "A114:X118",
       "status": "archived_candidate",
-      "purpose": "Legacy fractional components, source formulas preserved",
+      "purpose": "Workbook component share of midpoint annual cost",
       "columns": [
         {
           "column": "J",
-          "name": "component_J",
+          "name": "superannuation_share_of_midpoint_cost",
           "unit": "fraction",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "M",
-          "name": "component_M",
+          "name": "average_penalties_share_of_midpoint_cost",
           "unit": "fraction",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "N",
-          "name": "component_N",
+          "name": "public_holiday_penalty_share_of_midpoint_cost",
           "unit": "fraction",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "O",
-          "name": "component_O",
+          "name": "private_practice_loading_share_of_midpoint_cost",
           "unit": "fraction",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "P",
-          "name": "component_P",
+          "name": "attraction_retention_allowance_share_of_midpoint_cost",
           "unit": "fraction",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "Q",
-          "name": "component_Q",
+          "name": "sick_leave_proxy_share_of_midpoint_cost",
           "unit": "fraction",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "R",
-          "name": "component_R",
+          "name": "professional_development_allowance_share_of_midpoint_cost",
           "unit": "fraction",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "S",
-          "name": "component_S",
+          "name": "annual_leave_proxy_share_of_midpoint_cost",
           "unit": "fraction",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "T",
-          "name": "component_T",
+          "name": "annual_leave_loading_proxy_share_of_midpoint_cost",
           "unit": "fraction",
-          "role": "archived_component"
+          "role": "workbook_component"
         },
         {
           "column": "V",
-          "name": "component_V",
+          "name": "salary_lower_share_of_midpoint_cost",
           "unit": "fraction",
-          "role": "archived_component"
+          "role": "alternative_salary_bound"
         },
         {
           "column": "W",
-          "name": "component_W",
+          "name": "salary_midpoint_share_of_midpoint_cost",
           "unit": "fraction",
-          "role": "archived_component"
+          "role": "salary_midpoint"
         },
         {
           "column": "X",
-          "name": "component_X",
+          "name": "salary_upper_share_of_midpoint_cost",
           "unit": "fraction",
-          "role": "archived_component"
+          "role": "alternative_salary_bound"
         }
       ],
       "header_rows": []
