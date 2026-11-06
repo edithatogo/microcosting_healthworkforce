@@ -3,6 +3,7 @@
 
 from datetime import UTC, date, datetime
 from decimal import Decimal
+from fractions import Fraction
 
 import pytest
 
@@ -107,3 +108,21 @@ def test_longer_activity_is_not_topped_up_and_cross_day_is_rejected() -> None:
     )
     with pytest.raises(ValueError, match="calendar dates"):
         cost_minimum_engagement(example_release(), rule(), overnight, "UTC")
+
+
+def test_minimum_engagement_retains_exact_fractional_worked_hours() -> None:
+    """A one-hour salary-only minimum is exact after twenty minutes of work."""
+    activity = Activity(
+        activity_id="short",
+        resource_id="worker",
+        starts_at=datetime(2026, 6, 2, 9, tzinfo=UTC),
+        ends_at=datetime(2026, 6, 2, 9, 20, tzinfo=UTC),
+        resources=Decimal(1),
+    )
+    chosen = rule().model_copy(update={"minimum_hours": Decimal(1)})
+    result = cost_minimum_engagement(example_release(), chosen, activity, "UTC")
+    # Salary is paid for one hour and the hourly allowance for twenty minutes.
+    assert_that(
+        Fraction(result.exact_total_numerator, result.exact_total_denominator)
+        == Fraction(151, 3),
+    )

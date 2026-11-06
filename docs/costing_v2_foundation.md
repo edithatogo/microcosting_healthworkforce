@@ -138,4 +138,5 @@ context-precision amounts when hours or annual rates do not terminate in base te
 Callers should combine the rational totals before applying a declared rounding
 policy when exact aggregation is required. The cumulative overtime and tiered overtime results also provide exact rational
 totals; their existing Decimal fields retain context-precision behaviour. The
-minimum-engagement and capacity scenario methods do not yet provide rational totals.
+minimum-engagement and capacity scenario methods also expose exact rational
+totals; the capacity scenario additionally exposes its exact productive-hour rate.

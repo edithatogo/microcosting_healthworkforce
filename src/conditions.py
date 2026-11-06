@@ -155,8 +155,12 @@ class ConditionCostResult(BaseModel):
     segments: tuple[ConditionCostSegment, ...]
 
 
-def _exact_rate_sum(release: ConditionRelease, when: date) -> Fraction:
+def exact_hourly_components(
+    release: ConditionRelease,
+    when: date,
+) -> dict[str, Fraction]:
     """Keep annual condition ratios exact until the caller chooses rounding."""
+    release = ConditionRelease.model_validate(release.model_dump())
     current = [
         c for c in release.conditions if c.effective_from <= when < c.effective_to
     ]
@@ -167,13 +171,13 @@ def _exact_rate_sum(release: ConditionRelease, when: date) -> Fraction:
         raise ValueError(msg)
     salary = Fraction(salaries[0].value)
     annual_hours = Fraction(hours[0].value)
-    annual = salary
+    components = {salaries[0].component: salary / annual_hours}
     for item in current:
         if item.kind == "fixed_annual":
-            annual += Fraction(item.value)
+            components[item.component] = Fraction(item.value) / annual_hours
         elif item.kind == "salary_fraction":
-            annual += salary * Fraction(item.value)
-    return annual / annual_hours
+            components[item.component] = salary * Fraction(item.value) / annual_hours
+    return components
 
 
 def cost_condition_activity(
@@ -211,7 +215,10 @@ def cost_condition_activity(
             duration.days * 86400 + duration.seconds
         ) * 1000000 + duration.microseconds
         exact_hours = Fraction(microseconds, 3600000000) * Fraction(activity.resources)
-        exact_total += _exact_rate_sum(release, day) * exact_hours
+        exact_total += (
+            sum(exact_hourly_components(release, day).values(), Fraction(0))
+            * exact_hours
+        )
         rates = hourly_components(release, day)
         active = tuple(
             c.condition_id

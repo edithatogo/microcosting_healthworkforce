@@ -3,6 +3,7 @@
 
 from datetime import date
 from decimal import Decimal
+from fractions import Fraction
 
 import pytest
 
@@ -54,3 +55,25 @@ def test_capacity_rejects_excess_loss_and_double_counted_id() -> None:
                 losses_disjoint=True,
             ),
         )
+
+
+def test_capacity_ratio_retains_exact_nonterminating_value() -> None:
+    """Scenario productive-hour ratios retain exact values before rounding."""
+    inputs = CapacityScenarioInputs(
+        losses=(CapacityLoss(loss_id="leave", hours=Decimal(200)),),
+        cover_hours=Decimal(100),
+        cover_hourly_cost=Decimal(60),
+        losses_disjoint=True,
+    )
+    result = capacity_scenario(release(), date(2026, 6, 1), inputs)
+    assert_that(
+        Fraction(result.exact_total_numerator, result.exact_total_denominator)
+        == Fraction(106000),
+    )
+    assert_that(
+        Fraction(
+            result.exact_productive_rate_numerator,
+            result.exact_productive_rate_denominator,
+        )
+        == Fraction(530, 9),
+    )

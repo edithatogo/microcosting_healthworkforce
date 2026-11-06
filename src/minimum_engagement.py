@@ -3,12 +3,18 @@
 
 from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal
+from fractions import Fraction
 from typing import Self
 from zoneinfo import ZoneInfo
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from src.conditions import ConditionRelease, cost_condition_activity, hourly_components
+from src.conditions import (
+    ConditionRelease,
+    cost_condition_activity,
+    exact_hourly_components,
+    hourly_components,
+)
 from src.costing import Activity
 
 
@@ -58,6 +64,8 @@ class MinimumEngagementResult(BaseModel):
     worked_cost: Decimal
     minimum_increment: Decimal
     total: Decimal
+    exact_total_numerator: int
+    exact_total_denominator: int = Field(gt=0)
     included_components: tuple[str, ...]
     condition_ids: tuple[str, ...]
     rule_id: str
@@ -118,6 +126,18 @@ def cost_minimum_engagement(
         (rates[name] for name in rule.included_components),
         Decimal(0),
     )
+    elapsed = activity.ends_at.astimezone(UTC) - activity.starts_at.astimezone(UTC)
+    micros = (elapsed.days * 86400 + elapsed.seconds) * 1000000 + elapsed.microseconds
+    exact_hours = Fraction(micros, 3600000000)
+    extra_hours = max(Fraction(0), Fraction(rule.minimum_hours) - exact_hours)
+    exact_rates = exact_hourly_components(release, day)
+    exact_total = Fraction(
+        result.exact_total_numerator,
+        result.exact_total_denominator,
+    ) + extra_hours * sum(
+        (exact_rates[name] for name in rule.included_components),
+        Fraction(0),
+    )
     return MinimumEngagementResult(
         release_id=release.release_id,
         activity_id=activity.activity_id,
@@ -128,6 +148,8 @@ def cost_minimum_engagement(
         worked_cost=result.total,
         minimum_increment=increment,
         total=result.total + increment,
+        exact_total_numerator=exact_total.numerator,
+        exact_total_denominator=exact_total.denominator,
         included_components=rule.included_components,
         condition_ids=result.segments[0].condition_ids,
         rule_id=rule.rule_id,

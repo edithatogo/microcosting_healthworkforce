@@ -2,11 +2,12 @@
 """Explicit productive-capacity and incremental-cover scenario arithmetic."""
 
 from decimal import Decimal
+from fractions import Fraction
 lazy from datetime import date
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from src.conditions import ConditionRelease, hourly_components
+from src.conditions import ConditionRelease, exact_hourly_components, hourly_components
 
 
 class CapacityLoss(BaseModel):
@@ -40,6 +41,10 @@ class CapacityScenarioResult(BaseModel):
     incremental_cover_cost: Decimal
     total_cost: Decimal
     cost_per_productive_hour: Decimal
+    exact_total_numerator: int
+    exact_total_denominator: int = Field(gt=0)
+    exact_productive_rate_numerator: int
+    exact_productive_rate_denominator: int = Field(gt=0)
     condition_ids: tuple[str, ...]
     assumptions: CapacityScenarioInputs
 
@@ -80,6 +85,23 @@ def capacity_scenario(
     paid_cost = sum(rates.values(), Decimal(0)) * paid
     cover_cost = inputs.cover_hours * inputs.cover_hourly_cost
     total = paid_cost + cover_cost
+    exact_total = sum(
+        exact_hourly_components(release, when).values(),
+        Fraction(0),
+    ) * Fraction(paid) + Fraction(inputs.cover_hours) * Fraction(
+        inputs.cover_hourly_cost,
+    )
+    exact_productive = Fraction(paid) - sum(
+        (Fraction(loss.hours) for loss in inputs.losses),
+        Fraction(0),
+    )
+    if Fraction(inputs.cover_hours) > Fraction(paid) - exact_productive:
+        msg = "Incremental cover exceeds the exact lost hours"
+        raise ValueError(msg)
+    if exact_productive <= 0:
+        msg = "Scenario must retain positive exact productive hours"
+        raise ValueError(msg)
+    exact_rate = exact_total / exact_productive
     return CapacityScenarioResult(
         release_id=release.release_id,
         as_of=when,
@@ -89,6 +111,10 @@ def capacity_scenario(
         incremental_cover_cost=cover_cost,
         total_cost=total,
         cost_per_productive_hour=total / productive,
+        exact_total_numerator=exact_total.numerator,
+        exact_total_denominator=exact_total.denominator,
+        exact_productive_rate_numerator=exact_rate.numerator,
+        exact_productive_rate_denominator=exact_rate.denominator,
         condition_ids=tuple(c.condition_id for c in current),
         assumptions=inputs,
     )
