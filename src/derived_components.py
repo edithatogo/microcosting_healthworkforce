@@ -82,10 +82,19 @@ def _rows(
     quantity: Fraction,
 ) -> tuple[DerivedRow, ...]:
     rates = exact_hourly_components(release, when)
+    included = {
+        name
+        for item in release.conditions
+        if item.kind == "salary" and item.effective_from <= when < item.effective_to
+        for name in item.included_components
+    }
     result: list[DerivedRow] = []
     seen: set[str] = set()
     for raw in rules:
         rule = DerivedComponentRule.model_validate(raw.model_dump())
+        if rule.component in included:
+            msg = "Derived component duplicates a salary inclusion"
+            raise ValueError(msg)
         if rule.rule_id in seen or rule.component in rates:
             msg = "Derived rule identities and component names must be unique"
             raise ValueError(msg)

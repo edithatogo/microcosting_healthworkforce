@@ -27,6 +27,8 @@ jobs:
       - run: uv python install 3.15.2
       - name: Install workbook loader dependency
         run: |
+          # The Azure mirror delivered packages at 24 kB/s in run 42210695607.
+          sudo sed -i 's|http://azure.archive.ubuntu.com/ubuntu|https://archive.ubuntu.com/ubuntu|g' /etc/apt/sources.list.d/ubuntu.sources
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends libreoffice-calc
       - run: uv sync --locked --python 3.15.2
