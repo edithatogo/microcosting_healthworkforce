@@ -49,18 +49,22 @@ def validate_dsa_results(
             )
             if aligned.height != result_df.height:
                 return False
-            calculated_values = aligned["Calculated_Cost_Mid_Y0"].to_numpy()
-            expected_values = aligned["_expected"].to_numpy()
+            calculated_series = _finite_costs(aligned, "Calculated_Cost_Mid_Y0")
+            expected_series = _finite_costs(aligned, "_expected")
         else:
             if result_df.height != validation_df.height:
                 return False
-            calculated_values = result_df["Calculated_Cost_Mid_Y0"].to_numpy()
-            expected_values = validation_df[validation_col].to_numpy()
+            calculated_series = _finite_costs(result_df, "Calculated_Cost_Mid_Y0")
+            expected_series = _finite_costs(validation_df, validation_col)
+        if calculated_series is None or expected_series is None:
+            logger.error("DSA comparison requires complete finite numeric values.")
+            return False
+        calculated_values = calculated_series.to_numpy()
+        expected_values = expected_series.to_numpy()
         if np.allclose(
             np.asarray(calculated_values),
             np.asarray(expected_values),
             rtol=tolerance,
-            equal_nan=True,
         ):
             logger.info("✅ Scenario '%s' matched successfully.", scenario_name)
             matched_scenarios += 1
@@ -72,7 +76,6 @@ def validate_dsa_results(
                     np.asarray(calculated_values),
                     np.asarray(expected_values),
                     rtol=tolerance,
-                    equal_nan=True,
                 ),
             )[0]
             if discrepancy_idx.size > 0:

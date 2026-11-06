@@ -15,10 +15,44 @@ from src.dsa_analysis import (
     report_dsa_results,
     run_dsa_analysis,
 )
+from src.formula_engine import apply_formulas
 from tests.checks import assert_that
 
 EXPECTED_150 = 150
 EXPECTED_200 = 200
+
+
+def test_dsa_recalculates_an_already_costed_base_case() -> None:
+    """Perturbing raw inputs must not retain an old calculated cost."""
+    formulas: dict[str, Any] = {
+        "formulas": [
+            {"id": "salary_cost", "expression": "salary", "parameters": ["salary"]},
+        ],
+        "outputs": [
+            {
+                "name": "Calculated_Cost_Mid",
+                "calculation_method": "formula",
+                "uses_formula": "salary_cost",
+                "parameter_mapping": {"salary": "salary"},
+            },
+        ],
+    }
+    raw = pl.DataFrame({"salary": [100.0]})
+    costed = apply_formulas(raw, formulas)
+    scenarios = [
+        {
+            "name": "increase",
+            "parameter_to_vary": "salary",
+            "variation": {"type": "percentage", "value": 0.5},
+        },
+    ]
+    from_raw = run_dsa_analysis(raw, formulas, apply_formulas, scenarios)["increase"]
+    from_costed = run_dsa_analysis(costed, formulas, apply_formulas, scenarios)[
+        "increase"
+    ]
+    assert_that(from_costed["salary"][0] == EXPECTED_150)
+    assert_that(from_costed["Calculated_Cost_Mid_Y0"][0] == EXPECTED_150)
+    assert_that(from_costed.equals(from_raw))
 
 
 def test_load_dsa_scenarios_success() -> None:
