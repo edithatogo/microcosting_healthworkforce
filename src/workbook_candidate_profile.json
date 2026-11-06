@@ -2166,8 +2166,81 @@
       "sheet": "Labour - Prices",
       "area": "A34:U38",
       "status": "archived_candidate",
-      "purpose": "Legacy unweighted aggregate inputs",
-      "columns": [],
+      "purpose": "Historical unweighted five-jurisdiction mean inputs; formula basis is AVERAGE even on the WM sheet",
+      "columns": [
+        {
+          "column": "J",
+          "name": "superannuation_unweighted_mean",
+          "unit": "fraction",
+          "role": "archived_aggregate_input"
+        },
+        {
+          "column": "K",
+          "name": "hours_per_week_unweighted_mean",
+          "unit": "hours/week",
+          "role": "archived_aggregate_input"
+        },
+        {
+          "column": "L",
+          "name": "productive_time_unweighted_mean",
+          "unit": "fraction",
+          "role": "archived_aggregate_input"
+        },
+        {
+          "column": "M",
+          "name": "average_penalties_unweighted_mean",
+          "unit": "fraction",
+          "role": "archived_aggregate_input"
+        },
+        {
+          "column": "N",
+          "name": "public_holiday_penalty_unweighted_mean",
+          "unit": "fraction",
+          "role": "archived_aggregate_input"
+        },
+        {
+          "column": "O",
+          "name": "private_practice_loading_unweighted_mean",
+          "unit": "fraction",
+          "role": "archived_aggregate_input"
+        },
+        {
+          "column": "P",
+          "name": "retention_allowance_unweighted_mean",
+          "unit": "fraction",
+          "role": "archived_aggregate_input"
+        },
+        {
+          "column": "Q",
+          "name": "sick_leave_unweighted_mean",
+          "unit": "fraction",
+          "role": "archived_aggregate_input"
+        },
+        {
+          "column": "R",
+          "name": "professional_development_allowance_unweighted_mean",
+          "unit": "AUD/year_assumed",
+          "role": "archived_aggregate_input"
+        },
+        {
+          "column": "S",
+          "name": "annual_leave_unweighted_mean",
+          "unit": "weeks/year_assumed",
+          "role": "archived_aggregate_input"
+        },
+        {
+          "column": "T",
+          "name": "leave_loading_unweighted_mean",
+          "unit": "fraction",
+          "role": "archived_aggregate_input"
+        },
+        {
+          "column": "U",
+          "name": "indexation_unweighted_mean",
+          "unit": "fraction/year",
+          "role": "archived_aggregate_input"
+        }
+      ],
       "header_rows": []
     },
     {
@@ -2495,8 +2568,81 @@
       "sheet": "Labour - Prices",
       "area": "A40:U44",
       "status": "archived_candidate",
-      "purpose": "Legacy formatted aggregate input display",
-      "columns": [],
+      "purpose": "Formatted mean and observed minimum/maximum input display; no statistical interval inference",
+      "columns": [
+        {
+          "column": "J",
+          "name": "superannuation_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "K",
+          "name": "hours_per_week_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "L",
+          "name": "productive_time_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "M",
+          "name": "average_penalties_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "N",
+          "name": "public_holiday_penalty_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "O",
+          "name": "private_practice_loading_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "P",
+          "name": "retention_allowance_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "Q",
+          "name": "sick_leave_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "R",
+          "name": "professional_development_allowance_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "S",
+          "name": "annual_leave_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "T",
+          "name": "leave_loading_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "U",
+          "name": "indexation_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        }
+      ],
       "header_rows": []
     },
     {
@@ -3304,8 +3450,81 @@
       "sheet": "Labour - Prices",
       "area": "A83:X87",
       "status": "archived_candidate",
-      "purpose": "Legacy formatted aggregate component display, not numeric data",
-      "columns": [],
+      "purpose": "Formatted component dollar values using first-jurisdiction salary; mean and observed min/max, not numeric accepted inputs",
+      "columns": [
+        {
+          "column": "J",
+          "name": "superannuation_annual_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "M",
+          "name": "average_penalties_annual_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "N",
+          "name": "public_holiday_penalty_annual_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "O",
+          "name": "private_practice_loading_annual_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "P",
+          "name": "attraction_retention_allowance_annual_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "Q",
+          "name": "sick_leave_proxy_annual_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "R",
+          "name": "professional_development_allowance_annual_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "S",
+          "name": "annual_leave_proxy_annual_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "T",
+          "name": "annual_leave_loading_proxy_annual_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "V",
+          "name": "salary_lower_annual_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "W",
+          "name": "salary_midpoint_annual_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "X",
+          "name": "salary_upper_annual_display",
+          "unit": "text",
+          "role": "presentation"
+        }
+      ],
       "header_rows": []
     },
     {
@@ -3723,8 +3942,81 @@
       "sheet": "Labour - Prices",
       "area": "A120:X124",
       "status": "archived_candidate",
-      "purpose": "Legacy formatted aggregate component display, not numeric data",
-      "columns": [],
+      "purpose": "Formatted component shares using first-jurisdiction annual-cost denominator; mean and observed min/max, not numeric accepted inputs",
+      "columns": [
+        {
+          "column": "J",
+          "name": "superannuation_annual_share_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "M",
+          "name": "average_penalties_annual_share_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "N",
+          "name": "public_holiday_penalty_annual_share_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "O",
+          "name": "private_practice_loading_annual_share_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "P",
+          "name": "attraction_retention_allowance_annual_share_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "Q",
+          "name": "sick_leave_proxy_annual_share_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "R",
+          "name": "professional_development_allowance_annual_share_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "S",
+          "name": "annual_leave_proxy_annual_share_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "T",
+          "name": "annual_leave_loading_proxy_annual_share_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "V",
+          "name": "salary_lower_annual_share_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "W",
+          "name": "salary_midpoint_annual_share_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "X",
+          "name": "salary_upper_annual_share_display",
+          "unit": "text",
+          "role": "presentation"
+        }
+      ],
       "header_rows": []
     },
     {
@@ -5892,8 +6184,81 @@
       "sheet": "Labour - Prices (WM)",
       "area": "A34:U38",
       "status": "archived_candidate",
-      "purpose": "Legacy unweighted aggregate inputs",
-      "columns": [],
+      "purpose": "Historical unweighted five-jurisdiction mean inputs; formula basis is AVERAGE even on the WM sheet",
+      "columns": [
+        {
+          "column": "J",
+          "name": "superannuation_unweighted_mean",
+          "unit": "fraction",
+          "role": "archived_aggregate_input"
+        },
+        {
+          "column": "K",
+          "name": "hours_per_week_unweighted_mean",
+          "unit": "hours/week",
+          "role": "archived_aggregate_input"
+        },
+        {
+          "column": "L",
+          "name": "productive_time_unweighted_mean",
+          "unit": "fraction",
+          "role": "archived_aggregate_input"
+        },
+        {
+          "column": "M",
+          "name": "average_penalties_unweighted_mean",
+          "unit": "fraction",
+          "role": "archived_aggregate_input"
+        },
+        {
+          "column": "N",
+          "name": "public_holiday_penalty_unweighted_mean",
+          "unit": "fraction",
+          "role": "archived_aggregate_input"
+        },
+        {
+          "column": "O",
+          "name": "private_practice_loading_unweighted_mean",
+          "unit": "fraction",
+          "role": "archived_aggregate_input"
+        },
+        {
+          "column": "P",
+          "name": "retention_allowance_unweighted_mean",
+          "unit": "fraction",
+          "role": "archived_aggregate_input"
+        },
+        {
+          "column": "Q",
+          "name": "sick_leave_unweighted_mean",
+          "unit": "fraction",
+          "role": "archived_aggregate_input"
+        },
+        {
+          "column": "R",
+          "name": "professional_development_allowance_unweighted_mean",
+          "unit": "AUD/year_assumed",
+          "role": "archived_aggregate_input"
+        },
+        {
+          "column": "S",
+          "name": "annual_leave_unweighted_mean",
+          "unit": "weeks/year_assumed",
+          "role": "archived_aggregate_input"
+        },
+        {
+          "column": "T",
+          "name": "leave_loading_unweighted_mean",
+          "unit": "fraction",
+          "role": "archived_aggregate_input"
+        },
+        {
+          "column": "U",
+          "name": "indexation_unweighted_mean",
+          "unit": "fraction/year",
+          "role": "archived_aggregate_input"
+        }
+      ],
       "header_rows": []
     },
     {
@@ -6221,8 +6586,81 @@
       "sheet": "Labour - Prices (WM)",
       "area": "A40:U44",
       "status": "archived_candidate",
-      "purpose": "Legacy formatted aggregate input display",
-      "columns": [],
+      "purpose": "Formatted mean and observed minimum/maximum input display; no statistical interval inference",
+      "columns": [
+        {
+          "column": "J",
+          "name": "superannuation_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "K",
+          "name": "hours_per_week_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "L",
+          "name": "productive_time_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "M",
+          "name": "average_penalties_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "N",
+          "name": "public_holiday_penalty_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "O",
+          "name": "private_practice_loading_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "P",
+          "name": "retention_allowance_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "Q",
+          "name": "sick_leave_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "R",
+          "name": "professional_development_allowance_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "S",
+          "name": "annual_leave_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "T",
+          "name": "leave_loading_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "U",
+          "name": "indexation_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        }
+      ],
       "header_rows": []
     },
     {
@@ -6585,7 +7023,32 @@
       "area": "A52:AB56",
       "status": "archived_candidate",
       "purpose": "Weighted aggregate formatted display",
-      "columns": [],
+      "columns": [
+        {
+          "column": "A",
+          "name": "jurisdiction",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "Y",
+          "name": "weighted_annual_cost_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "AB",
+          "name": "weighted_hourly_cost_display",
+          "unit": "text",
+          "role": "presentation"
+        }
+      ],
       "header_rows": []
     },
     {
@@ -7085,8 +7548,81 @@
       "sheet": "Labour - Prices (WM)",
       "area": "A95:X99",
       "status": "archived_candidate",
-      "purpose": "Legacy formatted aggregate component display, not numeric data",
-      "columns": [],
+      "purpose": "Formatted component dollar values using first-jurisdiction salary; mean and observed min/max, not numeric accepted inputs; WM sheet formulas remain unweighted in this display block",
+      "columns": [
+        {
+          "column": "J",
+          "name": "superannuation_annual_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "M",
+          "name": "average_penalties_annual_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "N",
+          "name": "public_holiday_penalty_annual_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "O",
+          "name": "private_practice_loading_annual_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "P",
+          "name": "attraction_retention_allowance_annual_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "Q",
+          "name": "sick_leave_proxy_annual_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "R",
+          "name": "professional_development_allowance_annual_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "S",
+          "name": "annual_leave_proxy_annual_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "T",
+          "name": "annual_leave_loading_proxy_annual_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "V",
+          "name": "salary_lower_annual_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "W",
+          "name": "salary_midpoint_annual_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "X",
+          "name": "salary_upper_annual_display",
+          "unit": "text",
+          "role": "presentation"
+        }
+      ],
       "header_rows": []
     },
     {
@@ -7095,7 +7631,20 @@
       "area": "A101:B105",
       "status": "archived_candidate",
       "purpose": "Unpopulated weighted aggregate placeholder labels; no inferred values",
-      "columns": [],
+      "columns": [
+        {
+          "column": "A",
+          "name": "jurisdiction_placeholder",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type_placeholder",
+          "unit": null,
+          "role": "identity"
+        }
+      ],
       "header_rows": []
     },
     {
@@ -7104,7 +7653,20 @@
       "area": "A107:B111",
       "status": "archived_candidate",
       "purpose": "Unpopulated weighted aggregate placeholder labels; no inferred values",
-      "columns": [],
+      "columns": [
+        {
+          "column": "A",
+          "name": "jurisdiction_placeholder",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type_placeholder",
+          "unit": null,
+          "role": "identity"
+        }
+      ],
       "header_rows": []
     },
     {
@@ -7522,8 +8084,81 @@
       "sheet": "Labour - Prices (WM)",
       "area": "A144:X148",
       "status": "archived_candidate",
-      "purpose": "Legacy formatted aggregate component display, not numeric data",
-      "columns": [],
+      "purpose": "Formatted component shares using first-jurisdiction annual-cost denominator; mean and observed min/max, not numeric accepted inputs; WM sheet formulas remain unweighted in this display block",
+      "columns": [
+        {
+          "column": "J",
+          "name": "superannuation_annual_share_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "M",
+          "name": "average_penalties_annual_share_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "N",
+          "name": "public_holiday_penalty_annual_share_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "O",
+          "name": "private_practice_loading_annual_share_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "P",
+          "name": "attraction_retention_allowance_annual_share_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "Q",
+          "name": "sick_leave_proxy_annual_share_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "R",
+          "name": "professional_development_allowance_annual_share_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "S",
+          "name": "annual_leave_proxy_annual_share_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "T",
+          "name": "annual_leave_loading_proxy_annual_share_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "V",
+          "name": "salary_lower_annual_share_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "W",
+          "name": "salary_midpoint_annual_share_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "X",
+          "name": "salary_upper_annual_share_display",
+          "unit": "text",
+          "role": "presentation"
+        }
+      ],
       "header_rows": []
     },
     {
@@ -7532,7 +8167,20 @@
       "area": "A150:B154",
       "status": "archived_candidate",
       "purpose": "Unpopulated weighted aggregate placeholder labels; no inferred values",
-      "columns": [],
+      "columns": [
+        {
+          "column": "A",
+          "name": "jurisdiction_placeholder",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type_placeholder",
+          "unit": null,
+          "role": "identity"
+        }
+      ],
       "header_rows": []
     },
     {
@@ -7541,7 +8189,20 @@
       "area": "A156:B160",
       "status": "archived_candidate",
       "purpose": "Unpopulated weighted aggregate placeholder labels; no inferred values",
-      "columns": [],
+      "columns": [
+        {
+          "column": "A",
+          "name": "jurisdiction_placeholder",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type_placeholder",
+          "unit": null,
+          "role": "identity"
+        }
+      ],
       "header_rows": []
     },
     {
@@ -7550,7 +8211,14 @@
       "area": "A1:A3",
       "status": "archived_candidate",
       "purpose": "Medicare enrolment source and contextual notes",
-      "columns": [],
+      "columns": [
+        {
+          "column": "A",
+          "name": "historical_note",
+          "unit": null,
+          "role": "context"
+        }
+      ],
       "header_rows": []
     },
     {
@@ -7817,7 +8485,14 @@
       "area": "A23:A28",
       "status": "archived_candidate",
       "purpose": "Historical Medicare method and caveats",
-      "columns": [],
+      "columns": [
+        {
+          "column": "A",
+          "name": "historical_note",
+          "unit": null,
+          "role": "context"
+        }
+      ],
       "header_rows": []
     },
     {
@@ -7826,7 +8501,20 @@
       "area": "A29:B37",
       "status": "archived_candidate",
       "purpose": "Historical jurisdictional system-change values; unit requires review",
-      "columns": [],
+      "columns": [
+        {
+          "column": "A",
+          "name": "historical_jurisdiction_label",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "system_change_quantity_unit_unresolved",
+          "unit": null,
+          "role": "unresolved_historical_value"
+        }
+      ],
       "header_rows": [
         29
       ]
@@ -7837,7 +8525,14 @@
       "area": "A38:A41",
       "status": "archived_candidate",
       "purpose": "Historical source and disclaimer notes",
-      "columns": [],
+      "columns": [
+        {
+          "column": "A",
+          "name": "historical_note",
+          "unit": null,
+          "role": "context"
+        }
+      ],
       "header_rows": []
     },
     {
@@ -12482,7 +13177,14 @@
       "area": "AK39:AK39",
       "status": "physical_region_unresolved",
       "purpose": "Isolated zero; semantic role unresolved",
-      "columns": [],
+      "columns": [
+        {
+          "column": "AK",
+          "name": "isolated_zero_semantic_role_unresolved",
+          "unit": null,
+          "role": "unresolved_historical_value"
+        }
+      ],
       "header_rows": []
     },
     {
@@ -12491,7 +13193,218 @@
       "area": "A40:DH44",
       "status": "archived_candidate",
       "purpose": "Formatted DSA aggregate display",
-      "columns": [],
+      "columns": [
+        {
+          "column": "K",
+          "name": "superannuation_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "N",
+          "name": "hours_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "Q",
+          "name": "productive_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "T",
+          "name": "average_penalties_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "W",
+          "name": "public_holiday_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "Z",
+          "name": "private_practice_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "AC",
+          "name": "retention_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "AF",
+          "name": "sick_leave_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "AI",
+          "name": "professional_development_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "AL",
+          "name": "annual_leave_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "AO",
+          "name": "leave_loading_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "AQ",
+          "name": "indexation_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "AR",
+          "name": "base_case_salary_lower_midpoint_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "AU",
+          "name": "base_case_cost_lower_midpoint_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "AX",
+          "name": "base_case_hourly_lower_midpoint_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "BA",
+          "name": "superannuation_cost_lower_midpoint_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "BD",
+          "name": "superannuation_hourly_lower_midpoint_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "BG",
+          "name": "hours_cost_lower_midpoint_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "BJ",
+          "name": "hours_hourly_lower_midpoint_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "BM",
+          "name": "average_penalties_cost_lower_midpoint_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "BP",
+          "name": "average_penalties_hourly_lower_midpoint_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "BS",
+          "name": "public_holiday_cost_lower_midpoint_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "BV",
+          "name": "public_holiday_hourly_lower_midpoint_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "BY",
+          "name": "private_practice_cost_lower_midpoint_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "CB",
+          "name": "private_practice_hourly_lower_midpoint_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "CE",
+          "name": "retention_cost_lower_midpoint_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "CH",
+          "name": "retention_hourly_lower_midpoint_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "CK",
+          "name": "sick_leave_cost_lower_midpoint_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "CN",
+          "name": "sick_leave_hourly_lower_midpoint_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "CQ",
+          "name": "professional_development_cost_lower_midpoint_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "CT",
+          "name": "professional_development_hourly_lower_midpoint_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "CW",
+          "name": "annual_leave_cost_lower_midpoint_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "CZ",
+          "name": "annual_leave_hourly_lower_midpoint_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "DC",
+          "name": "leave_loading_cost_lower_midpoint_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "DF",
+          "name": "leave_loading_hourly_lower_midpoint_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        }
+      ],
       "header_rows": []
     },
     {
@@ -12992,7 +13905,80 @@
       "area": "A83:AT87",
       "status": "archived_candidate",
       "purpose": "Formatted DSA aggregate component display",
-      "columns": [],
+      "columns": [
+        {
+          "column": "K",
+          "name": "superannuation_annual_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "T",
+          "name": "average_penalties_annual_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "W",
+          "name": "public_holiday_penalty_annual_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "Z",
+          "name": "private_practice_loading_annual_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "AC",
+          "name": "retention_allowance_annual_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "AF",
+          "name": "sick_leave_proxy_annual_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "AI",
+          "name": "professional_development_allowance_annual_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "AL",
+          "name": "annual_leave_proxy_annual_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "AO",
+          "name": "leave_loading_proxy_annual_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "AR",
+          "name": "salary_lower_annual_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "AS",
+          "name": "salary_midpoint_annual_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "AT",
+          "name": "salary_upper_annual_display",
+          "unit": "text",
+          "role": "presentation"
+        }
+      ],
       "header_rows": []
     },
     {
@@ -13411,7 +14397,80 @@
       "area": "A120:AT124",
       "status": "archived_candidate",
       "purpose": "Formatted DSA aggregate component display",
-      "columns": [],
+      "columns": [
+        {
+          "column": "K",
+          "name": "superannuation_share_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "T",
+          "name": "average_penalties_share_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "W",
+          "name": "public_holiday_penalty_share_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "Z",
+          "name": "private_practice_loading_share_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "AC",
+          "name": "retention_allowance_share_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "AF",
+          "name": "sick_leave_proxy_share_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "AI",
+          "name": "professional_development_allowance_share_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "AL",
+          "name": "annual_leave_proxy_share_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "AO",
+          "name": "leave_loading_proxy_share_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "AR",
+          "name": "salary_lower_share_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "AS",
+          "name": "salary_midpoint_share_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "AT",
+          "name": "salary_upper_share_display",
+          "unit": "text",
+          "role": "presentation"
+        }
+      ],
       "header_rows": []
     },
     {
@@ -13420,7 +14479,20 @@
       "area": "A1:B33",
       "status": "archived_candidate",
       "purpose": "DSA archived jurisdiction and personnel identities",
-      "columns": [],
+      "columns": [
+        {
+          "column": "A",
+          "name": "jurisdiction",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
+        }
+      ],
       "header_rows": [
         1,
         2,
@@ -14110,7 +15182,32 @@
       "area": "I1:N301",
       "status": "archived_candidate",
       "purpose": "Numeric and formatted publication sensitivity blocks, ALL and jurisdiction rows",
-      "columns": [],
+      "columns": [
+        {
+          "column": "I",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "J",
+          "name": "sensitivity_variable",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "K",
+          "name": "jurisdiction",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "L",
+          "name": "reported_mean_lower_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        }
+      ],
       "header_rows": [
         1
       ]
@@ -14121,7 +15218,32 @@
       "area": "O1:S301",
       "status": "archived_candidate",
       "purpose": "Numeric and formatted publication sensitivity blocks, ALL and jurisdiction rows",
-      "columns": [],
+      "columns": [
+        {
+          "column": "O",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "P",
+          "name": "sensitivity_variable",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "Q",
+          "name": "jurisdiction",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "R",
+          "name": "archived_mean_lower_upper_display",
+          "unit": null,
+          "role": "presentation"
+        }
+      ],
       "header_rows": [
         1
       ]
@@ -14132,7 +15254,56 @@
       "area": "T1:AG301",
       "status": "archived_candidate",
       "purpose": "Numeric and formatted publication sensitivity blocks, ALL and jurisdiction rows",
-      "columns": [],
+      "columns": [
+        {
+          "column": "T",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "U",
+          "name": "sensitivity_variable",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "V",
+          "name": "nsw_archived_display",
+          "unit": null,
+          "role": "presentation"
+        },
+        {
+          "column": "W",
+          "name": "qld_archived_display",
+          "unit": null,
+          "role": "presentation"
+        },
+        {
+          "column": "X",
+          "name": "sa_archived_display",
+          "unit": null,
+          "role": "presentation"
+        },
+        {
+          "column": "Y",
+          "name": "vic_archived_display",
+          "unit": null,
+          "role": "presentation"
+        },
+        {
+          "column": "Z",
+          "name": "wa_archived_display",
+          "unit": null,
+          "role": "presentation"
+        },
+        {
+          "column": "AA",
+          "name": "all_archived_display",
+          "unit": null,
+          "role": "presentation"
+        }
+      ],
       "header_rows": [
         1
       ]
@@ -14191,7 +15362,50 @@
       "area": "AH33:AN301",
       "status": "archived_candidate",
       "purpose": "Numeric and formatted publication sensitivity blocks, ALL and jurisdiction rows",
-      "columns": [],
+      "columns": [
+        {
+          "column": "AH",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "AI",
+          "name": "jurisdiction",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "AJ",
+          "name": "sensitivity_variable",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "AK",
+          "name": "archived_layout_ak",
+          "unit": null,
+          "role": "unresolved_historical_value"
+        },
+        {
+          "column": "AL",
+          "name": "archived_layout_al",
+          "unit": null,
+          "role": "unresolved_historical_value"
+        },
+        {
+          "column": "AM",
+          "name": "archived_layout_am",
+          "unit": null,
+          "role": "unresolved_historical_value"
+        },
+        {
+          "column": "AN",
+          "name": "archived_layout_an",
+          "unit": null,
+          "role": "unresolved_historical_value"
+        }
+      ],
       "header_rows": [
         1
       ]
@@ -14202,7 +15416,32 @@
       "area": "AO1:AZ32",
       "status": "archived_candidate",
       "purpose": "Numeric and formatted publication sensitivity blocks, ALL and jurisdiction rows",
-      "columns": [],
+      "columns": [
+        {
+          "column": "AP",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "AQ",
+          "name": "jurisdiction",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "AR",
+          "name": "sensitivity_variable",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "AS",
+          "name": "reported_base_salary_bounds_display",
+          "unit": "text",
+          "role": "presentation"
+        }
+      ],
       "header_rows": [
         1
       ]
@@ -14213,7 +15452,44 @@
       "area": "AO33:AZ301",
       "status": "archived_candidate",
       "purpose": "Numeric and formatted publication sensitivity blocks, ALL and jurisdiction rows",
-      "columns": [],
+      "columns": [
+        {
+          "column": "AO",
+          "name": "archived_layout_ao",
+          "unit": null,
+          "role": "context"
+        },
+        {
+          "column": "AP",
+          "name": "archived_layout_ap",
+          "unit": null,
+          "role": "context"
+        },
+        {
+          "column": "AQ",
+          "name": "archived_layout_aq",
+          "unit": null,
+          "role": "context"
+        },
+        {
+          "column": "AR",
+          "name": "archived_layout_ar",
+          "unit": null,
+          "role": "context"
+        },
+        {
+          "column": "AS",
+          "name": "archived_layout_as",
+          "unit": null,
+          "role": "context"
+        },
+        {
+          "column": "AT",
+          "name": "archived_layout_at",
+          "unit": null,
+          "role": "context"
+        }
+      ],
       "header_rows": [
         1
       ]
@@ -14554,7 +15830,32 @@
       "area": "A1:D6",
       "status": "archived_candidate",
       "purpose": "Formatted historical summary display",
-      "columns": [],
+      "columns": [
+        {
+          "column": "A",
+          "name": "jurisdiction",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "C",
+          "name": "reported_total_cost_display",
+          "unit": null,
+          "role": "presentation"
+        },
+        {
+          "column": "D",
+          "name": "reported_labour_cost_display",
+          "unit": null,
+          "role": "presentation"
+        }
+      ],
       "header_rows": []
     },
     {
@@ -14856,8 +16157,33 @@
       "sheet": "Sum Cost Jur",
       "area": "A39:F43",
       "status": "archived_candidate",
-      "purpose": "Formatted jurisdiction summary",
-      "columns": [],
+      "purpose": "Formatted jurisdiction summary linked to same-sheet numeric bounds and midpoint; archived candidate display",
+      "columns": [
+        {
+          "column": "A",
+          "name": "jurisdiction",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "C",
+          "name": "annual_cost_midpoint_lower_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "F",
+          "name": "hourly_cost_midpoint_lower_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        }
+      ],
       "header_rows": []
     },
     {
@@ -14865,8 +16191,33 @@
       "sheet": "Sum Cost Jur",
       "area": "A45:F49",
       "status": "archived_candidate",
-      "purpose": "Formatted jurisdiction summary",
-      "columns": [],
+      "purpose": "Formatted jurisdiction summary linked to same-sheet numeric bounds and midpoint; archived candidate display",
+      "columns": [
+        {
+          "column": "A",
+          "name": "jurisdiction",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "C",
+          "name": "annual_cost_midpoint_lower_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "F",
+          "name": "hourly_cost_midpoint_lower_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        }
+      ],
       "header_rows": []
     },
     {
@@ -14874,8 +16225,33 @@
       "sheet": "Sum Cost Jur",
       "area": "A51:F55",
       "status": "archived_candidate",
-      "purpose": "Formatted jurisdiction summary",
-      "columns": [],
+      "purpose": "Formatted jurisdiction summary linked to same-sheet numeric bounds and midpoint; archived candidate display",
+      "columns": [
+        {
+          "column": "A",
+          "name": "jurisdiction",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "C",
+          "name": "annual_cost_midpoint_lower_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "F",
+          "name": "hourly_cost_midpoint_lower_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        }
+      ],
       "header_rows": []
     },
     {
@@ -14883,8 +16259,33 @@
       "sheet": "Sum Cost Jur",
       "area": "A57:F61",
       "status": "archived_candidate",
-      "purpose": "Formatted jurisdiction summary",
-      "columns": [],
+      "purpose": "Formatted jurisdiction summary linked to same-sheet numeric bounds and midpoint; archived candidate display",
+      "columns": [
+        {
+          "column": "A",
+          "name": "jurisdiction",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "C",
+          "name": "annual_cost_midpoint_lower_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "F",
+          "name": "hourly_cost_midpoint_lower_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        }
+      ],
       "header_rows": []
     },
     {
@@ -14892,8 +16293,33 @@
       "sheet": "Sum Cost Jur",
       "area": "A63:F67",
       "status": "archived_candidate",
-      "purpose": "Formatted jurisdiction summary",
-      "columns": [],
+      "purpose": "Formatted jurisdiction summary linked to same-sheet numeric bounds and midpoint; archived candidate display",
+      "columns": [
+        {
+          "column": "A",
+          "name": "jurisdiction",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "C",
+          "name": "annual_cost_midpoint_lower_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "F",
+          "name": "hourly_cost_midpoint_lower_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        }
+      ],
       "header_rows": []
     },
     {
@@ -14901,8 +16327,15 @@
       "sheet": "Sum Cost Jur",
       "area": "B69:B73",
       "status": "archived_candidate",
-      "purpose": "Label-only placeholder without numeric values",
-      "columns": [],
+      "purpose": "Personnel-type labels only; no cost observations in this block",
+      "columns": [
+        {
+          "column": "B",
+          "name": "personnel_type_placeholder",
+          "unit": null,
+          "role": "identity"
+        }
+      ],
       "header_rows": []
     },
     {
@@ -15001,7 +16434,44 @@
       "area": "A9:F9",
       "status": "archived_candidate",
       "purpose": "Transposed personnel labels",
-      "columns": [],
+      "columns": [
+        {
+          "column": "A",
+          "name": "personnel_label_a",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_label_b",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "C",
+          "name": "personnel_label_c",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "D",
+          "name": "personnel_label_d",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "E",
+          "name": "personnel_label_e",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "F",
+          "name": "personnel_label_f",
+          "unit": null,
+          "role": "identity"
+        }
+      ],
       "header_rows": [
         9
       ]
@@ -15816,7 +17286,14 @@
       "area": "A1:A2",
       "status": "archived_candidate",
       "purpose": "Historical reference scalar, not a validated PSA oracle",
-      "columns": [],
+      "columns": [
+        {
+          "column": "A",
+          "name": "historical_reference_scalar_unit_unresolved",
+          "unit": null,
+          "role": "unresolved_historical_value"
+        }
+      ],
       "header_rows": []
     },
     {
