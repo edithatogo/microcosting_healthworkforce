@@ -137,7 +137,9 @@ def test_publication_comparisons_preserve_formula_derived_roles() -> None:
         for offset in range(6):
             row = 2 + 7 * index + offset
             for column, numerator_index in zip(
-                ("BD", "BE", "BF", "BG"), numerator_indices, strict=True,
+                ("BD", "BE", "BF", "BG"),
+                numerator_indices,
+                strict=True,
             ):
                 cell = cells[f"{column}{row}"]
                 numerator_row = 2 + 7 * numerator_index + offset
