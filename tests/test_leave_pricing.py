@@ -1,0 +1,301 @@
+# Copyright 2026 Dylan. SPDX-License-Identifier: Apache-2.0
+"""Compose leave exposure with exact selected hours and dated source prices."""
+
+from dataclasses import replace
+from datetime import date, timedelta
+from decimal import Decimal, localcontext
+from fractions import Fraction
+from typing import Literal
+
+import pytest
+
+from src.leave_pricing import LeavePriceSelection, price_paid_leave
+from src.paid_leave import PaidLeaveSchedule, build_paid_leave
+from tests.checks import assert_that
+from tests.test_normal_pay import allowance, exposure, prices, selection
+from tests.test_paid_leave import policy, request
+from tests.test_unit_quotes import quote
+lazy from src.leave_pricing import PricedLeave
+lazy from src.unit_quotes import UnitQuoteRelease
+
+START = date(2026, 11, 7)
+MID = START + timedelta(weeks=1)
+END = START + timedelta(weeks=2)
+
+
+def schedule(mode: str = "half") -> PaidLeaveSchedule:
+    """One full-pay-equivalent week over two approved calendar weeks."""
+    return build_paid_leave(
+        policy(full_pay_weeks=1, paid_accrual_limit_weeks=1),
+        request(
+            starts_on=START,
+            approved_ends_on=END,
+            payment_mode=mode,
+            split_on=(MID,),
+            advance_payment_on=START - timedelta(days=1) if mode == "advance" else None,
+        ),
+    )
+
+
+def choices(
+    leave: PaidLeaveSchedule,
+    *,
+    second_quote: str = "salary",
+    mode: Literal["dated_row_start", "explicit_snapshot"] = "dated_row_start",
+) -> tuple[LeavePriceSelection, ...]:
+    """Select exact row exposures and a declared snapshot/dated method."""
+    return tuple(
+        LeavePriceSelection(
+            starts_on=row.starts_on,
+            ends_on=row.ends_on,
+            valuation_method=mode,
+            valuation_basis="Synthetic explicit valuation scenario",
+            pricing=exposure(
+                quantity_id=f"row-{i}",
+                quote_id="salary" if i == 0 else second_quote,
+                week_quantity=row.salary_equivalent_weeks,
+                valued_on=row.starts_on if mode == "dated_row_start" else START,
+            ),
+            allowances=(),
+        )
+        for i, row in enumerate(leave.rows)
+    )
+
+
+def dated_prices() -> UnitQuoteRelease:
+    """Declare an hourly price change without inferring allowance proration."""
+    old = quote(
+        quote_id="salary",
+        component="salary",
+        unit="hour",
+        amount=Decimal(30),
+        ends_on=MID,
+    )
+    new = quote(
+        quote_id="salary-new",
+        component="salary",
+        unit="hour",
+        amount=Decimal(40),
+        starts_on=MID,
+    )
+    return prices().model_copy(update={"quotes": (old, new)})
+
+
+def test_dated_half_pay_retains_exact_cost_and_independent_state() -> None:
+    """Half-week exposures at30/40 cost73500/73, unaffected by Decimal precision."""
+    leave = schedule()
+    with localcontext() as context:
+        context.prec = 3
+        result = price_paid_leave(
+            dated_prices(),
+            selection(),
+            leave,
+            choices(leave, second_quote="salary-new"),
+        )
+    assert_that(result.total == Fraction(73500, 73))
+    assert_that(result.schedule == leave)
+    assert_that(result.schedule.paid_entitlement_debit_weeks is None)
+    assert_that(result.schedule.accrual_exposure_weeks == Fraction(1))
+    assert_that(
+        [r.pricing.pricing.rows[0].quantity.quantity for r in result.rows]
+        == [Fraction(1050, 73)] * 2,
+    )
+
+
+def test_full_half_and_advance_share_constant_price_exposure() -> None:
+    """An advance instruction adds no extra salary; unpaid exposure remains zero."""
+    results: list[PricedLeave] = []
+    for mode in ("full", "half", "advance"):
+        leave = schedule(mode)
+        results.append(price_paid_leave(prices(), selection(), leave, choices(leave)))
+    assert_that([r.total for r in results] == [Fraction(63000, 73)] * 3)
+    assert_that(results[0].schedule.accrual_exposure_weeks is None)
+    assert_that(results[2].schedule.advance_instruction is not None)
+    assert_that(results[0].rows[1].pricing.pricing.total == 0)
+
+
+def test_snapshot_prices_can_explicitly_hold_prices_fixed() -> None:
+    """A declared counterfactual differs from using a price outside its dated row."""
+    leave = schedule()
+    result = price_paid_leave(
+        dated_prices(),
+        selection(),
+        leave,
+        choices(leave, mode="explicit_snapshot"),
+    )
+    assert_that(result.total == Fraction(63000, 73))
+    with pytest.raises(ValueError, match="cover"):
+        price_paid_leave(dated_prices(), selection(), leave, choices(leave))
+
+
+def test_allowances_keep_their_units_and_are_not_scaled_by_half_pay() -> None:
+    """An explicitly supplied half-fortnight costs100.01/2 once on each row."""
+    leave = schedule()
+    selected = choices(leave)
+    selected = tuple(
+        c.model_copy(
+            update={
+                "allowances": (
+                    allowance().model_copy(
+                        update={
+                            "quantity_id": f"allowance-{i}",
+                            "valued_on": c.starts_on,
+                        },
+                    ),
+                ),
+            },
+        )
+        for i, c in enumerate(selected)
+    )
+    result = price_paid_leave(
+        prices(quote(quote_id="development", component="development")),
+        selection(),
+        leave,
+        selected,
+    )
+    assert_that(result.total == Fraction(63000, 73) + Fraction(10001, 100))
+    duplicate = selected[1].model_copy(update={"allowances": selected[0].allowances})
+    with pytest.raises(ValueError, match="quantity identity"):
+        price_paid_leave(prices(), selection(), leave, (selected[0], duplicate))
+
+
+def test_forged_totals_are_rebuilt_before_pricing() -> None:
+    """Dataclass totals and rows never replace original policy/history evidence."""
+    leave = schedule()
+    forged = replace(leave, salary_equivalent_weeks=Fraction(999), rows=())
+    result = price_paid_leave(prices(), selection(), forged, choices(leave))
+    assert_that(result.schedule == leave)
+    assert_that(result.total == Fraction(63000, 73))
+
+
+@pytest.mark.parametrize("case", ["missing", "duplicate", "wrong_weeks", "wrong_date"])
+def test_incomplete_or_mismatched_price_selections_fail(case: str) -> None:
+    """No schedule segment can disappear or be priced with another exposure."""
+    leave = schedule()
+    selected = choices(leave)
+    if case == "missing":
+        selected = selected[:1]
+    elif case == "duplicate":
+        selected = (selected[0], selected[0])
+    elif case == "wrong_weeks":
+        selected = (
+            selected[0].model_copy(
+                update={
+                    "pricing": selected[0].pricing.model_copy(
+                        update={"week_quantity": Fraction(1)},
+                    ),
+                },
+            ),
+            selected[1],
+        )
+    else:
+        selected = (
+            selected[0].model_copy(
+                update={
+                    "pricing": selected[0].pricing.model_copy(
+                        update={"valued_on": MID},
+                    ),
+                },
+            ),
+            selected[1],
+        )
+    with pytest.raises(ValueError, match=r"interval|equivalent|valuation"):
+        price_paid_leave(prices(), selection(), leave, selected)
+
+
+@pytest.mark.parametrize("case", ["scope", "knowledge", "commencement"])
+def test_source_scope_knowledge_and_leave_start_must_match(case: str) -> None:
+    """Individually valid inputs from different contexts cannot be combined."""
+    leave = schedule()
+    if case == "scope":
+        changed = leave.policy.model_copy(update={"classification": "Different"})
+        leave = replace(leave, policy=changed)
+    elif case == "knowledge":
+        leave = replace(
+            leave,
+            policy=leave.policy.model_copy(
+                update={
+                    "as_known_on": date(2026, 11, 8),
+                },
+            ),
+        )
+    else:
+        leave = build_paid_leave(
+            leave.policy,
+            leave.request.model_copy(
+                update={
+                    "starts_on": START + timedelta(days=1),
+                    "split_on": (),
+                },
+            ),
+        )
+    with pytest.raises(ValueError, match=r"scope|commencement"):
+        price_paid_leave(prices(), selection(), leave, choices(leave))
+
+
+def test_dated_price_boundary_requires_an_explicit_schedule_split() -> None:
+    """A snapshot at the first day cannot hide a price change inside a row."""
+    leave = build_paid_leave(
+        schedule().policy.model_copy(update={"paid_accrual_limit_weeks": 2}),
+        schedule().request.model_copy(
+            update={"split_on": ()},
+        ),
+    )
+    assert_that(len(leave.rows) == 1)
+    with pytest.raises(ValueError, match="cover"):
+        price_paid_leave(dated_prices(), selection(), leave, choices(leave))
+
+
+def test_constant_price_segmentation_preserves_total() -> None:
+    """Splitting a half-pay interval changes neither exact hours nor total cost."""
+    split = build_paid_leave(
+        schedule().policy.model_copy(update={"paid_accrual_limit_weeks": 2}),
+        schedule().request,
+    )
+    whole = build_paid_leave(
+        split.policy,
+        split.request.model_copy(
+            update={"split_on": ()},
+        ),
+    )
+    assert_that(
+        [(r.starts_on, r.ends_on) for r in split.rows] == [(START, MID), (MID, END)],
+    )
+    assert_that(len(whole.rows) == 1)
+    left = price_paid_leave(prices(), selection(), split, choices(split))
+    right = price_paid_leave(prices(), selection(), whole, choices(whole))
+    assert_that(left.total == right.total == Fraction(63000, 73))
+
+
+def test_base_inclusions_still_reject_an_added_allowance() -> None:
+    """The bridge preserves the existing normal-pay double-counting guard."""
+    leave = schedule()
+    selected = choices(leave)
+    first = selected[0].model_copy(
+        update={
+            "pricing": selected[0].pricing.model_copy(
+                update={
+                    "base_included_components": ("development",),
+                },
+            ),
+            "allowances": (allowance(),),
+        },
+    )
+    with pytest.raises(ValueError, match="included"):
+        price_paid_leave(
+            prices(quote(quote_id="development", component="development")),
+            selection(),
+            leave,
+            (first, selected[1]),
+        )
+
+
+def test_choice_json_roundtrip_preserves_rational_exposure() -> None:
+    """Strict JSON fractions survive nested request validation without coercion."""
+    leave = schedule()
+    selected = tuple(
+        LeavePriceSelection.model_validate_json(c.model_dump_json())
+        for c in choices(leave)
+    )
+    result = price_paid_leave(prices(), selection(), leave, selected)
+    assert_that(result.total == Fraction(63000, 73))
