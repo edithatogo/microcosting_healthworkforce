@@ -164,7 +164,9 @@ but its report does not claim an estimable sample deviation or percentile interv
 
 The original workbook baseline uses nominal hours (productive-time fraction 1).
 Keep that baseline separate from explicitly labelled productive-hours scenarios.
-The retained PSA inputs are a conditional compatibility scenario: neither their
+The retained PSA inputs are an exploratory conditional compatibility scenario: neither their
 absolute productive-time support nor their independent draws and unweighted
 aggregation constitute an approved uncertainty specification. No clipping or
 replacement priors are implied by software parity.
+The PSA summary labels the results as exploratory; the CSV retains its existing
+numeric columns and does not embed the scenario's scientific qualification.

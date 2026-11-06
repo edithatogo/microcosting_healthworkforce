@@ -88,6 +88,10 @@ def report_psa_results(psa_results_df: pl.DataFrame) -> None:
         logger.info("No PSA results to report.")
         return
 
+    logger.warning(
+        "Exploratory PSA: results are conditional on supplied assumptions and are "
+        "not scientifically validated by this calculation.",
+    )
     mean_cost = numeric(psa_results_df["mean_cost"].mean())
     logger.info("Number of Iterations: %s", len(psa_results_df))
     logger.info("Average Mean Cost: %s", format(mean_cost, ",.2f"))

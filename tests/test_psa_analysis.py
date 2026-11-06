@@ -125,6 +125,8 @@ def test_report_psa_results_summary(caplog: LogCaptureFixture) -> None:
     with caplog.at_level(logging.INFO):
         report_psa_results(psa_results_df)
     assert_that("PSA Results Summary" in caplog.text)
+    assert_that("Exploratory PSA" in caplog.text)
+    assert_that("not scientifically validated" in caplog.text)
     assert_that("Average Mean Cost: 110.00" in caplog.text)
 
 
