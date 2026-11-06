@@ -140,3 +140,22 @@ policy when exact aggregation is required. The cumulative overtime and tiered ov
 totals; their existing Decimal fields retain context-precision behaviour. The
 minimum-engagement and capacity scenario methods also expose exact rational
 totals; the capacity scenario additionally exposes its exact productive-hour rate.
+
+## Exact aggregate presentation
+
+Flat-rate ledger rows retain `exact_hours_numerator` and
+`exact_hours_denominator`, alongside their Decimal hours. Dynamic row hours use
+exact elapsed microseconds and resource quantities; static rows retain the
+supplied exact Decimal quantity as a rational number. Components are aggregated
+from exact hours and source rates before each aggregate amount is projected once
+to Decimal. The total is projected from the exact rational total, rather than
+summing rounded Decimal row amounts.
+
+Splitting an activity therefore preserves aggregate component amounts and the
+reported total within the same Decimal context. Row-level Decimal amounts and
+their sum can differ in final representation digits from a once-projected
+aggregate; the rational quantities and exact total remain the accounting oracle.
+This is numerical projection, not a currency-rounding policy. No industrial
+rounding, cents allocation or payroll payment rule is inferred. Previously
+serialized rows lacking exact hours must be recomputed from their source inputs,
+rather than inventing zero or treating rounded hours as exact originals.

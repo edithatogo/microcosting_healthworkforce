@@ -2,7 +2,7 @@
 """Independent arithmetic and boundary checks for static/dynamic costing."""
 
 from datetime import UTC, datetime, timedelta
-from decimal import Decimal
+from decimal import Decimal, localcontext
 from fractions import Fraction
 
 import pytest
@@ -288,3 +288,56 @@ def test_allocation_identity_requires_one_resource_and_nonblank_id() -> None:
     base.update({"resources": Decimal(1), "allocation_id": " "})
     with pytest.raises(ValueError, match="blank"):
         Activity.model_validate(base)
+
+
+@pytest.mark.parametrize("precision", [6, 28])
+def test_exact_component_aggregation_is_independent_of_segmentation(
+    precision: int,
+) -> None:
+    """One25-minute activity and5+20 minutes have identical projected totals."""
+    start = datetime(2026, 1, 1, 10, tzinfo=UTC)
+    activity = Activity(
+        activity_id="whole",
+        resource_id="staff",
+        allocation_id="worker",
+        starts_at=start,
+        ends_at=start + timedelta(minutes=25),
+        resources=Decimal(1),
+    )
+    with localcontext() as context:
+        context.prec = precision
+        whole = cost_dynamic(release(), (activity,))
+        parts = cost_dynamic(
+            release(),
+            (
+                activity.model_copy(
+                    update={
+                        "activity_id": "first",
+                        "ends_at": start + timedelta(minutes=5),
+                    },
+                ),
+                activity.model_copy(
+                    update={
+                        "activity_id": "second",
+                        "starts_at": start + timedelta(minutes=5),
+                    },
+                ),
+            ),
+        )
+        assert_that(whole.total == parts.total == Decimal(125) / Decimal(6))
+        assert_that(whole.components == parts.components)
+        assert_that(
+            Fraction(whole.exact_total_numerator, whole.exact_total_denominator)
+            == Fraction(parts.exact_total_numerator, parts.exact_total_denominator)
+            == Fraction(125, 6),
+        )
+        assert_that(
+            sum(
+                (
+                    Fraction(row.exact_hours_numerator, row.exact_hours_denominator)
+                    for row in parts.rows
+                ),
+                Fraction(0),
+            )
+            == Fraction(5, 12),
+        )
