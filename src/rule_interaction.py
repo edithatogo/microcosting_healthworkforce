@@ -9,8 +9,17 @@ from zoneinfo import ZoneInfo
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from src.minimum_engagement import MinimumEngagementRule, cost_minimum_engagement
-from src.roster_costing import OvertimeRule, PayPeriod, cost_overtime_period
+from src.minimum_engagement import (
+    MinimumEngagementResult,
+    MinimumEngagementRule,
+    cost_minimum_engagement,
+)
+from src.roster_costing import (
+    OvertimeRule,
+    PayPeriod,
+    RosterCostResult,
+    cost_overtime_period,
+)
 lazy from src.conditions import ConditionRelease
 lazy from src.costing import Activity
 
@@ -20,6 +29,8 @@ class InteractionResult(BaseModel):
 
     model_config = ConfigDict(strict=True, extra="forbid", frozen=True)
     method: Literal["worked_overtime_ordinary_minimum_v1"]
+    minimum_result: MinimumEngagementResult
+    overtime_result: RosterCostResult
     minimum_total: Decimal
     overtime_increment: Decimal
     total: Decimal
@@ -112,6 +123,8 @@ def cost_minimum_with_overtime(
     exact += Fraction(worked.exact_premium_numerator, worked.exact_premium_denominator)
     return InteractionResult(
         method=rules.method,
+        minimum_result=guaranteed,
+        overtime_result=worked,
         minimum_total=guaranteed.total,
         overtime_increment=increment,
         total=guaranteed.total + increment,
