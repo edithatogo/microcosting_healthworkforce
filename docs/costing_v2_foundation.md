@@ -189,3 +189,39 @@ qualified method. Annual and fortnight inputs must not represent the same cost
 twice; no automatic combination with hourly/fixed-annual ledgers is performed.
 The API does not assert a source-specific payroll rule, a full employment cost,
 or empirical PSA validity. No real source rates or private records are bundled.
+
+## Complete historical-hours comparison
+
+`src.historical_hours.select_normal_hours` supplies the quantity-base step for an
+explicitly selected twelve-month/forty-week comparison method. It compares an
+exact historical weekly average with commencement weekly hours and retains both
+comparands, the winner (including a tie), original history rows, rule/source and
+normalization declarations. It does not calculate monetary normal pay.
+
+For at least twelve calendar months of verified continuous service, the method
+uses the preceding calendar anniversary window. For shorter service of at least
+forty weeks, it uses the whole service interval. The anniversary clamp convention
+must be selected explicitly, including its treatment of leap day. This convention
+is an execution choice requiring review; the library does not claim it is mandated
+by every instrument. Service eligibility outside the selected comparison and all
+employee/leave-route conditions remain upstream decisions.
+
+Supply fully allocated `HistoricalHours` rows covering that exact window, including
+explicit zero periods. Missing rows, gaps, overlaps, duplicate identities and rows
+outside the selected window fail; the engine does not clip or distribute a total
+across a boundary. History completeness and continuous-service verification must
+also be asserted. The rule admits only matching held-primary source scope/hash
+and a covered commencement date, with an explicit knowledge date.
+
+The averaging exposure is a mandatory rational number of equivalent weeks with
+its own kind (`reviewed_payroll_exposure` or `analyst_assumption`) and nonblank
+basis. No value of 52, 26 or calendar days divided by seven is inferred. In a
+synthetic calendar-day/7 scenario, 1500 hours over 365/7 weeks yields exactly
+2100/73 hours/week; comparison with 20 selects the historical mean. Choosing a
+payroll exposure instead remains an explicit input requiring source qualification.
+
+This quantity selection does not choose wage rates or continuing allowances,
+interpret service credit, establish variable-part-time/parental eligibility,
+calculate leave accrual/payment, or infer cover/cash savings. The unresolved source
+normalization convention remains visible even when a scenario's arithmetic passes.
+No real employee histories or private instrument extracts are bundled.
