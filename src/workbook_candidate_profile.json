@@ -13588,15 +13588,15 @@
       ]
     },
     {
-      "table_id": "WS10-R01-comparison",
+      "table_id": "WS10-R01-comparison-1",
       "sheet": "Labour - Prices (DSA, Pub)",
-      "area": "BA1:BG301",
+      "area": "BA1:BG7",
       "status": "archived_candidate",
-      "purpose": "Numeric and formatted publication sensitivity blocks, ALL and jurisdiction rows",
+      "purpose": "Historical hourly midpoint ratios with administrative_staff denominator; formula numerator identities, original header text retained",
       "columns": [
         {
           "column": "BA",
-          "name": "personnel",
+          "name": "denominator_personnel_label",
           "unit": null,
           "role": "identity"
         },
@@ -13608,40 +13608,252 @@
         },
         {
           "column": "BC",
-          "name": "hourly_midpoint",
+          "name": "administrative_staff_hourly_midpoint",
           "unit": "AUD/hour",
           "role": "archived_value"
         },
         {
           "column": "BD",
-          "name": "comparison_BD",
+          "name": "bioinformatics_staff_over_administrative_staff",
           "unit": "ratio",
           "role": "formula_ratio"
         },
         {
           "column": "BE",
-          "name": "comparison_BE",
+          "name": "lab_technician_over_administrative_staff",
           "unit": "ratio",
           "role": "formula_ratio"
         },
         {
           "column": "BF",
-          "name": "comparison_BF",
+          "name": "medical_scientist_over_administrative_staff",
           "unit": "ratio",
           "role": "formula_ratio"
         },
         {
           "column": "BG",
-          "name": "comparison_BG",
+          "name": "pathologists_over_administrative_staff",
           "unit": "ratio",
           "role": "formula_ratio"
         }
       ],
       "header_rows": [
-        1,
-        8,
-        15,
-        22,
+        1
+      ]
+    },
+    {
+      "table_id": "WS10-R01-comparison-2",
+      "sheet": "Labour - Prices (DSA, Pub)",
+      "area": "BA8:BG14",
+      "status": "archived_candidate",
+      "purpose": "Historical hourly midpoint ratios with bioinformatics_staff denominator; formula numerator identities, original header text retained",
+      "columns": [
+        {
+          "column": "BA",
+          "name": "denominator_personnel_label",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "BB",
+          "name": "jurisdiction",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "BC",
+          "name": "bioinformatics_staff_hourly_midpoint",
+          "unit": "AUD/hour",
+          "role": "archived_value"
+        },
+        {
+          "column": "BD",
+          "name": "administrative_staff_over_bioinformatics_staff",
+          "unit": "ratio",
+          "role": "formula_ratio"
+        },
+        {
+          "column": "BE",
+          "name": "lab_technician_over_bioinformatics_staff",
+          "unit": "ratio",
+          "role": "formula_ratio"
+        },
+        {
+          "column": "BF",
+          "name": "medical_scientist_over_bioinformatics_staff",
+          "unit": "ratio",
+          "role": "formula_ratio"
+        },
+        {
+          "column": "BG",
+          "name": "pathologists_over_bioinformatics_staff",
+          "unit": "ratio",
+          "role": "formula_ratio"
+        }
+      ],
+      "header_rows": [
+        8
+      ]
+    },
+    {
+      "table_id": "WS10-R01-comparison-3",
+      "sheet": "Labour - Prices (DSA, Pub)",
+      "area": "BA15:BG21",
+      "status": "archived_candidate",
+      "purpose": "Historical hourly midpoint ratios with lab_technician denominator; formula numerator identities, original header text retained",
+      "columns": [
+        {
+          "column": "BA",
+          "name": "denominator_personnel_label",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "BB",
+          "name": "jurisdiction",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "BC",
+          "name": "lab_technician_hourly_midpoint",
+          "unit": "AUD/hour",
+          "role": "archived_value"
+        },
+        {
+          "column": "BD",
+          "name": "administrative_staff_over_lab_technician",
+          "unit": "ratio",
+          "role": "formula_ratio"
+        },
+        {
+          "column": "BE",
+          "name": "bioinformatics_staff_over_lab_technician",
+          "unit": "ratio",
+          "role": "formula_ratio"
+        },
+        {
+          "column": "BF",
+          "name": "medical_scientist_over_lab_technician",
+          "unit": "ratio",
+          "role": "formula_ratio"
+        },
+        {
+          "column": "BG",
+          "name": "pathologists_over_lab_technician",
+          "unit": "ratio",
+          "role": "formula_ratio"
+        }
+      ],
+      "header_rows": [
+        15
+      ]
+    },
+    {
+      "table_id": "WS10-R01-comparison-4",
+      "sheet": "Labour - Prices (DSA, Pub)",
+      "area": "BA22:BG28",
+      "status": "archived_candidate",
+      "purpose": "Historical hourly midpoint ratios with medical_scientist denominator; formula numerator identities, original header text retained",
+      "columns": [
+        {
+          "column": "BA",
+          "name": "denominator_personnel_label",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "BB",
+          "name": "jurisdiction",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "BC",
+          "name": "medical_scientist_hourly_midpoint",
+          "unit": "AUD/hour",
+          "role": "archived_value"
+        },
+        {
+          "column": "BD",
+          "name": "administrative_staff_over_medical_scientist",
+          "unit": "ratio",
+          "role": "formula_ratio"
+        },
+        {
+          "column": "BE",
+          "name": "bioinformatics_staff_over_medical_scientist",
+          "unit": "ratio",
+          "role": "formula_ratio"
+        },
+        {
+          "column": "BF",
+          "name": "lab_technician_over_medical_scientist",
+          "unit": "ratio",
+          "role": "formula_ratio"
+        },
+        {
+          "column": "BG",
+          "name": "pathologists_over_medical_scientist",
+          "unit": "ratio",
+          "role": "formula_ratio"
+        }
+      ],
+      "header_rows": [
+        22
+      ]
+    },
+    {
+      "table_id": "WS10-R01-comparison-5",
+      "sheet": "Labour - Prices (DSA, Pub)",
+      "area": "BA29:BG35",
+      "status": "archived_candidate",
+      "purpose": "Historical hourly midpoint ratios with pathologists denominator; formula numerator identities, original header text retained",
+      "columns": [
+        {
+          "column": "BA",
+          "name": "denominator_personnel_label",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "BB",
+          "name": "jurisdiction",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "BC",
+          "name": "pathologists_hourly_midpoint",
+          "unit": "AUD/hour",
+          "role": "archived_value"
+        },
+        {
+          "column": "BD",
+          "name": "administrative_staff_over_pathologists",
+          "unit": "ratio",
+          "role": "formula_ratio"
+        },
+        {
+          "column": "BE",
+          "name": "bioinformatics_staff_over_pathologists",
+          "unit": "ratio",
+          "role": "formula_ratio"
+        },
+        {
+          "column": "BF",
+          "name": "lab_technician_over_pathologists",
+          "unit": "ratio",
+          "role": "formula_ratio"
+        },
+        {
+          "column": "BG",
+          "name": "medical_scientist_over_pathologists",
+          "unit": "ratio",
+          "role": "formula_ratio"
+        }
+      ],
+      "header_rows": [
         29
       ]
     },

@@ -16,7 +16,7 @@ def test_candidate_profile_reconciles_original_workbook() -> None:
     catalog = read_workbook_catalog(Path("data/Labour Model - v3, 20240328.xlsx"))
     profile = load_candidate_profile()
     extraction = extract_tables(catalog, profile.table_definitions(catalog.sha256))
-    expected_sections = 262
+    expected_sections = 266
     expected_cells = 27929
     assert_that(len(extraction.tables) == expected_sections)
     assert_that(sum(len(table.cells) for table in extraction.tables) == expected_cells)
@@ -113,3 +113,44 @@ def test_primary_component_formulas_and_candidate_meanings() -> None:
                 assert_that(share.column_name == f"{meaning}_share_of_midpoint_cost")
                 if column in ("V", "X"):
                     assert_that(amount.role == share.role == "alternative_salary_bound")
+
+
+def test_publication_comparisons_preserve_formula_derived_roles() -> None:
+    """All 120 ratios retain their actual numerator and denominator lineage."""
+    catalog = read_workbook_catalog(Path("data/Labour Model - v3, 20240328.xlsx"))
+    extraction = extract_tables(
+        catalog,
+        load_candidate_profile().table_definitions(catalog.sha256),
+    )
+    tables = {table.definition.table_id: table for table in extraction.tables}
+    roles = (
+        "administrative_staff",
+        "bioinformatics_staff",
+        "lab_technician",
+        "medical_scientist",
+        "pathologists",
+    )
+    for index, denominator in enumerate(roles):
+        table = tables[f"WS10-R01-comparison-{index + 1}"]
+        cells = {cell.coordinate: cell for cell in table.cells}
+        numerator_indices = [i for i in range(5) if i != index]
+        for offset in range(6):
+            row = 2 + 7 * index + offset
+            for column, numerator_index in zip(
+                ("BD", "BE", "BF", "BG"), numerator_indices, strict=True,
+            ):
+                cell = cells[f"{column}{row}"]
+                numerator_row = 2 + 7 * numerator_index + offset
+                expected_formula = f"=BC{numerator_row}/BC{row}"
+                assert_that(str(cell.source.value).replace("$", "") == expected_formula)
+                assert_that(
+                    cell.column_name == f"{roles[numerator_index]}_over_{denominator}",
+                )
+                assert_that(cell.unit == "ratio" and cell.role == "formula_ratio")
+        for column in ("BD", "BE", "BF", "BG"):
+            header = cells[f"{column}{1 + 7 * index}"]
+            assert_that(header.unit is None and header.role is None)
+    assert_that(tables["WS10-R01-comparison-1"].cells[0].source.value == "BI")
+    third = {cell.coordinate: cell for cell in tables["WS10-R01-comparison-3"].cells}
+    assert_that(third["BE15"].source.value == "BS")
+    assert_that(third["BE16"].column_name == "bioinformatics_staff_over_lab_technician")
