@@ -188,3 +188,45 @@ def test_schedule_composes_with_reviewed_retrospective_rules() -> None:
     )
     with pytest.raises(ValueError, match="scope"):
         cost_scheduled_activity(release, activity, "UTC", unreviewed)
+
+
+@pytest.mark.parametrize(
+    ("start", "end", "elapsed_hours"),
+    [
+        (
+            datetime(2026, 4, 4, 13, tzinfo=UTC),
+            datetime(2026, 4, 5, 14, tzinfo=UTC),
+            25,
+        ),
+        (
+            datetime(2026, 10, 3, 14, tzinfo=UTC),
+            datetime(2026, 10, 4, 13, tzinfo=UTC),
+            23,
+        ),
+    ],
+)
+def test_local_daylight_transition_uses_elapsed_hours(
+    start: datetime,
+    end: datetime,
+    elapsed_hours: int,
+) -> None:
+    """A full Sydney local day costs its actual 23 or 25 elapsed hours."""
+    activity = Activity(
+        activity_id="daylight-transition",
+        resource_id="worker",
+        starts_at=start,
+        ends_at=end,
+        resources=Decimal(1),
+    )
+    constant = DerivedSchedule(
+        series=(
+            RuleSeries(
+                component="allowance",
+                editions=(rule("daylight", "allowance", ("salary",), "0.05"),),
+            ),
+        ),
+    )
+    result = cost_scheduled_activity(baseline(), activity, "Australia/Sydney", constant)
+    assert_that(result.exact_total == Fraction(115, 2) * elapsed_hours)
+    assert_that(len(result.rows) == 1)
+    assert_that(result.rows[0].quantity_hours == Fraction(elapsed_hours))
