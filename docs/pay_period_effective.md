@@ -14,3 +14,14 @@ backpay or cash timing, or generalize one agreement's rule to another. For
 example, the retained ACT administrative, support, technical and ambulance
 editions each contain first-full-period wording in clause C2.2.2; applicability,
 actual payroll boundaries and later variations require independent verification.
+
+For a later source that explicitly authorizes an earlier entitlement interval,
+attach a reviewed `RetrospectiveAuthority` to the rule with the bounded
+entitlement dates, when that authority became known, the run's knowledge cutoff
+and a citation. The source must be verified for the same scope at both the
+known-from and as-known-at dates, and the source hash must match. Earlier trigger
+and selected period-start dates must lie inside the reviewed interval. Without
+that assertion, ordinary source-date checks remain unchanged. The authority is a
+caller-reviewed assertion; the resolver does not determine whether the source
+actually grants retrospective effect. Condition-release retrospective pricing,
+backpay and cash timing remain separate capabilities.
