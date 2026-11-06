@@ -162,6 +162,18 @@ def _exact_segment(
     return hours, premium
 
 
+def _require_single_worker(ordered: list[Activity]) -> None:
+    if (
+        len({a.activity_id for a in ordered}) != len(ordered)
+        or len({a.resource_id for a in ordered}) != 1
+    ):
+        msg = "Activities require unique identities and one resource"
+        raise ValueError(msg)
+    if len({a.allocation_id for a in ordered}) > 1:
+        msg = "One overtime period requires one consistent allocation identity"
+        raise ValueError(msg)
+
+
 def cost_overtime_period(
     release: ConditionRelease,
     period: PayPeriod,
@@ -186,12 +198,7 @@ def cost_overtime_period(
     if not ordered:
         msg = "At least one activity and its complete history are required"
         raise ValueError(msg)
-    if (
-        len({a.activity_id for a in ordered}) != len(ordered)
-        or len({a.resource_id for a in ordered}) != 1
-    ):
-        msg = "Activities require unique identities and one resource"
-        raise ValueError(msg)
+    _require_single_worker(ordered)
     if ordered[0].starts_at.astimezone(UTC) != period.history_through.astimezone(UTC):
         msg = "History must be stated through the first activity start"
         raise ValueError(msg)
