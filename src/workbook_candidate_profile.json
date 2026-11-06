@@ -9384,7 +9384,7 @@
       "sheet": "Medicare Enrolments",
       "area": "A29:B37",
       "status": "archived_candidate",
-      "purpose": "Historical jurisdictional system-change values; unit requires review",
+      "purpose": "Signed eligible-person count change for September 2005; note A28",
       "columns": [
         {
           "column": "A",
@@ -9394,9 +9394,9 @@
         },
         {
           "column": "B",
-          "name": "system_change_quantity_unit_unresolved",
-          "unit": null,
-          "role": "unresolved_historical_value"
+          "name": "eligible_persons_method_change",
+          "unit": "persons",
+          "role": "historical_method_change"
         }
       ],
       "header_rows": [

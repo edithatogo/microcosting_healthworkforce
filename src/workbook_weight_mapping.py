@@ -76,10 +76,15 @@ def weight_table_definitions(workbook_sha256: str) -> tuple[TableDefinition, ...
             sheet,
             "A29:B37",
             "archived_candidate",
-            "Historical system change; quantity meaning requires review",
+            "Signed eligible-person count change for September 2005; note A28",
             (
                 ColumnMeaning("A", "jurisdiction", None, "identity"),
-                ColumnMeaning("B", "change", None, "unresolved_reference"),
+                ColumnMeaning(
+                    "B",
+                    "eligible_persons_method_change",
+                    "persons",
+                    "historical_method_change",
+                ),
             ),
             (29,),
         ),
