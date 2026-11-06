@@ -18,3 +18,13 @@ This method is additive. It does not infer entitlements, rule precedence,
 thresholds, caps, payroll rounding or a rule for an uncovered date. Dynamic
 costing validates each local-day segment; it does not automatically switch to
 another rule edition when a rule stops applying.
+
+## Retrospective derived rules
+
+A derived rule may separately carry reviewed retrospective authority. Its
+knowledge date must match the condition release, and its source hash and scope
+are verified at the authority and knowledge dates. An earlier work date must
+fall inside the rule's own reviewed entitlement interval. The salary's
+retrospective authority does not automatically approve an allowance or on-cost.
+This is a costing scenario and does not determine worker eligibility, legal
+effect, backpay or cash timing.
