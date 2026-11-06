@@ -2,6 +2,7 @@
 """Explicit nondecreasing cumulative overtime tiers for one supplied pay period."""
 
 from decimal import Decimal
+from fractions import Fraction
 from typing import Self
 lazy from datetime import date
 
@@ -72,6 +73,8 @@ class TieredOvertimeResult(BaseModel):
     method_id: str = "cumulative_salary_overtime_tiers_v1"
     base_cost: Decimal
     total: Decimal
+    exact_total_numerator: int
+    exact_total_denominator: int = Field(gt=0)
     tiers: tuple[TierPremium, ...]
 
 
@@ -92,6 +95,8 @@ def cost_tiered_overtime(
     rule = TieredOvertimeRule.model_validate(rule.model_dump())
     tiers: list[TierPremium] = []
     base: Decimal | None = None
+    exact_base: Fraction | None = None
+    exact_premiums = Fraction(0)
     previous = Decimal(1)
     for tier in rule.tiers:
         incremental = tier.multiplier - previous
@@ -114,8 +119,17 @@ def cost_tiered_overtime(
             local_timezone,
         )
         premium = sum((row.overtime_increment for row in result.rows), Decimal(0))
+        exact_premium = Fraction(
+            result.exact_premium_numerator,
+            result.exact_premium_denominator,
+        )
+        exact_premiums += exact_premium
         if base is None:
             base = result.total - premium
+            exact_base = (
+                Fraction(result.exact_total_numerator, result.exact_total_denominator)
+                - exact_premium
+            )
         tiers.append(
             TierPremium(
                 threshold_hours=tier.threshold_hours,
@@ -127,7 +141,7 @@ def cost_tiered_overtime(
             ),
         )
         previous = tier.multiplier
-    if base is None:
+    if base is None or exact_base is None:
         msg = "At least one overtime tier is required"
         raise ValueError(msg)
     return TieredOvertimeResult(
@@ -135,5 +149,7 @@ def cost_tiered_overtime(
         rule_id=rule.rule_id,
         base_cost=base,
         total=base + sum((tier.premium for tier in tiers), Decimal(0)),
+        exact_total_numerator=(exact_base + exact_premiums).numerator,
+        exact_total_denominator=(exact_base + exact_premiums).denominator,
         tiers=tuple(tiers),
     )

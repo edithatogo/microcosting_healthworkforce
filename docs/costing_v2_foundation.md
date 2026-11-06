@@ -136,5 +136,6 @@ the supplied decimal conditions and elapsed microseconds. The existing Decimal
 `total` and component segments remain for compatibility and can differ by small
 context-precision amounts when hours or annual rates do not terminate in base ten.
 Callers should combine the rational totals before applying a declared rounding
-policy when exact aggregation is required. The overtime, minimum-engagement and
-capacity scenario methods do not yet provide rational totals.
+policy when exact aggregation is required. The cumulative overtime and tiered overtime results also provide exact rational
+totals; their existing Decimal fields retain context-precision behaviour. The
+minimum-engagement and capacity scenario methods do not yet provide rational totals.

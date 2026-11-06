@@ -1,8 +1,9 @@
 # Copyright 2026 Dylan. SPDX-License-Identifier: Apache-2.0
 """Synthetic cumulative overtime tiers with explicit evidence and history."""
 
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal
+from fractions import Fraction
 
 import pytest
 
@@ -107,3 +108,54 @@ def test_duplicate_thresholds_and_unreviewed_rule_are_rejected() -> None:
             (activity,),
             "UTC",
         )
+
+
+def test_tiered_exact_total_retains_fractional_hour_segmentation() -> None:
+    """Tiered overtime exact totals do not depend on 20-minute segmentation."""
+    period = PayPeriod(
+        starts_at=datetime(2026, 6, 1, tzinfo=UTC),
+        ends_at=datetime(2026, 6, 8, tzinfo=UTC),
+        prior_hours=Decimal(39),
+        history_through=datetime(2026, 6, 2, 9, tzinfo=UTC),
+        history_complete=True,
+    )
+    current = TieredOvertimeRule(
+        rule_id="tiers",
+        tiers=(
+            OvertimeTier(threshold_hours=Decimal("39.25"), multiplier=Decimal("1.5")),
+            OvertimeTier(threshold_hours=Decimal("39.75"), multiplier=Decimal(2)),
+        ),
+        source_id="synthetic-award-1",
+        source_sha256="a" * 64,
+        citation="synthetic clause",
+        effective_from=date(2026, 1, 1),
+        effective_to=date(2027, 1, 1),
+        reviewed=True,
+    )
+    start = datetime(2026, 6, 2, 9, tzinfo=UTC)
+    whole = Activity(
+        activity_id="all",
+        resource_id="worker",
+        starts_at=start,
+        ends_at=start + timedelta(hours=1),
+        resources=Decimal(1),
+    )
+    parts = tuple(
+        Activity(
+            activity_id=str(i),
+            resource_id="worker",
+            starts_at=start + timedelta(minutes=i),
+            ends_at=start + timedelta(minutes=i + 20),
+            resources=Decimal(1),
+        )
+        for i in (0, 20, 40)
+    )
+    a = cost_tiered_overtime(release(), period, current, (whole,), "UTC")
+    b = cost_tiered_overtime(release(), period, current, parts, "UTC")
+    assert_that(
+        Fraction(a.exact_total_numerator, a.exact_total_denominator) == Fraction(75),
+    )
+    assert_that(
+        Fraction(a.exact_total_numerator, a.exact_total_denominator)
+        == Fraction(b.exact_total_numerator, b.exact_total_denominator),
+    )

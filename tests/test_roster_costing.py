@@ -1,8 +1,9 @@
 # Copyright 2026 Dylan. SPDX-License-Identifier: Apache-2.0
 """Overtime examples use synthetic conditions, history and rule assertions."""
 
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal
+from fractions import Fraction
 
 import pytest
 
@@ -151,3 +152,37 @@ def test_overtime_rule_rejects_missing_source_or_unbounded_activity() -> None:
             ),
             "UTC",
         )
+
+
+def test_overtime_exact_total_is_invariant_for_fractional_hour_splits() -> None:
+    """A one-hour shift and three 20-minute shifts agree exactly across a threshold."""
+    current_rule = rule().model_copy(update={"threshold_hours": Decimal("39.5")})
+    starts = datetime(2026, 6, 2, 9, tzinfo=UTC)
+    end = starts + timedelta(hours=1)
+    whole = Activity(
+        activity_id="whole",
+        resource_id="worker",
+        starts_at=starts,
+        ends_at=end,
+        resources=Decimal(1),
+    )
+    parts = tuple(
+        Activity(
+            activity_id=str(i),
+            resource_id="worker",
+            starts_at=starts + timedelta(minutes=i),
+            ends_at=starts + timedelta(minutes=i + 20),
+            resources=Decimal(1),
+        )
+        for i in (0, 20, 40)
+    )
+    a = cost_overtime_period(release(), period(), current_rule, (whole,), "UTC")
+    b = cost_overtime_period(release(), period(), current_rule, parts, "UTC")
+    expected = Fraction(125, 2)
+    assert_that(
+        Fraction(a.exact_total_numerator, a.exact_total_denominator) == expected,
+    )
+    assert_that(
+        Fraction(a.exact_total_numerator, a.exact_total_denominator)
+        == Fraction(b.exact_total_numerator, b.exact_total_denominator),
+    )
