@@ -12562,7 +12562,218 @@
       "area": "A40:DH44",
       "status": "archived_candidate",
       "purpose": "Formatted DSA aggregate display",
-      "columns": [],
+      "columns": [
+        {
+          "column": "K",
+          "name": "superannuation_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "N",
+          "name": "hours_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "Q",
+          "name": "productive_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "T",
+          "name": "average_penalties_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "W",
+          "name": "public_holiday_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "Z",
+          "name": "private_practice_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "AC",
+          "name": "retention_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "AF",
+          "name": "sick_leave_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "AI",
+          "name": "professional_development_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "AL",
+          "name": "annual_leave_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "AO",
+          "name": "leave_loading_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "AQ",
+          "name": "indexation_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "AR",
+          "name": "base_case_salary_lower_midpoint_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "AU",
+          "name": "base_case_cost_lower_midpoint_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "AX",
+          "name": "base_case_hourly_lower_midpoint_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "BA",
+          "name": "superannuation_cost_lower_midpoint_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "BD",
+          "name": "superannuation_hourly_lower_midpoint_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "BG",
+          "name": "hours_cost_lower_midpoint_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "BJ",
+          "name": "hours_hourly_lower_midpoint_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "BM",
+          "name": "average_penalties_cost_lower_midpoint_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "BP",
+          "name": "average_penalties_hourly_lower_midpoint_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "BS",
+          "name": "public_holiday_cost_lower_midpoint_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "BV",
+          "name": "public_holiday_hourly_lower_midpoint_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "BY",
+          "name": "private_practice_cost_lower_midpoint_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "CB",
+          "name": "private_practice_hourly_lower_midpoint_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "CE",
+          "name": "retention_cost_lower_midpoint_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "CH",
+          "name": "retention_hourly_lower_midpoint_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "CK",
+          "name": "sick_leave_cost_lower_midpoint_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "CN",
+          "name": "sick_leave_hourly_lower_midpoint_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "CQ",
+          "name": "professional_development_cost_lower_midpoint_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "CT",
+          "name": "professional_development_hourly_lower_midpoint_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "CW",
+          "name": "annual_leave_cost_lower_midpoint_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "CZ",
+          "name": "annual_leave_hourly_lower_midpoint_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "DC",
+          "name": "leave_loading_cost_lower_midpoint_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "DF",
+          "name": "leave_loading_hourly_lower_midpoint_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        }
+      ],
       "header_rows": []
     },
     {

@@ -42,3 +42,9 @@ Their mean and observed bounds use the DSA input columns, first-jurisdiction
 salary AS, annual-cost denominator AV for shares, and annual-leave scaling by
 52. The archived component proxy arithmetic remains distinct from an accepted
 leave, loading or payroll rule.
+
+The DSA aggregate input/output presentation in rows 40:44 has 35 display
+columns: 12 format input means with observed jurisdiction minima/maxima, and
+23 format salary or scenario-bound triples. Their references are retained
+explicitly. The two bound conventions remain separate; neither is promoted to
+an independently validated statistical interval.

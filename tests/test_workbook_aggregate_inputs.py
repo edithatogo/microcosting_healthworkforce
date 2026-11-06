@@ -151,3 +151,37 @@ def test_dsa_component_displays_preserve_archived_bases() -> None:
                 if col == "AL":
                     assert_that("/52" in value)
                 assert_that(cell.unit == "text" and cell.role == "presentation")
+
+
+def test_dsa_aggregate_displays_trace_inputs_and_scenario_bounds() -> None:
+    """Presentation strings keep mean/range and scenario-bound bases distinct."""
+    catalog = read_workbook_catalog(Path("data/Labour Model - v3, 20240328.xlsx"))
+    extraction = extract_tables(
+        catalog,
+        load_candidate_profile().table_definitions(catalog.sha256),
+    )
+    table = next(
+        t for t in extraction.tables if t.definition.table_id == "WS06-R06-formatted"
+    )
+    cells = {c.coordinate: c for c in table.cells}
+    for row in range(40, 45):
+        source = row - 6
+        for col in ("K", "N", "Q", "T", "W", "Z", "AC", "AF", "AI", "AL", "AO", "AQ"):
+            style = "$0.0" if col == "AI" else "0.0" if col in ("N", "AL") else "0.0%"
+            refs = ",".join(f"{col}{r + row - 40}" for r in (28, 22, 16, 10, 4))
+            expected = (
+                f'=TEXT({col}{source}, "{style}") & " (" & '
+                f'TEXT(MIN({refs}), "{style}") & " - " & '
+                f'TEXT(MAX({refs}), "{style}") & ")"'
+            )
+            assert_that(cells[f"{col}{row}"].source.value == expected)
+        for n in range(44, 111, 3):
+            lower, mid, upper = (get_column_letter(n + offset) for offset in range(3))
+            cell = cells[f"{lower}{row}"]
+            expected = (
+                f'="AUD " & TEXT({mid}{source}, "0,0") & " (" & '
+                f'TEXT({lower}{source}, "0,0") & " - " & '
+                f'TEXT({upper}{source}, "0,0") & ")"'
+            )
+            assert_that(cell.source.value == expected)
+            assert_that(cell.unit == "text" and cell.role == "presentation")
