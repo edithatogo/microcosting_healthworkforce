@@ -111,3 +111,41 @@ def test_threshold_and_interaction_source_validation() -> None:
             activity,
             "UTC",
         )
+
+
+def test_composed_minimum_respects_exclusive_midnight_boundary() -> None:
+    """Ending at midnight stays covered; one microsecond later spans days."""
+    start = datetime(2026, 6, 2, 23, 30, tzinfo=UTC)
+    midnight = datetime(2026, 6, 3, tzinfo=UTC)
+    activity = Activity(
+        activity_id="boundary",
+        resource_id="worker",
+        starts_at=start,
+        ends_at=midnight,
+        resources=Decimal(1),
+    )
+    rules = InteractionRules(
+        method="worked_overtime_ordinary_minimum_v1",
+        minimum=minimum_rule(),
+        overtime=overtime_rule(),
+        rule_id="boundary-interaction",
+        source_id="synthetic-award-1",
+        source_sha256="a" * 64,
+        citation="synthetic boundary qualification",
+        effective_from=date(2026, 6, 2),
+        effective_to=date(2026, 6, 3),
+        reviewed=True,
+    )
+    history = period().model_copy(update={"history_through": start})
+    result = cost_minimum_with_overtime(release(), history, rules, activity, "UTC")
+    assert_that(result.total == Decimal(150))
+    with pytest.raises(ValueError, match="cannot span local calendar dates"):
+        cost_minimum_with_overtime(
+            release(),
+            history,
+            rules,
+            activity.model_copy(
+                update={"ends_at": midnight + timedelta(microseconds=1)},
+            ),
+            "UTC",
+        )
