@@ -1,0 +1,16 @@
+{
+  "track_id": "workforce-conditions-costing-v2_20261106",
+  "type": "feature",
+  "status": "in_progress",
+  "created_at": "2026-11-06T09:15:04.236478+10:00",
+  "updated_at": "2026-11-06T09:15:04.236478+10:00",
+  "spec_approved": true,
+  "plan_approved": true,
+  "implementation_authorized": true,
+  "registered": true,
+  "dependency": "Accepted parameters depend on verified batches from workforce-source-coverage_20261106; schemas/intake can start independently",
+  "owner_chat": "local-only",
+  "private_context_only": true,
+  "source_base": "11df8b34ca37cf516256943df3fb0f04faa6caf8",
+  "implementation_started": true
+}
