@@ -22,7 +22,7 @@ from src.formula_engine import apply_formulas, load_formulas
 from src.libreoffice import recalculate
 from src.numeric import numeric, row_filter
 from src.projection import project_costs
-from src.psa_analysis import run_psa_analysis
+from src.psa_analysis import report_psa_results, run_psa_analysis
 from src.psa_simulation import SimulationSpec
 from src.rate_converter import convert_annual_cost_to_rates
 from src.scenario_oracle import compare_scenarios
@@ -233,6 +233,7 @@ class WorkforceRun:
             seed=spec.seed,
         )
         psa = PSA_SCHEMA.validate(simulations)
+        report_psa_results(psa)
         psa.write_csv(self.dest / "psa_results.csv")
         plot_psa(psa, self.dest)
 

@@ -89,7 +89,15 @@ def run_dsa_analysis(
                 .alias(column_to_vary),
             )
 
-        scenario_results = calculation_pipeline(scenario_df, formulas_data)
+        derived = [
+            output["name"] + "_Y0"
+            for output in formulas_data.get("outputs", [])
+            if "name" in output
+        ]
+        scenario_results = calculation_pipeline(
+            scenario_df.drop(derived, strict=False),
+            formulas_data,
+        )
         dsa_results[scenario_name] = scenario_results
 
     return dsa_results

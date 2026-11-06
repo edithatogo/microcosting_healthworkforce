@@ -25,6 +25,28 @@ def test_validate_dsa_results_failure() -> None:
     assert_that(not validate_dsa_results(dsa_results, validation_df, scenario_map))
 
 
+@pytest.mark.parametrize("value", [None, float("nan"), float("inf"), float("-inf")])
+def test_dsa_validation_rejects_nonfinite_evidence(value: float | None) -> None:
+    """Missing and nonfinite values on both sides are not matching evidence."""
+    result = pl.DataFrame(
+        {"Calculated_Cost_Mid_Y0": [value]},
+        schema={"Calculated_Cost_Mid_Y0": pl.Float64},
+    )
+    reference = pl.DataFrame({"expected": [value]}, schema={"expected": pl.Float64})
+    assert_that(
+        not validate_dsa_results({"case": result}, reference, {"case": "expected"}),
+    )
+
+
+def test_dsa_validation_rejects_empty_comparisons() -> None:
+    """Two empty columns do not constitute a successful comparison."""
+    result = pl.DataFrame(schema={"Calculated_Cost_Mid_Y0": pl.Float64})
+    reference = pl.DataFrame(schema={"expected": pl.Float64})
+    assert_that(
+        not validate_dsa_results({"case": result}, reference, {"case": "expected"}),
+    )
+
+
 def test_validate_psa_results_success() -> None:
     """Accept PSA results that agree with their reference."""
     psa_results = pl.DataFrame({"mean_cost": [100, 110, 120]})
