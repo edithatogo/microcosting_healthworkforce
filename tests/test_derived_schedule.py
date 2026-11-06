@@ -230,3 +230,38 @@ def test_local_daylight_transition_uses_elapsed_hours(
     assert_that(result.exact_total == Fraction(115, 2) * elapsed_hours)
     assert_that(len(result.rows) == 1)
     assert_that(result.rows[0].quantity_hours == Fraction(elapsed_hours))
+
+
+def test_explicit_allowance_exclusion_from_superannuation_base() -> None:
+    """An allowance is not superable unless an incremental rule is supplied."""
+    allowance = RuleSeries(
+        component="allowance",
+        editions=(rule("training", "allowance", ("salary",), "0.05"),),
+    )
+    incremental_super = RuleSeries(
+        component="allowance_super",
+        editions=(rule("training-super", "allowance_super", ("allowance",), "0.1"),),
+    )
+    start = datetime(2026, 6, 2, 9, tzinfo=UTC)
+    activity = Activity(
+        activity_id="training-exclusion",
+        resource_id="worker",
+        starts_at=start,
+        ends_at=start + timedelta(hours=2),
+        resources=Decimal(1),
+    )
+    excluded = cost_scheduled_activity(
+        baseline(),
+        activity,
+        "UTC",
+        DerivedSchedule(series=(allowance,)),
+    )
+    included = cost_scheduled_activity(
+        baseline(),
+        activity,
+        "UTC",
+        DerivedSchedule(series=(allowance, incremental_super)),
+    )
+    assert_that(excluded.exact_total == Fraction(115))
+    assert_that([r.rule.component for r in excluded.rows] == ["allowance"])
+    assert_that(included.exact_total - excluded.exact_total == Fraction(1, 2))
