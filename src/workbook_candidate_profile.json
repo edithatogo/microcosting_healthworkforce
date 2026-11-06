@@ -16723,7 +16723,7 @@
       "sheet": "Labour - Prices (DSA, Pub)",
       "area": "AH33:AN301",
       "status": "archived_candidate",
-      "purpose": "Numeric and formatted publication sensitivity blocks, ALL and jurisdiction rows",
+      "purpose": "Archived display strings, companion identity labels and an unpopulated column; numeric bounds remain separate",
       "columns": [
         {
           "column": "AH",
@@ -16745,27 +16745,27 @@
         },
         {
           "column": "AK",
-          "name": "archived_layout_ak",
+          "name": "flattened_hourly_bounds_display",
           "unit": null,
-          "role": "unresolved_historical_value"
+          "role": "presentation"
         },
         {
           "column": "AL",
-          "name": "archived_layout_al",
+          "name": "unpopulated_layout_column",
           "unit": null,
-          "role": "unresolved_historical_value"
+          "role": "unpopulated_layout"
         },
         {
           "column": "AM",
-          "name": "archived_layout_am",
+          "name": "wide_display_personnel_type",
           "unit": null,
-          "role": "unresolved_historical_value"
+          "role": "identity"
         },
         {
           "column": "AN",
-          "name": "archived_layout_an",
+          "name": "wide_display_sensitivity_variable",
           "unit": null,
-          "role": "unresolved_historical_value"
+          "role": "identity"
         }
       ],
       "header_rows": [
@@ -18788,7 +18788,9 @@
           "role": "unresolved_historical_value"
         }
       ],
-      "header_rows": []
+      "header_rows": [
+        1
+      ]
     },
     {
       "table_id": "component_dollars",
