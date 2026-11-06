@@ -35,14 +35,14 @@ def release_sha256(release: ConditionRelease) -> str:
     legacy = release.as_known_at is None and all(
         item.retrospective is None for item in release.conditions
     )
-    payload = (
-        release.model_dump(
-            mode="json",
-            exclude={"as_known_at": True, "conditions": {"__all__": {"retrospective"}}},
-        )
-        if legacy
-        else release.model_dump(mode="json")
-    )
+    payload = release.model_dump(mode="json")
+    if legacy:
+        payload.pop("as_known_at")
+    for item in payload["conditions"]:
+        if legacy:
+            item.pop("retrospective")
+        if not any(condition.included_components for condition in release.conditions):
+            item.pop("included_components")
     encoded = json.dumps(
         payload,
         sort_keys=True,
