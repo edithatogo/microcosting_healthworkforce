@@ -129,6 +129,7 @@ class Activity(FrozenModel):
     starts_at: datetime
     ends_at: datetime
     resources: Decimal = Field(ge=0, allow_inf_nan=False)
+    allocation_id: str | None = None
 
     @model_validator(mode="after")
     def valid_interval(self) -> Self:
@@ -139,6 +140,13 @@ class Activity(FrozenModel):
         if self.ends_at.astimezone(UTC) <= self.starts_at.astimezone(UTC):
             msg = "Activity interval must be nonempty"
             raise ValueError(msg)
+        if self.allocation_id is not None:
+            if not self.allocation_id.strip():
+                msg = "Allocation identity cannot be blank"
+                raise ValueError(msg)
+            if self.resources > 1:
+                msg = "An individual allocation permits at most one resource"
+                raise ValueError(msg)
         return self
 
 
@@ -147,6 +155,7 @@ class CostRow(FrozenModel):
 
     activity_id: str
     resource_id: str
+    allocation_id: str | None = None
     rate_id: str
     starts_at: datetime
     ends_at: datetime | None
@@ -195,14 +204,15 @@ def _rate(release: CostRelease, resource: str, at: datetime) -> RatePeriod:
 
 def _row(
     rate: RatePeriod,
-    activity: str,
+    activity: tuple[str, str | None],
     start: datetime,
     end: datetime | None,
     hours: Decimal,
 ) -> CostRow:
     return CostRow(
-        activity_id=activity,
+        activity_id=activity[0],
         resource_id=rate.resource_id,
+        allocation_id=activity[1],
         rate_id=rate.rate_id,
         starts_at=start,
         ends_at=end,
@@ -250,7 +260,7 @@ def cost_static(
     exact = Fraction(0)
     for resource in resources:
         rate = _rate(release, resource.resource_id, at)
-        rows.append(_row(rate, "snapshot", at, None, resource.hours))
+        rows.append(_row(rate, ("snapshot", None), at, None, resource.hours))
         exact += Fraction(resource.hours) * sum(
             (Fraction(value) for value in rate.components.values()),
             Fraction(0),
@@ -259,12 +269,29 @@ def cost_static(
 
 
 def cost_dynamic(release: CostRelease, activities: tuple[Activity, ...]) -> CostResult:
-    """Cost elapsed activities, splitting at rate changes and rejecting gaps."""
+    """Cost elapsed activities, rejecting overlaps for explicit allocation IDs.
+
+    A resource ID is a shared rate category. A supplied allocation ID identifies
+    one worker and must cover all their activities for overlap detection to be
+    complete. Without it, parallel resource quantities remain caller-supplied.
+    """
     release = _validated(release)
     activities = tuple(Activity.model_validate(a.model_dump()) for a in activities)
     if len({a.activity_id for a in activities}) != len(activities):
         msg = "Duplicate activity identity"
         raise ValueError(msg)
+    allocations: dict[str, datetime] = {}
+    for activity in sorted(activities, key=lambda a: a.starts_at.astimezone(UTC)):
+        if activity.allocation_id is None:
+            continue
+        start = activity.starts_at.astimezone(UTC)
+        if (
+            activity.allocation_id in allocations
+            and start < allocations[activity.allocation_id]
+        ):
+            msg = "Activities overlap for an explicit allocation identity"
+            raise ValueError(msg)
+        allocations[activity.allocation_id] = activity.ends_at.astimezone(UTC)
     rows: list[CostRow] = []
     exact = Fraction(0)
     for activity in activities:
@@ -290,6 +317,14 @@ def cost_dynamic(release: CostRelease, activities: tuple[Activity, ...]) -> Cost
                     Fraction(0),
                 )
             )
-            rows.append(_row(rate, activity.activity_id, cursor, stop, hours))
+            rows.append(
+                _row(
+                    rate,
+                    (activity.activity_id, activity.allocation_id),
+                    cursor,
+                    stop,
+                    hours,
+                ),
+            )
             cursor = stop
     return _result(release, rows, exact)

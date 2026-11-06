@@ -186,3 +186,38 @@ def test_overtime_exact_total_is_invariant_for_fractional_hour_splits() -> None:
         Fraction(a.exact_total_numerator, a.exact_total_denominator)
         == Fraction(b.exact_total_numerator, b.exact_total_denominator),
     )
+
+
+def test_overtime_rejects_multiple_or_incomplete_allocation_identities() -> None:
+    """One pay period cannot combine separate or unidentified workers."""
+    first = Activity(
+        activity_id="first",
+        resource_id="worker",
+        allocation_id="person-1",
+        starts_at=datetime(2026, 6, 2, 9, tzinfo=UTC),
+        ends_at=datetime(2026, 6, 2, 10, tzinfo=UTC),
+        resources=Decimal(1),
+    )
+    later = first.model_copy(
+        update={
+            "activity_id": "later",
+            "starts_at": first.ends_at,
+            "ends_at": datetime(2026, 6, 2, 11, tzinfo=UTC),
+            "allocation_id": "person-2",
+        },
+    )
+    with pytest.raises(ValueError, match="allocation"):
+        cost_overtime_period(release(), period(), rule(), (first, later), "UTC")
+    with pytest.raises(ValueError, match="allocation"):
+        cost_overtime_period(
+            release(),
+            period(),
+            rule(),
+            (first, later.model_copy(update={"allocation_id": None})),
+            "UTC",
+        )
+    same = later.model_copy(update={"allocation_id": "person-1"})
+    assert_that(
+        cost_overtime_period(release(), period(), rule(), (first, same), "UTC").total
+        == Decimal(125),
+    )
