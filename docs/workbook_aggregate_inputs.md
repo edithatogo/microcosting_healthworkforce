@@ -18,3 +18,10 @@ are labelled presentation text, while jurisdiction and personnel type retain
 identity roles. The B69:B73 block contains personnel labels only and does not
 supply cost observations. The mapping traces formulas without reinterpreting
 archived lower and upper values as independently validated intervals.
+
+The literal Sum Cost summary retains its reported strings and original header
+wording; its values are not parsed into new unit prices. Medicare note regions
+are contextual records. The historical system-change quantity and PSA reference
+scalar explicitly retain unknown units and unresolved status. The transposed
+personnel-header block carries identities only. None of these dispositions
+promotes contextual notes, labels or an archived scalar to an accepted parameter.

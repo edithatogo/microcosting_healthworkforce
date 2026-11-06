@@ -7988,7 +7988,14 @@
       "area": "A1:A3",
       "status": "archived_candidate",
       "purpose": "Medicare enrolment source and contextual notes",
-      "columns": [],
+      "columns": [
+        {
+          "column": "A",
+          "name": "historical_note",
+          "unit": null,
+          "role": "context"
+        }
+      ],
       "header_rows": []
     },
     {
@@ -8255,7 +8262,14 @@
       "area": "A23:A28",
       "status": "archived_candidate",
       "purpose": "Historical Medicare method and caveats",
-      "columns": [],
+      "columns": [
+        {
+          "column": "A",
+          "name": "historical_note",
+          "unit": null,
+          "role": "context"
+        }
+      ],
       "header_rows": []
     },
     {
@@ -8264,7 +8278,20 @@
       "area": "A29:B37",
       "status": "archived_candidate",
       "purpose": "Historical jurisdictional system-change values; unit requires review",
-      "columns": [],
+      "columns": [
+        {
+          "column": "A",
+          "name": "historical_jurisdiction_label",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "system_change_quantity_unit_unresolved",
+          "unit": null,
+          "role": "unresolved_historical_value"
+        }
+      ],
       "header_rows": [
         29
       ]
@@ -8275,7 +8302,14 @@
       "area": "A38:A41",
       "status": "archived_candidate",
       "purpose": "Historical source and disclaimer notes",
-      "columns": [],
+      "columns": [
+        {
+          "column": "A",
+          "name": "historical_note",
+          "unit": null,
+          "role": "context"
+        }
+      ],
       "header_rows": []
     },
     {
@@ -14361,7 +14395,32 @@
       "area": "A1:D6",
       "status": "archived_candidate",
       "purpose": "Formatted historical summary display",
-      "columns": [],
+      "columns": [
+        {
+          "column": "A",
+          "name": "jurisdiction",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "C",
+          "name": "reported_total_cost_display",
+          "unit": null,
+          "role": "presentation"
+        },
+        {
+          "column": "D",
+          "name": "reported_labour_cost_display",
+          "unit": null,
+          "role": "presentation"
+        }
+      ],
       "header_rows": []
     },
     {
@@ -14940,7 +14999,44 @@
       "area": "A9:F9",
       "status": "archived_candidate",
       "purpose": "Transposed personnel labels",
-      "columns": [],
+      "columns": [
+        {
+          "column": "A",
+          "name": "personnel_label_a",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_label_b",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "C",
+          "name": "personnel_label_c",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "D",
+          "name": "personnel_label_d",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "E",
+          "name": "personnel_label_e",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "F",
+          "name": "personnel_label_f",
+          "unit": null,
+          "role": "identity"
+        }
+      ],
       "header_rows": [
         9
       ]
@@ -15755,7 +15851,14 @@
       "area": "A1:A2",
       "status": "archived_candidate",
       "purpose": "Historical reference scalar, not a validated PSA oracle",
-      "columns": [],
+      "columns": [
+        {
+          "column": "A",
+          "name": "historical_reference_scalar_unit_unresolved",
+          "unit": null,
+          "role": "unresolved_historical_value"
+        }
+      ],
       "header_rows": []
     },
     {
