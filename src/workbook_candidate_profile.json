@@ -2166,8 +2166,81 @@
       "sheet": "Labour - Prices",
       "area": "A34:U38",
       "status": "archived_candidate",
-      "purpose": "Legacy unweighted aggregate inputs",
-      "columns": [],
+      "purpose": "Historical unweighted five-jurisdiction mean inputs; formula basis is AVERAGE even on the WM sheet",
+      "columns": [
+        {
+          "column": "J",
+          "name": "superannuation_unweighted_mean",
+          "unit": "fraction",
+          "role": "archived_aggregate_input"
+        },
+        {
+          "column": "K",
+          "name": "hours_per_week_unweighted_mean",
+          "unit": "hours/week",
+          "role": "archived_aggregate_input"
+        },
+        {
+          "column": "L",
+          "name": "productive_time_unweighted_mean",
+          "unit": "fraction",
+          "role": "archived_aggregate_input"
+        },
+        {
+          "column": "M",
+          "name": "average_penalties_unweighted_mean",
+          "unit": "fraction",
+          "role": "archived_aggregate_input"
+        },
+        {
+          "column": "N",
+          "name": "public_holiday_penalty_unweighted_mean",
+          "unit": "fraction",
+          "role": "archived_aggregate_input"
+        },
+        {
+          "column": "O",
+          "name": "private_practice_loading_unweighted_mean",
+          "unit": "fraction",
+          "role": "archived_aggregate_input"
+        },
+        {
+          "column": "P",
+          "name": "retention_allowance_unweighted_mean",
+          "unit": "fraction",
+          "role": "archived_aggregate_input"
+        },
+        {
+          "column": "Q",
+          "name": "sick_leave_unweighted_mean",
+          "unit": "fraction",
+          "role": "archived_aggregate_input"
+        },
+        {
+          "column": "R",
+          "name": "professional_development_allowance_unweighted_mean",
+          "unit": "AUD/year_assumed",
+          "role": "archived_aggregate_input"
+        },
+        {
+          "column": "S",
+          "name": "annual_leave_unweighted_mean",
+          "unit": "weeks/year_assumed",
+          "role": "archived_aggregate_input"
+        },
+        {
+          "column": "T",
+          "name": "leave_loading_unweighted_mean",
+          "unit": "fraction",
+          "role": "archived_aggregate_input"
+        },
+        {
+          "column": "U",
+          "name": "indexation_unweighted_mean",
+          "unit": "fraction/year",
+          "role": "archived_aggregate_input"
+        }
+      ],
       "header_rows": []
     },
     {
@@ -2495,8 +2568,81 @@
       "sheet": "Labour - Prices",
       "area": "A40:U44",
       "status": "archived_candidate",
-      "purpose": "Legacy formatted aggregate input display",
-      "columns": [],
+      "purpose": "Formatted mean and observed minimum/maximum input display; no statistical interval inference",
+      "columns": [
+        {
+          "column": "J",
+          "name": "superannuation_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "K",
+          "name": "hours_per_week_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "L",
+          "name": "productive_time_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "M",
+          "name": "average_penalties_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "N",
+          "name": "public_holiday_penalty_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "O",
+          "name": "private_practice_loading_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "P",
+          "name": "retention_allowance_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "Q",
+          "name": "sick_leave_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "R",
+          "name": "professional_development_allowance_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "S",
+          "name": "annual_leave_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "T",
+          "name": "leave_loading_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "U",
+          "name": "indexation_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        }
+      ],
       "header_rows": []
     },
     {
@@ -5892,8 +6038,81 @@
       "sheet": "Labour - Prices (WM)",
       "area": "A34:U38",
       "status": "archived_candidate",
-      "purpose": "Legacy unweighted aggregate inputs",
-      "columns": [],
+      "purpose": "Historical unweighted five-jurisdiction mean inputs; formula basis is AVERAGE even on the WM sheet",
+      "columns": [
+        {
+          "column": "J",
+          "name": "superannuation_unweighted_mean",
+          "unit": "fraction",
+          "role": "archived_aggregate_input"
+        },
+        {
+          "column": "K",
+          "name": "hours_per_week_unweighted_mean",
+          "unit": "hours/week",
+          "role": "archived_aggregate_input"
+        },
+        {
+          "column": "L",
+          "name": "productive_time_unweighted_mean",
+          "unit": "fraction",
+          "role": "archived_aggregate_input"
+        },
+        {
+          "column": "M",
+          "name": "average_penalties_unweighted_mean",
+          "unit": "fraction",
+          "role": "archived_aggregate_input"
+        },
+        {
+          "column": "N",
+          "name": "public_holiday_penalty_unweighted_mean",
+          "unit": "fraction",
+          "role": "archived_aggregate_input"
+        },
+        {
+          "column": "O",
+          "name": "private_practice_loading_unweighted_mean",
+          "unit": "fraction",
+          "role": "archived_aggregate_input"
+        },
+        {
+          "column": "P",
+          "name": "retention_allowance_unweighted_mean",
+          "unit": "fraction",
+          "role": "archived_aggregate_input"
+        },
+        {
+          "column": "Q",
+          "name": "sick_leave_unweighted_mean",
+          "unit": "fraction",
+          "role": "archived_aggregate_input"
+        },
+        {
+          "column": "R",
+          "name": "professional_development_allowance_unweighted_mean",
+          "unit": "AUD/year_assumed",
+          "role": "archived_aggregate_input"
+        },
+        {
+          "column": "S",
+          "name": "annual_leave_unweighted_mean",
+          "unit": "weeks/year_assumed",
+          "role": "archived_aggregate_input"
+        },
+        {
+          "column": "T",
+          "name": "leave_loading_unweighted_mean",
+          "unit": "fraction",
+          "role": "archived_aggregate_input"
+        },
+        {
+          "column": "U",
+          "name": "indexation_unweighted_mean",
+          "unit": "fraction/year",
+          "role": "archived_aggregate_input"
+        }
+      ],
       "header_rows": []
     },
     {
@@ -6221,8 +6440,81 @@
       "sheet": "Labour - Prices (WM)",
       "area": "A40:U44",
       "status": "archived_candidate",
-      "purpose": "Legacy formatted aggregate input display",
-      "columns": [],
+      "purpose": "Formatted mean and observed minimum/maximum input display; no statistical interval inference",
+      "columns": [
+        {
+          "column": "J",
+          "name": "superannuation_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "K",
+          "name": "hours_per_week_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "L",
+          "name": "productive_time_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "M",
+          "name": "average_penalties_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "N",
+          "name": "public_holiday_penalty_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "O",
+          "name": "private_practice_loading_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "P",
+          "name": "retention_allowance_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "Q",
+          "name": "sick_leave_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "R",
+          "name": "professional_development_allowance_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "S",
+          "name": "annual_leave_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "T",
+          "name": "leave_loading_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "U",
+          "name": "indexation_mean_min_max_display",
+          "unit": "text",
+          "role": "presentation"
+        }
+      ],
       "header_rows": []
     },
     {
