@@ -185,3 +185,32 @@ def test_dsa_aggregate_displays_trace_inputs_and_scenario_bounds() -> None:
             )
             assert_that(cell.source.value == expected)
             assert_that(cell.unit == "text" and cell.role == "presentation")
+
+
+def test_publication_formula_displays_preserve_source_links() -> None:
+    """Publication formula strings preserve their original bounds and identities."""
+    catalog = read_workbook_catalog(Path("data/Labour Model - v3, 20240328.xlsx"))
+    extraction = extract_tables(
+        catalog,
+        load_candidate_profile().table_definitions(catalog.sha256),
+    )
+    tables = {t.definition.table_id: t for t in extraction.tables}
+    cells = {c.coordinate: c for c in tables["WS10-R01-formatted_formula"].cells}
+    for row in range(2, 302):
+        for destination, source in (("I", "A"), ("J", "B"), ("K", "C")):
+            assert_that(cells[f"{destination}{row}"].source.value == f"={source}{row}")
+        expected = (
+            f'=TEXT(E{row}, "0,0") & " (" & TEXT(D{row}, "0,0") & " - " & '
+            f'TEXT(F{row}, "0,0") & ")"'
+        )
+        assert_that(cells[f"L{row}"].source.value == expected)
+        assert_that(cells[f"L{row}"].unit == "text")
+    base = {c.coordinate: c for c in tables["WS10-R01-display_formula"].cells}
+    for row in range(3, 33):
+        for destination, source in (("AP", "AH"), ("AQ", "AI"), ("AR", "AJ")):
+            assert_that(base[f"{destination}{row}"].source.value == f"={source}{row}")
+        expected = (
+            f'=TEXT(AL{row}, "0,0") & " (" & TEXT(AK{row}, "0,0") & " - " & '
+            f'TEXT(AM{row}, "0,0") & ")"'
+        )
+        assert_that(base[f"AS{row}"].source.value == expected)

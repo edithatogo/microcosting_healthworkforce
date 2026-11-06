@@ -14551,7 +14551,32 @@
       "area": "I1:N301",
       "status": "archived_candidate",
       "purpose": "Numeric and formatted publication sensitivity blocks, ALL and jurisdiction rows",
-      "columns": [],
+      "columns": [
+        {
+          "column": "I",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "J",
+          "name": "sensitivity_variable",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "K",
+          "name": "jurisdiction",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "L",
+          "name": "reported_mean_lower_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        }
+      ],
       "header_rows": [
         1
       ]
@@ -14562,7 +14587,32 @@
       "area": "O1:S301",
       "status": "archived_candidate",
       "purpose": "Numeric and formatted publication sensitivity blocks, ALL and jurisdiction rows",
-      "columns": [],
+      "columns": [
+        {
+          "column": "O",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "P",
+          "name": "sensitivity_variable",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "Q",
+          "name": "jurisdiction",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "R",
+          "name": "archived_mean_lower_upper_display",
+          "unit": null,
+          "role": "presentation"
+        }
+      ],
       "header_rows": [
         1
       ]
@@ -14573,7 +14623,56 @@
       "area": "T1:AG301",
       "status": "archived_candidate",
       "purpose": "Numeric and formatted publication sensitivity blocks, ALL and jurisdiction rows",
-      "columns": [],
+      "columns": [
+        {
+          "column": "T",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "U",
+          "name": "sensitivity_variable",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "V",
+          "name": "nsw_archived_display",
+          "unit": null,
+          "role": "presentation"
+        },
+        {
+          "column": "W",
+          "name": "qld_archived_display",
+          "unit": null,
+          "role": "presentation"
+        },
+        {
+          "column": "X",
+          "name": "sa_archived_display",
+          "unit": null,
+          "role": "presentation"
+        },
+        {
+          "column": "Y",
+          "name": "vic_archived_display",
+          "unit": null,
+          "role": "presentation"
+        },
+        {
+          "column": "Z",
+          "name": "wa_archived_display",
+          "unit": null,
+          "role": "presentation"
+        },
+        {
+          "column": "AA",
+          "name": "all_archived_display",
+          "unit": null,
+          "role": "presentation"
+        }
+      ],
       "header_rows": [
         1
       ]
@@ -14632,7 +14731,50 @@
       "area": "AH33:AN301",
       "status": "archived_candidate",
       "purpose": "Numeric and formatted publication sensitivity blocks, ALL and jurisdiction rows",
-      "columns": [],
+      "columns": [
+        {
+          "column": "AH",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "AI",
+          "name": "jurisdiction",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "AJ",
+          "name": "sensitivity_variable",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "AK",
+          "name": "archived_layout_ak",
+          "unit": null,
+          "role": "unresolved_historical_value"
+        },
+        {
+          "column": "AL",
+          "name": "archived_layout_al",
+          "unit": null,
+          "role": "unresolved_historical_value"
+        },
+        {
+          "column": "AM",
+          "name": "archived_layout_am",
+          "unit": null,
+          "role": "unresolved_historical_value"
+        },
+        {
+          "column": "AN",
+          "name": "archived_layout_an",
+          "unit": null,
+          "role": "unresolved_historical_value"
+        }
+      ],
       "header_rows": [
         1
       ]
@@ -14643,7 +14785,32 @@
       "area": "AO1:AZ32",
       "status": "archived_candidate",
       "purpose": "Numeric and formatted publication sensitivity blocks, ALL and jurisdiction rows",
-      "columns": [],
+      "columns": [
+        {
+          "column": "AP",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "AQ",
+          "name": "jurisdiction",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "AR",
+          "name": "sensitivity_variable",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "AS",
+          "name": "reported_base_salary_bounds_display",
+          "unit": "text",
+          "role": "presentation"
+        }
+      ],
       "header_rows": [
         1
       ]
@@ -14654,7 +14821,44 @@
       "area": "AO33:AZ301",
       "status": "archived_candidate",
       "purpose": "Numeric and formatted publication sensitivity blocks, ALL and jurisdiction rows",
-      "columns": [],
+      "columns": [
+        {
+          "column": "AO",
+          "name": "archived_layout_ao",
+          "unit": null,
+          "role": "context"
+        },
+        {
+          "column": "AP",
+          "name": "archived_layout_ap",
+          "unit": null,
+          "role": "context"
+        },
+        {
+          "column": "AQ",
+          "name": "archived_layout_aq",
+          "unit": null,
+          "role": "context"
+        },
+        {
+          "column": "AR",
+          "name": "archived_layout_ar",
+          "unit": null,
+          "role": "context"
+        },
+        {
+          "column": "AS",
+          "name": "archived_layout_as",
+          "unit": null,
+          "role": "context"
+        },
+        {
+          "column": "AT",
+          "name": "archived_layout_at",
+          "unit": null,
+          "role": "context"
+        }
+      ],
       "header_rows": [
         1
       ]

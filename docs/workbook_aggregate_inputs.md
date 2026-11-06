@@ -48,3 +48,10 @@ columns: 12 format input means with observed jurisdiction minima/maxima, and
 23 format salary or scenario-bound triples. Their references are retained
 explicitly. The two bound conventions remain separate; neither is promoted to
 an independently validated statistical interval.
+
+The six DSA publication sections distinguish formula-linked identities and
+formatted bounds, stored literal display strings, jurisdiction presentation
+columns, and mixed archival layouts below the main numeric block. Unknown-unit
+or mixed historical values retain no economic unit. Formula displays keep their
+source links, including archived mean/95% CI labels; those labels do not establish
+statistical validity. Layout fragments remain contextual or unresolved records.
