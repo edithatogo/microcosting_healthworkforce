@@ -246,6 +246,16 @@ def test_explicit_allocations_reject_overlaps_but_allow_parallel_workers() -> No
     overlapping = first.model_copy(update={"activity_id": "second"})
     with pytest.raises(ValueError, match="overlap"):
         cost_dynamic(release(), (first, overlapping))
+    # Identity is global across rate categories, even if the later rate is absent.
+    cross_category = overlapping.model_copy(update={"resource_id": "other-category"})
+    with pytest.raises(ValueError, match="overlap"):
+        cost_dynamic(release(), (first, cross_category))
+    # Without allocation identities the caller supplies aggregate quantities.
+    aggregate = first.model_copy(update={"allocation_id": None})
+    aggregate_two = aggregate.model_copy(update={"activity_id": "aggregate-two"})
+    assert_that(
+        cost_dynamic(release(), (aggregate, aggregate_two)).total == Decimal(100),
+    )
     second = overlapping.model_copy(update={"allocation_id": "opaque-2"})
     result = cost_dynamic(release(), (first, second))
     assert_that(result.total == Decimal(100))
