@@ -1,0 +1,841 @@
+{
+  "workbook_sha256": "c72a5f9d8a232ee559516978537a7efdd1aea6df55738e9d851840fff837ddca",
+  "scope": "complete physical intake; typed semantic integration pending",
+  "sheet_count": 20,
+  "region_count": 94,
+  "nonempty_cell_count": 27929,
+  "sheets": [
+    {
+      "sheet_id": "WS01",
+      "name": "Labour - Prices",
+      "range": "A1:BN124",
+      "nonempty_cells": 3029,
+      "formulas": 2271,
+      "purpose": "Primary source metadata, 25 state-role inputs, Year 0\u20134 rates, unweighted aggregates and dollar/percentage components",
+      "current_consumption": "Partial: parameters() reads the 25 rows and selected inputs/cached outputs; source metadata, aggregate/component tables are not exposed",
+      "required_disposition": "Preserve legacy inputs; version metadata, each year/tier, components and aggregates separately",
+      "intake_status": "catalogued_not_fully_integrated",
+      "regions": [
+        {
+          "region_id": "WS01-R01",
+          "range": "A1:BN8",
+          "nonempty_cells": 414,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS01-R02",
+          "range": "A10:BN14",
+          "nonempty_cells": 319,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS01-R03",
+          "range": "A16:BN20",
+          "nonempty_cells": 316,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS01-R04",
+          "range": "A22:BN26",
+          "nonempty_cells": 313,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS01-R05",
+          "range": "A28:BN32",
+          "nonempty_cells": 315,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS01-R06",
+          "range": "A34:BN38",
+          "nonempty_cells": 295,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS01-R07",
+          "range": "A40:BL44",
+          "nonempty_cells": 145,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS01-R08",
+          "range": "A46:X51",
+          "nonempty_cells": 71,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS01-R09",
+          "range": "A53:X57",
+          "nonempty_cells": 70,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS01-R10",
+          "range": "A59:X63",
+          "nonempty_cells": 70,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS01-R11",
+          "range": "A65:X69",
+          "nonempty_cells": 70,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS01-R12",
+          "range": "A71:X75",
+          "nonempty_cells": 70,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS01-R13",
+          "range": "A77:X81",
+          "nonempty_cells": 70,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS01-R14",
+          "range": "A83:X87",
+          "nonempty_cells": 70,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS01-R15",
+          "range": "A89:X94",
+          "nonempty_cells": 71,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS01-R16",
+          "range": "A96:X100",
+          "nonempty_cells": 70,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS01-R17",
+          "range": "A102:X106",
+          "nonempty_cells": 70,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS01-R18",
+          "range": "A108:X112",
+          "nonempty_cells": 70,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS01-R19",
+          "range": "A114:X118",
+          "nonempty_cells": 70,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS01-R20",
+          "range": "A120:X124",
+          "nonempty_cells": 70,
+          "status": "catalogued_requires_semantic_mapping"
+        }
+      ]
+    },
+    {
+      "sheet_id": "WS02",
+      "name": "Labour - Prices (WM)",
+      "range": "A1:BN160",
+      "nonempty_cells": 3129,
+      "formulas": 2311,
+      "purpose": "Parallel input/rate/component tables plus Medicare-weighted ALL(WM) aggregates and placeholders",
+      "current_consumption": "Not consumed by the calculation API",
+      "required_disposition": "Extract as a distinct weighting/method variant; never pool ALL with individual state rows",
+      "intake_status": "catalogued_not_fully_integrated",
+      "regions": [
+        {
+          "region_id": "WS02-R01",
+          "range": "A1:BN8",
+          "nonempty_cells": 414,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS02-R02",
+          "range": "A10:BN14",
+          "nonempty_cells": 319,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS02-R03",
+          "range": "A16:BN20",
+          "nonempty_cells": 316,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS02-R04",
+          "range": "A22:BN26",
+          "nonempty_cells": 313,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS02-R05",
+          "range": "A28:BN32",
+          "nonempty_cells": 315,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS02-R06",
+          "range": "A34:BN38",
+          "nonempty_cells": 295,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS02-R07",
+          "range": "A40:BL44",
+          "nonempty_cells": 145,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS02-R08",
+          "range": "A46:AD50",
+          "nonempty_cells": 40,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS02-R09",
+          "range": "A52:AB56",
+          "nonempty_cells": 20,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS02-R10",
+          "range": "A58:X63",
+          "nonempty_cells": 71,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS02-R11",
+          "range": "A65:X69",
+          "nonempty_cells": 70,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS02-R12",
+          "range": "A71:X75",
+          "nonempty_cells": 70,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS02-R13",
+          "range": "A77:X81",
+          "nonempty_cells": 70,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS02-R14",
+          "range": "A83:X87",
+          "nonempty_cells": 70,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS02-R15",
+          "range": "A89:X93",
+          "nonempty_cells": 70,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS02-R16",
+          "range": "A95:X99",
+          "nonempty_cells": 70,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS02-R17",
+          "range": "A101:B105",
+          "nonempty_cells": 10,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS02-R18",
+          "range": "A107:B111",
+          "nonempty_cells": 10,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS02-R19",
+          "range": "A113:X118",
+          "nonempty_cells": 71,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS02-R20",
+          "range": "A120:X124",
+          "nonempty_cells": 70,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS02-R21",
+          "range": "A126:X130",
+          "nonempty_cells": 70,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS02-R22",
+          "range": "A132:X136",
+          "nonempty_cells": 70,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS02-R23",
+          "range": "A138:X142",
+          "nonempty_cells": 70,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS02-R24",
+          "range": "A144:X148",
+          "nonempty_cells": 70,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS02-R25",
+          "range": "A150:B154",
+          "nonempty_cells": 10,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS02-R26",
+          "range": "A156:B160",
+          "nonempty_cells": 10,
+          "status": "catalogued_requires_semantic_mapping"
+        }
+      ]
+    },
+    {
+      "sheet_id": "WS03",
+      "name": "Medicare Enrolments",
+      "range": "A1:J41",
+      "nonempty_cells": 211,
+      "formulas": 0,
+      "purpose": "December 2023 enrolment counts, card-size distribution, denominator/method notes, source link",
+      "current_consumption": "Not consumed",
+      "required_disposition": "Preserve statistical reference and caveats; not workforce or activity-volume weights by default",
+      "intake_status": "catalogued_not_fully_integrated",
+      "regions": [
+        {
+          "region_id": "WS03-R01",
+          "range": "A1:A3",
+          "nonempty_cells": 3,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS03-R02",
+          "range": "A5:J41",
+          "nonempty_cells": 208,
+          "status": "catalogued_requires_semantic_mapping"
+        }
+      ]
+    },
+    {
+      "sheet_id": "WS04",
+      "name": "Weightings",
+      "range": "A1:H10",
+      "nonempty_cells": 52,
+      "formulas": 17,
+      "purpose": "Eight jurisdiction counts, five-state denominator, alternate reordered five-state fractions",
+      "current_consumption": "Not consumed",
+      "required_disposition": "Version denominator, included states, observation date and target estimand; require explicit weight selection",
+      "intake_status": "catalogued_not_fully_integrated",
+      "regions": [
+        {
+          "region_id": "WS04-R01",
+          "range": "A1:H10",
+          "nonempty_cells": 52,
+          "status": "catalogued_requires_semantic_mapping"
+        }
+      ]
+    },
+    {
+      "sheet_id": "WS05",
+      "name": "Components $ and %",
+      "range": "A1:N64",
+      "nonempty_cells": 870,
+      "formulas": 0,
+      "purpose": "Two vertically stacked tables: dollar components and fractional shares; 30 rows each including ALL",
+      "current_consumption": "Not consumed",
+      "required_disposition": "Split A1:N32 and A33:N64; typed currency/share units despite reused percentage-looking headers",
+      "intake_status": "catalogued_not_fully_integrated",
+      "regions": [
+        {
+          "region_id": "WS05-R01",
+          "range": "A1:N64",
+          "nonempty_cells": 870,
+          "status": "catalogued_requires_semantic_mapping"
+        }
+      ]
+    },
+    {
+      "sheet_id": "WS06",
+      "name": "Labour - Prices (DSA)",
+      "range": "A1:DH124",
+      "nonempty_cells": 4460,
+      "formulas": 3024,
+      "purpose": "Independent DSA input LL/MP/UL, base and ten sensitivity axes, component subtables",
+      "current_consumption": "Not used as runtime inputs",
+      "required_disposition": "Preserve its own baseline and axes; explicit reconciliation against primary inputs",
+      "intake_status": "catalogued_not_fully_integrated",
+      "regions": [
+        {
+          "region_id": "WS06-R01",
+          "range": "A1:DH8",
+          "nonempty_cells": 705,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS06-R02",
+          "range": "A10:DH14",
+          "nonempty_cells": 539,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS06-R03",
+          "range": "A16:DH20",
+          "nonempty_cells": 536,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS06-R04",
+          "range": "A22:DH26",
+          "nonempty_cells": 533,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS06-R05",
+          "range": "A28:DH32",
+          "nonempty_cells": 535,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS06-R06",
+          "range": "A34:DH44",
+          "nonempty_cells": 700,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS06-R07",
+          "range": "A46:AT51",
+          "nonempty_cells": 71,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS06-R08",
+          "range": "A53:AT57",
+          "nonempty_cells": 70,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS06-R09",
+          "range": "A59:AT63",
+          "nonempty_cells": 70,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS06-R10",
+          "range": "A65:AT69",
+          "nonempty_cells": 70,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS06-R11",
+          "range": "A71:AT75",
+          "nonempty_cells": 70,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS06-R12",
+          "range": "A77:AT81",
+          "nonempty_cells": 70,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS06-R13",
+          "range": "A83:AT87",
+          "nonempty_cells": 70,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS06-R14",
+          "range": "A89:AT94",
+          "nonempty_cells": 71,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS06-R15",
+          "range": "A96:AT100",
+          "nonempty_cells": 70,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS06-R16",
+          "range": "A102:AT106",
+          "nonempty_cells": 70,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS06-R17",
+          "range": "A108:AT112",
+          "nonempty_cells": 70,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS06-R18",
+          "range": "A114:AT118",
+          "nonempty_cells": 70,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS06-R19",
+          "range": "A120:AT124",
+          "nonempty_cells": 70,
+          "status": "catalogued_requires_semantic_mapping"
+        }
+      ]
+    },
+    {
+      "sheet_id": "WS07",
+      "name": "Labour - Prices (DSA, Values)",
+      "range": "A1:BP33",
+      "nonempty_cells": 2141,
+      "formulas": 0,
+      "purpose": "Archived wide base/sensitivity LL/MP/UL annual and hourly outputs",
+      "current_consumption": "Read for delivered diagnostics only; not a passing acceptance gate",
+      "required_disposition": "Preserve every axis/tier; retain incompatibility and false diagnostics",
+      "intake_status": "catalogued_not_fully_integrated",
+      "regions": [
+        {
+          "region_id": "WS07-R01",
+          "range": "A1:BP33",
+          "nonempty_cells": 2141,
+          "status": "catalogued_requires_semantic_mapping"
+        }
+      ]
+    },
+    {
+      "sheet_id": "WS08",
+      "name": "Labour - Prices (DSA,Val,Long)",
+      "range": "A1:I332",
+      "nonempty_cells": 2981,
+      "formulas": 0,
+      "purpose": "Long annual/hourly sensitivity outputs",
+      "current_consumption": "Not consumed",
+      "required_disposition": "Typed long archive; retain source identity, axes, units and duplicates",
+      "intake_status": "catalogued_not_fully_integrated",
+      "regions": [
+        {
+          "region_id": "WS08-R01",
+          "range": "A1:I332",
+          "nonempty_cells": 2981,
+          "status": "catalogued_requires_semantic_mapping"
+        }
+      ]
+    },
+    {
+      "sheet_id": "WS09",
+      "name": "Labour - Prices (DSA,Val,Lo (2)",
+      "range": "A1:F331",
+      "nonempty_cells": 1986,
+      "formulas": 0,
+      "purpose": "Long hourly sensitivity outputs",
+      "current_consumption": "Not consumed",
+      "required_disposition": "Preserve distinct sheet identity; compare with related long archive rather than silently deduplicate",
+      "intake_status": "catalogued_not_fully_integrated",
+      "regions": [
+        {
+          "region_id": "WS09-R01",
+          "range": "A1:F331",
+          "nonempty_cells": 1986,
+          "status": "catalogued_requires_semantic_mapping"
+        }
+      ]
+    },
+    {
+      "sheet_id": "WS10",
+      "name": "Labour - Prices (DSA, Pub)",
+      "range": "A1:BG301",
+      "nonempty_cells": 5291,
+      "formulas": 1440,
+      "purpose": "Numeric and formatted publication sensitivity blocks, ALL and jurisdiction rows",
+      "current_consumption": "Not consumed",
+      "required_disposition": "Split numeric/display blocks; retain bounds and presentation labels without asserting a statistical CI",
+      "intake_status": "catalogued_not_fully_integrated",
+      "regions": [
+        {
+          "region_id": "WS10-R01",
+          "range": "A1:BG301",
+          "nonempty_cells": 5291,
+          "status": "catalogued_requires_semantic_mapping"
+        }
+      ]
+    },
+    {
+      "sheet_id": "WS11",
+      "name": "Labour - Pr (PSA,Val,Long,Tot)",
+      "range": "A1:F331",
+      "nonempty_cells": 1986,
+      "formulas": 0,
+      "purpose": "Archived total-cost LL/MP/UL by sensitivity variable, despite PSA in sheet name",
+      "current_consumption": "Not consumed",
+      "required_disposition": "Classify from columns/content; not iteration-level Monte Carlo draws",
+      "intake_status": "catalogued_not_fully_integrated",
+      "regions": [
+        {
+          "region_id": "WS11-R01",
+          "range": "A1:F331",
+          "nonempty_cells": 1986,
+          "status": "catalogued_requires_semantic_mapping"
+        }
+      ]
+    },
+    {
+      "sheet_id": "WS12",
+      "name": "Labour - Pr (PSA,Val,Hr)",
+      "range": "A1:F31",
+      "nonempty_cells": 186,
+      "formulas": 0,
+      "purpose": "Archived baseline hourly LL/MP/UL across roles/jurisdictions",
+      "current_consumption": "Not consumed",
+      "required_disposition": "Keep as baseline bounds, not a distribution or empirical uncertainty sample",
+      "intake_status": "catalogued_not_fully_integrated",
+      "regions": [
+        {
+          "region_id": "WS12-R01",
+          "range": "A1:F31",
+          "nonempty_cells": 186,
+          "status": "catalogued_requires_semantic_mapping"
+        }
+      ]
+    },
+    {
+      "sheet_id": "WS13",
+      "name": "Sum Cost",
+      "range": "A1:E6",
+      "nonempty_cells": 24,
+      "formulas": 0,
+      "purpose": "Formatted five-role ALL cost/rate summaries",
+      "current_consumption": "Not consumed",
+      "required_disposition": "Presentation layer; keep numeric provenance and bound semantics explicit",
+      "intake_status": "catalogued_not_fully_integrated",
+      "regions": [
+        {
+          "region_id": "WS13-R01",
+          "range": "A1:D6",
+          "nonempty_cells": 24,
+          "status": "catalogued_requires_semantic_mapping"
+        }
+      ]
+    },
+    {
+      "sheet_id": "WS14",
+      "name": "Sum Cost Jur",
+      "range": "A1:H73",
+      "nonempty_cells": 355,
+      "formulas": 50,
+      "purpose": "Jurisdiction numeric LL/mid/UL plus formatted summaries and label-only placeholders",
+      "current_consumption": "Not consumed",
+      "required_disposition": "Separate numeric tables, display text and intentional placeholders",
+      "intake_status": "catalogued_not_fully_integrated",
+      "regions": [
+        {
+          "region_id": "WS14-R01",
+          "range": "A1:H7",
+          "nonempty_cells": 50,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS14-R02",
+          "range": "A9:H13",
+          "nonempty_cells": 40,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS14-R03",
+          "range": "A15:H19",
+          "nonempty_cells": 40,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS14-R04",
+          "range": "A21:H25",
+          "nonempty_cells": 40,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS14-R05",
+          "range": "A27:H31",
+          "nonempty_cells": 40,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS14-R06",
+          "range": "A33:H37",
+          "nonempty_cells": 40,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS14-R07",
+          "range": "A39:F43",
+          "nonempty_cells": 20,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS14-R08",
+          "range": "A45:F49",
+          "nonempty_cells": 20,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS14-R09",
+          "range": "A51:F55",
+          "nonempty_cells": 20,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS14-R10",
+          "range": "A57:F61",
+          "nonempty_cells": 20,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS14-R11",
+          "range": "A63:F67",
+          "nonempty_cells": 20,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS14-R12",
+          "range": "B69:B73",
+          "nonempty_cells": 5,
+          "status": "catalogued_requires_semantic_mapping"
+        }
+      ]
+    },
+    {
+      "sheet_id": "WS15",
+      "name": "Sum Cost Comp",
+      "range": "A1:M21",
+      "nonempty_cells": 156,
+      "formulas": 0,
+      "purpose": "Mean component parameters/salary range strings plus notes/table fragments",
+      "current_consumption": "Not consumed",
+      "required_disposition": "Retain aggregate method and parameter provenance; do not reuse aggregates as individual inputs",
+      "intake_status": "catalogued_not_fully_integrated",
+      "regions": [
+        {
+          "region_id": "WS15-R01",
+          "range": "A2:M7",
+          "nonempty_cells": 78,
+          "status": "catalogued_requires_semantic_mapping"
+        },
+        {
+          "region_id": "WS15-R02",
+          "range": "A9:F21",
+          "nonempty_cells": 78,
+          "status": "catalogued_requires_semantic_mapping"
+        }
+      ]
+    },
+    {
+      "sheet_id": "WS16",
+      "name": "Labour - BY ($)",
+      "range": "A1:N31",
+      "nonempty_cells": 434,
+      "formulas": 0,
+      "purpose": "Base-year dollar components and salary tiers for 25 state-role plus five ALL rows",
+      "current_consumption": "Not consumed",
+      "required_disposition": "Version component units and distinguish aggregate from input rows",
+      "intake_status": "catalogued_not_fully_integrated",
+      "regions": [
+        {
+          "region_id": "WS16-R01",
+          "range": "A1:N31",
+          "nonempty_cells": 434,
+          "status": "catalogued_requires_semantic_mapping"
+        }
+      ]
+    },
+    {
+      "sheet_id": "WS17",
+      "name": "Labour - BY (%)",
+      "range": "A1:A1",
+      "nonempty_cells": 0,
+      "formulas": 0,
+      "purpose": "Empty worksheet",
+      "current_consumption": "Not consumed; explicitly empty",
+      "required_disposition": "Register empty state; no inferred values or invented percentage table",
+      "intake_status": "catalogued_empty",
+      "regions": []
+    },
+    {
+      "sheet_id": "WS18",
+      "name": "Labour - Prices (Fixed header)",
+      "range": "A1:X26",
+      "nonempty_cells": 624,
+      "formulas": 186,
+      "purpose": "25-row flat alternative inputs/cost/rate table",
+      "current_consumption": "Not consumed",
+      "required_disposition": "Normalize only with declared units; indexation is 1.5 here versus 0.015 in primary table",
+      "intake_status": "catalogued_not_fully_integrated",
+      "regions": [
+        {
+          "region_id": "WS18-R01",
+          "range": "A1:X26",
+          "nonempty_cells": 624,
+          "status": "catalogued_requires_semantic_mapping"
+        }
+      ]
+    },
+    {
+      "sheet_id": "WS19",
+      "name": "Assumptions",
+      "range": "A1:B6",
+      "nonempty_cells": 12,
+      "formulas": 0,
+      "purpose": "Five explicit modelling rationales",
+      "current_consumption": "Not consumed as a machine-readable assumptions register",
+      "required_disposition": "Carry assumption IDs into outputs; separate entitlements, uptake, average penalties and indexation",
+      "intake_status": "catalogued_not_fully_integrated",
+      "regions": [
+        {
+          "region_id": "WS19-R01",
+          "range": "A1:B6",
+          "nonempty_cells": 12,
+          "status": "catalogued_requires_semantic_mapping"
+        }
+      ]
+    },
+    {
+      "sheet_id": "WS20",
+      "name": "PSA - Validation",
+      "range": "A1:A2",
+      "nonempty_cells": 2,
+      "formulas": 0,
+      "purpose": "Single expected-mean literal 150000",
+      "current_consumption": "Generic loader exists; current CLI PSA does not establish this as an authoritative reference",
+      "required_disposition": "Preserve historical literal and introduction provenance; exclude as scientific acceptance oracle",
+      "intake_status": "catalogued_not_fully_integrated",
+      "regions": [
+        {
+          "region_id": "WS20-R01",
+          "range": "A1:A2",
+          "nonempty_cells": 2,
+          "status": "catalogued_requires_semantic_mapping"
+        }
+      ]
+    }
+  ],
+  "workbook_global_defined_names": [],
+  "sheet_local_defined_names": [
+    {
+      "sheet": "Medicare Enrolments",
+      "name": "IDX",
+      "type": "RANGE",
+      "text": "'Medicare Enrolments'!$A$3"
+    }
+  ]
+}
