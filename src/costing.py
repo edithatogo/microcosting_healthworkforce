@@ -160,6 +160,8 @@ class CostRow(FrozenModel):
     starts_at: datetime
     ends_at: datetime | None
     hours: Decimal
+    exact_hours_numerator: int = Field(ge=0)
+    exact_hours_denominator: int = Field(gt=0)
     components: dict[str, Decimal]
     source_id: str
     source_sha256: str
@@ -207,7 +209,7 @@ def _row(
     activity: tuple[str, str | None],
     start: datetime,
     end: datetime | None,
-    hours: Decimal,
+    hours: Fraction,
 ) -> CostRow:
     return CostRow(
         activity_id=activity[0],
@@ -216,8 +218,14 @@ def _row(
         rate_id=rate.rate_id,
         starts_at=start,
         ends_at=end,
-        hours=hours,
-        components={key: value * hours for key, value in rate.components.items()},
+        hours=Decimal(hours.numerator) / Decimal(hours.denominator),
+        exact_hours_numerator=hours.numerator,
+        exact_hours_denominator=hours.denominator,
+        components={
+            key: Decimal(amount.numerator) / Decimal(amount.denominator)
+            for key, value in rate.components.items()
+            for amount in (Fraction(value) * hours,)
+        },
         source_id=rate.source_id,
         source_sha256=rate.source_sha256,
         citation=rate.citation,
@@ -225,15 +233,23 @@ def _row(
 
 
 def _result(release: CostRelease, rows: list[CostRow], exact: Fraction) -> CostResult:
-    components: dict[str, Decimal] = {}
+    rates = {rate.rate_id: rate for rate in release.rates}
+    component_totals: dict[str, Fraction] = {}
     for row in rows:
-        for key, amount in row.components.items():
-            components[key] = components.get(key, Decimal(0)) + amount
+        hours = Fraction(row.exact_hours_numerator, row.exact_hours_denominator)
+        for key, rate in rates[row.rate_id].components.items():
+            component_totals[key] = (
+                component_totals.get(key, Fraction(0)) + Fraction(rate) * hours
+            )
+    components = {
+        key: Decimal(amount.numerator) / Decimal(amount.denominator)
+        for key, amount in component_totals.items()
+    }
     return CostResult(
         release_id=release.release_id,
         method_id=release.method_id,
         currency=release.currency,
-        total=sum(components.values(), Decimal(0)),
+        total=Decimal(exact.numerator) / Decimal(exact.denominator),
         exact_total_numerator=exact.numerator,
         exact_total_denominator=exact.denominator,
         components=components,
@@ -260,7 +276,7 @@ def cost_static(
     exact = Fraction(0)
     for resource in resources:
         rate = _rate(release, resource.resource_id, at)
-        rows.append(_row(rate, ("snapshot", None), at, None, resource.hours))
+        rows.append(_row(rate, ("snapshot", None), at, None, Fraction(resource.hours)))
         exact += Fraction(resource.hours) * sum(
             (Fraction(value) for value in rate.components.values()),
             Fraction(0),
@@ -302,20 +318,13 @@ def cost_dynamic(release: CostRelease, activities: tuple[Activity, ...]) -> Cost
             stop = min(end, rate.ends_at) if rate.ends_at is not None else end
             _rate(release, activity.resource_id, stop - timedelta(microseconds=1))
             duration = stop - cursor
-            seconds = Decimal(duration.days * 86400 + duration.seconds) + Decimal(
-                duration.microseconds,
-            ) / Decimal(1000000)
-            hours = seconds / Decimal(3600) * activity.resources
             micros = (
                 duration.days * 86400 + duration.seconds
             ) * 1000000 + duration.microseconds
-            exact += (
-                Fraction(micros, 3600000000)
-                * Fraction(activity.resources)
-                * sum(
-                    (Fraction(value) for value in rate.components.values()),
-                    Fraction(0),
-                )
+            hours = Fraction(micros, 3600000000) * Fraction(activity.resources)
+            exact += hours * sum(
+                (Fraction(value) for value in rate.components.values()),
+                Fraction(0),
             )
             rows.append(
                 _row(
