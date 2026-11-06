@@ -259,3 +259,42 @@ selection, exposure/inclusion/interaction declarations, source quotes and exact
 component ledger. Monetary results are price exposures, not an assertion of pay
 due. Eligibility, continuing status, allowance proration, calendar normalization,
 paid/unpaid leave/accrual and employment endpoints remain separate qualifications.
+
+## Paid-leave exposure state
+
+`src.paid_leave.build_paid_leave` builds a dated ledger from an explicitly reviewed
+`PaidLeavePolicy` and approved `PaidLeaveRequest`. Calendar absence, normal-pay-
+equivalent salary exposure, accrual eligibility and entitlement-budget debits are
+separate axes. Full pay uses the declared paid weeks; the selected half-pay option
+spreads that exposure over twice the calendar duration. An advance election records
+a separate caller-supplied earlier payment instruction, without adding a second
+salary exposure or valuing actual cash.
+
+The explicit calendar-days/7 convention and its basis are mandatory. Policy,
+accrual-cap and caller split boundaries partition the approved episode. Half-pay
+exposure beyond the independently declared accrual cap does not accrue additional
+eligible weeks. An unknown paid cap or unpaid accrual factor remains null; the
+known accrual subtotal is retained separately and is not an actual accrued-leave
+credit. No twenty-working-day rule is inferred from calendar days.
+
+Entitlement offsets require a review kind and rationale. An unresolved offset
+leaves debit/remaining-budget outputs null. Calendar-absence and normal-pay-
+equivalent debit scenarios can be supplied explicitly, without implying either
+is the correct interpretation of a particular instrument. Calendar absence limits
+remain independent. Fixed-term episodes require a covering contract endpoint;
+only an explicitly approved shorter endpoint truncates the planned exposure,
+with unused salary-equivalent budget retained. It is not forfeiture or cash due.
+
+All policy/approval/eligibility declarations and source scope/hash/date/knowledge
+are validated. There is no default approval, employee classification, payroll
+rounding or cash date. Keeping-in-touch work/extensions, family/route interactions,
+other leave and approved extension processes need their own qualified state rules;
+they must not be inferred from this core profile.
+
+To price these exposures, partition rows at every applicable price boundary,
+select covering quotes and pass each row's exact `salary_equivalent_weeks` to
+`price_selected_hours` as its explicit week exposure. Supply allowances separately
+with their own qualified units/continuation basis. The full and half profiles have
+equal constant-price salary exposure; a wage increase during the longer half-pay
+period can make their dated prices differ. This is exposure costing, not the
+valuation or execution of an actual advance payroll payment.
