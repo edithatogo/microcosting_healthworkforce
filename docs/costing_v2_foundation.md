@@ -110,3 +110,11 @@ than industrial entitlements. The cost-per-productive-hour denominator describes
 the original worker only; any productive output from replacement cover is not
 included. It does not infer leave uptake, cash savings, overlap between absences,
 or the cost or productivity of cover.
+
+`src.tiered_overtime.cost_tiered_overtime` extends the same explicit-period
+method to strictly increasing cumulative thresholds with nondecreasing total
+salary multipliers. It counts base cost once and reports each incremental
+premium. Hours above a later threshold also appear in earlier threshold totals;
+these are cumulative, not mutually exclusive bands. Decreasing multipliers,
+shift-specific thresholds, premium stacking and minimum engagements are not
+supported by this method.
