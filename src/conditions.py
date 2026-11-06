@@ -10,6 +10,7 @@ lazy from decimal import Decimal
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 lazy from src.costing import Activity
+lazy from src.pay_period_effective import RetrospectiveAuthority
 lazy from src.source_registry import SourceRegistry
 
 ConditionKind = Literal["salary", "paid_hours", "fixed_annual", "salary_fraction"]
@@ -31,6 +32,7 @@ class Condition(BaseModel):
     source_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
     citation: str = Field(min_length=1)
     status: Literal["candidate", "accepted", "rejected"]
+    retrospective: RetrospectiveAuthority | None = None
 
     @model_validator(mode="after")
     def valid_condition(self) -> Self:
@@ -66,6 +68,7 @@ class ConditionRelease(BaseModel):
     jurisdiction: str = Field(min_length=1)
     employer: str = Field(min_length=1)
     classification: str = Field(min_length=1)
+    as_known_at: date | None = None
     sources: SourceRegistry
     conditions: tuple[Condition, ...]
 
@@ -81,17 +84,7 @@ class ConditionRelease(BaseModel):
             if item.status != "accepted":
                 msg = "Costing releases require accepted conditions"
                 raise ValueError(msg)
-            for when in (item.effective_from, item.effective_to - timedelta(days=1)):
-                source = self.sources.require_applicable(
-                    item.source_id,
-                    when,
-                    self.jurisdiction,
-                    self.employer,
-                    self.classification,
-                )
-                if source.sha256 != item.source_sha256:
-                    msg = "Condition source hash mismatch"
-                    raise ValueError(msg)
+            self._validate_source(item)
         for index, left in enumerate(self.conditions):
             for right in self.conditions[index + 1 :]:
                 if (
@@ -102,6 +95,39 @@ class ConditionRelease(BaseModel):
                     msg = "Overlapping condition component periods"
                     raise ValueError(msg)
         return self
+
+    def _validate_source(self, item: Condition) -> None:
+        """Check the source at knowledge dates and the entire entitlement interval."""
+        authority = item.retrospective
+        dates = (item.effective_from, item.effective_to - timedelta(days=1))
+        if authority is not None:
+            if self.as_known_at is None or authority.as_known_at != self.as_known_at:
+                msg = "Retrospective conditions require the release knowledge date"
+                raise ValueError(msg)
+            if item.effective_from < authority.known_from and (
+                item.effective_from < authority.entitlement_from
+                or min(item.effective_to, authority.known_from)
+                > authority.entitlement_to
+            ):
+                msg = "Date outside reviewed retrospective entitlement interval"
+                raise ValueError(msg)
+            dates += (authority.known_from, self.as_known_at)
+        for when in dates:
+            if authority is not None and when < authority.known_from:
+                if not authority.entitlement_from <= when < authority.entitlement_to:
+                    msg = "Date outside reviewed retrospective entitlement interval"
+                    raise ValueError(msg)
+                continue
+            source = self.sources.require_applicable(
+                item.source_id,
+                when,
+                self.jurisdiction,
+                self.employer,
+                self.classification,
+            )
+            if source.sha256 != item.source_sha256:
+                msg = "Condition source hash mismatch"
+                raise ValueError(msg)
 
 
 def hourly_components(release: ConditionRelease, when: date) -> dict[str, Decimal]:
