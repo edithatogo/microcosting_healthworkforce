@@ -1,0 +1,16 @@
+{
+  "track_id_proposed": "workforce-conditions-costing-v2_20261106",
+  "type": "feature",
+  "spec_approved": true,
+  "spec_approved_date": "2026-11-06",
+  "spec_approval": "Explicit user reply in this chat",
+  "spec_sha256": "211a45ab4f140b8951978b7c0d711baeedc54196950e6386cd8540cd39729da4",
+  "plan_status": "approved",
+  "plan_sha256": "529b3d7515872bdddb4dd5f3579a971e8977642d13e0e944a1394956d09b8a6a",
+  "registered": true,
+  "implementation_started": false,
+  "updated_at": "2026-11-06T09:15:04.236478+10:00",
+  "catalog_review": "No relevant missing Firebase/GCP skills; no installation required.",
+  "plan_approved_date": "2026-11-06",
+  "implementation_authorized": true
+}

@@ -1,0 +1,22 @@
+{
+  "track_id": "workforce-modernization_20261106",
+  "type": "refactor",
+  "status": "registered_pending_implementation",
+  "created_date": "2026-11-06",
+  "updated_date": "2026-11-06",
+  "timezone": "Australia/Brisbane",
+  "spec_approved": true,
+  "plan_approved": true,
+  "registered": true,
+  "baseline_commit": "55c757956547a8da5ec2384c9b07cef749a74749",
+  "dependency": "Scientific domain decisions block dependent changes; source handoff reconciled through 79c3354",
+  "canonical_owner_chat": "local-only",
+  "spec_approved_date": "2026-11-06",
+  "plan_finalised_date": "2026-11-06",
+  "implementation_started": false,
+  "plan_approved_date": "2026-11-06",
+  "handoff_available": true,
+  "handoff_source_commit": "79c3354",
+  "handoff_reconciled": true,
+  "qualified_runtime": "3.15.2"
+}
