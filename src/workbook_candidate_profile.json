@@ -14663,8 +14663,33 @@
       "sheet": "Sum Cost Jur",
       "area": "A39:F43",
       "status": "archived_candidate",
-      "purpose": "Formatted jurisdiction summary",
-      "columns": [],
+      "purpose": "Formatted jurisdiction summary linked to same-sheet numeric bounds and midpoint; archived candidate display",
+      "columns": [
+        {
+          "column": "A",
+          "name": "jurisdiction",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "C",
+          "name": "annual_cost_midpoint_lower_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "F",
+          "name": "hourly_cost_midpoint_lower_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        }
+      ],
       "header_rows": []
     },
     {
@@ -14672,8 +14697,33 @@
       "sheet": "Sum Cost Jur",
       "area": "A45:F49",
       "status": "archived_candidate",
-      "purpose": "Formatted jurisdiction summary",
-      "columns": [],
+      "purpose": "Formatted jurisdiction summary linked to same-sheet numeric bounds and midpoint; archived candidate display",
+      "columns": [
+        {
+          "column": "A",
+          "name": "jurisdiction",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "C",
+          "name": "annual_cost_midpoint_lower_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "F",
+          "name": "hourly_cost_midpoint_lower_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        }
+      ],
       "header_rows": []
     },
     {
@@ -14681,8 +14731,33 @@
       "sheet": "Sum Cost Jur",
       "area": "A51:F55",
       "status": "archived_candidate",
-      "purpose": "Formatted jurisdiction summary",
-      "columns": [],
+      "purpose": "Formatted jurisdiction summary linked to same-sheet numeric bounds and midpoint; archived candidate display",
+      "columns": [
+        {
+          "column": "A",
+          "name": "jurisdiction",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "C",
+          "name": "annual_cost_midpoint_lower_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "F",
+          "name": "hourly_cost_midpoint_lower_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        }
+      ],
       "header_rows": []
     },
     {
@@ -14690,8 +14765,33 @@
       "sheet": "Sum Cost Jur",
       "area": "A57:F61",
       "status": "archived_candidate",
-      "purpose": "Formatted jurisdiction summary",
-      "columns": [],
+      "purpose": "Formatted jurisdiction summary linked to same-sheet numeric bounds and midpoint; archived candidate display",
+      "columns": [
+        {
+          "column": "A",
+          "name": "jurisdiction",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "C",
+          "name": "annual_cost_midpoint_lower_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "F",
+          "name": "hourly_cost_midpoint_lower_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        }
+      ],
       "header_rows": []
     },
     {
@@ -14699,8 +14799,33 @@
       "sheet": "Sum Cost Jur",
       "area": "A63:F67",
       "status": "archived_candidate",
-      "purpose": "Formatted jurisdiction summary",
-      "columns": [],
+      "purpose": "Formatted jurisdiction summary linked to same-sheet numeric bounds and midpoint; archived candidate display",
+      "columns": [
+        {
+          "column": "A",
+          "name": "jurisdiction",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "C",
+          "name": "annual_cost_midpoint_lower_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "F",
+          "name": "hourly_cost_midpoint_lower_upper_display",
+          "unit": "text",
+          "role": "presentation"
+        }
+      ],
       "header_rows": []
     },
     {
@@ -14708,8 +14833,15 @@
       "sheet": "Sum Cost Jur",
       "area": "B69:B73",
       "status": "archived_candidate",
-      "purpose": "Label-only placeholder without numeric values",
-      "columns": [],
+      "purpose": "Personnel-type labels only; no cost observations in this block",
+      "columns": [
+        {
+          "column": "B",
+          "name": "personnel_type_placeholder",
+          "unit": null,
+          "role": "identity"
+        }
+      ],
       "header_rows": []
     },
     {

@@ -69,3 +69,31 @@ def test_component_displays_retain_formula_bases() -> None:
                     assert_that(f"/$Z{4 + offset}" in value)
                 if col == "S":
                     assert_that("/52" in value)
+
+
+def test_jurisdiction_summary_displays_link_numeric_cells() -> None:
+    """Every displayed summary retains its numeric source row and units."""
+    catalog = read_workbook_catalog(Path("data/Labour Model - v3, 20240328.xlsx"))
+    extraction = extract_tables(
+        catalog,
+        load_candidate_profile().table_definitions(catalog.sha256),
+    )
+    tables = {t.definition.table_id: t for t in extraction.tables}
+    for block, first in enumerate((39, 45, 51, 57, 63), start=7):
+        table = tables[f"WS14-R{block:02}"]
+        cells = {c.coordinate: c for c in table.cells}
+        for row in range(first, first + 5):
+            source_row = row - 36
+            for col, mid, lower, upper in (("C", "D", "C", "E"), ("F", "G", "F", "H")):
+                cell = cells[f"{col}{row}"]
+                expected = (
+                    f'=TEXT({mid}{source_row}, "0,0") & " (" & '
+                    f'TEXT({lower}{source_row}, "0,0") & " - " & '
+                    f'TEXT({upper}{source_row}, "0,0") & ")"'
+                )
+                assert_that(cell.source.value == expected)
+                assert_that(cell.unit == "text" and cell.role == "presentation")
+    placeholders = tables["WS14-R12"]
+    assert_that(
+        all(c.role == "identity" and c.unit is None for c in placeholders.cells),
+    )

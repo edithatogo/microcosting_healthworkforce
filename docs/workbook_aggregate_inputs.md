@@ -11,3 +11,10 @@ marks presentation strings as text. Currency, ordinary hours, annual leave and
 fractions retain their distinct units. Blank base-year cells remain blank.
 These are archived candidate summaries, with no statistical-interval or
 individual-entitlement acceptance inferred from the displayed ranges.
+
+The five jurisdiction summary display blocks in Sum Cost Jur link their C and
+F columns to the same sheet's annual and hourly numeric bounds. Their strings
+are labelled presentation text, while jurisdiction and personnel type retain
+identity roles. The B69:B73 block contains personnel labels only and does not
+supply cost observations. The mapping traces formulas without reinterpreting
+archived lower and upper values as independently validated intervals.
