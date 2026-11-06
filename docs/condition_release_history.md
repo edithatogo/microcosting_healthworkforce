@@ -20,9 +20,10 @@ condition release.
 When a release has a fixed `as_known_at` date, its edition cannot be declared
 known before that date. Retrospective conditions require reviewed entitlement
 intervals, a matching release knowledge date and source scope and hash checks.
-They do not establish legal entitlement or payment timing. Adding these fields
-changes serialized release content and therefore its pin hash; retain older
-versioned code and original releases for replay of previously issued pins.
+They do not establish legal entitlement or payment timing. A release with neither
+new field retains its original canonical pin hash. Releases using the new
+fields include them in the hash, so changing reviewed knowledge or retrospective
+authority changes the pin.
 
 This initial contract supports a linear history for one scope. It does not
 model parallel interpretations, automatic source acquisition, legal pay-period

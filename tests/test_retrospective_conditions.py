@@ -6,7 +6,12 @@ from decimal import Decimal
 
 import pytest
 
-from src.condition_history import ConditionHistory, ReleaseEdition, ReleasePin
+from src.condition_history import (
+    ConditionHistory,
+    ReleaseEdition,
+    ReleasePin,
+    release_sha256,
+)
 from src.conditions import (
     ConditionRelease,
     cost_condition_activity,
@@ -17,6 +22,7 @@ from src.pay_period_effective import RetrospectiveAuthority
 from src.source_registry import SourceRegistry
 from tests.checks import assert_that
 from tests.test_conditions import condition
+from tests.test_roster_costing import release
 from tests.test_source_registry import source
 
 
@@ -141,3 +147,26 @@ def test_history_never_selects_or_replays_before_release_knowledge() -> None:
     )
     with pytest.raises(ValueError, match="not known"):
         history.replay(forged)
+
+
+def test_existing_release_pin_hash_is_preserved() -> None:
+    """A release without new fields keeps its original canonical content hash."""
+    old_hash = "da7c885a3053d8d06ce1a9c77d8bf3120ac28c3b9cdad5c42676636850e1d859"
+    assert_that(release_sha256(release()) == old_hash)
+
+
+def test_new_release_pin_covers_authority() -> None:
+    """Changing a reviewed citation changes the new release's pin."""
+    original = retrospective_release()
+    item = original.conditions[0]
+    authority = item.retrospective
+    if authority is None:
+        msg = "Test requires retrospective authority"
+        raise ValueError(msg)
+    changed_item = item.model_copy(
+        update={"retrospective": authority.model_copy(update={"citation": "other"})},
+    )
+    changed = original.model_copy(
+        update={"conditions": (changed_item, *original.conditions[1:])},
+    )
+    assert_that(release_sha256(original) != release_sha256(changed))
