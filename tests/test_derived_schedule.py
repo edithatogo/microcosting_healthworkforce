@@ -16,6 +16,7 @@ from src.derived_schedule import (
 )
 from tests.checks import assert_that
 from tests.test_derived_components import baseline, rule
+from tests.test_retrospective_conditions import retrospective_release
 
 
 def schedule() -> DerivedSchedule:
@@ -119,3 +120,46 @@ def test_subsecond_activity_retains_exact_rational_total() -> None:
     )
     result = cost_scheduled_activity(baseline(), activity, "UTC", schedule())
     assert_that(result.exact_total == Fraction(115, 7200000000))
+
+
+def test_schedule_composes_with_reviewed_retrospective_rules() -> None:
+    """A change across two historical days requires each rule's own authority."""
+    release = retrospective_release()
+    authority = release.conditions[0].retrospective
+    if authority is None:
+        msg = "Test requires retrospective authority"
+        raise ValueError(msg)
+    old = rule("old", "allowance", ("salary",), "0.05").model_copy(
+        update={
+            "effective_from": date(2025, 6, 1),
+            "effective_to": date(2025, 7, 2),
+            "retrospective": authority,
+        },
+    )
+    new = rule("new", "allowance", ("salary",), "0.10").model_copy(
+        update={
+            "effective_from": date(2025, 7, 2),
+            "effective_to": date(2026, 1, 1),
+            "retrospective": authority,
+        },
+    )
+    dated = DerivedSchedule(
+        series=(RuleSeries(component="allowance", editions=(old, new)),),
+    )
+    start = datetime(2025, 7, 1, 23, tzinfo=UTC)
+    activity = Activity(
+        activity_id="historical",
+        resource_id="worker",
+        starts_at=start,
+        ends_at=start + timedelta(hours=2),
+        resources=Decimal(1),
+    )
+    result = cost_scheduled_activity(release, activity, "UTC", dated)
+    assert_that(result.exact_total == Fraction(215, 2))
+    assert_that([row.rule.rule_id for row in result.rows] == ["old", "new"])
+    missing = new.model_copy(update={"retrospective": None})
+    unreviewed = DerivedSchedule(
+        series=(RuleSeries(component="allowance", editions=(old, missing)),),
+    )
+    with pytest.raises(ValueError, match="scope"):
+        cost_scheduled_activity(release, activity, "UTC", unreviewed)
