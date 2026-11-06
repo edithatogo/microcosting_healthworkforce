@@ -7533,7 +7533,20 @@
       "area": "A101:B105",
       "status": "archived_candidate",
       "purpose": "Unpopulated weighted aggregate placeholder labels; no inferred values",
-      "columns": [],
+      "columns": [
+        {
+          "column": "A",
+          "name": "jurisdiction_placeholder",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type_placeholder",
+          "unit": null,
+          "role": "identity"
+        }
+      ],
       "header_rows": []
     },
     {
@@ -7542,7 +7555,20 @@
       "area": "A107:B111",
       "status": "archived_candidate",
       "purpose": "Unpopulated weighted aggregate placeholder labels; no inferred values",
-      "columns": [],
+      "columns": [
+        {
+          "column": "A",
+          "name": "jurisdiction_placeholder",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type_placeholder",
+          "unit": null,
+          "role": "identity"
+        }
+      ],
       "header_rows": []
     },
     {
@@ -7970,7 +7996,20 @@
       "area": "A150:B154",
       "status": "archived_candidate",
       "purpose": "Unpopulated weighted aggregate placeholder labels; no inferred values",
-      "columns": [],
+      "columns": [
+        {
+          "column": "A",
+          "name": "jurisdiction_placeholder",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type_placeholder",
+          "unit": null,
+          "role": "identity"
+        }
+      ],
       "header_rows": []
     },
     {
@@ -7979,7 +8018,20 @@
       "area": "A156:B160",
       "status": "archived_candidate",
       "purpose": "Unpopulated weighted aggregate placeholder labels; no inferred values",
-      "columns": [],
+      "columns": [
+        {
+          "column": "A",
+          "name": "jurisdiction_placeholder",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type_placeholder",
+          "unit": null,
+          "role": "identity"
+        }
+      ],
       "header_rows": []
     },
     {
@@ -12323,7 +12375,14 @@
       "area": "AK39:AK39",
       "status": "physical_region_unresolved",
       "purpose": "Isolated zero; semantic role unresolved",
-      "columns": [],
+      "columns": [
+        {
+          "column": "AK",
+          "name": "isolated_zero_semantic_role_unresolved",
+          "unit": null,
+          "role": "unresolved_historical_value"
+        }
+      ],
       "header_rows": []
     },
     {
@@ -13261,7 +13320,20 @@
       "area": "A1:B33",
       "status": "archived_candidate",
       "purpose": "DSA archived jurisdiction and personnel identities",
-      "columns": [],
+      "columns": [
+        {
+          "column": "A",
+          "name": "jurisdiction",
+          "unit": null,
+          "role": "identity"
+        },
+        {
+          "column": "B",
+          "name": "personnel_type",
+          "unit": null,
+          "role": "identity"
+        }
+      ],
       "header_rows": [
         1,
         2,

@@ -25,3 +25,8 @@ are contextual records. The historical system-change quantity and PSA reference
 scalar explicitly retain unknown units and unresolved status. The transposed
 personnel-header block carries identities only. None of these dispositions
 promotes contextual notes, labels or an archived scalar to an accepted parameter.
+
+Four weighted aggregate placeholder blocks and the DSA archived jurisdiction/
+personnel columns carry identity roles only. The isolated AK39 zero retains
+an unresolved historical-value role with no declared economic unit. Recording
+that literal zero does not supply a missing lower-bound input in AK34.
