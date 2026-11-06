@@ -180,6 +180,68 @@ def exact_hourly_components(
     return components
 
 
+class SnapshotQuantity(BaseModel):
+    """Explicit nonnegative resource hours for a dated static calculation."""
+
+    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
+    hours: Decimal = Field(ge=0, allow_inf_nan=False)
+
+
+class ConditionSnapshotResult(BaseModel):
+    """Static component ledger and the accepted inputs used to calculate it."""
+
+    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
+    release_id: str
+    method_id: str
+    jurisdiction: str
+    employer: str
+    classification: str
+    currency: Literal["AUD"] = "AUD"
+    as_of: date
+    hours: Decimal
+    components: dict[str, Decimal]
+    total: Decimal
+    exact_total_numerator: int
+    exact_total_denominator: int = Field(gt=0)
+    conditions: tuple[Condition, ...]
+
+
+def cost_condition_snapshot(
+    release: ConditionRelease,
+    when: date,
+    hours: Decimal,
+) -> ConditionSnapshotResult:
+    """Price supplied paid hours at one date, without inferring eligibility.
+
+    This is a nominal-hour scenario: it does not add leave, overtime or cover.
+    Source and reviewer assertions in the release must be independently qualified.
+    """
+    release = ConditionRelease.model_validate(release.model_dump())
+    quantity = SnapshotQuantity(hours=hours)
+    rates = hourly_components(release, when)
+    components = {name: rate * quantity.hours for name, rate in rates.items()}
+    exact = sum(
+        exact_hourly_components(release, when).values(),
+        Fraction(0),
+    ) * Fraction(quantity.hours)
+    return ConditionSnapshotResult(
+        release_id=release.release_id,
+        method_id=release.method_id,
+        jurisdiction=release.jurisdiction,
+        employer=release.employer,
+        classification=release.classification,
+        as_of=when,
+        hours=quantity.hours,
+        components=components,
+        total=sum(components.values(), Decimal(0)),
+        exact_total_numerator=exact.numerator,
+        exact_total_denominator=exact.denominator,
+        conditions=tuple(
+            c for c in release.conditions if c.effective_from <= when < c.effective_to
+        ),
+    )
+
+
 def cost_condition_activity(
     release: ConditionRelease,
     activity: Activity,
