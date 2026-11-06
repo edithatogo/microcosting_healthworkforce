@@ -50,6 +50,7 @@ dependencies = [
 
 [project.scripts]
 microcosting-healthworkforce = "src.main:main"
+microcosting-healthworkforce-v2 = "src.conditions_cli:main"
 
 [tool.setuptools]
 packages = ["src"]
