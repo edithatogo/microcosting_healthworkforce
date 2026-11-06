@@ -3450,8 +3450,81 @@
       "sheet": "Labour - Prices",
       "area": "A83:X87",
       "status": "archived_candidate",
-      "purpose": "Legacy formatted aggregate component display, not numeric data",
-      "columns": [],
+      "purpose": "Formatted component dollar values using first-jurisdiction salary; mean and observed min/max, not numeric accepted inputs",
+      "columns": [
+        {
+          "column": "J",
+          "name": "superannuation_annual_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "M",
+          "name": "average_penalties_annual_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "N",
+          "name": "public_holiday_penalty_annual_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "O",
+          "name": "private_practice_loading_annual_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "P",
+          "name": "attraction_retention_allowance_annual_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "Q",
+          "name": "sick_leave_proxy_annual_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "R",
+          "name": "professional_development_allowance_annual_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "S",
+          "name": "annual_leave_proxy_annual_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "T",
+          "name": "annual_leave_loading_proxy_annual_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "V",
+          "name": "salary_lower_annual_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "W",
+          "name": "salary_midpoint_annual_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "X",
+          "name": "salary_upper_annual_display",
+          "unit": "text",
+          "role": "presentation"
+        }
+      ],
       "header_rows": []
     },
     {
@@ -3869,8 +3942,81 @@
       "sheet": "Labour - Prices",
       "area": "A120:X124",
       "status": "archived_candidate",
-      "purpose": "Legacy formatted aggregate component display, not numeric data",
-      "columns": [],
+      "purpose": "Formatted component shares using first-jurisdiction annual-cost denominator; mean and observed min/max, not numeric accepted inputs",
+      "columns": [
+        {
+          "column": "J",
+          "name": "superannuation_annual_share_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "M",
+          "name": "average_penalties_annual_share_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "N",
+          "name": "public_holiday_penalty_annual_share_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "O",
+          "name": "private_practice_loading_annual_share_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "P",
+          "name": "attraction_retention_allowance_annual_share_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "Q",
+          "name": "sick_leave_proxy_annual_share_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "R",
+          "name": "professional_development_allowance_annual_share_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "S",
+          "name": "annual_leave_proxy_annual_share_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "T",
+          "name": "annual_leave_loading_proxy_annual_share_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "V",
+          "name": "salary_lower_annual_share_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "W",
+          "name": "salary_midpoint_annual_share_display",
+          "unit": "text",
+          "role": "presentation"
+        },
+        {
+          "column": "X",
+          "name": "salary_upper_annual_share_display",
+          "unit": "text",
+          "role": "presentation"
+        }
+      ],
       "header_rows": []
     },
     {
