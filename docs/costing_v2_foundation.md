@@ -159,3 +159,33 @@ This is numerical projection, not a currency-rounding policy. No industrial
 rounding, cents allocation or payroll payment rule is inferred. Previously
 serialized rows lacking exact hours must be recomputed from their source inputs,
 rather than inventing zero or treating rounded hours as exact originals.
+## Direct quoted units and dated events
+
+`src.unit_quotes.price_units` prices explicit `QuoteQuantity` inputs against an
+accepted `UnitQuoteRelease`. Each input names its quote, exact denominator unit,
+valuation date, nonnegative quantity, provenance kind (`observed_use` or
+`analyst_assumption`) and basis. Quantities at one date form a static snapshot;
+quantities at different dates form a dated event series. Results retain the full
+quote/source citation, quantity, release hash and exact `Fraction` amounts.
+
+For example, a synthetic price of 100.01 AUD/fortnight and an independently
+published 2700 AUD/annum can coexist. One fortnight costs exactly 100.01; one
+annum costs exactly 2700. Neither quote is converted to the other. A quantity
+of 0.5 fortnight must be supplied with its reviewed basis; the library does not
+infer it from seven elapsed days, part-time hours or an annual divisor.
+
+The release requires held primary sources with verified employer/classification/
+jurisdiction scope, matching hashes, full effective-interval coverage and a
+knowledge date covering source retrieval and the quote's known-from date.
+Candidate quotes, overlapping same-component/unit versions, duplicate identities,
+wrong units and dates outside a named quote are rejected, including for zero
+quantities. Explicit quote IDs prevent silent substitution of another version.
+
+This is direct price application. Worker eligibility, mutually exclusive
+allowances, award comparisons, alternative payment arrangements, actual payroll
+accrual/payment dates and partial-period allocation remain separate reviewed
+inputs. A quantity spanning a price change must first be allocated by an explicit
+qualified method. Annual and fortnight inputs must not represent the same cost
+twice; no automatic combination with hourly/fixed-annual ledgers is performed.
+The API does not assert a source-specific payroll rule, a full employment cost,
+or empirical PSA validity. No real source rates or private records are bundled.
