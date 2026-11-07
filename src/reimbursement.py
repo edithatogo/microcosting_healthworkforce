@@ -1,5 +1,5 @@
 # Copyright 2026 Dylan. SPDX-License-Identifier: Apache-2.0
-"""Cost approved expense claims against one explicitly reviewed cap period."""
+"""Cost approved expense claims within one explicitly reviewed accounting period."""
 
 from dataclasses import dataclass
 from fractions import Fraction
@@ -22,12 +22,12 @@ class ReimbursementClaim(QuoteModel):
 
 
 class ReimbursementPeriod(QuoteModel):
-    """A reviewed cap in one currency for one assignment and accounting period."""
+    """Reviewed claims for one assignment and accounting period."""
 
     currency: str = Field(pattern=r"^[A-Z]{3}$")
     starts_on: date
     ends_on: date
-    cap: NonnegativeQuantity
+    cap: NonnegativeQuantity | None
     prior_use: NonnegativeQuantity
     applicability_evidence: str
     claims: tuple[ReimbursementClaim, ...]
@@ -38,7 +38,7 @@ class ReimbursementPeriod(QuoteModel):
         dates = [claim.charged_on for claim in self.claims]
         if (
             self.starts_on >= self.ends_on
-            or self.prior_use > self.cap
+            or self.prior_use > (self.cap if self.cap is not None else 0)
             or any(not self.starts_on <= day < self.ends_on for day in dates)
             or dates != sorted(dates)
             or len({claim.claim_id for claim in self.claims}) != len(self.claims)
@@ -54,7 +54,16 @@ class ReimbursementRow:
 
     claim: ReimbursementClaim
     cost: Fraction
-    remaining: Fraction
+    remaining: Fraction | None
+
+
+@dataclass(frozen=True)
+class ReimbursementLedger:
+    """Reviewed accounting period, ordered claim costs and exact total."""
+
+    period: ReimbursementPeriod
+    rows: tuple[ReimbursementRow, ...]
+    total: Fraction
 
 
 def cost_reimbursements(
@@ -62,19 +71,35 @@ def cost_reimbursements(
 ) -> tuple[ReimbursementRow, ...]:
     """Apply the supplied cap to approved expenses in the declared order.
 
+    Supply a null cap only for a reviewed uncapped rule.
     The caller determines coverage, proration, eligible costs and the period
     to charge. A cap alone creates no cost.
     """
+    return build_reimbursement_ledger(period).rows
+
+
+def build_reimbursement_ledger(period: ReimbursementPeriod) -> ReimbursementLedger:
+    """Keep the reviewed period and its applicability evidence with the costs."""
     period = ReimbursementPeriod.model_validate(
         {**dict(period), "claims": tuple(dict(claim) for claim in period.claims)},
     )
-    remaining = Fraction(period.cap) - Fraction(period.prior_use)
+    remaining = (
+        None
+        if period.cap is None
+        else Fraction(period.cap) - Fraction(period.prior_use)
+    )
     rows: list[ReimbursementRow] = []
     for claim in period.claims:
-        cost = min(Fraction(claim.eligible_amount), remaining)
-        remaining -= cost
+        cost = Fraction(claim.eligible_amount)
+        if remaining is not None:
+            cost = min(cost, remaining)
+            remaining -= cost
         rows.append(ReimbursementRow(claim, cost, remaining))
-    return tuple(rows)
+    return ReimbursementLedger(
+        period,
+        tuple(rows),
+        sum((row.cost for row in rows), Fraction(0)),
+    )
 
 
 class ReimbursementCarryDecision(QuoteModel):

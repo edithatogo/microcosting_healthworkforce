@@ -9,9 +9,12 @@ from pydantic import TypeAdapter
 
 from src.assignment_costing import AssignmentCost, AssignmentTimeline
 from src.assignment_requests import (
+    AssignmentActivitiesRequest,
+    AssignmentCostWithReimbursements,
     AssignmentRequest,
     AssignmentScenarioComparison,
     compare_assignment_requests,
+    cost_assignment_with_reimbursements,
     run_assignment_request,
 )
 from src.capacity_costing import CapacityScenarioInputs, capacity_scenario
@@ -23,6 +26,15 @@ from src.conditions import (
     cost_condition_snapshot,
 )
 from src.costing import Activity
+from src.unit_quotes import QuoteModel
+lazy from src.reimbursement import ReimbursementPeriod
+
+
+class AssignmentReimbursementRequest(QuoteModel):
+    """Reviewed claim period explicitly bound to the assignment subject."""
+
+    reviewed_subject_id: str
+    period: ReimbursementPeriod
 
 
 class SnapshotRequest(SnapshotQuantity):
@@ -77,7 +89,24 @@ def _assignment_output(
     request: AssignmentRequest,
     comparison_path: Path | None,
     alternative_path: Path | None,
+    reimbursement_path: Path | None,
 ) -> str:
+    if reimbursement_path is not None:
+        if not isinstance(request, AssignmentActivitiesRequest):
+            msg = "Reimbursements require an assignment activity request"
+            raise ValueError(msg)
+        reviewed = AssignmentReimbursementRequest.model_validate_json(
+            reimbursement_path.read_bytes(),
+        )
+        combined = cost_assignment_with_reimbursements(
+            timeline,
+            request,
+            reviewed.period,
+            reviewed_subject_id=reviewed.reviewed_subject_id,
+        )
+        return (
+            TypeAdapter(AssignmentCostWithReimbursements).dump_json(combined).decode()
+        )
     if comparison_path is None:
         result = run_assignment_request(timeline, request)
         return TypeAdapter(AssignmentCost).dump_json(result).decode("utf-8")
@@ -104,6 +133,12 @@ def _validate_comparison_options(
     parser: argparse.ArgumentParser,
     args: argparse.Namespace,
 ) -> None:
+    if args.reimbursements is not None and (
+        args.timeline is None or args.compare_assignment_request is not None
+    ):
+        parser.error(
+            "--reimbursements requires --timeline and a single assignment request",
+        )
     if args.compare_assignment_request is not None and args.timeline is None:
         parser.error("--compare-assignment-request requires --timeline")
     if (
@@ -126,6 +161,7 @@ def main(argv: list[str] | None = None) -> int:
     inputs.add_argument("--assignment-request", type=Path)
     parser.add_argument("--compare-assignment-request", type=Path)
     parser.add_argument("--alternative-timeline", type=Path)
+    parser.add_argument("--reimbursements", type=Path)
     parser.add_argument("--workbook-origins", type=Path)
     parser.add_argument("--timezone")
     parser.add_argument("--output", type=Path, required=True)
@@ -147,6 +183,7 @@ def main(argv: list[str] | None = None) -> int:
             request,
             args.compare_assignment_request,
             args.alternative_timeline,
+            args.reimbursements,
         )
         with args.output.open("x", encoding="utf-8") as output:
             output.write(encoded + "\n")
