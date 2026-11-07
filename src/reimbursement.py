@@ -13,6 +13,37 @@ from src.unit_quotes import NonnegativeQuantity, QuoteModel, price_units
 lazy from src.unit_quotes import QuoteQuantity, UnitQuoteRelease, UnitQuoteResult
 
 
+class LeaveSchemeReconciliation(QuoteModel):
+    """One matched leave payment, replacement cost and scheme credit."""
+
+    case_id: str
+    paid_leave: NonnegativeQuantity
+    paid_leave_oncost: NonnegativeQuantity
+    replacement_cost: NonnegativeQuantity
+    scheme_credit: NonnegativeQuantity
+    review_evidence: str
+
+    @model_validator(mode="after")
+    def credit_within_paid_leave(self) -> Self:
+        """Exclude replacement labour from the maximum scheme offset."""
+        paid = Fraction(self.paid_leave) + Fraction(self.paid_leave_oncost)
+        if Fraction(self.scheme_credit) > paid:
+            msg = "Scheme credit exceeds the matched paid leave and on-costs"
+            raise ValueError(msg)
+        return self
+
+
+def net_leave_scheme_cost(case: LeaveSchemeReconciliation) -> Fraction:
+    """Value the reviewed credit against gross employer cost in one currency."""
+    case = LeaveSchemeReconciliation.model_validate_json(case.model_dump_json())
+    return (
+        Fraction(case.paid_leave)
+        + Fraction(case.paid_leave_oncost)
+        + Fraction(case.replacement_cost)
+        - Fraction(case.scheme_credit)
+    )
+
+
 class ReimbursementClaim(QuoteModel):
     """An approved eligible amount and its assigned cap accounting date."""
 

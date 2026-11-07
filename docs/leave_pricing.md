@@ -101,3 +101,16 @@ requires explicit evidence for the valuation date. Advance ordinary-pay
 excess is a separate calculation through `AdvanceLeaveTermination`, using
 reviewed ordinary pay due and the relevant service-year completion date.
 Its result is the excess before any payroll deduction.
+
+## Reconcile a reviewed leave scheme credit
+
+Use `LeaveSchemeReconciliation` and `net_leave_scheme_cost` from
+`src.reimbursement` to calculate net employer cost for a matched case.
+Supply original-worker leave pay, its paid on-costs, replacement labour
+and the scheme credit in the same currency. Record the review evidence
+with the case. For example, 100 of leave pay, 10 of on-costs, 50 of
+replacement labour and an 80 credit leave 80 of net employer cost.
+
+The credit is bounded by paid leave and its on-costs. Supply eligible
+amounts from the applicable scheme and matched payroll evidence.
+Retain the claim and cash receipt dates in the underlying records.
