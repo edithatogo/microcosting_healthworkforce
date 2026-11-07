@@ -38,3 +38,17 @@ Supply the same allowance component and the parent denominators throughout.
 The schedule preserves each segment's release ID and hash and checks the
 classified hours and factors across the whole payroll period. The caller
 supplies the reviewed assignment and facility evidence for each segment.
+
+## Receipt-based vehicle travel exclusion
+
+Use `src.vehicle_allowance.price_vehicle_travel` for a reviewed rule
+that excludes an Award kilometre payment when the worker receives
+a recurring vehicle allowance. Supply the exclusion source and hash,
+travel component, effective interval and knowledge date. Each travel
+case supplies explicit receipt or nonreceipt evidence for the worker
+and valuation date. The result retains suppressed cases and prices
+the remaining kilometres against the applicable release.
+
+Value the recurring allowance separately using its own payable
+period and leave portions. The caller must match the receipt evidence
+to the worker and travel date.
