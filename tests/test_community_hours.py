@@ -3,7 +3,10 @@
 
 import pytest
 
-from src.community_hours import tas_rural_base_community_hours
+from src.community_hours import (
+    tas_rural_base_community_hours,
+    tas_rural_community_hours,
+)
 from tests.checks import assert_that
 
 
@@ -21,3 +24,18 @@ def test_exact_breakpoints_are_uncovered(population: int) -> None:
     """Preserve the source's strict inequalities."""
     with pytest.raises(ValueError, match="uncovered schedule breakpoint"):
         tas_rural_base_community_hours(population)
+
+
+def test_volunteer_ambulance_increment_applies_once_to_covered_pool() -> None:
+    """Apply the extra hours once and preserve uncovered base thresholds."""
+    supported_hours, unsupported_hours = 5, 3
+    assert_that(
+        tas_rural_community_hours(5001, supports_volunteer_ambulance=True)
+        == supported_hours,
+    )
+    assert_that(
+        tas_rural_community_hours(5001, supports_volunteer_ambulance=False)
+        == unsupported_hours,
+    )
+    with pytest.raises(ValueError, match="uncovered schedule breakpoint"):
+        tas_rural_community_hours(5000, supports_volunteer_ambulance=True)
