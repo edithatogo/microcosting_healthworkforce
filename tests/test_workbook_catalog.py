@@ -105,3 +105,13 @@ def test_intake_retains_extended_validation(tmp_path: Path) -> None:
     (rule,) = catalog.validations
     assert_that(rule.sheet == "Sheet")
     assert_that("AllowedOptions" in rule.rule_xml and "K6:K55" in rule.rule_xml)
+
+
+def test_intake_rejects_document_type_before_parsing(tmp_path: Path) -> None:
+    """Reject declarations before either workbook reader parses the XML."""
+    path = tmp_path / "doctype.xlsx"
+    xml = "<!DOCTYPE workbook><workbook/>"
+    with ZipFile(path, "w") as archive:
+        archive.writestr("xl/workbook.xml", xml.encode("utf-16"))
+    with pytest.raises(ValueError, match="document type declaration"):
+        read_workbook_catalog(path)
