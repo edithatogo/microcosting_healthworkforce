@@ -1,11 +1,13 @@
 # Copyright 2026 Dylan. SPDX-License-Identifier: Apache-2.0
 """Typed scenario requests delegate to the qualified assignment cost functions."""
 
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Annotated, Literal
 lazy from decimal import Decimal
+lazy from fractions import Fraction
 
-from pydantic import Field, TypeAdapter, field_validator
+from pydantic import Field, TypeAdapter, computed_field, field_validator
 
 from src.assignment_costing import (
     AssignmentCost,
@@ -56,3 +58,36 @@ def run_assignment_request(
     if isinstance(request, AssignmentSnapshotRequest):
         return cost_assignment_snapshot(timeline, request.when, request.hours)
     return cost_assignment_activities(timeline, request.activities)
+
+
+@dataclass(frozen=True)
+class AssignmentScenarioComparison:
+    """Retain the two exact ledgers underlying a deterministic difference."""
+
+    baseline: AssignmentCost
+    alternative: AssignmentCost
+
+    @computed_field
+    @property
+    def difference(self) -> Fraction:
+        """Return alternative minus baseline in ledger currency."""
+        return self.alternative.total - self.baseline.total
+
+
+def compare_assignment_requests(
+    baseline_timeline: AssignmentTimeline,
+    baseline_request: AssignmentRequest,
+    alternative_timeline: AssignmentTimeline,
+    alternative_request: AssignmentRequest,
+) -> AssignmentScenarioComparison:
+    """Compare explicit scenarios for one subject using the same costing mode."""
+    if (
+        baseline_request.mode != alternative_request.mode
+        or baseline_timeline.subject_id != alternative_timeline.subject_id
+    ):
+        msg = "Assignment comparison requires one subject and one costing mode"
+        raise ValueError(msg)
+    return AssignmentScenarioComparison(
+        run_assignment_request(baseline_timeline, baseline_request),
+        run_assignment_request(alternative_timeline, alternative_request),
+    )

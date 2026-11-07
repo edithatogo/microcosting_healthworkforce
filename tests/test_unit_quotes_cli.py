@@ -199,3 +199,31 @@ def test_cli_requires_all_paths_and_documents_both_modes() -> None:
     with pytest.raises(SystemExit) as help_result:
         main(["--help"])
     assert_that(help_result.value.code == 0)
+
+
+@pytest.mark.parametrize("mode", ["snapshot", "events"])
+def test_negative_allowance_scenario_cannot_enter_quote_ledger(
+    tmp_path: Path,
+    mode: str,
+) -> None:
+    """A negative legacy perturbation cannot become a successor unit price."""
+    rates = release(
+        quote(component="professional_development_allowance", amount=Decimal(0)),
+    )
+    args, output = inputs(
+        tmp_path,
+        payload(
+            (quantity(),),
+            mode=mode,
+            as_of="2026-02-01" if mode == "snapshot" else None,
+        ),
+        rates,
+    )
+    release_path = tmp_path / "release.json"
+    invalid = rates.model_dump(mode="json")
+    invalid["quotes"][0]["amount"] = "-500"
+    release_path.write_text(json.dumps(invalid), encoding="utf-8")
+    with pytest.raises(SystemExit) as error:
+        main(args)
+    assert_that(error.value.code == ARGUMENT_ERROR)
+    assert_that(not output.exists())

@@ -8,7 +8,12 @@ lazy from datetime import date
 from pydantic import TypeAdapter
 
 from src.assignment_costing import AssignmentCost, AssignmentTimeline
-from src.assignment_requests import AssignmentRequest, run_assignment_request
+from src.assignment_requests import (
+    AssignmentRequest,
+    AssignmentScenarioComparison,
+    compare_assignment_requests,
+    run_assignment_request,
+)
 from src.capacity_costing import CapacityScenarioInputs, capacity_scenario
 from src.conditions import (
     ConditionRelease,
@@ -67,6 +72,47 @@ def _load_release(release_path: Path, origin_path: Path | None) -> ConditionRele
     return release
 
 
+def _assignment_output(
+    timeline: AssignmentTimeline,
+    request: AssignmentRequest,
+    comparison_path: Path | None,
+    alternative_path: Path | None,
+) -> str:
+    if comparison_path is None:
+        result = run_assignment_request(timeline, request)
+        return TypeAdapter(AssignmentCost).dump_json(result).decode("utf-8")
+    alternative = TypeAdapter(AssignmentRequest).validate_json(
+        comparison_path.read_bytes(),
+    )
+    alternative_timeline = (
+        timeline
+        if alternative_path is None
+        else AssignmentTimeline.model_validate_json(alternative_path.read_bytes())
+    )
+    comparison = compare_assignment_requests(
+        timeline,
+        request,
+        alternative_timeline,
+        alternative,
+    )
+    return (
+        TypeAdapter(AssignmentScenarioComparison).dump_json(comparison).decode("utf-8")
+    )
+
+
+def _validate_comparison_options(
+    parser: argparse.ArgumentParser,
+    args: argparse.Namespace,
+) -> None:
+    if args.compare_assignment_request is not None and args.timeline is None:
+        parser.error("--compare-assignment-request requires --timeline")
+    if (
+        args.alternative_timeline is not None
+        and args.compare_assignment_request is None
+    ):
+        parser.error("--alternative-timeline requires --compare-assignment-request")
+
+
 def main(argv: list[str] | None = None) -> int:
     """Validate both inputs, then create a new output without overwriting files."""
     parser = argparse.ArgumentParser(description=__doc__)
@@ -78,10 +124,13 @@ def main(argv: list[str] | None = None) -> int:
     inputs.add_argument("--snapshot", type=Path)
     inputs.add_argument("--capacity", type=Path)
     inputs.add_argument("--assignment-request", type=Path)
+    parser.add_argument("--compare-assignment-request", type=Path)
+    parser.add_argument("--alternative-timeline", type=Path)
     parser.add_argument("--workbook-origins", type=Path)
     parser.add_argument("--timezone")
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args(argv)
+    _validate_comparison_options(parser, args)
     if args.timeline is not None:
         if (
             args.assignment_request is None
@@ -93,8 +142,12 @@ def main(argv: list[str] | None = None) -> int:
         request = TypeAdapter(AssignmentRequest).validate_json(
             args.assignment_request.read_bytes(),
         )
-        assignment = run_assignment_request(timeline, request)
-        encoded = TypeAdapter(AssignmentCost).dump_json(assignment).decode("utf-8")
+        encoded = _assignment_output(
+            timeline,
+            request,
+            args.compare_assignment_request,
+            args.alternative_timeline,
+        )
         with args.output.open("x", encoding="utf-8") as output:
             output.write(encoded + "\n")
         return 0

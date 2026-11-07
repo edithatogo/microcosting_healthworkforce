@@ -14,7 +14,11 @@ from src.assignment_costing import (
     cost_assignment_activities,
     cost_assignment_snapshot,
 )
-from src.assignment_requests import AssignmentRequest, run_assignment_request
+from src.assignment_requests import (
+    AssignmentRequest,
+    compare_assignment_requests,
+    run_assignment_request,
+)
 from src.conditions_cli import main
 from tests.checks import assert_that
 from tests.test_assignment_costing import CHANGE, activity, timeline
@@ -124,3 +128,54 @@ def test_assignment_request_cannot_be_used_as_single_release(tmp_path: Path) -> 
     with pytest.raises(SystemExit):
         main(args)
     assert_that(not output.exists())
+
+
+def test_explicit_assignment_sensitivity_retains_both_ledgers(tmp_path: Path) -> None:
+    """Price the declared comparison using the same static valuation function."""
+    args, _ = files(tmp_path, "snapshot")
+    baseline = TypeAdapter(AssignmentRequest).validate_json(Path(args[3]).read_bytes())
+    alternative = TypeAdapter(AssignmentRequest).validate_python(
+        {**baseline.model_dump(), "hours": Decimal(3)},
+    )
+    path = timeline()
+    result = compare_assignment_requests(path, baseline, path, alternative)
+    assert_that(result.baseline == cost_assignment_snapshot(path, CHANGE, Decimal(2)))
+    assert_that(
+        result.alternative == cost_assignment_snapshot(path, CHANGE, Decimal(3)),
+    )
+    assert_that(result.difference * 2 == result.baseline.total)
+
+
+def test_dynamic_assignment_sensitivity_prices_both_sides_of_change() -> None:
+    """The alternative increases utilisation across both effective wage periods."""
+    path = timeline()
+    original = activity()
+    half = original.model_copy(update={"resources": Decimal("0.5")})
+    adapter = TypeAdapter(AssignmentRequest)
+    baseline = adapter.validate_python(
+        {"mode": "activities", "activities": (half,)},
+    )
+    alternative = adapter.validate_python(
+        {"mode": "activities", "activities": (original,)},
+    )
+    result = compare_assignment_requests(path, baseline, path, alternative)
+    assert_that(result.baseline == cost_assignment_activities(path, (half,)))
+    assert_that(result.alternative == cost_assignment_activities(path, (original,)))
+    assert_that(result.difference == Fraction(55))
+    assert_that(
+        [row.state_id for row in result.alternative.rows] == ["first", "second"],
+    )
+
+
+def test_assignment_comparison_cli_emits_exact_difference(tmp_path: Path) -> None:
+    """The optional comparison retains both ledgers in the CLI output."""
+    args, output = files(tmp_path, "snapshot")
+    alternative = tmp_path / "alternative.json"
+    request = json.loads(Path(args[3]).read_bytes())
+    request["hours"] = "3"
+    alternative.write_text(json.dumps(request))
+    assert_that(main([*args, "--compare-assignment-request", str(alternative)]) == 0)
+    data = json.loads(output.read_bytes())
+    assert_that(Fraction(data["difference"]) == Fraction(60))
+    assert_that(Fraction(data["baseline"]["total"]) == Fraction(120))
+    assert_that(Fraction(data["alternative"]["total"]) == Fraction(180))
