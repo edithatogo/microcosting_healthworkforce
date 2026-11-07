@@ -108,6 +108,17 @@ by the selected contribution row, including any applicable section 15
 agreement. For a paid-earnings calculation, qualify the allowance's
 payroll posting and assignment binding before including it.
 
+Use `reconcile_allowance_payment` to compare a priced periodic
+allowance with a caller-matched payroll posting. Pass that reconciliation
+through `allowance_reconciliations` in `cost_contribution_payments`, and
+pass the remaining postings through `payments`. Together they must cover
+the complete period. Each reconciled posting enters the calculation
+through its reconciliation. Supplying it in both arguments raises a
+duplicate payment error.
+It retains any paid-versus-payable difference and prices the actual
+posting against each reviewed base that includes its component. This
+keeps the allowance calculation and its cash posting separately auditable.
+
 ## Queensland long-service leave levy
 
 The [Treasury Central Scheme guidelines](https://www.treasury.qld.gov.au/files/Long-Service-Leave-Central-Scheme-Guidelines-2.pdf)
