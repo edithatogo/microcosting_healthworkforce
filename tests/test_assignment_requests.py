@@ -18,6 +18,7 @@ from src.assignment_costing import (
 from src.assignment_requests import (
     AssignmentActivitiesRequest,
     AssignmentRequest,
+    AssignmentSnapshotRequest,
     compare_assignment_requests,
     cost_assignment_with_reimbursements,
     run_assignment_request,
@@ -27,6 +28,7 @@ from src.leave_pricing import (
     nsw_online_study_leave_hours,
     vic_hama_historical_study_leave_hours,
     vic_scientist_development_credit_balance,
+    vic_scientist_ungranted_development_leave_credit,
 )
 from src.reimbursement import ReimbursementClaim, ReimbursementPeriod
 from tests.checks import assert_that
@@ -309,3 +311,28 @@ def test_development_credit_redemption_reconciles_dated_roster_hours() -> None:
         == Fraction(1, 2),
     )
     assert_that(result.total == Fraction(80))
+
+
+def test_ungranted_development_credit_snapshot_and_dated_cost() -> None:
+    """Value one reviewed credit on a snapshot and across a roster rate change."""
+    hours = vic_scientist_ungranted_development_leave_credit(
+        Fraction(15, 2),
+        valid_application=True,
+        leave_granted_in_calendar_year=False,
+    )
+    path = timeline()
+    snapshot = AssignmentSnapshotRequest(
+        mode="snapshot",
+        when=CHANGE,
+        hours=Decimal(hours.numerator) / Decimal(hours.denominator),
+    )
+    original = activity()
+    scheduled = original.model_copy(
+        update={
+            "activity_id": "approved-development-remedy",
+            "ends_at": original.starts_at + timedelta(minutes=int(hours * 60)),
+        },
+    )
+    dated = AssignmentActivitiesRequest(mode="activities", activities=(scheduled,))
+    assert_that(run_assignment_request(path, snapshot).total == Fraction(450))
+    assert_that(run_assignment_request(path, dated).total == Fraction(440))

@@ -283,3 +283,26 @@ def price_sa_residential_course_days(
         msg = "Course-day quote must match the programme duration band"
         raise ValueError(msg)
     return result
+
+
+def validate_vic_development_reimbursement(
+    claim: ReimbursementClaim,
+    *,
+    returned_on: date,
+    applied_on: date,
+    receipt_evidence: str,
+) -> ReimbursementClaim:
+    """Check filing evidence under the later Victorian agreement's clause 75.
+
+    The caller establishes instrument coverage, approved leave and the
+    approved reasonable amount. The claim's accounting date is independent
+    of its application date.
+    """
+    filing_limit_days = 14
+    if not 0 <= (applied_on - returned_on).days <= filing_limit_days:
+        msg = "Development expense application must be within 14 days of return"
+        raise ValueError(msg)
+    if not receipt_evidence.strip():
+        msg = "Development expense application requires official receipt evidence"
+        raise ValueError(msg)
+    return ReimbursementClaim.model_validate(dict(claim))
