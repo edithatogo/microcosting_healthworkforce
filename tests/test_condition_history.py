@@ -1,12 +1,18 @@
 # Copyright 2026 Dylan. SPDX-License-Identifier: Apache-2.0
 """Synthetic retrospective release selection and frozen replay examples."""
 
+import json
 from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal
 
 import pytest
 
-from src.condition_history import ConditionHistory, ReleaseEdition, ReleasePin
+from src.condition_history import (
+    ConditionHistory,
+    ReleaseEdition,
+    ReleasePin,
+    release_sha256,
+)
 from src.conditions import (
     ConditionRelease,
     cost_condition_activity,
@@ -128,3 +134,17 @@ def test_historical_selection_also_applies_to_dynamic_activity() -> None:
         cost_condition_activity(history.replay(pin), activity, "UTC").total
         == Decimal(50),
     )
+
+
+def test_publication_metadata_changes_pin_only_when_supplied() -> None:
+    """Unknown publication preserves legacy pins and known publication is hashed."""
+    original = release()
+    legacy_payload = original.model_dump(mode="json")
+    for record in legacy_payload["sources"]["records"]:
+        record.pop("published_on")
+    legacy = ConditionRelease.model_validate_json(json.dumps(legacy_payload))
+    assert_that(release_sha256(legacy) == release_sha256(original))
+    updated = original.model_dump()
+    updated["sources"]["records"][0]["published_on"] = date(2026, 6, 1)
+    published = ConditionRelease.model_validate(updated)
+    assert_that(release_sha256(published) != release_sha256(original))

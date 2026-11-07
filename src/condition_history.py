@@ -43,6 +43,9 @@ def release_sha256(release: ConditionRelease) -> str:
             item.pop("retrospective")
         if not any(condition.included_components for condition in release.conditions):
             item.pop("included_components")
+    for source in payload["sources"]["records"]:
+        if source["published_on"] is None:
+            source.pop("published_on")
     encoded = json.dumps(
         payload,
         sort_keys=True,

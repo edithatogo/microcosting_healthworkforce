@@ -30,6 +30,10 @@ class SourceRecord(BaseModel):
     ] = "unresolved"
     sha256: str | None = Field(default=None, pattern=r"^[a-f0-9]{64}$")
     retrieved_at: datetime | None = None
+    published_on: date | None = Field(
+        default=None,
+        description="Document publication date, independent of the operative interval",
+    )
     effective_from: date | None = None
     effective_to: date | None = None
     verified_through: date | None = None
