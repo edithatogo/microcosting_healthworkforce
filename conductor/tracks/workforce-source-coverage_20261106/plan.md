@@ -380,3 +380,12 @@ screening targets, including the separately acquired health-professionals
 agreement. The retained nursing edition commenced on 13 August 2024.
 Later variations, complete instrument chains, employer and classification
 coverage, and the applicable pay period remain open.
+
+## NT professional-health applicability checkpoint
+
+The [professional-health source review](../../reviews/nt-professional-health-chain-20261107.md)
+records candidate scope for three NT public-sector cohorts and separates
+market allowance, retention and receipt-based exclusions. Approval
+undertakings and operative, transition and end dates are documented.
+Actual worker cohort and service history, missing instrument links and
+payroll treatment remain open.
