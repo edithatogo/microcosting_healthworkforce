@@ -564,6 +564,9 @@ def test_shift_credit_applies_once_per_qualifying_period(
 ) -> None:
     """Extra shifts do not generate additional credits within a period."""
     credit = qualifying_shift_leave_credit(
-        worked, required, Fraction("2.92"), Fraction(share),
+        worked,
+        required,
+        Fraction("2.92"),
+        Fraction(share),
     )
     assert_that(credit == Fraction(expected))
