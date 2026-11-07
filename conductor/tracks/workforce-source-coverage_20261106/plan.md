@@ -373,5 +373,10 @@ is open with hosted checks and integration pending.
 
 The [held-source review](../../reviews/nt-tas-held-source-batch-20261107.md)
 supersedes the download-failure disposition for the selected 28 PDFs.
-Source holdings and candidate transcriptions are evidenced. Applicability,
-instrument chains and the ACT acquisition scope remain open.
+Source holdings and candidate transcriptions are evidenced. The separate
+[ACT acquisition review](../../reviews/act-public-sector-source-batch-20261106.md)
+records six verified files and seven held candidates linked to ten public-sector
+screening targets, including the separately acquired health-professionals
+agreement. The retained nursing edition commenced on 13 August 2024.
+Later variations, complete instrument chains, employer and classification
+coverage, and the applicable pay period remain open.
