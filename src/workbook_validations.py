@@ -3,14 +3,22 @@
 
 from dataclasses import dataclass
 from posixpath import normpath
+from typing import Protocol, cast
 from zipfile import ZipFile
 lazy from pathlib import Path
 
+from openpyxl.formula.translate import Translator
+from openpyxl.utils.cell import get_column_letter
+from openpyxl.worksheet.cell_range import CellRange
 from openpyxl.xml.functions import fromstring, tostring
 
 _RELATIONSHIP_ID = (
     "{http://schemas.openxmlformats.org/officeDocument/2006/relationships}id"
 )
+
+
+class _FormulaTranslator(Protocol):
+    def translate_formula(self, dest: str) -> object: ...
 
 
 @dataclass(frozen=True)
@@ -22,6 +30,33 @@ class WorkbookValidation:
     targets: tuple[str, ...] = ()
     formula1: str | None = None
     formula2: str | None = None
+
+    def formulas_at(self, cell: str) -> tuple[str | None, str | None]:
+        """Translate operands within one contiguous validation range."""
+        if len(self.targets) != 1:
+            msg = "Formula translation requires a single validation range"
+            raise ValueError(msg)
+        target = CellRange(self.targets[0])
+        if cell not in target:
+            msg = "Cell is outside the validation range"
+            raise ValueError(msg)
+        origin = f"{get_column_letter(target.min_col)}{target.min_row}"
+
+        def translate(formula: str | None) -> str | None:
+            if formula is None:
+                return None
+            expression = "=" + formula.removeprefix("=")
+            translator = cast(
+                "_FormulaTranslator",
+                Translator(expression, origin=origin),
+            )
+            result = translator.translate_formula(cell)
+            if not isinstance(result, str):
+                msg = "Validation formula translation did not return text"
+                raise TypeError(msg)
+            return result if formula.startswith("=") else result.removeprefix("=")
+
+        return translate(self.formula1), translate(self.formula2)
 
 
 def _read_xml_part(archive: ZipFile, member: str) -> bytes:

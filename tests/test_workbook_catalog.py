@@ -92,7 +92,7 @@ def test_intake_retains_extended_validation(tmp_path: Path) -> None:
         b'<x14:dataValidations xmlns:x14="http://schemas.microsoft.com/office/'
         b'spreadsheetml/2009/9/main" xmlns:xm="http://schemas.microsoft.com/'
         b'office/excel/2006/main" count="1">'
-        b'<x14:dataValidation type="list"><x14:formula1><xm:f>AllowedOptions</xm:f>'
+        b'<x14:dataValidation type="list"><x14:formula1><xm:f>INDIRECT($J6)</xm:f>'
         b"</x14:formula1><xm:sqref>K6:K55</xm:sqref></x14:dataValidation>"
         b"</x14:dataValidations></ext></extLst>"
     )
@@ -108,9 +108,12 @@ def test_intake_retains_extended_validation(tmp_path: Path) -> None:
     (rule,) = catalog.validations
     assert_that(rule.sheet == "Sheet")
     assert_that(rule.targets == ("K6:K55",))
-    assert_that(rule.formula1 == "AllowedOptions")
+    assert_that(rule.formula1 == "INDIRECT($J6)")
     assert_that(rule.formula2 is None)
-    assert_that("AllowedOptions" in rule.rule_xml and "K6:K55" in rule.rule_xml)
+    assert_that(rule.formulas_at("K55") == ("INDIRECT($J55)", None))
+    with pytest.raises(ValueError, match="outside the validation range"):
+        rule.formulas_at("K56")
+    assert_that("INDIRECT($J6)" in rule.rule_xml and "K6:K55" in rule.rule_xml)
 
 
 def test_intake_rejects_document_type_before_parsing(tmp_path: Path) -> None:
