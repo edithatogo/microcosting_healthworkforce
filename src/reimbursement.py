@@ -1,6 +1,7 @@
 # Copyright 2026 Dylan. SPDX-License-Identifier: Apache-2.0
 """Cost approved expense claims within one explicitly reviewed accounting period."""
 
+from calendar import monthrange
 from dataclasses import dataclass
 from fractions import Fraction
 from typing import Literal, Self
@@ -358,3 +359,39 @@ def nsw_level_one_tesl_available_funding(
         msg = "TESL credit, unspent balance and ceiling must be nonnegative"
         raise ValueError(msg)
     return min(annual_credit + unspent_balance, accumulation_ceiling)
+
+
+def nsw_level_one_tesl_retained_funding_split(
+    unspent_balance: Fraction,
+    appointment_fractions: tuple[Fraction, ...],
+    *,
+    terminated_on: date,
+    starts_on: tuple[date, ...],
+) -> tuple[Fraction, ...]:
+    """Allocate retained Level 1 entitlement after a reviewed continuous move.
+
+    PD2019_043 section 3.5 allocates entitlement proportionately across
+    receiving appointments. Match each fraction to its commencement date.
+    The result represents entitlement balances without a cash transfer.
+    """
+    if (
+        unspent_balance < 0
+        or not appointment_fractions
+        or any(not 0 < fraction <= 1 for fraction in appointment_fractions)
+    ):
+        msg = "TESL split needs nonnegative funds and positive appointment fractions"
+        raise ValueError(msg)
+    year_offset, month_index = divmod(terminated_on.month + 1, 12)
+    year = terminated_on.year + year_offset
+    month = month_index + 1
+    deadline = date(year, month, min(terminated_on.day, monthrange(year, month)[1]))
+    if len(starts_on) != len(appointment_fractions) or any(
+        not terminated_on <= start <= deadline for start in starts_on
+    ):
+        msg = "Each receiving appointment must start within two months of termination"
+        raise ValueError(msg)
+    total_fraction = sum(appointment_fractions, Fraction(0))
+    return tuple(
+        unspent_balance * fraction / total_fraction
+        for fraction in appointment_fractions
+    )

@@ -18,6 +18,7 @@ from src.reimbursement import (
     cost_reimbursements,
     nsw_level_one_tesl_available_funding,
     nsw_level_one_tesl_funding,
+    nsw_level_one_tesl_retained_funding_split,
     price_sa_residential_course_days,
     reimbursement_carry_amount,
     reimbursement_cost_after_recovery,
@@ -495,3 +496,33 @@ def test_nsw_tesl_carried_funding_limits_dated_claims() -> None:
     )
     assert_that(ledger.total == Fraction(1000))
     assert_that(ledger.rows[-1].remaining == 0)
+
+
+def test_nsw_tesl_retained_entitlement_split_conserves_balance() -> None:
+    """Split the full balance in proportion to the new appointments."""
+    split = nsw_level_one_tesl_retained_funding_split
+    terminated = date(2022, 12, 31)
+    starts = (date(2023, 1, 1), date(2023, 2, 28))
+    assert_that(
+        split(
+            Fraction("12000.03"),
+            (Fraction(1, 5), Fraction(2, 5)),
+            terminated_on=terminated,
+            starts_on=starts,
+        )
+        == (Fraction("4000.01"), Fraction("8000.02")),
+    )
+    with pytest.raises(ValueError, match="positive appointment fractions"):
+        split(
+            Fraction(100),
+            (Fraction(0), Fraction(1, 2)),
+            terminated_on=terminated,
+            starts_on=starts,
+        )
+    with pytest.raises(ValueError, match="within two months"):
+        split(
+            Fraction(100),
+            (Fraction(1),),
+            terminated_on=terminated,
+            starts_on=(date(2023, 3, 1),),
+        )
