@@ -10,6 +10,7 @@ import pytest
 from src.costing import Activity, CostRelease, ResourceUse
 from src.period_contributions import (
     ContributionAlternative,
+    ContributionCap,
     ContributionFactor,
     ContributionPeriod,
     ContributionRule,
@@ -403,3 +404,89 @@ def test_unsupported_caps_and_static_out_of_period_quantity_fail() -> None:
                 at,
                 ResourceUse(resource_id="staff", hours=Decimal(hours)),
             )
+
+
+def test_capped_earnings_use_prior_history_before_pricing() -> None:
+    """A 2,500 remaining earnings base at 12 percent adds 300."""
+    source = prices()
+    source = source.model_copy(
+        update={
+            "rates": tuple(
+                row.model_copy(update={"components": {"salary": Decimal(2500)}})
+                for row in source.rates
+            ),
+        },
+    )
+    cap = ContributionCap(
+        limit=Decimal(62500),
+        prior_eligible_earnings=Decimal(60000),
+        starts_at=datetime(2026, 1, 1, tzinfo=UTC),
+        ends_at=datetime(2026, 4, 1, tzinfo=UTC),
+        history_through=START,
+        source_id="synthetic-award-1",
+        source_sha256="a" * 64,
+        citation="Synthetic cap evidence",
+        reviewed=True,
+    )
+    alternative = ContributionAlternative(
+        alternative_id="capped",
+        bases=("salary",),
+        factors=(factor("capped-rate", "0.12"),),
+        cap=cap,
+    )
+    comparison = ContributionAlternative(
+        alternative_id="comparison",
+        bases=("salary",),
+        factors=(factor("comparison-rate", "0.05"),),
+    )
+    capped_rule = rule().model_copy(update={"alternatives": (alternative, comparison)})
+    dated = cost_contribution_activities(source, period(), capped_rule, (activity(),))
+    snapshot = cost_contribution_snapshot(
+        source,
+        period(),
+        capped_rule,
+        START,
+        ResourceUse(resource_id="staff", hours=Decimal(2)),
+    )
+    assert_that(dated.contribution == snapshot.contribution == Fraction(300))
+    assert_that(
+        [r.eligible_base_amount for r in dated.rows if r.alternative_id == "capped"]
+        == [Fraction(2500), 0],
+    )
+    assert_that(
+        [r.base_amount for r in dated.rows if r.alternative_id == "capped"]
+        == [Fraction(2500), Fraction(2500)],
+    )
+    stale = cap.model_copy(update={"history_through": START - timedelta(hours=1)})
+    invalid = capped_rule.model_copy(
+        update={
+            "alternatives": (alternative.model_copy(update={"cap": stale}), comparison),
+        },
+    )
+    with pytest.raises(ValueError, match="history cutoff"):
+        cost_contribution_activities(source, period(), invalid, (activity(),))
+
+    changed = alternative.model_copy(
+        update={
+            "factors": (
+                factor("early", "0.12", START, START + timedelta(hours=1)),
+                factor("late", "0.18", START + timedelta(hours=1), END),
+            ),
+        },
+    )
+    changed_rule = capped_rule.model_copy(
+        update={"alternatives": (changed, comparison)},
+    )
+    first = activity().model_copy(
+        update={"activity_id": "first", "ends_at": START + timedelta(hours=1)},
+    )
+    second = activity().model_copy(
+        update={"activity_id": "second", "starts_at": START + timedelta(hours=1)},
+    )
+    ordered = cost_contribution_activities(
+        source,
+        period(),
+        changed_rule,
+        (second, first),
+    )
+    assert_that(ordered.contribution == Fraction(300))
