@@ -14,6 +14,7 @@ from src.leave_pricing import (
     LeaveLoadingMoneyCap,
     LeavePriceSelection,
     allocate_leave_loading_hours,
+    combined_leave_hours,
     price_leave_loading,
     price_paid_leave,
     select_leave_loading_alternative,
@@ -522,4 +523,24 @@ def test_grouped_loading_compares_once_across_a_rate_change() -> None:
             row.total == row.pricing.pricing.total * Fraction(6, 5)
             for row in result.rows
         ),
+    )
+
+
+@pytest.mark.parametrize(
+    ("eligible", "base_only", "expected"),
+    [
+        ("15.2", "7.6", ("22.8", "15.2", "15.2")),
+        ("30.4", "22.8", ("38", "15.2", "30.4")),
+    ],
+)
+def test_combined_leave_cap_preserves_loading_allocation_range(
+    eligible: str,
+    base_only: str,
+    expected: tuple[str, str, str],
+) -> None:
+    """The cap fixes total accrual while the loading basis may remain unresolved."""
+    result = combined_leave_hours(Fraction(eligible), Fraction(base_only), Fraction(38))
+    assert_that(
+        (result.total, result.minimum_loaded, result.maximum_loaded)
+        == tuple(map(Fraction, expected)),
     )

@@ -56,6 +56,32 @@ def select_leave_loading_alternative(
     )
 
 
+@dataclass(frozen=True)
+class CombinedLeaveHours:
+    """Total capped hours and the feasible range of loading-eligible hours."""
+
+    total: Fraction
+    minimum_loaded: Fraction
+    maximum_loaded: Fraction
+
+
+def combined_leave_hours(
+    loading_eligible: Fraction,
+    base_only: Fraction,
+    cap: Fraction,
+) -> CombinedLeaveHours:
+    """Bound the loading basis when a shared cap has no reviewed priority."""
+    if min(loading_eligible, base_only, cap) < 0:
+        msg = "Combined leave hours and cap must be nonnegative"
+        raise ValueError(msg)
+    total = min(loading_eligible + base_only, cap)
+    return CombinedLeaveHours(
+        total,
+        max(Fraction(0), total - base_only),
+        min(loading_eligible, total),
+    )
+
+
 def allocate_leave_loading_hours(
     eligible_hours: tuple[Fraction, ...],
     cap_hours: Fraction,
