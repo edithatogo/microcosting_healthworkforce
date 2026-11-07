@@ -49,11 +49,15 @@ def test_settlement_retains_signed_lines_and_separate_cash_date() -> None:
     assert_that(result.differences == (Fraction(51, 25), Fraction(-1)))
     assert_that(result.net_difference == Fraction(26, 25))
     assert_that(result.request == request)
+    duplicate = next_line.model_copy(update={"line_id": " first "})
+    with pytest.raises(ValueError, match="Duplicate adjustment line identity"):
+        reconcile_adjustment(
+            request.model_copy(update={"lines": (line, duplicate)}),
+        )
+    overlapping = line.model_copy(update={"line_id": "copy", "component": " salary "})
     with pytest.raises(ValueError, match="Overlapping"):
         reconcile_adjustment(
-            request.model_copy(
-                update={"lines": (line, line.model_copy(update={"line_id": "copy"}))},
-            ),
+            request.model_copy(update={"lines": (line, overlapping)}),
         )
 
 
