@@ -22,6 +22,7 @@ from src.leave_pricing import (
     price_advance_loading,
     price_leave_loading,
     price_paid_leave,
+    price_separation_loading,
     qualifying_shift_leave_credit,
     select_leave_loading_alternative,
 )
@@ -657,6 +658,34 @@ def test_deferred_loading_prices_both_quotes_on_entitlement_date() -> None:
             release,
             timing,
             selected.model_copy(update={"benchmark_quote_id": "new"}),
+        )
+
+    separation = SeparationLoadingEligibility(
+        separated_on=MID,
+        as_known_on=MID,
+        reason="retirement",
+        entitled_loading_weeks=Fraction(1, 2),
+        evidence="Synthetic retirement record",
+    )
+    priced = price_separation_loading(
+        release,
+        separation,
+        selected,
+        valued_on=MID,
+        valuation_evidence="Synthetic reviewed rate date",
+    )
+    if priced is None:
+        pytest.fail("Expected loading on eligible separation")
+    ledger, amount = priced
+    assert_that(amount == Fraction(140))
+    assert_that(all(row.quantity.valued_on == MID for row in ledger.rows))
+    with pytest.raises(ValueError, match="eligible separation weeks"):
+        price_separation_loading(
+            release,
+            separation,
+            selected.model_copy(update={"eligible_weeks": Fraction(1)}),
+            valued_on=MID,
+            valuation_evidence="Synthetic reviewed rate date",
         )
 
 

@@ -299,6 +299,23 @@ def price_advance_loading(
     if payable_on is None:
         return None
     prices = AdvanceLoadingPrices.model_validate(dict(prices))
+    ledger, amount = _price_capped_weekly_loading(
+        release,
+        prices,
+        prices.eligible_weeks,
+        payable_on,
+        timing.evidence,
+    )
+    return DeferredLeaveLoading(timing, prices, ledger, amount)
+
+
+def _price_capped_weekly_loading(
+    release: UnitQuoteRelease,
+    prices: AdvanceLoadingPrices,
+    weeks: NonnegativeQuantity,
+    valued_on: date,
+    evidence: str,
+) -> tuple[UnitQuoteResult, Fraction]:
     ledger = price_units(
         release,
         tuple(
@@ -306,10 +323,10 @@ def price_advance_loading(
                 quantity_id=label,
                 quote_id=quote_id,
                 unit="week",
-                quantity=prices.eligible_weeks,
-                valued_on=payable_on,
+                quantity=weeks,
+                valued_on=valued_on,
                 quantity_kind="analyst_assumption",
-                basis=timing.evidence,
+                basis=evidence,
             )
             for label, quote_id in (
                 ("salary", prices.salary_quote_id),
@@ -319,10 +336,41 @@ def price_advance_loading(
     )
     salary, benchmark = ledger.rows
     if (salary.quote.component, benchmark.quote.component) != ("salary", "benchmark"):
-        msg = "Advance loading requires a salary quote and a benchmark quote"
+        msg = "Capped loading requires a salary quote and a benchmark quote"
         raise ValueError(msg)
     amount = min(salary.cost, benchmark.cost) * Fraction(prices.loading_rate)
-    return DeferredLeaveLoading(timing, prices, ledger, amount)
+    return ledger, amount
+
+
+def price_separation_loading(
+    release: UnitQuoteRelease,
+    eligibility: SeparationLoadingEligibility,
+    prices: AdvanceLoadingPrices,
+    *,
+    valued_on: date,
+    valuation_evidence: str,
+) -> tuple[UnitQuoteResult, Fraction] | None:
+    """Price eligible separation loading on an explicitly reviewed rate date."""
+    weeks = eligibility.eligible_weeks()
+    if release.as_known_on != eligibility.as_known_on:
+        msg = "Separation and the price release must share a knowledge date"
+        raise ValueError(msg)
+    if not valuation_evidence.strip() or valued_on > eligibility.as_known_on:
+        msg = "Separation loading requires reviewed valuation evidence at cutoff"
+        raise ValueError(msg)
+    if not weeks:
+        return None
+    prices = AdvanceLoadingPrices.model_validate(dict(prices))
+    if Fraction(prices.eligible_weeks) != weeks:
+        msg = "Selected pricing weeks must equal eligible separation weeks"
+        raise ValueError(msg)
+    return _price_capped_weekly_loading(
+        release,
+        prices,
+        weeks,
+        valued_on,
+        valuation_evidence,
+    )
 
 
 class LeavePriceSelection(QuoteModel):
