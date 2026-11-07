@@ -437,8 +437,14 @@ For NT Aboriginal health practitioners, the Fair Work Commission register
 establishes the 31 March 2026 agreement operation date. Schedule D and
 clause 46 establish the fixed classification reference and payment
 conditions. PR #225 verifies the generic dated quote arithmetic with
-synthetic amounts. The signed Annexure A undertaking and actual payroll
-conversion still require evidence.
+synthetic amounts. The [published approval decision and agreement](https://ocpe.nt.gov.au/__data/assets/pdf_file/0008/1604663/northern-territory-public-sector-aboriginal-health-practitioner-2025-2029-enterprise-agreement.PDF)
+identify the undertaking as a term of the agreement and locate it at
+Annexure A on PDF page 3. The searchable text shows only the annexure
+heading, so applicability review still requires a legible page image or
+transcription. Actual payroll conversion remains a separate evidence gap.
+Clause 80.19(d) governs the extended half-pay period and leave accrual.
+Clause 80.19(h) separately limits counted service to the full-pay equivalent.
+Keep these quantities separate from the monetary allowance calculation.
 
 ## Candidate workforce weighting sources
 

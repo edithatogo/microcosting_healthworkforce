@@ -152,3 +152,21 @@ date interval. Supply both dates when payroll identifies the earning
 period. Reconciliation checks them against the priced allowance period.
 The paid contribution calculation still selects its period and rate
 using `paid_at`, including when the payment arrives late.
+
+## NT half-pay parental leave
+
+Clause 80.19(d) of the NT Aboriginal Health Practitioner agreement
+doubles the duration when an employee elects half-pay parental leave.
+Leave entitlement accrual and counted service under clauses 80.19(d)
+and 80.19(h) follow the full-pay equivalent duration. Record those
+quantities separately from the accrued monetary allowance.
+
+The synthetic costing example uses a payment factor of 0.5 throughout
+the extended period. Use that factor for an actual allowance only once
+continued eligibility under clause 46, the effect of Annexure A and the
+payroll conversion have been verified.
+
+At an unchanged rate and equal contracted hours per fortnight, two
+half-pay fortnights yield the same exact payable allowance as one
+full-pay fortnight. If the annual rate changes, value each fortnight
+under its applicable release.

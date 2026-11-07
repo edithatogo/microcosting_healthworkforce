@@ -271,3 +271,38 @@ def test_overtime_rejects_premium_on_composite_salary() -> None:
     )
     with pytest.raises(ValueError, match="salary without bundled components"):
         cost_overtime_period(composite, period(), rule(), (activity,), "UTC")
+
+
+def test_overtime_uses_salary_effective_when_threshold_is_crossed() -> None:
+    """Carry eligible hours across a wage change and price the later premium."""
+    base = release()
+    salary, hours = base.conditions
+    boundary = date(2026, 6, 3)
+    dated = base.model_copy(
+        update={
+            "conditions": (
+                salary.model_copy(update={"effective_to": boundary}),
+                salary.model_copy(
+                    update={
+                        "effective_from": boundary,
+                        "condition_id": "salary-later",
+                        "value": Decimal(120000),
+                    },
+                ),
+                hours,
+            ),
+        },
+    )
+    start = datetime(2026, 6, 2, 23, tzinfo=UTC)
+    activity = Activity(
+        activity_id="overnight",
+        resource_id="worker",
+        starts_at=start,
+        ends_at=start + timedelta(hours=2),
+        resources=Decimal(1),
+    )
+    history = period().model_copy(update={"history_through": start})
+    result = cost_overtime_period(dated, history, rule(), (activity,), "UTC")
+    assert_that(result.total == Decimal(140))
+    assert_that(result.overtime_hours == Decimal(1))
+    assert_that(result.rows[1].condition_ids == ("salary-later", "hours"))
