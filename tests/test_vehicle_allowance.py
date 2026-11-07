@@ -125,16 +125,30 @@ def test_moca7_vehicle_level(
     appointment = Moca7VehicleAppointment(
         classification_level=classification,
         received_manager_allowance_level=manager_level,
+        award_vehicle_allowance_selected=False,
         review_evidence="Synthetic covered appointment and receipt assessment",
     )
     assert_that(moca7_vehicle_level(appointment) == expected)
 
 
-def test_moca7_vehicle_level_change_across_fortnight() -> None:
+@pytest.mark.parametrize(
+    ("lower", "upper", "payable", "accrued"),
+    [
+        ("2600", "5200", Fraction(75), Fraction(100)),
+        ("24097", "29260", Fraction(31412, 52), Fraction(38727, 52)),
+    ],
+)
+def test_moca7_vehicle_level_change_across_fortnight(
+    lower: str,
+    upper: str,
+    payable: Fraction,
+    accrued: Fraction,
+) -> None:
     """Price a reviewed manager receipt change with one nominal denominator."""
     appointment = Moca7VehicleAppointment(
         classification_level=24,
         received_manager_allowance_level=0,
+        award_vehicle_allowance_selected=False,
         review_evidence="Synthetic reviewed nonreceipt",
     )
     promoted = appointment.model_copy(
@@ -144,8 +158,8 @@ def test_moca7_vehicle_level_change_across_fortnight() -> None:
         },
     )
     conditions = (
-        condition("vehicle-1", "fixed_annual", "2600", "AUD/year"),
-        condition("vehicle-2", "fixed_annual", "5200", "AUD/year"),
+        condition("vehicle-1", "fixed_annual", lower, "AUD/year"),
+        condition("vehicle-2", "fixed_annual", upper, "AUD/year"),
     )
     rates = condition_release().model_copy(update={"conditions": conditions})
     boundary = date(2026, 6, 8)
@@ -166,7 +180,19 @@ def test_moca7_vehicle_level_change_across_fortnight() -> None:
         [segment.condition.condition_id for segment in result.segments]
         == ["vehicle-1", "vehicle-2"],
     )
-    assert_that(result.payable == Fraction(75))
-    assert_that(result.accrued == Fraction(100))
+    assert_that(result.payable == payable)
+    assert_that(result.accrued == accrued)
     with pytest.raises(ValueError, match="conserve classified hours"):
         cost_periodic_allowance_allocations(period(*before.portions), allocations)
+
+
+def test_moca7_rejects_concurrent_award_vehicle_allowance() -> None:
+    """Clause 11.33.4 excludes concurrent award vehicle allowance."""
+    appointment = Moca7VehicleAppointment(
+        classification_level=25,
+        received_manager_allowance_level=0,
+        award_vehicle_allowance_selected=True,
+        review_evidence="Synthetic reviewed concurrent selection",
+    )
+    with pytest.raises(ValueError, match="cannot be selected together"):
+        moca7_vehicle_level(appointment)
