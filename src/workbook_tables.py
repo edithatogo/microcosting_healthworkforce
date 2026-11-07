@@ -2,6 +2,7 @@
 """Segment catalogued workbook cells using explicit, reviewable table definitions."""
 
 from dataclasses import dataclass
+from decimal import Decimal
 from typing import TYPE_CHECKING
 
 from openpyxl.utils.cell import column_index_from_string, range_boundaries
@@ -141,3 +142,46 @@ def extract_tables(
         unassigned,
         tuple(sheet.name for sheet in catalog.sheets if not sheet.cells),
     )
+
+
+def extract_vehicle_opening_amounts(
+    catalog: WorkbookCatalog,
+) -> dict[str, Decimal | None]:
+    """Read the Queensland template's core vehicle lookup using cached keys.
+
+    A present key with no opening amount remains None. Unknown keys remain
+    absent from the mapping. An uncalculated or erroneous key is invalid.
+    """
+    (table,) = extract_tables(
+        catalog,
+        (
+            TableDefinition(
+                "qld-vehicle-opening",
+                "MV Allowance",
+                "C2:D25",
+                "reviewed",
+                "Core vehicle lookup keys and opening annual budget amounts",
+            ),
+        ),
+    ).tables
+    cells = {(cell.source.row, cell.source.column): cell.source for cell in table.cells}
+    amounts: dict[str, Decimal | None] = {}
+    for row in range(2, 26):
+        key_cell = cells.get((row, 3))
+        key = key_cell.cached if key_cell and key_cell.cached_type != "e" else None
+        if not isinstance(key, str) or not key.strip() or key in amounts:
+            msg = f"Missing, invalid or duplicate vehicle lookup key at C{row}"
+            raise ValueError(msg)
+        amount = cells.get((row, 4))
+        if amount is None:
+            amounts[key] = None
+            continue
+        if type(amount.cached) not in (int, float):
+            msg = f"Invalid vehicle opening amount at D{row}"
+            raise ValueError(msg)
+        value = Decimal(str(amount.cached))
+        if not value.is_finite() or value < 0:
+            msg = f"Invalid vehicle opening amount at D{row}"
+            raise ValueError(msg)
+        amounts[key] = value
+    return amounts
