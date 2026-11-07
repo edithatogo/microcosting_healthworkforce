@@ -119,6 +119,9 @@ def test_intake_retains_extended_validation(tmp_path: Path) -> None:
     assert_that(rule.formula1 == "INDIRECT($J6)")
     assert_that(rule.formula2 is None)
     assert_that(rule.formulas_at("K55") == ("INDIRECT($J55)", None))
+    assert_that(rule.formulas_at("$K$55") == ("INDIRECT($J55)", None))
+    with pytest.raises(ValueError, match="one unqualified cell"):
+        rule.formulas_at("K54:K55")
     with pytest.raises(ValueError, match="outside the validation range"):
         rule.formulas_at("K56")
     assert_that("INDIRECT($J6)" in rule.rule_xml and "K6:K55" in rule.rule_xml)
