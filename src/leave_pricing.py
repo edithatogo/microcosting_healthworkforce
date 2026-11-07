@@ -1052,3 +1052,18 @@ def price_vic_scientist_development_time_in_lieu(
         msg = "Development time credit requires ordinary hourly salary quotes"
         raise ValueError(msg)
     return priced
+
+
+def vic_scientist_development_credit_balance(
+    earned_hours: Fraction,
+    redeemed_hours: Fraction,
+) -> Fraction:
+    """Reconcile reviewed clause 70.9 time credits and approved time taken.
+
+    Use quantities from the same reviewed balance. Cash valuation and any
+    settlement are separate from this time-for-time reconciliation.
+    """
+    if not 0 <= redeemed_hours <= earned_hours:
+        msg = "Redeemed hours must fit the earned development credit"
+        raise ValueError(msg)
+    return earned_hours - redeemed_hours
