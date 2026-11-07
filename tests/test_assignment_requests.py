@@ -2,7 +2,7 @@
 """Explicit assignment requests share pricing and preserve serialized lineage."""
 
 import json
-from datetime import date
+from datetime import date, timedelta
 from decimal import Decimal
 from fractions import Fraction
 from pathlib import Path
@@ -23,6 +23,7 @@ from src.assignment_requests import (
     run_assignment_request,
 )
 from src.conditions_cli import main
+from src.leave_pricing import nsw_online_study_leave_hours
 from src.reimbursement import ReimbursementClaim, ReimbursementPeriod
 from tests.checks import assert_that
 from tests.test_assignment_costing import CHANGE, activity, timeline
@@ -244,3 +245,25 @@ def test_assignment_and_reviewed_expenses_keep_separate_ledgers(tmp_path: Path) 
     assert_that(main([*args, "--reimbursements", str(claims_path)]) == 0)
     ledger = json.loads(output.read_bytes())
     assert_that(Fraction(ledger["total"]) == Fraction("185.25"))
+
+
+def test_approved_study_hours_price_across_dated_wage_change() -> None:
+    """One approved study interval retains its identity across two wage slices."""
+    approved = nsw_online_study_leave_hours(
+        Fraction("1.5"),
+        equivalent_compulsory_hours=Fraction(3),
+    )
+    original = activity()
+    study = original.model_copy(
+        update={
+            "activity_id": "approved-study",
+            "ends_at": original.starts_at + timedelta(minutes=int(approved * 60)),
+        },
+    )
+    request = AssignmentActivitiesRequest(mode="activities", activities=(study,))
+    result = run_assignment_request(timeline(), request)
+    assert_that(
+        [row.exact_hours for row in result.rows] == [Fraction(1), Fraction(1, 2)],
+    )
+    assert_that({row.activity_id for row in result.rows} == {"approved-study"})
+    assert_that(result.total == Fraction(80))

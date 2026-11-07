@@ -25,7 +25,11 @@ from src.leave_pricing import (
     WeekendLeaveShift,
     allocate_leave_loading_hours,
     combined_leave_hours,
+    nsw_examination_leave_days,
+    nsw_face_to_face_study_leave_guide,
     nsw_general_shift_leave_credit,
+    nsw_online_study_leave_hours,
+    nsw_research_study_leave_guide,
     price_advance_loading,
     price_leave_loading,
     price_paid_leave,
@@ -994,3 +998,46 @@ def test_sa_study_block_days_keep_delegate_approval_separate() -> None:
     )
     with pytest.raises(ValueError, match="separate approval"):
         price(Fraction("20.5"))
+
+
+def test_nsw_face_to_face_study_guide_halves_and_caps_attendance() -> None:
+    """The guide preserves fractional hours and caps the weekly figure."""
+    guide = nsw_face_to_face_study_leave_guide
+    assert_that(guide(Fraction("5.5")) == Fraction("2.75"))
+    assert_that(guide(Fraction(8)) == Fraction(4))
+    assert_that(guide(Fraction(10)) == Fraction(4))
+    with pytest.raises(ValueError, match="nonnegative"):
+        guide(Fraction(-1))
+
+
+def test_nsw_research_study_guide_uses_institution_weeks_and_study_fraction() -> None:
+    """Research leave uses the declared academic year rather than 52 weeks."""
+    guide = nsw_research_study_leave_guide
+    assert_that(guide(Fraction(39), Fraction(1)) == Fraction(156))
+    assert_that(guide(Fraction(39), Fraction(1, 3)) == Fraction(52))
+    with pytest.raises(ValueError, match="study fraction"):
+        guide(Fraction(39), Fraction(2))
+
+
+def test_nsw_exam_leave_respects_prior_calendar_year_use() -> None:
+    """An approved fractional grant can use the remaining annual balance."""
+    price = nsw_examination_leave_days
+    assert_that(price(Fraction("0.5"), Fraction("4.5")) == Fraction("0.5"))
+    with pytest.raises(ValueError, match="calendar-year limit"):
+        price(Fraction("0.51"), Fraction("4.5"))
+    with pytest.raises(ValueError, match="calendar-year limit"):
+        price(Fraction(0), Fraction(-1))
+
+
+def test_nsw_online_study_uses_reviewed_equivalence_or_discretionary_limit() -> None:
+    """Known equivalence can limit the grant below the discretionary ceiling."""
+    price = nsw_online_study_leave_hours
+    assert_that(price(Fraction(4), equivalent_compulsory_hours=None) == Fraction(4))
+    assert_that(
+        price(Fraction("2.5"), equivalent_compulsory_hours=Fraction(5))
+        == Fraction("2.5"),
+    )
+    with pytest.raises(ValueError, match="weekly limit"):
+        price(Fraction(3), equivalent_compulsory_hours=Fraction(5))
+    with pytest.raises(ValueError, match="weekly limit"):
+        price(Fraction("4.01"), equivalent_compulsory_hours=None)
