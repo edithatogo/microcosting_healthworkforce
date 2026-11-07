@@ -128,7 +128,12 @@ monthly costing, price each month using its eligible gross earnings.
 Aggregate those expenses for the quarter and retain the remittance
 date separately. The engine preserves an explicit planned remittance
 timestamp. A statutory due date requires the applicable working-day
-calendar and the agency's remittance schedule.
+calendar and the agency's remittance schedule. Use
+`quarterly_levy_due_date(quarter_end, working_days)` to count the
+12 working days after a calendar quarter ends. Supply a Boolean
+classification for every intervening date, including non-working
+days. The returned date is conditional on the supplied calendar.
+Keep it separate from the actual remittance timestamp.
 
 Confirm member agency coverage, employee eligibility and payroll
 component mapping before setting the base. The historical workbook
