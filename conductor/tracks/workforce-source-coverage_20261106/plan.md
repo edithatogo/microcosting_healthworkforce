@@ -415,3 +415,11 @@ candidate rates from worker-level applicability.
 
 The review counts describe their respective matrix versions. Worker coverage,
 eligibility and payroll evidence remain separate acceptance requirements.
+
+## Queensland health practitioner and dental officer chain
+
+The [current HPDO source review](../../reviews/qld-hpdo-current-chain-20261107.md)
+and its [development policy companion](../../reviews/qld-hpdo-development-interaction-20261106.md)
+record instrument and policy dependencies, dated rate comparisons and
+qualification boundaries. Individual eligibility and application approvals
+remain separate from the documented source chain.
