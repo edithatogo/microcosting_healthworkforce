@@ -47,6 +47,7 @@ class QuoteBundleRule(QuoteModel):
 
     comparison: HighestQuoteRule
     bundles: tuple[QuoteBundleDefinition, ...] = Field(min_length=2)
+    tie_priority: tuple[str, ...] | None = None
 
     @model_validator(mode="after")
     def complete_definitions(self) -> Self:
@@ -56,6 +57,11 @@ class QuoteBundleRule(QuoteModel):
             self.comparison.selection.components,
         ):
             msg = "Supply exactly one bundle definition for each policy alternative"
+            raise ValueError(msg)
+        if self.tie_priority is not None and (
+            len(self.tie_priority) != len(names) or set(self.tie_priority) != set(names)
+        ):
+            msg = "Tie priority must list each alternative exactly once"
             raise ValueError(msg)
         return self
 
@@ -204,6 +210,7 @@ def price_highest_quote_bundles(
         tuple(case.exposure for case in cases),
     )
     definitions = {bundle.alternative: bundle for bundle in rule.bundles}
+    tie_priority = rule.tie_priority or tuple(sorted(definitions))
     selections: list[QuoteBundleSelection] = []
     quantities: list[QuoteQuantity] = []
     scenario = rule.comparison.selection.interpretation_kind == "analyst_assumption"
@@ -236,7 +243,7 @@ def price_highest_quote_bundles(
             for bundle in priced
             if bundle.unit_total is not None and bundle.unit_total == maximum
         )
-        selected = winners[0] if winners else None
+        selected = next((name for name in tie_priority if name in winners), None)
         selections.append(QuoteBundleSelection(case, priced, winners, selected))
         for bundle in priced:
             if bundle.definition.alternative == selected and bundle.prices is not None:
