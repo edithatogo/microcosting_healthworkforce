@@ -368,3 +368,10 @@ is `gap-candidate-link-validation-v1.json` alongside the private register.
 Occupation, sector, employer and effective-date applicability remain separate
 decisions. Outgoing Gitleaks and reviewed Presidio passed; [PR #66](https://github.com/edithatogo/microcosting_healthworkforce/pull/66)
 is open with hosted checks and integration pending.
+
+## NT and Tasmania acquisition checkpoint
+
+The [held-source review](../../reviews/nt-tas-held-source-batch-20261107.md)
+supersedes the download-failure disposition for the selected 28 PDFs.
+Source holdings and candidate transcriptions are evidenced. Applicability,
+instrument chains and the ACT acquisition scope remain open.
