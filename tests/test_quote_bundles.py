@@ -261,3 +261,18 @@ def test_revalidates_nested_copies_and_definition_completeness() -> None:
             comparison=policy.comparison,
             bundles=(policy.bundles[0], policy.bundles[0]),
         )
+
+
+def test_reviewed_tie_priority_only_changes_the_paid_tie() -> None:
+    """An eligible advancement wins equal pay but loses to strictly higher pay."""
+    policy = bundle_rule().model_copy(update={"tie_priority": ("single", "combined")})
+    for incentive, expected in (("5.5", "single"), ("6", "combined")):
+        result = price_highest_quote_bundles(
+            policy,
+            bundle_release(incentive),
+            (bundle_case(),),
+        )
+        assert_that(result.selections[0].selected_alternative == expected)
+    invalid = policy.model_copy(update={"tie_priority": ("single", "single")})
+    with pytest.raises(ValueError, match="each alternative exactly once"):
+        price_highest_quote_bundles(invalid, bundle_release(), (bundle_case(),))
