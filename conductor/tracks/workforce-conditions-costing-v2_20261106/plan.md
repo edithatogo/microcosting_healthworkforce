@@ -690,3 +690,9 @@ matched 600 jurisdiction-role outputs, 60 aggregate amounts and 60 formatted
 aggregate shares against the private recalculation. The workbook uses the
 first jurisdiction's midpoint cost in the aggregate share displays.
 The intended interpretation as a national aggregate remains open.
+
+The [publication comparison replay](../../../docs/workbook_publication_dispositions.md)
+matched all 120 ratios against the private recalculation within an absolute
+difference of 0.000000000001. The formula-derived personnel roles and original
+display labels remain separately traceable. This validates the ratios given
+their scenario costs. It does not qualify the underlying sensitivity bounds.
