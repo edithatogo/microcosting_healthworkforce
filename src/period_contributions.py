@@ -41,6 +41,7 @@ class ContributionPeriod(FrozenModel):
     starts_at: datetime
     ends_at: datetime
     earnings_complete: bool
+    planned_remittance_at: datetime | None = None
 
     @model_validator(mode="after")
     def valid_period(self) -> Self:
@@ -53,6 +54,11 @@ class ContributionPeriod(FrozenModel):
             for value in (self.period_id, self.resource_id, self.allocation_id)
         ):
             msg = "Contribution period needs nonblank identities and positive duration"
+            raise ValueError(msg)
+        if self.planned_remittance_at is not None and _utc(
+            self.planned_remittance_at,
+        ) < _utc(self.ends_at):
+            msg = "Planned remittance cannot precede the end of the earnings period"
             raise ValueError(msg)
         return self
 

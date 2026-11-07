@@ -233,7 +233,7 @@ def test_explicit_zero_earnings_retains_tied_alternatives() -> None:
 
 def test_incomplete_period_wrong_worker_and_aggregate_resources_fail() -> None:
     """No missing earning history, mixed employee or aggregate headcount default."""
-    with pytest.raises(ValueError, match="complete"):
+    with pytest.raises(ValueError, match="Complete relevant period earnings"):
         cost_contribution_activities(
             prices(),
             period().model_copy(update={"earnings_complete": False}),
@@ -490,3 +490,27 @@ def test_capped_earnings_use_prior_history_before_pricing() -> None:
         (second, first),
     )
     assert_that(ordered.contribution == Fraction(300))
+
+
+def test_planned_remittance_is_separate_from_earned_cost() -> None:
+    """A later remittance remains an explicit timing assumption."""
+    remittance = END + timedelta(days=14)
+    dated = period().model_copy(update={"planned_remittance_at": remittance})
+    result = cost_contribution_activities(prices(), dated, rule(), (activity(),))
+    baseline = cost_contribution_activities(prices(), period(), rule(), (activity(),))
+    assert_that(result.period.planned_remittance_at == remittance)
+    assert_that(result.rows == baseline.rows)
+    assert_that(result.exact_total == baseline.exact_total)
+    resource = ResourceUse(resource_id="staff", hours=Decimal(2))
+    snapshot = cost_contribution_snapshot(prices(), dated, rule(), START, resource)
+    undated = cost_contribution_snapshot(prices(), period(), rule(), START, resource)
+    assert_that(snapshot.period.planned_remittance_at == remittance)
+    assert_that(snapshot.rows == undated.rows)
+    assert_that(snapshot.exact_total == undated.exact_total)
+    with pytest.raises(ValueError, match="remittance cannot precede"):
+        cost_contribution_activities(
+            prices(),
+            dated.model_copy(update={"planned_remittance_at": START}),
+            rule(),
+            (activity(),),
+        )
