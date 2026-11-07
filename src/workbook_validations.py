@@ -30,6 +30,9 @@ class WorkbookValidation:
     targets: tuple[str, ...] = ()
     formula1: str | None = None
     formula2: str | None = None
+    validation_type: str = "none"
+    operator: str = "between"
+    allow_blank: bool = False
 
     def formulas_at(self, cell: str) -> tuple[str | None, str | None]:
         """Translate operands within one contiguous validation range."""
@@ -100,6 +103,9 @@ def read_workbook_validations(path: Path) -> tuple[WorkbookValidation, ...]:
                         or rule.findtext("{*}formula1"),
                         rule.findtext("{*}formula2/{*}f")
                         or rule.findtext("{*}formula2"),
+                        validation_type=rule.get("type", "none"),
+                        operator=rule.get("operator", "between"),
+                        allow_blank=rule.get("allowBlank") in ("1", "true"),
                     ),
                 )
     return tuple(rules)
