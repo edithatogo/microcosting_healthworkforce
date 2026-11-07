@@ -24,6 +24,7 @@ from src.reimbursement import (
     sa_ordinary_study_fee_amount,
     sa_residential_course_allowance,
     validate_vic_development_reimbursement,
+    vic_specialist_cme_annual_cap,
 )
 from tests.checks import assert_that
 from tests.test_unit_quotes import quantity, quote, release
@@ -384,3 +385,39 @@ def test_vic_development_reimbursement_filing(
                 receipt_evidence=receipt,
                 **arguments,
             )
+
+
+def test_vic_specialist_cme_cap_requires_reviewed_column() -> None:
+    """An actual payroll date cannot implicitly select a published column."""
+    assert_that(vic_specialist_cme_annual_cap(date(2022, 3, 1)) == Fraction("29000.16"))
+    assert_that(vic_specialist_cme_annual_cap(date(2023, 9, 1)) == Fraction("29725.16"))
+    assert_that(vic_specialist_cme_annual_cap(date(2025, 3, 1)) == Fraction("30468.29"))
+    with pytest.raises(ValueError, match="published Victorian specialist CME"):
+        vic_specialist_cme_annual_cap(date(2025, 3, 3))
+
+
+def test_vic_specialist_cme_cap_limits_approved_claims() -> None:
+    """The published ceiling limits expenditure after prior use."""
+    cap = vic_specialist_cme_annual_cap(date(2022, 3, 1))
+    period = ReimbursementPeriod(
+        currency="AUD",
+        starts_on=date(2023, 1, 1),
+        ends_on=date(2024, 1, 1),
+        cap=cap,
+        prior_use=Fraction("28000.10"),
+        applicability_evidence="Synthetic reviewed full cap and accounting period",
+        claims=(
+            ReimbursementClaim(
+                claim_id="synthetic-cme",
+                charged_on=date(2023, 2, 1),
+                eligible_amount=Fraction("1100.25"),
+                approval_evidence="Synthetic approved expense",
+            ),
+        ),
+    )
+    ledger = build_reimbursement_ledger(period)
+    assert_that(ledger.total == Fraction("1000.06"))
+    assert_that(ledger.rows[0].remaining == 0)
+    assert_that(
+        build_reimbursement_ledger(period.model_copy(update={"claims": ()})).total == 0,
+    )

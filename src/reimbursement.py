@@ -306,3 +306,20 @@ def validate_vic_development_reimbursement(
         msg = "Development expense application requires official receipt evidence"
         raise ValueError(msg)
     return ReimbursementClaim.model_validate(dict(claim))
+
+
+def vic_specialist_cme_annual_cap(rate_column: date) -> Fraction:
+    """Return the published annual CME cap for a reviewed table 2.1 column.
+
+    The column date is the published first-full-pay-period trigger.
+    Establish actual payroll dates, coverage and any proration separately.
+    """
+    caps = {
+        date(2022, 3, 1): Fraction("29000.16"),
+        date(2023, 9, 1): Fraction("29725.16"),
+        date(2025, 3, 1): Fraction("30468.29"),
+    }
+    if rate_column not in caps:
+        msg = "Select a published Victorian specialist CME rate column"
+        raise ValueError(msg)
+    return caps[rate_column]
