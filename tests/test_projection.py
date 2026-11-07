@@ -4,7 +4,7 @@
 import polars as pl
 import pytest
 
-from src.projection import project_workbook_costs
+from src.projection import project_workbook_costs, project_workbook_pda_amount
 from tests.checks import assert_that
 
 
@@ -46,3 +46,11 @@ def test_workbook_projection_uses_simple_indexation_and_fixed_cost() -> None:
             pl.Series([0.015, None]),
             pl.Series([10000, 10000]),
         )
+
+
+def test_pda_projection_preserves_binary_rounding_boundary() -> None:
+    """Replay the cached binary rounding on either side of a boundary."""
+    assert_that(project_workbook_pda_amount(1.15, 1) == pytest.approx(1.1))
+    assert_that(project_workbook_pda_amount(1.16, 1) == pytest.approx(1.2))
+    with pytest.raises(ValueError, match="finite"):
+        project_workbook_pda_amount(100, float("nan"))
