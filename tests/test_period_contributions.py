@@ -12,9 +12,11 @@ from src.period_contributions import (
     ContributionAlternative,
     ContributionCap,
     ContributionFactor,
+    ContributionPayment,
     ContributionPeriod,
     ContributionRule,
     cost_contribution_activities,
+    cost_contribution_payments,
     cost_contribution_snapshot,
 )
 from tests.checks import assert_that
@@ -531,3 +533,69 @@ def test_planned_remittance_is_separate_from_earned_cost() -> None:
             rule(),
             (activity(),),
         )
+
+
+def test_paid_contribution_uses_posted_components_and_rejects_duplicates() -> None:
+    """Price a payroll-only component using the reviewed posting basis."""
+    original = rule()
+    basis = original.alternatives[0].model_copy(update={"bases": ("vehicle",)})
+    policy = original.model_copy(update={"alternatives": (basis,)})
+    payment = ContributionPayment(
+        payment_id="posting-1",
+        resource_id="staff",
+        allocation_id="worker",
+        component="vehicle",
+        paid_at=START,
+        amount=Decimal(110),
+        evidence="Synthetic posting receipt",
+    )
+    excluded = payment.model_copy(
+        update={"payment_id": "posting-2", "component": "excluded"},
+    )
+    result = cost_contribution_payments(prices(), period(), policy, (excluded, payment))
+    assert_that(result.contribution == Fraction(11))
+    assert_that(tuple(row.payment for row in result.rows) == (payment,))
+    with pytest.raises(ValueError, match="Duplicate contribution payment"):
+        cost_contribution_payments(prices(), period(), policy, (payment, payment))
+
+
+def test_paid_contribution_uses_posting_boundary_and_remaining_cap() -> None:
+    """Consume the cap chronologically even when postings arrive out of order."""
+    boundary = START + timedelta(hours=1)
+    cap = ContributionCap(
+        limit=Decimal(100),
+        prior_eligible_earnings=Decimal(0),
+        starts_at=START,
+        ends_at=END,
+        history_through=START,
+        source_id="synthetic-award-1",
+        source_sha256="a" * 64,
+        citation="Synthetic cap evidence",
+        reviewed=True,
+    )
+    basis = ContributionAlternative(
+        alternative_id="paid",
+        bases=("salary", "vehicle"),
+        factors=(
+            factor("early", "0.1", START, boundary),
+            factor("late", "0.2", boundary, END),
+        ),
+        cap=cap,
+    )
+    policy = rule().model_copy(update={"alternatives": (basis,)})
+    early = ContributionPayment(
+        payment_id="salary",
+        resource_id="staff",
+        allocation_id="worker",
+        component="salary",
+        paid_at=START,
+        amount=Decimal(80),
+        evidence="Synthetic salary posting",
+    )
+    late = early.model_copy(
+        update={"payment_id": "vehicle", "component": "vehicle", "paid_at": boundary},
+    )
+    result = cost_contribution_payments(prices(), period(), policy, (late, early))
+    assert_that(result.contribution == Fraction(12))
+    assert_that([row.eligible_base for row in result.rows] == [80, 20])
+    assert_that([row.factor.factor_id for row in result.rows] == ["early", "late"])

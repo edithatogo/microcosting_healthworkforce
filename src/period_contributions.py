@@ -272,6 +272,8 @@ def _prepare(
     release: CostRelease,
     period: ContributionPeriod,
     rule: ContributionRule,
+    *,
+    paid_basis: bool = False,
 ) -> tuple[CostRelease, ContributionPeriod, ContributionRule]:
     release = CostRelease.model_validate(release.model_dump())
     period = ContributionPeriod.model_validate(period.model_dump())
@@ -288,7 +290,7 @@ def _prepare(
         msg = "No resource rate scope for contribution period"
         raise ValueError(msg)
     required = {name for a in rule.alternatives for name in a.bases}
-    if any(required - r.components.keys() for r in rates):
+    if not paid_basis and any(required - r.components.keys() for r in rates):
         msg = "Contribution base component is missing; supply explicit zeros if known"
         raise ValueError(msg)
     if any(rule.component in r.components for r in rates):
@@ -476,4 +478,113 @@ def cost_contribution_snapshot(
         rule,
         cost_static(release, at, (resource,)),
         "static_assumed_quantity",
+    )
+
+
+class ContributionPayment(FrozenModel):
+    """An explicitly classified payroll posting for one allocation."""
+
+    payment_id: str = Field(min_length=1)
+    resource_id: str = Field(min_length=1)
+    allocation_id: str = Field(min_length=1)
+    component: str = Field(min_length=1)
+    paid_at: datetime
+    amount: Decimal = Field(ge=0, allow_inf_nan=False)
+    evidence: str = Field(min_length=1)
+
+
+@dataclass(frozen=True)
+class PaidContributionRow:
+    """One eligible payment and its exact contribution under an alternative."""
+
+    alternative_id: str
+    payment: ContributionPayment
+    factor: ContributionFactor
+    eligible_base: Fraction
+    amount: Fraction
+
+
+@dataclass(frozen=True)
+class PaidContributionCost:
+    """Keep the supplied postings and whole-period alternatives available for audit."""
+
+    period: ContributionPeriod
+    rule: ContributionRule
+    payments: tuple[ContributionPayment, ...]
+    rows: tuple[PaidContributionRow, ...]
+    alternatives: tuple[ContributionTotal, ...]
+    contribution: Fraction
+
+
+def cost_contribution_payments(
+    release: CostRelease,
+    period: ContributionPeriod,
+    rule: ContributionRule,
+    payments: tuple[ContributionPayment, ...],
+) -> PaidContributionCost:
+    """Price complete paid earnings using posting time and explicit basis membership."""
+    _, period, rule = _prepare(release, period, rule, paid_basis=True)
+    start, end = _utc(period.starts_at), _utc(period.ends_at)
+    payments = tuple(
+        ContributionPayment.model_validate(payment.model_dump()) for payment in payments
+    )
+    if len({p.payment_id for p in payments}) != len(payments):
+        msg = "Duplicate contribution payment identity"
+        raise ValueError(msg)
+    for payment in payments:
+        if (
+            payment.resource_id != period.resource_id
+            or payment.allocation_id != period.allocation_id
+            or not start <= _utc(payment.paid_at) < end
+            or payment.component == rule.component
+            or not all(
+                value.strip()
+                for value in (payment.payment_id, payment.component, payment.evidence)
+            )
+        ):
+            msg = "Payment does not match the contribution period or scope"
+            raise ValueError(msg)
+    payments = tuple(sorted(payments, key=lambda p: (_utc(p.paid_at), p.payment_id)))
+    rows: list[PaidContributionRow] = []
+    totals: list[ContributionTotal] = []
+    for alternative in sorted(rule.alternatives, key=lambda a: a.alternative_id):
+        pieces = _pieces(alternative, start, end)
+        cap = alternative.cap
+        remaining = (
+            max(
+                Fraction(0),
+                Fraction(cap.limit) - Fraction(cap.prior_eligible_earnings),
+            )
+            if cap is not None
+            else None
+        )
+        total = Fraction(0)
+        for payment in payments:
+            if payment.component not in alternative.bases:
+                continue
+            instant = _utc(payment.paid_at)
+            factor = next(f for left, right, f in pieces if left <= instant < right)
+            eligible = Fraction(payment.amount)
+            if remaining is not None:
+                eligible = min(eligible, remaining)
+                remaining -= eligible
+            amount = eligible * Fraction(factor.fraction)
+            rows.append(
+                PaidContributionRow(
+                    alternative.alternative_id,
+                    payment,
+                    factor,
+                    eligible,
+                    amount,
+                ),
+            )
+            total += amount
+        totals.append(ContributionTotal(alternative.alternative_id, total))
+    return PaidContributionCost(
+        period,
+        rule,
+        payments,
+        tuple(rows),
+        tuple(totals),
+        max(t.amount for t in totals),
     )
