@@ -203,3 +203,29 @@ def test_grossed_up_backfill_remains_visible_in_downstream_bases() -> None:
     assert_that(super_cost.amount == Fraction("2.323"))
     assert_that(cover.amount == Fraction("0.02323"))
     assert_that(result.exact_total == Fraction("135.57623"))
+
+
+def test_casual_budget_loading_is_visible_in_selected_bases() -> None:
+    """Count the salary increment once and trace its selected dependencies."""
+    rules = (
+        rule("casual", "casual", ("salary",), "0.25"),
+        rule("penalty", "penalty", ("salary", "casual"), "0.1"),
+        rule("loaded_super", "loaded_super", ("casual", "penalty"), "0.1"),
+    )
+    start = datetime(2026, 6, 2, 9, tzinfo=UTC)
+    activity = Activity(
+        activity_id="casual-budget",
+        resource_id="worker",
+        starts_at=start,
+        ends_at=start + timedelta(hours=1),
+        resources=Decimal(1),
+    )
+    snapshot = cost_derived_snapshot(baseline(), start.date(), Decimal(1), rules)
+    dynamic = cost_derived_activity(baseline(), activity, "UTC", rules)
+
+    assert_that(
+        [row.amount for row in snapshot.rows]
+        == [Fraction("12.5"), Fraction("6.25"), Fraction("1.875")],
+    )
+    assert_that(dynamic.rows == snapshot.rows)
+    assert_that(dynamic.exact_total == snapshot.exact_total == Fraction("75.625"))

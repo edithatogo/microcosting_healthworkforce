@@ -315,3 +315,56 @@ def test_loading_cap_preserves_prior_consumption_and_partial_portion() -> None:
     assert_that(loaded == (Fraction(38), Fraction(47, 2), Fraction(0)))
     with pytest.raises(ValueError, match="prior cap consumption"):
         allocate_leave_loading_hours((Fraction(38),), Fraction(152), Fraction(153))
+
+
+def test_capped_loading_prices_separately_across_dated_quotes() -> None:
+    """Compose reviewed loading-hour assumptions with dated leave prices."""
+    leave = schedule()
+    selected = choices(leave, second_quote="salary-new")
+    release = dated_prices()
+    loading_quotes = (
+        quote(
+            quote_id="loading-old",
+            component="leave_loading",
+            unit="hour",
+            amount=Decimal("5.25"),
+            ends_on=MID,
+        ),
+        quote(
+            quote_id="loading-new",
+            component="leave_loading",
+            unit="hour",
+            amount=Decimal(7),
+            starts_on=MID,
+        ),
+    )
+    release = release.model_copy(update={"quotes": (*release.quotes, *loading_quotes)})
+    hours = allocate_leave_loading_hours(
+        (Fraction(10), Fraction(10)),
+        Fraction(20),
+        Fraction(5),
+    )
+    with_loading = tuple(
+        choice.model_copy(
+            update={
+                "allowances": (
+                    allowance().model_copy(
+                        update={
+                            "quantity_id": price.quote_id,
+                            "quote_id": price.quote_id,
+                            "unit": "hour",
+                            "quantity": quantity,
+                            "valued_on": choice.starts_on,
+                        },
+                    ),
+                ),
+            },
+        )
+        for choice, price, quantity in zip(selected, loading_quotes, hours, strict=True)
+    )
+    result = price_paid_leave(release, selection(), leave, with_loading)
+    assert_that(
+        [row.pricing.pricing.rows[1].cost for row in result.rows]
+        == [Fraction("52.5"), Fraction(35)],
+    )
+    assert_that(result.total == Fraction(73500, 73) + Fraction("87.5"))

@@ -126,6 +126,9 @@ def test_leave_cover_values_and_domain() -> None:
         ("hours", 0.0),
         ("hours", -1.0),
         ("salary", None),
+        ("salary", float("nan")),
+        ("hours", float("inf")),
+        ("loading", float("-inf")),
     ):
         with pytest.raises(ValueError, match="positive productive hours"):
             productive_hourly_rates(frame.with_columns(pl.lit(value).alias(column)))
