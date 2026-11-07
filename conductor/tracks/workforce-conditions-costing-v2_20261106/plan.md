@@ -631,3 +631,25 @@ The focused costing, assignment, capacity, roster and CLI suites pass.
 These checks cover the implemented contracts and synthetic cases.
 Full source-backed releases, remaining rule interactions, workbook
 runtime verification and final package acceptance remain open.
+
+## Installed package checkpoint
+
+At cc7e809, a wheel built from the source distribution contained 81 source
+members matching the checkout byte for byte. Both archives carried the
+licence and excluded workbook and PDF inputs. The wheel metadata declared
+Apache-2.0. A fresh Python 3.15.2 environment installed the source
+distribution and its 25 dependencies from the retained offline cache.
+The dependency check passed.
+
+Outside the checkout, the installed v2 CLI produced the expected synthetic
+snapshot and dated-activity totals. The installed legacy CLI ran with
+explicit external workbook and configuration inputs. Its base case, DSA
+summary and detail, archived comparison and validation outputs matched
+the source run byte for byte on the same interpreter and inputs.
+This checkpoint qualifies the tested revision and retained dependency
+cache. Native Excel behavior, source applicability and final release
+acceptance remain open.
+
+The 17 delivered validation diagnostics still report differences above a
+cent. Identical diagnostics establish package parity for the tested outputs.
+The archived workbook discrepancies retain their separate dispositions.
