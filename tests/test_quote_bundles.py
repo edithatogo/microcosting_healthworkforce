@@ -346,3 +346,26 @@ def test_percentage_basis_is_audited_without_being_paid() -> None:
                 ),
             ),
         )
+    for change, error in (
+        ({"source_sha256": "b" * 64}, "held and known edition"),
+        (
+            {
+                "starts_on": modified.exposure.valued_on + timedelta(days=1),
+            },
+            "whole window",
+        ),
+        ({"known_from": quotes.as_known_on + timedelta(days=1)}, "knowledge date"),
+    ):
+        invalid_percentage = percentage.model_copy(update=change)
+        invalid_policy = policy.model_copy(
+            update={
+                "bundles": (
+                    policy.bundles[0].model_copy(
+                        update={"percentage": invalid_percentage},
+                    ),
+                    single,
+                ),
+            },
+        )
+        with pytest.raises(ValueError, match=error):
+            price_highest_quote_bundles(invalid_policy, quotes, (modified,))
