@@ -62,6 +62,16 @@ must fall within that year. Supply the reviewed annual
 fraction as a decimal or exact fraction, separately from the employment
 fraction. The calculator checks the supplied prior-payment status.
 
+For reviewed concurrent or sequential service across categories, pass
+one `InaccessibilityCategoryPayment` per payable share to
+`price_inaccessibility_category_payments`. Supply the applicable
+annual quote, a unique payment ID and the reviewed annual fraction
+as a `Fraction`. Keep employment proration separate. For example,
+a reviewed one-third annual share at half time prices one-sixth of
+that category's annual quote. The assessment evidence should identify
+the qualifying engagements and prior payments. Use distinct payment
+IDs for distinct instalments so the resulting rows can be reconciled.
+
 ## Transfers across releases
 
 For a transfer across releases, use
