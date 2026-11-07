@@ -75,12 +75,13 @@ class DerivedCost:
     exact_total: Fraction
 
 
-def _rows(
+def price_derived_rows(
     release: ConditionRelease,
     rules: tuple[DerivedComponentRule, ...],
     when: date,
     quantity: Fraction,
 ) -> tuple[DerivedRow, ...]:
+    """Price ordered rules for an exact paid-hour segment."""
     rates = exact_hourly_components(release, when)
     included = {
         name
@@ -153,7 +154,7 @@ def cost_derived_snapshot(
     """Add explicit dependencies to one nominal paid-hours snapshot."""
     release = ConditionRelease.model_validate(release.model_dump())
     base = cost_condition_snapshot(release, when, hours)
-    rows = _rows(release, rules, when, Fraction(hours))
+    rows = price_derived_rows(release, rules, when, Fraction(hours))
     exact_base = Fraction(base.exact_total_numerator, base.exact_total_denominator)
     return DerivedCost(
         base,
@@ -180,9 +181,8 @@ def cost_derived_activity(
             elapsed.days * 86400 + elapsed.seconds
         ) * 1000000 + elapsed.microseconds
         hours = Fraction(micros, 3600000000) * Fraction(activity.resources)
-        rows.extend(
-            _rows(release, rules, segment.starts_at.astimezone(zone).date(), hours),
-        )
+        day = segment.starts_at.astimezone(zone).date()
+        rows.extend(price_derived_rows(release, rules, day, hours))
     exact_base = Fraction(base.exact_total_numerator, base.exact_total_denominator)
     return DerivedCost(
         base,

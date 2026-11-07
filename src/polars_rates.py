@@ -40,10 +40,23 @@ def productive_hourly_rates(inputs: pl.DataFrame) -> pl.DataFrame:
     loading = 1 + pl.col("loading")
     base = salary * (1 + pl.col("on_cost_fraction")) + pl.col("development")
     divisor = pl.col("productive") * 52 * pl.col("hours")
-    if (
-        inputs.select(pl.any_horizontal(pl.all().is_null()).any()).item()
-        or inputs.filter((divisor <= 0) | (pl.col("productive") > 1)).height
-    ):
+    required = (
+        "salary",
+        "loading",
+        "on_cost_fraction",
+        "development",
+        "productive",
+        "hours",
+        "weeks",
+    )
+    invalid = pl.any_horizontal(
+        ~pl.col(*required).cast(pl.Float64).is_finite().fill_null(value=False),
+        ~divisor.is_finite(),
+        divisor <= 0,
+        pl.col("hours") < 0,
+        pl.col("productive") > 1,
+    )
+    if inputs.select(invalid.any()).item():
         message = "Complete inputs and positive productive hours required"
         raise ValueError(message)
     replacement = salary * pl.col("weeks") / 52 * loading

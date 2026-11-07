@@ -17,6 +17,7 @@ from src.derived_components import (
     DerivedCost,
     DerivedRow,
     cost_derived_snapshot,
+    price_derived_rows,
 )
 
 
@@ -108,18 +109,7 @@ def cost_scheduled_activity(
         ) * 1000000 + elapsed.microseconds
         hours = Fraction(micros, 3600000000) * Fraction(activity.resources)
         day = segment.starts_at.astimezone(zone).date()
-        hourly = cost_derived_snapshot(release, day, Decimal(1), schedule.select(day))
-        rows.extend(
-            DerivedRow(
-                day,
-                row.rule,
-                row.base_hourly,
-                row.hourly_amount,
-                hours,
-                row.hourly_amount * hours,
-            )
-            for row in hourly.rows
-        )
+        rows.extend(price_derived_rows(release, schedule.select(day), day, hours))
     total = Fraction(base.exact_total_numerator, base.exact_total_denominator)
     return DerivedCost(
         base,
