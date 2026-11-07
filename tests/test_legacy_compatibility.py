@@ -169,7 +169,6 @@ def test_workbook_projection_is_explicit_and_adjusts_fixed_cost() -> None:
 @pytest.mark.parametrize("rename_inputs", [False, True])
 def test_explicit_workbook_projection_replays_nsw_admin_midpoint(
     *,
-
     rename_inputs: bool,
 ) -> None:
     """Replay the original year-four formula without changing compound mode."""
