@@ -17,6 +17,45 @@ lazy from src.paid_leave import LeaveExposureRow, PaidLeaveSchedule
 lazy from src.unit_quotes import QuoteQuantity
 
 
+@dataclass(frozen=True)
+class LeaveLoadingAlternative:
+    """Separate the selected cash loading from any elected leave days."""
+
+    cash: Fraction
+    additional_days: Fraction
+
+
+def select_leave_loading_alternative(
+    base_leave_pay: Fraction,
+    loading_rate: Fraction,
+    forgone_penalties: Fraction | None,
+    *,
+    elected_days: Fraction | None = None,
+) -> LeaveLoadingAlternative:
+    """Compare reviewed amounts for the same leave exposure and currency.
+
+    A supplied election must already be verified for the relevant entitlement
+    period. Its days remain a quantity for downstream leave accounting.
+    """
+    if (
+        base_leave_pay < 0
+        or loading_rate < 0
+        or (forgone_penalties is not None and forgone_penalties < 0)
+        or (elected_days is not None and elected_days <= 0)
+    ):
+        msg = "Leave loading amounts must be nonnegative and elected days positive"
+        raise ValueError(msg)
+    if elected_days is not None:
+        return LeaveLoadingAlternative(Fraction(0), elected_days)
+    if forgone_penalties is None:
+        msg = "Cash leave loading requires reviewed forgone penalties"
+        raise ValueError(msg)
+    return LeaveLoadingAlternative(
+        max(base_leave_pay * loading_rate, forgone_penalties),
+        Fraction(0),
+    )
+
+
 def allocate_leave_loading_hours(
     eligible_hours: tuple[Fraction, ...],
     cap_hours: Fraction,

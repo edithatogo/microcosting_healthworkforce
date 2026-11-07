@@ -15,6 +15,7 @@ from src.leave_pricing import (
     allocate_leave_loading_hours,
     price_leave_loading,
     price_paid_leave,
+    select_leave_loading_alternative,
 )
 from src.paid_leave import PaidLeaveSchedule, build_paid_leave
 from tests.checks import assert_that
@@ -440,3 +441,24 @@ def test_loading_applies_hours_and_money_caps_independently() -> None:
     assert_that(result == (Fraction("52.50"), Fraction("7.50"), Fraction(0)))
     with pytest.raises(ValueError, match="prior payments"):
         price_leave_loading(hours, rates, Fraction(80), Fraction(81))
+
+
+@pytest.mark.parametrize(("penalties", "expected"), [(0, 200), (200, 200), (250, 250)])
+def test_cash_loading_selects_the_higher_amount(penalties: int, expected: int) -> None:
+    """Compare two amounts from the same leave exposure without adding them."""
+    result = select_leave_loading_alternative(
+        Fraction(1000),
+        Fraction("0.20"),
+        Fraction(penalties),
+    )
+    assert_that(result.cash == expected and result.additional_days == 0)
+
+
+def test_leave_election_replaces_cash_and_preserves_days() -> None:
+    """A reviewed election needs no cash comparator, unlike the default route."""
+    base, rate = Fraction(1000), Fraction("0.20")
+    days = Fraction(4)
+    result = select_leave_loading_alternative(base, rate, None, elected_days=days)
+    assert_that(result.cash == 0 and result.additional_days == days)
+    with pytest.raises(ValueError, match="reviewed forgone penalties"):
+        select_leave_loading_alternative(base, rate, None)
