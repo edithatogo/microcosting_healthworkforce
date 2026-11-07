@@ -1,12 +1,13 @@
 # Copyright 2026 Dylan. SPDX-License-Identifier: Apache-2.0
 """Test receipt-based exclusion without converting between units."""
 
-from datetime import date
+from datetime import UTC, date, datetime
 from decimal import Decimal
 from fractions import Fraction
 
 import pytest
 
+from src.source_registry import SourceRegistry
 from src.vehicle_allowance import (
     VehicleTravelCase,
     VehicleTravelExclusion,
@@ -44,6 +45,12 @@ def test_receipt_excludes_travel_before_pricing() -> None:
     result = price_vehicle_travel(rates, rule, (paid, suppressed))
     assert_that(result.prices.total == Fraction(15))
     assert_that(result.suppressed == (suppressed,))
+    fractional = paid.model_copy(
+        update={"travel": quantity(unit="km", quantity=Fraction(1, 3))},
+    )
+    assert_that(
+        price_vehicle_travel(rates, rule, (fractional,)).prices.total == Fraction(1, 4),
+    )
     with pytest.raises(ValueError, match="matching source hash"):
         price_vehicle_travel(
             rates,
@@ -67,4 +74,33 @@ def test_receipt_excludes_travel_before_pricing() -> None:
             rates,
             rule.model_copy(update={"effective_to": paid.travel.valued_on}),
             (paid,),
+        )
+    with pytest.raises(ValueError, match="Duplicate vehicle travel quantity identity"):
+        price_vehicle_travel(
+            rates,
+            rule,
+            (paid, paid.model_copy(update={"recurring_allowance_received": True})),
+        )
+    with pytest.raises(ValueError, match="kilometre units"):
+        price_vehicle_travel(
+            rates,
+            rule,
+            (suppressed.model_copy(update={"travel": quantity(unit="annum")}),),
+        )
+
+    source = rates.sources.records[0]
+    late_source = source.model_copy(
+        update={
+            "source_id": "late-rule",
+            "retrieved_at": datetime(2026, 2, 2, tzinfo=UTC),
+        },
+    )
+    late_release = rates.model_copy(
+        update={"sources": SourceRegistry(records=(source, late_source))},
+    )
+    with pytest.raises(ValueError, match="exclusion source exceeds"):
+        price_vehicle_travel(
+            late_release,
+            rule.model_copy(update={"source_id": "late-rule"}),
+            (suppressed,),
         )

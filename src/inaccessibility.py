@@ -1,5 +1,5 @@
 # Copyright 2026 Dylan. SPDX-License-Identifier: Apache-2.0
-"""Inaccessibility payments for a reviewed single-category appointment."""
+"""Price reviewed inaccessibility payments against annual category quotes."""
 
 from fractions import Fraction
 from typing import Annotated, Literal
@@ -85,10 +85,17 @@ def _price_payment(
     request: InaccessibilityPaymentBasis,
     annual_fraction: Fraction,
 ) -> UnitQuoteResult:
+    return _price_payments(release, ((request, annual_fraction),))
+
+
+def _payment_quantity(
+    request: InaccessibilityPaymentBasis,
+    annual_fraction: Fraction,
+) -> QuoteQuantity:
     if request.service_assessed_through > request.valued_on:
         msg = "Service assessment cannot follow payment valuation"
         raise ValueError(msg)
-    quantity = QuoteQuantity(
+    return QuoteQuantity(
         quantity_id=request.payment_id,
         quote_id=request.annual_quote_id,
         unit="annum",
@@ -97,10 +104,20 @@ def _price_payment(
         quantity_kind="analyst_assumption",
         basis=request.review_evidence,
     )
-    result = price_units(release, (quantity,))
-    if result.rows[0].quote.component != f"inaccessibility-category-{request.category}":
-        msg = "Annual quote must match the inaccessibility category"
-        raise ValueError(msg)
+
+
+def _price_payments(
+    release: UnitQuoteRelease,
+    payments: tuple[tuple[InaccessibilityPaymentBasis, Fraction], ...],
+) -> UnitQuoteResult:
+    result = price_units(
+        release,
+        tuple(_payment_quantity(request, share) for request, share in payments),
+    )
+    for row, (request, _) in zip(result.rows, payments, strict=True):
+        if row.quote.component != f"inaccessibility-category-{request.category}":
+            msg = "Annual quote must match the inaccessibility category"
+            raise ValueError(msg)
     return result
 
 
@@ -139,4 +156,29 @@ def price_inaccessibility_rotation_payment(
         release,
         request,
         Fraction(request.reviewed_annual_fraction) if eligible else Fraction(0),
+    )
+
+
+class InaccessibilityCategoryPayment(InaccessibilityPaymentBasis):
+    """One reviewed payable share of a mixed-category service assessment."""
+
+    reviewed_annual_fraction: Annotated[Fraction, Field(gt=0, le=1)]
+
+
+def price_inaccessibility_category_payments(
+    release: UnitQuoteRelease,
+    requests: tuple[InaccessibilityCategoryPayment, ...],
+) -> UnitQuoteResult:
+    """Price separately adjudicated shares for concurrent or sequential service.
+
+    The annual fractions exclude employment proration, which is applied here.
+    The supplied evidence must cover eligibility, attribution and prior payment.
+    """
+    validated = tuple(
+        InaccessibilityCategoryPayment.model_validate(dict(request))
+        for request in requests
+    )
+    return _price_payments(
+        release,
+        tuple((request, request.reviewed_annual_fraction) for request in validated),
     )
