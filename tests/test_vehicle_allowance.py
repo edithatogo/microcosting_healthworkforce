@@ -9,7 +9,9 @@ import pytest
 
 from src.periodic_allowance import cost_periodic_allowance_allocations
 from src.source_registry import SourceRegistry
+from src.unit_quotes import price_units
 from src.vehicle_allowance import (
+    ExcessVehicleDistance,
     Moca7VehicleAppointment,
     VehicleTravelCase,
     VehicleTravelExclusion,
@@ -196,3 +198,17 @@ def test_moca7_rejects_concurrent_award_vehicle_allowance() -> None:
     )
     with pytest.raises(ValueError, match="cannot be selected together"):
         moca7_vehicle_level(appointment)
+
+
+@pytest.mark.parametrize(("journey", "expected"), [(30, 10), (20, 0), (10, 0)])
+def test_excess_vehicle_distance(journey: int, expected: int) -> None:
+    """Only comparable distance beyond the usual commute is payable."""
+    case = ExcessVehicleDistance(
+        journey=quantity(unit="km", quantity=Decimal(journey)),
+        normal_commute_km=Decimal(20),
+        commute_evidence="Synthetic usual commute",
+    )
+    payable = case.payable_quantity()
+    rates = release(quote(unit="km", amount=Decimal("0.75")))
+    assert_that(payable.quantity == Fraction(expected))
+    assert_that(price_units(rates, (payable,)).total == Fraction(expected * 3, 4))
