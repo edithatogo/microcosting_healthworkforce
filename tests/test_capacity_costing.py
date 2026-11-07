@@ -8,6 +8,7 @@ from fractions import Fraction
 import pytest
 
 from src.capacity_costing import CapacityLoss, CapacityScenarioInputs, capacity_scenario
+from src.leave_pricing import sa_part_time_study_paid_hours
 from tests.checks import assert_that
 from tests.test_roster_costing import release
 
@@ -130,4 +131,28 @@ def test_paid_development_leave_reduces_capacity_without_adding_wages() -> None:
             result.exact_productive_rate_denominator,
         )
         == Fraction(10000, 181),
+    )
+
+
+def test_approved_sa_study_hours_preserve_exact_capacity_ratio() -> None:
+    """Reviewed study and travel affect service hours without adding salary."""
+    study = sa_part_time_study_paid_hours(Fraction(5), Fraction(1, 3))
+    inputs = CapacityScenarioInputs(
+        losses=(CapacityLoss(loss_id="approved-study", hours=study),),
+        cover_hours=Decimal(0),
+        cover_hourly_cost=Decimal(0),
+        losses_disjoint=True,
+    )
+    result = capacity_scenario(
+        release(),
+        date(2026, 6, 1),
+        CapacityScenarioInputs.model_validate_json(inputs.model_dump_json()),
+    )
+    assert_that(result.total_cost == Decimal(100000))
+    assert_that(
+        Fraction(
+            result.exact_productive_rate_numerator,
+            result.exact_productive_rate_denominator,
+        )
+        == Fraction(300000, 5984),
     )

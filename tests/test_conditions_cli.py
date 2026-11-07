@@ -4,6 +4,7 @@
 import json
 from datetime import UTC, datetime
 from decimal import Decimal
+from fractions import Fraction
 lazy from pathlib import Path
 
 import pytest
@@ -125,14 +126,18 @@ def test_snapshot_cli_preserves_exact_total_and_rejects_invalid_mode(
         main([*args, "--activity", "unused.json"])
 
 
-def test_capacity_cli_retains_assumptions_and_exact_total(tmp_path: Path) -> None:
+@pytest.mark.parametrize("leave_hours", ["200", "601/3"])
+def test_capacity_cli_retains_assumptions_and_exact_total(
+    tmp_path: Path,
+    leave_hours: str,
+) -> None:
     """Expose separate paid cost, cover and productive hours through JSON."""
     release_path = tmp_path / "release.json"
     request = tmp_path / "capacity.json"
     output = tmp_path / "result.json"
     release_path.write_text(release().model_dump_json(), encoding="utf-8")
     request.write_text(
-        '{"as_of":"2026-06-01","losses":[{"loss_id":"leave","hours":"200"}],'
+        f'{{"as_of":"2026-06-01","losses":[{{"loss_id":"leave","hours":"{leave_hours}"}}],'
         '"cover_hours":"100","cover_hourly_cost":"60","losses_disjoint":true}',
         encoding="utf-8",
     )
@@ -151,7 +156,15 @@ def test_capacity_cli_retains_assumptions_and_exact_total(tmp_path: Path) -> Non
     result = CapacityScenarioResult.model_validate_json(output.read_bytes())
     assert_that(result.paid_cost == Decimal(100000))
     assert_that(result.incremental_cover_cost == Decimal(6000))
-    assert_that(result.productive_hours == Decimal(1800))
+    productive = Fraction(2000) - Fraction(leave_hours)
+    assert_that(
+        Fraction(
+            result.exact_productive_rate_numerator,
+            result.exact_productive_rate_denominator,
+        )
+        == Fraction(106000) / productive,
+    )
+    assert_that(Fraction(result.assumptions.losses[0].hours) == Fraction(leave_hours))
     assert_that(result.exact_total_numerator == Decimal(106000))
     assert_that(result.exact_total_denominator == 1)
     assert_that(result.assumptions.losses[0].loss_id == "leave")

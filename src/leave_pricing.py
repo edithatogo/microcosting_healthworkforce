@@ -874,3 +874,53 @@ def victorian_hama_leave_loading(
         Fraction(7, 40),
         sum(supplements, Fraction(0)),
     ).cash
+
+
+def sa_part_time_study_paid_hours(
+    approved_study_hours: Fraction,
+    necessary_travel_hours: Fraction,
+    *,
+    approved_additional_study_hours: Fraction = Fraction(0),
+) -> Fraction:
+    """Value one approved week under SA Health HR Manual 7/22 section 7-1-2.
+
+    The caller reviews course and appointment coverage and allocates travel
+    separately. Compulsory block release and examinations use separate decisions.
+    """
+    if (
+        min(
+            approved_study_hours,
+            necessary_travel_hours,
+            approved_additional_study_hours,
+        )
+        < 0
+    ):
+        msg = "Approved study and travel hours must be nonnegative"
+        raise ValueError(msg)
+    standard_weekly_limit = 5
+    if approved_study_hours > standard_weekly_limit:
+        msg = "Weekly study above five hours requires a separate approval"
+        raise ValueError(msg)
+    return (
+        approved_study_hours + necessary_travel_hours + approved_additional_study_hours
+    )
+
+
+def sa_part_time_study_block_days(
+    approved_block_days: Fraction,
+    *,
+    approved_additional_block_days: Fraction = Fraction(0),
+) -> Fraction:
+    """Value approved compulsory block release in one reviewed policy year.
+
+    Use SA Health HR Manual 7/22 section 7-1-2. The caller reviews prior
+    use in the year and supplies the delegate-approved excess separately.
+    """
+    if min(approved_block_days, approved_additional_block_days) < 0:
+        msg = "Approved block days must be nonnegative"
+        raise ValueError(msg)
+    standard_annual_limit = 20
+    if approved_block_days > standard_annual_limit:
+        msg = "Annual block release above 20 days requires a separate approval"
+        raise ValueError(msg)
+    return approved_block_days + approved_additional_block_days

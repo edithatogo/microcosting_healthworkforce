@@ -31,6 +31,8 @@ from src.leave_pricing import (
     price_paid_leave,
     price_separation_loading,
     qualifying_shift_leave_credit,
+    sa_part_time_study_block_days,
+    sa_part_time_study_paid_hours,
     select_leave_loading_alternative,
     victorian_hama_additional_leave_weeks,
     victorian_hama_leave_loading,
@@ -968,3 +970,27 @@ def test_hama_grouped_loading_uses_reviewed_ordinary_rate_basis() -> None:
         ),
     )
     assert_that(result.total == Fraction(73500, 73) + 140)
+
+
+def test_sa_study_travel_and_additional_approval_are_separate() -> None:
+    """Travel and separately approved study can exceed the standard study limit."""
+    price = sa_part_time_study_paid_hours
+    assert_that(price(Fraction(5), Fraction("1.25")) == Fraction("6.25"))
+    assert_that(
+        price(Fraction(5), Fraction(1), approved_additional_study_hours=Fraction(2))
+        == Fraction(8),
+    )
+    with pytest.raises(ValueError, match="separate approval"):
+        price(Fraction("5.01"), Fraction(0))
+
+
+def test_sa_study_block_days_keep_delegate_approval_separate() -> None:
+    """The standard cap applies to days before any approved excess."""
+    price = sa_part_time_study_block_days
+    assert_that(price(Fraction(20)) == Fraction(20))
+    assert_that(
+        price(Fraction(20), approved_additional_block_days=Fraction("0.5"))
+        == Fraction("20.5"),
+    )
+    with pytest.raises(ValueError, match="separate approval"):
+        price(Fraction("20.5"))

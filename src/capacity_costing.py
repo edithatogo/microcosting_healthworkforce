@@ -8,6 +8,7 @@ lazy from datetime import date
 from pydantic import BaseModel, ConfigDict, Field
 
 from src.conditions import ConditionRelease, exact_hourly_components
+lazy from src.unit_quotes import NonnegativeQuantity
 
 
 class CapacityLoss(BaseModel):
@@ -15,7 +16,7 @@ class CapacityLoss(BaseModel):
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
     loss_id: str = Field(min_length=1)
-    hours: Decimal = Field(ge=0, allow_inf_nan=False)
+    hours: NonnegativeQuantity
 
 
 class CapacityScenarioInputs(BaseModel):
@@ -67,7 +68,7 @@ def capacity_scenario(
     productivity delivered by cover is outside this ratio.
     """
     release = ConditionRelease.model_validate(release.model_dump())
-    inputs = CapacityScenarioInputs.model_validate(inputs.model_dump())
+    inputs = CapacityScenarioInputs.model_validate_json(inputs.model_dump_json())
     if not inputs.losses_disjoint:
         msg = "Loss periods must be explicitly asserted disjoint"
         raise ValueError(msg)
