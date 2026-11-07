@@ -215,3 +215,19 @@ def test_transfer_prices_each_release_and_conserves_hours() -> None:
                 ),
             ),
         )
+
+
+def test_periodic_allowance_rejects_component_in_salary_bundle() -> None:
+    """Identify the bundled route before attempting a separate allowance price."""
+    base = release()
+    salary = condition("salary", "salary", "100000", "AUD/year")
+    bundled = salary.model_copy(update={"included_components": ("training",)})
+    reviewed = ConditionRelease.model_validate(
+        {**base.model_dump(), "conditions": (bundled,)},
+    )
+    with pytest.raises(ValueError, match="duplicates a salary inclusion"):
+        cost_periodic_allowance(
+            reviewed,
+            "training",
+            period(portion("ordinary", "76", "1", "1")),
+        )

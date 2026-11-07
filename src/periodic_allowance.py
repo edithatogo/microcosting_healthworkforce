@@ -95,6 +95,14 @@ def cost_periodic_allowance(
     """
     release = ConditionRelease.model_validate(release.model_dump())
     period = AllowancePeriod.model_validate(period.model_dump())
+    if any(
+        component in condition.included_components
+        and condition.effective_from < period.ends_on
+        and period.starts_on < condition.effective_to
+        for condition in release.conditions
+    ):
+        msg = "Periodic allowance duplicates a salary inclusion"
+        raise ValueError(msg)
     candidates = [
         c
         for c in release.conditions
