@@ -497,7 +497,7 @@ real-world values and receipts must not enter public source distributions.
   - [ ] Retain nominal-hours baseline and paired productive-capacity/leave-cover
     examples with no salary/cover double counting; compare compatibility mode
     against unchanged legacy results with explicit tolerance and source identity.
-- [ ] Task: Implement the static library interface and auditable output ledger.
+- [~] Task: Implement the static library interface and auditable output ledger.
   - [ ] Separate explicit resource quantities, accepted unit prices, component
     rules, paid cost and productive capacity; emit totals, currency/price date,
     method/release/source lineage and diagnostic decisions.
@@ -521,7 +521,7 @@ real-world values and receipts must not enter public source distributions.
     rules, minimum engagements and state carry-over where the accepted rules need it.
   - [ ] Check constant-rate/date reduction to static costing and segmentation/
     aggregation invariance where no threshold or approved rounding changes the result.
-- [ ] Task: Implement the deterministic dynamic costing interface.
+- [~] Task: Implement the deterministic dynamic costing interface.
   - [ ] Split activity/resource segments at relevant boundaries and apply selected
     accepted rules in a stable chronological order; require necessary prior history.
   - [ ] Keep retrospective wage entitlement, pay-effective period and cash/backpay
@@ -546,7 +546,7 @@ real-world values and receipts must not enter public source distributions.
     requests, output lineage and unchanged default legacy CLI behaviour.
   - [ ] Verify new scenario wrappers call the same selected cost function; keep PSA
     optional and do not silently change old seeds, priors, dependence or estimand.
-- [ ] Task: Expose supported library and bounded CLI interfaces.
+- [~] Task: Expose supported library and bounded CLI interfaces.
   - [ ] Document all-input/accepted-release requirements, quantity and price units,
     capacity/leave-cover perspective, date/rule failures and immutable run identity.
   - [ ] Provide synthetic static and dynamic examples, source/condition dictionaries,
@@ -621,3 +621,13 @@ among the previously unresolved cases. Keep those dispositions
 provisional pending native Excel lookup and manual-entry verification.
 Private lineage v3 retains the original rule evidence and both review
 dispositions by edition.
+
+## Static, dynamic and CLI implementation checkpoint
+
+At main 034ae07, the library exposes static and dated activity pricing,
+assignment snapshots and activity ledgers, productive capacity costing,
+and explicit roster overtime. The v2 CLI dispatches reviewed requests.
+The focused costing, assignment, capacity, roster and CLI suites pass.
+These checks cover the implemented contracts and synthetic cases.
+Full source-backed releases, remaining rule interactions, workbook
+runtime verification and final package acceptance remain open.
