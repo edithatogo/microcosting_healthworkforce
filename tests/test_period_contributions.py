@@ -618,3 +618,16 @@ def test_paid_contribution_rejects_mixed_classification_scope() -> None:
     )
     with pytest.raises(ValueError, match="Resource identity has conflicting scopes"):
         cost_contribution_payments(changed, period(), rule(), ())
+
+
+def test_paid_contribution_rejects_unverified_factor_even_without_postings() -> None:
+    """A complete zero-payment period still needs the reviewed factor source."""
+    policy = rule()
+    first, second = policy.alternatives
+    wrong_hash = first.factors[0].model_copy(update={"source_sha256": "b" * 64})
+    changed = first.model_copy(update={"factors": (wrong_hash,)})
+    invalid = policy.model_copy(update={"alternatives": (changed, second)})
+    with pytest.raises(ValueError, match="Contribution source hash mismatch"):
+        cost_contribution_payments(prices(), period(), invalid, ())
+    empty = cost_contribution_payments(prices(), period(), policy, ())
+    assert_that(empty.contribution == 0)
