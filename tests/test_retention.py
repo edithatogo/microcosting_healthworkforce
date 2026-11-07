@@ -8,12 +8,15 @@ from fractions import Fraction
 import pytest
 
 from src.retention import (
+    DatedPharmacyPortion,
+    PharmacyHistoryInput,
     PharmacyRetentionProration,
     PharmacyServicePortion,
     RetentionAssessment,
     RetentionAuthority,
     RetentionEvidence,
     RetentionHistorySegment,
+    assess_pharmacy_history,
     assess_pharmacy_retention,
     assess_retention,
     assess_retention_history,
@@ -428,5 +431,65 @@ def test_competing_receipt_does_not_reverse_pharmacy_priority() -> None:
     )
     with pytest.raises(ValueError, match="settlement"):
         assess_pharmacy_retention(
-            p, r, request(competing_receipt="received"), e, proration,
+            p,
+            r,
+            request(competing_receipt="received"),
+            e,
+            proration,
+        )
+
+
+def dated_pharmacy_history() -> tuple[DatedPharmacyPortion, ...]:
+    """Attach explicit dates/evidence to the synthetic measured-service example."""
+    return tuple(
+        DatedPharmacyPortion.model_validate(
+            dict(p)
+            | {
+                "resource_id": "hypothetical-worker",
+                "starts_on": date(2025, 2, 6) if i == 0 else date(2025, 5, 6),
+                "ends_on": date(2025, 5, 6) if i == 0 else date(2026, 2, 6),
+                "evidence_id": p.portion_id + "-fact",
+                "evidence_sha256": "b" * 64,
+                "known_on": date(2026, 11, 7),
+                "input_kind": "analyst_assumption",
+            },
+        )
+        for i, p in enumerate(pharmacy_request().portions)
+    )
+
+
+def test_dated_pharmacy_history_matches_explicit_snapshot_allocation() -> None:
+    """Dated input preserves exact arithmetic and records, without day conversion."""
+    p, r, e = sourced_inputs()
+    p = p.model_copy(update={"method": "pharmacy_retention"})
+    allocation = pharmacy_request().model_copy(
+        update={
+            "assessment_id": "synthetic-anniversary",
+            "annual_amount": Decimal(2000),
+        },
+    )
+    history = dated_pharmacy_history()
+    result = assess_pharmacy_history(
+        p,
+        r,
+        request(),
+        e,
+        PharmacyHistoryInput(proration=allocation, history=history),
+    )
+    assert_that(result.result.amount == result.result.prices.total == Fraction(250))
+    assert_that(result.history == history)
+
+
+def test_dated_pharmacy_history_rejects_missing_service() -> None:
+    """A missing interval cannot silently become credited or zero service."""
+    p, r, e = sourced_inputs()
+    with pytest.raises(ValueError, match="coverage"):
+        assess_pharmacy_history(
+            p,
+            r,
+            request(),
+            e,
+            PharmacyHistoryInput(
+                proration=pharmacy_request(), history=dated_pharmacy_history()[1:],
+            ),
         )

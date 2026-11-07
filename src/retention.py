@@ -526,3 +526,100 @@ def assess_pharmacy_retention(
         scenario,
         prices,
     )
+
+
+class DatedPharmacyPortion(PharmacyServicePortion):
+    """Dated service measurement with resource and evidence provenance."""
+
+    resource_id: str
+    starts_on: date
+    ends_on: date
+    evidence_id: str
+    evidence_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
+    known_on: date
+    input_kind: Literal["observed_case_evidence", "analyst_assumption"]
+
+    @model_validator(mode="after")
+    def positive_dates(self) -> Self:
+        """Reject empty or inverted service histories."""
+        if self.ends_on <= self.starts_on:
+            msg = "Dated pharmacy history requires positive intervals"
+            raise ValueError(msg)
+        return self
+
+
+@dataclass(frozen=True)
+class PharmacyHistoryResult:
+    """Keep measured dated service alongside its scoped exact assessment."""
+
+    history: tuple[DatedPharmacyPortion, ...]
+    result: PharmacyRetentionResult
+
+
+class PharmacyHistoryInput(QuoteModel):
+    """Explicit allocation convention and dated measurements for one assessment."""
+
+    proration: PharmacyRetentionProration
+    history: tuple[DatedPharmacyPortion, ...]
+
+
+def assess_pharmacy_history(
+    rule: RetentionAuthority,
+    release: UnitQuoteRelease,
+    snapshot: RetentionAssessment,
+    evidence: RetentionEvidence,
+    inputs: PharmacyHistoryInput,
+) -> PharmacyHistoryResult:
+    """Bind complete measured history without inferring a workday denominator."""
+    proration = inputs.proration
+    history = inputs.history
+    release = UnitQuoteRelease.model_validate(release.model_dump())
+    snapshot = RetentionAssessment.model_validate(dict(snapshot))
+    history = tuple(DatedPharmacyPortion.model_validate(dict(p)) for p in history)
+    if not history or len({p.portion_id for p in history}) != len(history):
+        msg = "Dated pharmacy history requires unique nonempty portions"
+        raise ValueError(msg)
+    ordered = tuple(sorted(history, key=lambda p: p.starts_on))
+    cursor = snapshot.history_starts_on
+    for portion in ordered:
+        if (
+            portion.resource_id != snapshot.resource_id
+            or portion.starts_on != cursor
+            or portion.ends_on > snapshot.history_ends_on
+            or portion.known_on > release.as_known_on
+            or (
+                portion.input_kind == "observed_case_evidence"
+                and portion.known_on < portion.ends_on - timedelta(days=1)
+            )
+        ):
+            msg = "Pharmacy history has invalid coverage, resource or evidence dates"
+            raise ValueError(msg)
+        cursor = portion.ends_on
+    if cursor != snapshot.history_ends_on:
+        msg = "Pharmacy history must cover the complete assessment period"
+        raise ValueError(msg)
+    derived = PharmacyRetentionProration.model_validate(
+        dict(proration)
+        | {
+            "portions": tuple(
+                PharmacyServicePortion.model_validate(
+                    {
+                        k: v
+                        for k, v in dict(p).items()
+                        if k in PharmacyServicePortion.model_fields
+                    },
+                )
+                for p in ordered
+            ),
+            "interpretation_kind": (
+                "analyst_assumption"
+                if proration.interpretation_kind == "analyst_assumption"
+                or any(p.input_kind == "analyst_assumption" for p in ordered)
+                else "source_reviewed"
+            ),
+        },
+    )
+    return PharmacyHistoryResult(
+        ordered,
+        assess_pharmacy_retention(rule, release, snapshot, evidence, derived),
+    )
