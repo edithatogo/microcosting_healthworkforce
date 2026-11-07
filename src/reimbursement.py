@@ -323,3 +323,38 @@ def vic_specialist_cme_annual_cap(rate_column: date) -> Fraction:
         msg = "Select a published Victorian specialist CME rate column"
         raise ValueError(msg)
     return caps[rate_column]
+
+
+def nsw_level_one_tesl_funding(
+    full_time_allocation: Fraction,
+    employment_fraction: Fraction,
+) -> Fraction:
+    """Prorate a reviewed historical Level 1 TESL funding allocation.
+
+    Supply the applicable funding year and appointment fraction. This
+    values the funding allocation. Approved claims and accumulated balances
+    are handled separately through the reimbursement ledger.
+    """
+    if full_time_allocation < 0 or not 0 < employment_fraction <= 1:
+        msg = (
+            "TESL funding requires a nonnegative allocation and positive FTE up to one"
+        )
+        raise ValueError(msg)
+    return full_time_allocation * employment_fraction
+
+
+def nsw_level_one_tesl_available_funding(
+    annual_credit: Fraction,
+    unspent_balance: Fraction,
+    *,
+    accumulation_ceiling: Fraction,
+) -> Fraction:
+    """Apply the reviewed PD2019_043 section 5.1 accumulation ceiling.
+
+    The ceiling uses full-time allocations or a reviewed executive approval.
+    Annual credit can be prorated independently of that ceiling.
+    """
+    if min(annual_credit, unspent_balance, accumulation_ceiling) < 0:
+        msg = "TESL credit, unspent balance and ceiling must be nonnegative"
+        raise ValueError(msg)
+    return min(annual_credit + unspent_balance, accumulation_ceiling)
