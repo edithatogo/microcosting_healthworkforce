@@ -85,8 +85,13 @@ condition for the service period, then pass that condition's component
 to the periodic costing API. Supply the reviewed fortnight denominator
 and allocate ordinary hours and paid leave at their applicable pay
 fractions. Unpaid leave has a zero payment factor. If the appointment
-or manager allowance changes within a fortnight, separate the portions
-using the effective dates and retain the evidence for each selection.
+or manager allowance changes within a fortnight, use
+`cost_periodic_allowance_allocations(period, allocations)`. Supply
+one tuple of release, selected component and period segment for each
+effective interval. The segments must cover the whole fortnight in order,
+retain its full-time hours and annual divisor, and reconcile the hours
+for every label and pair of accrual and payment factors. Retain the
+appointment and receipt evidence for each selection.
 
 [QIRC certified MOCA7, clause 11.33](https://www.qirc.qld.gov.au/sites/default/files/2025-11/2025_cb128.pdf)
 
