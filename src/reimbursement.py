@@ -101,3 +101,75 @@ def reimbursement_carry_amount(decision: ReimbursementCarryDecision) -> Fraction
     if decision.eligible_balances == "current_and_prior":
         eligible += Fraction(decision.prior_remaining)
     return min(eligible, Fraction(decision.carry_limit))
+
+
+def sa_consultant_development_caps(
+    nominal_half_days_per_week: NonnegativeQuantity,
+) -> tuple[Fraction, Fraction]:
+    """Return annual and two-year FBT-inclusive limits for a covered consultant.
+
+    Use the reviewed appointment under clause 45.1.2 of the 2022 agreement.
+    Eligibility, accumulated balances and approved claims are separate inputs.
+    """
+    return _consultant_caps(nominal_half_days_per_week, 22000)
+
+
+def sa_consultant_development_caps_2025(
+    nominal_half_days_per_week: NonnegativeQuantity,
+    effective_on: date,
+) -> tuple[Fraction, Fraction]:
+    """Select the expense caps under the reviewed 2025 agreement.
+
+    Coverage as a non-casual consultant and any retrospective adjustment must
+    be established separately. The date is the applicable entitlement date.
+    """
+    if effective_on < date(2025, 4, 14):
+        msg = "Date precedes the first 2025 agreement development cap"
+        raise ValueError(msg)
+    full_annual_cap = 23000 if effective_on >= date(2026, 4, 14) else 22000
+    return _consultant_caps(nominal_half_days_per_week, full_annual_cap)
+
+
+def _consultant_caps(
+    nominal_half_days_per_week: NonnegativeQuantity,
+    full_annual_cap: int,
+) -> tuple[Fraction, Fraction]:
+    half_days = Fraction(nominal_half_days_per_week)
+    if half_days <= 0:
+        msg = "Consultant appointment must have positive nominal half-days"
+        raise ValueError(msg)
+    full_cap_threshold = 5
+    annual_cap = Fraction(full_annual_cap)
+    if half_days < full_cap_threshold:
+        annual_cap /= 2
+    return annual_cap, 2 * annual_cap
+
+
+class ReimbursementRecoveryDecision(QuoteModel):
+    """Reviewed resignation reconciliation for one entitlement period."""
+
+    reimbursed: NonnegativeQuantity
+    prorated_entitlement: NonnegativeQuantity
+    approved_recovery: NonnegativeQuantity
+    decision_evidence: str
+
+    @model_validator(mode="after")
+    def validate_recovery(self) -> Self:
+        """Limit the employer's decision to the excess reimbursement."""
+        excess = max(0, Fraction(self.reimbursed) - Fraction(self.prorated_entitlement))
+        if self.approved_recovery > excess:
+            msg = "Approved recovery exceeds reimbursement above prorated entitlement"
+            raise ValueError(msg)
+        return self
+
+
+def reimbursement_cost_after_recovery(
+    decision: ReimbursementRecoveryDecision,
+) -> Fraction:
+    """Return net expense cost after the supplied reviewed recovery.
+
+    The caller establishes eligibility, proration and the recovery decision.
+    The result values that decision without changing claims or payroll.
+    """
+    decision = ReimbursementRecoveryDecision.model_validate(dict(decision))
+    return Fraction(decision.reimbursed) - Fraction(decision.approved_recovery)

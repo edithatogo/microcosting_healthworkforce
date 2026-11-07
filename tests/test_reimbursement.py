@@ -11,8 +11,12 @@ from src.reimbursement import (
     ReimbursementCarryDecision,
     ReimbursementClaim,
     ReimbursementPeriod,
+    ReimbursementRecoveryDecision,
     cost_reimbursements,
     reimbursement_carry_amount,
+    reimbursement_cost_after_recovery,
+    sa_consultant_development_caps,
+    sa_consultant_development_caps_2025,
 )
 from tests.checks import assert_that
 
@@ -99,3 +103,81 @@ def test_exact_carry_can_fund_the_next_period() -> None:
     (row,) = cost_reimbursements(period)
     assert_that(row.cost == Fraction(133))
     assert_that(row.remaining == 0)
+
+
+def test_sa_consultant_development_caps_at_half_day_boundary() -> None:
+    """The lower bracket ends at exactly five nominal half-days."""
+    assert_that(
+        sa_consultant_development_caps(Decimal("4.99"))
+        == (Fraction(11000), Fraction(22000)),
+    )
+    assert_that(
+        sa_consultant_development_caps(Decimal(5))
+        == (Fraction(22000), Fraction(44000)),
+    )
+    with pytest.raises(ValueError, match="positive nominal half-days"):
+        sa_consultant_development_caps(Decimal(0))
+
+
+def test_sa_development_claim_respects_reviewed_two_year_headroom() -> None:
+    """The annual allocation and carry together fit the two-year ceiling."""
+    annual_cap, two_year_cap = sa_consultant_development_caps(Decimal(5))
+    carry = reimbursement_carry_amount(
+        ReimbursementCarryDecision(
+            current_remaining=Decimal(18000),
+            prior_remaining=Decimal(9000),
+            carry_limit=two_year_cap - annual_cap,
+            eligible_balances="current_and_prior",
+            decision_evidence="Synthetic reviewed eligible balances",
+        ),
+    )
+    start = date(2023, 7, 1)
+    (row,) = cost_reimbursements(
+        ReimbursementPeriod(
+            currency="AUD",
+            starts_on=start,
+            ends_on=date(2024, 7, 1),
+            cap=annual_cap + carry,
+            prior_use=Decimal("1500.25"),
+            applicability_evidence="Synthetic reviewed cap and carry allocation",
+            claims=(
+                ReimbursementClaim(
+                    claim_id="approved-development-expense",
+                    charged_on=start,
+                    eligible_amount=Decimal(43000),
+                    approval_evidence="Synthetic FBT-inclusive approved amount",
+                ),
+            ),
+        ),
+    )
+    assert_that(carry == Fraction(22000))
+    assert_that(row.cost == Fraction("42499.75"))
+    assert_that(row.remaining == 0)
+
+
+def test_sa_successor_development_cap_effective_dates() -> None:
+    """The successor raises both brackets at its operative date."""
+    select = sa_consultant_development_caps_2025
+    with pytest.raises(ValueError, match="precedes"):
+        select(Decimal(5), date(2025, 4, 13))
+    for day in (date(2025, 4, 14), date(2026, 4, 13)):
+        assert_that(select(Decimal(5), day) == (22000, 44000))
+    boundary = date(2026, 4, 14)
+    assert_that(select(Decimal(5), boundary) == (23000, 46000))
+    assert_that(select(Decimal("4.99"), boundary) == (11500, 23000))
+
+
+def test_reimbursement_recovery_is_discretionary_and_limited_to_excess() -> None:
+    """An employer can choose a smaller recovery than the eligible excess."""
+    decision = ReimbursementRecoveryDecision(
+        reimbursed=Decimal("14000.25"),
+        prorated_entitlement=Decimal(11000),
+        approved_recovery=Decimal("2500.10"),
+        decision_evidence="Synthetic approved resignation reconciliation",
+    )
+    assert_that(reimbursement_cost_after_recovery(decision) == Fraction("11500.15"))
+    declined = decision.model_copy(update={"approved_recovery": Decimal(0)})
+    assert_that(reimbursement_cost_after_recovery(declined) == Fraction("14000.25"))
+    excess = decision.model_copy(update={"approved_recovery": Decimal("3000.26")})
+    with pytest.raises(ValueError, match="exceeds reimbursement"):
+        reimbursement_cost_after_recovery(excess)

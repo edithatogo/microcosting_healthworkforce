@@ -136,7 +136,10 @@ def victorian_medical_scientist_weekend_leave_credit(
     part_time: bool,
     nes_credit_hours: Fraction,
 ) -> Fraction:
-    """Calculate clause 61.8 hours for one reviewed 12-month roster window.
+    """Calculate weekend leave hours for one reviewed 12-month roster window.
+
+    The same arithmetic applies under clauses 60.7 (2017-2021) and
+    61.8 (2021-2025). The caller establishes the operative agreement.
 
     Group ordinary shifts by weekend. Supply reviewed weekend attribution for
     shifts crossing a day boundary and zero NES credit when inapplicable.
@@ -460,6 +463,15 @@ def price_separation_loading(
     )
 
 
+class VictorianLeaveLoadingComparison(QuoteModel):
+    """Reviewed clause 60.8 inputs for one complete comparison interval."""
+
+    premium_inclusive_pay: NonnegativeQuantity
+    remaining_loading_cap: NonnegativeQuantity
+    evidence: str
+    comparison_id: str | None = None
+
+
 class LeavePriceSelection(QuoteModel):
     """An explicit price/exposure choice for exactly one schedule interval."""
 
@@ -471,6 +483,7 @@ class LeavePriceSelection(QuoteModel):
     allowances: tuple[QuoteQuantity, ...]
     loading_accrued_on: date | None = None
     loading_comparison: LeaveLoadingComparison | None = None
+    victorian_loading: VictorianLeaveLoadingComparison | None = None
 
 
 class LeaveLoadingMoneyCap(QuoteModel):
@@ -563,24 +576,72 @@ def _apply_loading_comparisons(
 ) -> None:
     """Compare each declared cash interval once and allocate its winning basis."""
     groups: dict[str, list[tuple[int, LeaveLoadingComparison]]] = {}
+    victorian_groups: dict[str, list[tuple[int, VictorianLeaveLoadingComparison]]] = {}
     for index, row in enumerate(rows):
         supplied = row.choice.loading_comparison
-        if supplied is None:
-            continue
-        if has_cap or any(
-            item.quote.component == "leave_loading"
-            for item in row.pricing.pricing.rows[1:]
+        victorian = row.choice.victorian_loading
+        if (supplied or victorian) and (
+            has_cap
+            or any(
+                item.quote.component == "leave_loading"
+                for item in row.pricing.pricing.rows[1:]
+            )
         ):
             msg = "Loading comparison cannot combine with a loading quote or cap"
             raise ValueError(msg)
-        comparison = LeaveLoadingComparison.model_validate(dict(supplied))
-        if comparison.comparison_id is None:
-            alternative = comparison.select(row.pricing.pricing.rows[0].cost)
-            rows[index] = replace(row, loading_alternative=alternative)
-        else:
-            groups.setdefault(comparison.comparison_id, []).append((index, comparison))
+        base_pay = row.pricing.pricing.rows[0].cost
+        if victorian is not None:
+            if supplied is not None:
+                msg = "Select only one loading comparison"
+                raise ValueError(msg)
+            reviewed = VictorianLeaveLoadingComparison.model_validate(dict(victorian))
+            if reviewed.comparison_id is None:
+                _allocate_victorian_loading(rows, [(index, reviewed)])
+            else:
+                victorian_groups.setdefault(reviewed.comparison_id, []).append(
+                    (index, reviewed),
+                )
+        elif supplied is not None:
+            comparison = LeaveLoadingComparison.model_validate(dict(supplied))
+            if comparison.comparison_id is None:
+                alternative = comparison.select(base_pay)
+                rows[index] = replace(row, loading_alternative=alternative)
+            else:
+                groups.setdefault(comparison.comparison_id, []).append(
+                    (index, comparison),
+                )
     for group in groups.values():
         _allocate_grouped_loading(rows, group)
+
+    for group in victorian_groups.values():
+        _allocate_victorian_loading(rows, group)
+
+
+def _allocate_victorian_loading(
+    rows: list[PricedLeaveRow],
+    group: list[tuple[int, VictorianLeaveLoadingComparison]],
+) -> None:
+    reviewed = group[0][1]
+    if any(item != reviewed for _, item in group) or any(
+        rows[left].exposure.ends_on != rows[right].exposure.starts_on
+        for (left, _), (right, _) in pairwise(group)
+    ):
+        msg = "Victorian loading requires contiguous rows with identical period inputs"
+        raise ValueError(msg)
+    bases = [rows[index].pricing.pricing.rows[0].cost for index, _ in group]
+    total_base = sum(bases, Fraction(0))
+    cash = victorian_medical_scientist_leave_loading(
+        total_base,
+        Fraction(reviewed.premium_inclusive_pay),
+        Fraction(reviewed.remaining_loading_cap),
+    )
+    # Allocate for reporting by ordinary pay, or evenly when ordinary pay is zero.
+    for (index, _), base in zip(group, bases, strict=True):
+        share = base / total_base if total_base else Fraction(1, len(group))
+        rows[index] = replace(
+            rows[index],
+            loading_alternative=LeaveLoadingAlternative(cash * share, Fraction(0)),
+        )
 
 
 def _allocate_grouped_loading(
@@ -724,3 +785,21 @@ def price_paid_leave(
         single_cap,
         multiple_caps,
     )
+
+
+def victorian_medical_scientist_leave_loading(
+    ordinary_pay: Fraction,
+    premium_inclusive_pay: Fraction,
+    remaining_loading_cap: Fraction,
+) -> Fraction:
+    """Value the additional cash under the Victorian 2017-2021 clause 60.8.
+
+    Supply the reviewed cap balance and premium-inclusive pay for the same
+    leave period and currency. The latter reflects average eligible earnings
+    or the reviewed roster equivalent for weekend-only or permanent nights.
+    """
+    if min(ordinary_pay, premium_inclusive_pay, remaining_loading_cap) < 0:
+        msg = "Victorian loading inputs must be nonnegative"
+        raise ValueError(msg)
+    standard_loading = min(ordinary_pay * Fraction(7, 40), remaining_loading_cap)
+    return max(standard_loading, premium_inclusive_pay - ordinary_pay)

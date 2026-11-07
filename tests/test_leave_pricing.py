@@ -6,9 +6,13 @@ from datetime import date, timedelta
 from decimal import Decimal, localcontext
 from fractions import Fraction
 from typing import Literal
+lazy from pathlib import Path
 
 import pytest
+from pydantic import TypeAdapter
 
+from src.leave_cli import LeaveCostRequest, LeaveCostRun
+from src.leave_cli import main as leave_main
 from src.leave_pricing import (
     AdvanceLeaveTermination,
     AdvanceLoadingPrices,
@@ -17,6 +21,7 @@ from src.leave_pricing import (
     LeaveLoadingMoneyCap,
     LeavePriceSelection,
     SeparationLoadingEligibility,
+    VictorianLeaveLoadingComparison,
     WeekendLeaveShift,
     allocate_leave_loading_hours,
     combined_leave_hours,
@@ -27,6 +32,7 @@ from src.leave_pricing import (
     price_separation_loading,
     qualifying_shift_leave_credit,
     select_leave_loading_alternative,
+    victorian_medical_scientist_leave_loading,
     victorian_medical_scientist_weekend_leave_credit,
 )
 from src.paid_leave import PaidLeaveSchedule, build_paid_leave
@@ -786,3 +792,95 @@ def test_victorian_weekend_credit_applies_grouping_cap_and_nes_substitution() ->
     ambiguous = (crossing[0] + (WeekendLeaveShift(Fraction(8), Fraction(8)),),)
     with pytest.raises(ValueError, match="reviewed weekend credit selection"):
         credit(ambiguous, part_time=True, nes_credit_hours=Fraction(0))
+
+
+def test_victorian_leave_loading_caps_only_the_standard_alternative() -> None:
+    """Compare the capped standard loading with the incremental premium."""
+    loading = victorian_medical_scientist_leave_loading
+    base = Fraction(1000)
+    assert_that(loading(base, Fraction(1100), Fraction(200)) == Fraction(175))
+    assert_that(loading(base, Fraction(1100), Fraction(120)) == Fraction(120))
+    assert_that(loading(base, Fraction(1140), Fraction(120)) == Fraction(140))
+    assert_that(loading(base, Fraction(950), Fraction(0)) == 0)
+
+
+def test_victorian_loading_enters_dated_leave_ledger_once() -> None:
+    """A reviewed interval adds the winning cash increment to the base ledger."""
+    leave = schedule()
+    first, second = choices(leave, second_quote="salary-new")
+    reviewed = VictorianLeaveLoadingComparison(
+        premium_inclusive_pay=Decimal(0),
+        remaining_loading_cap=Decimal(12),
+        evidence="Synthetic reviewed cap balance and premium comparator",
+    )
+    result = price_paid_leave(
+        dated_prices(),
+        selection(),
+        leave,
+        (first.model_copy(update={"victorian_loading": reviewed}), second),
+    )
+    assert_that(result.total == Fraction(73500, 73) + 12)
+
+
+def test_victorian_loading_compares_once_across_a_wage_change() -> None:
+    """Repeat identical whole-period inputs on the contiguous wage rows."""
+    leave = schedule()
+    first, second = choices(leave, second_quote="salary-new")
+    reviewed = VictorianLeaveLoadingComparison(
+        premium_inclusive_pay=Decimal(1200),
+        remaining_loading_cap=Decimal(100),
+        comparison_id="complete-leave-period",
+        evidence="Synthetic reviewed whole-period inputs",
+    )
+    selected = tuple(
+        LeavePriceSelection.model_validate_json(
+            choice.model_copy(update={"victorian_loading": reviewed}).model_dump_json(),
+        )
+        for choice in (first, second)
+    )
+    result = price_paid_leave(dated_prices(), selection(), leave, selected)
+    assert_that(result.total == Fraction(1200))
+
+    inconsistent = reviewed.model_copy(update={"remaining_loading_cap": Decimal(99)})
+    with pytest.raises(ValueError, match="identical period inputs"):
+        price_paid_leave(
+            dated_prices(),
+            selection(),
+            leave,
+            (
+                selected[0],
+                second.model_copy(update={"victorian_loading": inconsistent}),
+            ),
+        )
+
+
+def test_paid_leave_cli_prices_original_declarations(tmp_path: Path) -> None:
+    """The CLI reconstructs the dated schedule and writes the exact total."""
+    leave = schedule()
+    hours = selection()
+    request = LeaveCostRequest(
+        policy=leave.policy,
+        leave=leave.request,
+        hours_rule=hours.rule,
+        hours_request=hours.request,
+        hours_history=hours.rows,
+        choices=choices(leave, second_quote="salary-new"),
+    )
+    release_path = tmp_path / "release.json"
+    request_path = tmp_path / "request.json"
+    output = tmp_path / "ledger.json"
+    release_path.write_text(dated_prices().model_dump_json())
+    request_path.write_text(request.model_dump_json())
+    argv = [
+        "--release",
+        str(release_path),
+        "--request",
+        str(request_path),
+        "--output",
+        str(output),
+    ]
+    assert_that(leave_main(argv) == 0)
+    run = TypeAdapter(LeaveCostRun).validate_json(output.read_bytes())
+    assert_that(run.result.total == Fraction(73500, 73))
+    with pytest.raises(FileExistsError):
+        leave_main(argv)
