@@ -9,7 +9,7 @@ from zoneinfo import ZoneInfo
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from src.conditions import ConditionRelease, cost_condition_activity, hourly_components
+from src.conditions import ConditionRelease, cost_condition_activity
 from src.costing import Activity
 lazy from src.conditions import ConditionCostSegment
 
@@ -136,7 +136,7 @@ def _exact_segment(
     segment: ConditionCostSegment,
     day: date,
     cumulative: Fraction,
-) -> tuple[Fraction, Fraction]:
+) -> tuple[Fraction, Fraction, Fraction]:
     elapsed = segment.ends_at - segment.starts_at
     microseconds = (
         elapsed.days * 86400 + elapsed.seconds
@@ -159,7 +159,7 @@ def _exact_segment(
         * (Fraction(rule.multiplier) - 1)
         * (hours - ordinary)
     )
-    return hours, premium
+    return hours, ordinary, premium
 
 
 def _require_single_worker(ordered: list[Activity]) -> None:
@@ -203,8 +203,9 @@ def cost_overtime_period(
         msg = "History must be stated through the first activity start"
         raise ValueError(msg)
     previous_end = period.starts_at.astimezone(UTC)
-    cumulative = period.prior_hours
     exact_cumulative = Fraction(period.prior_hours)
+    exact_ordinary_total = Fraction(0)
+    exact_overtime_total = Fraction(0)
     exact_base = Fraction(0)
     exact_premium = Fraction(0)
     rows: list[RosterCostRow] = []
@@ -234,27 +235,20 @@ def cost_overtime_period(
                 (segment.ends_at - timedelta(microseconds=1)).astimezone(zone).date()
             )
             _require_rule_coverage(release, rule, day, final_day)
-            ordinary = min(
-                segment.hours,
-                max(Decimal(0), rule.threshold_hours - cumulative),
-            )
-            overtime = segment.hours - ordinary
-            cumulative += segment.hours
-            salary = next(
-                c
-                for c in release.conditions
-                if c.kind == "salary" and c.effective_from <= day < c.effective_to
-            )
-            salary_rate = hourly_components(release, day)[salary.component]
-            increment = salary_rate * (rule.multiplier - Decimal(1)) * overtime
-            exact_hours, premium_delta = _exact_segment(
+            exact_hours, exact_ordinary, premium_delta = _exact_segment(
                 release,
                 rule,
                 segment,
                 day,
                 exact_cumulative,
             )
+            exact_overtime = exact_hours - exact_ordinary
+            ordinary = Decimal(exact_ordinary.numerator) / exact_ordinary.denominator
+            overtime = Decimal(exact_overtime.numerator) / exact_overtime.denominator
+            increment = Decimal(premium_delta.numerator) / premium_delta.denominator
             exact_cumulative += exact_hours
+            exact_ordinary_total += exact_ordinary
+            exact_overtime_total += exact_overtime
             exact_premium += premium_delta
             rows.append(
                 RosterCostRow(
@@ -272,20 +266,19 @@ def cost_overtime_period(
                     citation=rule.citation,
                 ),
             )
+    exact_total = exact_base + exact_premium
     return RosterCostResult(
         release_id=release.release_id,
-        total=sum(
-            (
-                sum(r.components.values(), Decimal(0)) + r.overtime_increment
-                for r in rows
-            ),
-            Decimal(0),
+        total=Decimal(exact_total.numerator) / exact_total.denominator,
+        ordinary_hours=(
+            Decimal(exact_ordinary_total.numerator) / exact_ordinary_total.denominator
         ),
-        ordinary_hours=sum((r.ordinary_hours for r in rows), Decimal(0)),
-        overtime_hours=sum((r.overtime_hours for r in rows), Decimal(0)),
+        overtime_hours=(
+            Decimal(exact_overtime_total.numerator) / exact_overtime_total.denominator
+        ),
         prior_hours=period.prior_hours,
-        exact_total_numerator=(exact_base + exact_premium).numerator,
-        exact_total_denominator=(exact_base + exact_premium).denominator,
+        exact_total_numerator=exact_total.numerator,
+        exact_total_denominator=exact_total.denominator,
         exact_premium_numerator=exact_premium.numerator,
         exact_premium_denominator=exact_premium.denominator,
         rows=tuple(rows),
