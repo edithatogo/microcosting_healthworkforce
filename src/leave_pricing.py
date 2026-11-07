@@ -114,6 +114,28 @@ def price_leave_loading(
     return _allocate_cap(amounts, monetary_cap - prior_paid)
 
 
+class LeaveLoadingComparison(QuoteModel):
+    """Reviewed loading inputs for one priced interval in release currency."""
+
+    rate: NonnegativeQuantity
+    forgone_penalties: NonnegativeQuantity | None = None
+    elected_days: NonnegativeQuantity | None = None
+    evidence: str
+
+    def select(self, base_pay: Fraction) -> LeaveLoadingAlternative:
+        """Keep supplied election days as an explicitly allocated quantity."""
+        return select_leave_loading_alternative(
+            base_pay,
+            Fraction(self.rate),
+            None
+            if self.forgone_penalties is None
+            else Fraction(self.forgone_penalties),
+            elected_days=None
+            if self.elected_days is None
+            else Fraction(self.elected_days),
+        )
+
+
 class LeavePriceSelection(QuoteModel):
     """An explicit price/exposure choice for exactly one schedule interval."""
 
@@ -124,6 +146,7 @@ class LeavePriceSelection(QuoteModel):
     pricing: HoursPricingRequest
     allowances: tuple[QuoteQuantity, ...]
     loading_accrued_on: date | None = None
+    loading_comparison: LeaveLoadingComparison | None = None
 
 
 class LeaveLoadingMoneyCap(QuoteModel):
@@ -144,6 +167,15 @@ class PricedLeaveRow:
     choice: LeavePriceSelection
     pricing: SelectedHoursPricing
     loading_reduction: Fraction = Fraction(0)
+    loading_alternative: LeaveLoadingAlternative | None = None
+
+    @property
+    def total(self) -> Fraction:
+        """Combine the base ledger and exactly one loading path."""
+        cash = (
+            self.loading_alternative.cash if self.loading_alternative else Fraction(0)
+        )
+        return self.pricing.pricing.total - self.loading_reduction + cash
 
 
 @dataclass(frozen=True)
@@ -296,7 +328,21 @@ def price_paid_leave(
             raise ValueError(msg)
         _dated_coverage(release, choice)
         priced = price_selected_hours(release, selection, request, choice.allowances)
-        rows.append(PricedLeaveRow(exposure, choice, priced))
+        alternative = None
+        if choice.loading_comparison is not None:
+            if loading_cap or any(
+                item.quote.component == "leave_loading"
+                for item in priced.pricing.rows[1:]
+            ):
+                msg = "Loading comparison cannot combine with a loading quote or cap"
+                raise ValueError(msg)
+            comparison = LeaveLoadingComparison.model_validate(
+                dict(choice.loading_comparison),
+            )
+            alternative = comparison.select(priced.pricing.rows[0].cost)
+        rows.append(
+            PricedLeaveRow(exposure, choice, priced, loading_alternative=alternative),
+        )
     single_cap = loading_cap if isinstance(loading_cap, LeaveLoadingMoneyCap) else None
     multiple_caps = loading_cap if isinstance(loading_cap, tuple) else ()
     caps = (single_cap,) if single_cap is not None else multiple_caps
@@ -308,7 +354,7 @@ def price_paid_leave(
         selection,
         release.currency,
         tuple(rows),
-        sum((r.pricing.pricing.total - r.loading_reduction for r in rows), Fraction(0)),
+        sum((row.total for row in rows), Fraction(0)),
         single_cap,
         multiple_caps,
     )
