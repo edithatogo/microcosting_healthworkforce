@@ -31,6 +31,39 @@ Supply reviewed eligibility, payroll dates, hours and factors. Allocation
 hours may not exceed the specified full-time hours. When combining ledgers,
 count the allowance once.
 
+## Inaccessibility milestones and instalments
+
+Use `price_inaccessibility_first_payment` and
+`price_inaccessibility_recurring_payment` from `src.inaccessibility`
+for reviewed single-category cases. Select an accepted annual quote
+with unit `annum` and component `inaccessibility-category-N` for the
+applicable category and valuation date. Supply the reviewed employment
+fraction and evidence for eligible service and previous payments. Set
+`service_assessed_through` to the last date covered by that assessment,
+on or before the valuation date.
+
+For the standard first milestone, categories 1–3 use six completed
+eligible months and half the annual amount. Categories 4–7 use twelve
+completed eligible months and the full annual amount. A completed,
+unpaid recurring instalment after the initial milestone uses one
+quarter of the annual amount. The supplied employment fraction applies
+to each calculation. An unpaid, completed instalment at half time
+therefore costs 150 from a synthetic annual quote of 1,200.
+
+Provide a stable payment ID for each case so the resulting ledger row can be
+matched to its payment history. This API prices a supplied case.
+Calendar derivation, mixed-category service and vocational rotation
+eligibility require separate evidence and methods.
+
+For a reviewed single-category vocational RMO rotation case,
+`price_inaccessibility_rotation_payment` applies the four-completed-month
+threshold within the declared service year. The service assessment date
+must fall within that year. Supply the reviewed annual
+fraction as a decimal or exact fraction, separately from the employment
+fraction. The calculator checks the supplied prior-payment status.
+
+## Transfers across releases
+
 For a transfer across releases, use
 `cost_periodic_allowance_across_releases(component, period, allocations)`.
 Each allocation pairs the segment with its applicable condition release.
