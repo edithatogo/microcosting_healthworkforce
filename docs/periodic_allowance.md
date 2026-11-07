@@ -31,14 +31,6 @@ Supply reviewed eligibility, payroll dates, hours and factors. Allocation
 hours may not exceed the specified full-time hours. When combining ledgers,
 count the allowance once.
 
-For a transfer across releases, use
-`cost_periodic_allowance_across_releases(component, period, allocations)`.
-Each allocation pairs the segment with its applicable condition release.
-Supply the same allowance component and the parent denominators throughout.
-The schedule preserves each segment's release ID and hash and checks the
-classified hours and factors across the whole payroll period. The caller
-supplies the reviewed assignment and facility evidence for each segment.
-
 ## Inaccessibility milestones and instalments
 
 Use `price_inaccessibility_first_payment` and
@@ -69,3 +61,13 @@ threshold within the declared service year. The service assessment date
 must fall within that year. Supply the reviewed annual
 fraction as a decimal or exact fraction, separately from the employment
 fraction. The calculator checks the supplied prior-payment status.
+
+## Transfers across releases
+
+For a transfer across releases, use
+`cost_periodic_allowance_across_releases(component, period, allocations)`.
+Each allocation pairs the segment with its applicable condition release.
+Supply the same allowance component and the parent denominators throughout.
+The schedule preserves each segment's release ID and hash and checks the
+classified hours and factors across the whole payroll period. The caller
+supplies the reviewed assignment and facility evidence for each segment.
