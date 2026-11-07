@@ -12,9 +12,11 @@ from src.period_contributions import (
     ContributionAlternative,
     ContributionCap,
     ContributionFactor,
+    ContributionPayment,
     ContributionPeriod,
     ContributionRule,
     cost_contribution_activities,
+    cost_contribution_payments,
     cost_contribution_snapshot,
 )
 from tests.checks import assert_that
@@ -531,3 +533,27 @@ def test_planned_remittance_is_separate_from_earned_cost() -> None:
             rule(),
             (activity(),),
         )
+
+
+def test_paid_contribution_uses_posted_components_and_rejects_duplicates() -> None:
+    """Price a payroll-only component using the reviewed posting basis."""
+    original = rule()
+    basis = original.alternatives[0].model_copy(update={"bases": ("vehicle",)})
+    policy = original.model_copy(update={"alternatives": (basis,)})
+    payment = ContributionPayment(
+        payment_id="posting-1",
+        resource_id="staff",
+        allocation_id="worker",
+        component="vehicle",
+        paid_at=START,
+        amount=Decimal(110),
+        evidence="Synthetic posting receipt",
+    )
+    excluded = payment.model_copy(
+        update={"payment_id": "posting-2", "component": "excluded"},
+    )
+    result = cost_contribution_payments(prices(), period(), policy, (excluded, payment))
+    assert_that(result.contribution == Fraction(11))
+    assert_that(tuple(row.payment for row in result.rows) == (payment,))
+    with pytest.raises(ValueError, match="Duplicate contribution payment"):
+        cost_contribution_payments(prices(), period(), policy, (payment, payment))
