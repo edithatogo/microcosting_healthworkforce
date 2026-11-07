@@ -10,6 +10,7 @@ import pytest
 from src.conditions import (
     Condition,
     ConditionRelease,
+    WorkbookConditionOrigin,
     cost_condition_activity,
     cost_condition_snapshot,
     hourly_components,
@@ -265,3 +266,27 @@ def test_costing_revalidates_source_applicability(applicability: str) -> None:
         cost_condition_snapshot(revised, date(2026, 6, 1), Decimal(1))
     with pytest.raises(ValueError, match="No verified source coverage"):
         cost_condition_activity(revised, activity, "UTC")
+
+
+def test_verified_award_does_not_override_conflicting_workbook_origin() -> None:
+    """Verified instrument coverage and workbook applicability are separate."""
+    salary = condition("salary", "salary", "100000", "AUD/year").model_copy(
+        update={
+            "workbook_origin": WorkbookConditionOrigin(
+                workbook_sha256="b" * 64,
+                sheet="Synthetic workbook",
+                coordinate="V16",
+                applicability="conflicting",
+                review_evidence="Reviewed conflicting classification and salary",
+            ),
+        },
+    )
+    with pytest.raises(ValueError, match="verified cell applicability"):
+        ConditionRelease(
+            release_id="workbook-derived",
+            jurisdiction="QLD",
+            employer="Synthetic employer",
+            classification="Synthetic grade",
+            sources=SourceRegistry(records=(source(),)),
+            conditions=(salary,),
+        )
