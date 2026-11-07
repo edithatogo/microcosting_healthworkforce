@@ -264,3 +264,41 @@ def test_location_pool_preserves_exact_total_and_rejects_overallocation() -> Non
     ):
         with pytest.raises(ValueError, match="Location pool"):
             price_location_pool(release(), invalid)
+
+
+def test_fixed_classification_allowance_uses_dated_annual_quote() -> None:
+    """Price reviewed annual fractions at the applicable classification quote."""
+    boundary = date(2026, 7, 1)
+    rates = release(
+        quote(
+            quote_id="ep-before",
+            component="exemplary-practice",
+            unit="annum",
+            amount=Decimal(6000),
+            ends_on=boundary,
+        ),
+        quote(
+            quote_id="ep-after",
+            component="exemplary-practice",
+            unit="annum",
+            amount=Decimal(6600),
+            starts_on=boundary,
+        ),
+    )
+    earlier = quantity(
+        quote_id="ep-before",
+        unit="annum",
+        quantity=Decimal("0.25"),
+        valued_on=date(2026, 6, 30),
+        basis="Synthetic reviewed quarter-year exposure",
+    )
+    later = quantity(
+        quantity_id="event-2",
+        quote_id="ep-after",
+        unit="annum",
+        quantity=Decimal("0.25"),
+        valued_on=boundary,
+        basis="Synthetic reviewed quarter-year exposure",
+    )
+    assert_that(price_units(rates, (earlier,)).total == Fraction(1500))
+    assert_that(price_units(rates, (earlier, later)).total == Fraction(3150))

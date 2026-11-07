@@ -39,3 +39,35 @@ twice. Keep appointment eligibility and the effective salary edition with
 the case evidence.
 
 [NTPS Aboriginal Health Practitioner agreement, clauses 37.5–37.6](https://ocpe.nt.gov.au/__data/assets/pdf_file/0007/1588894/ntps-aboriginal-health-practitioner-2025-2029-enterprise-agreement.pdf)
+
+### NT Aboriginal health practitioner exemplary practice allowance
+
+Schedule D of the [2025–2029 enterprise agreement approval bundle](https://ocpe.nt.gov.au/__data/assets/pdf_file/0008/1604663/northern-territory-public-sector-aboriginal-health-practitioner-2025-2029-enterprise-agreement.PDF)
+defines Exemplary Practice 1 as 6% of the fourth salary point of AHP2
+or AHP3, as applicable. Exemplary Practice 2 uses 13% of the fourth
+salary point of AHP3. The schedule publishes annual amounts. Use the
+applicable dated annual amount with the unit-quote calculator once
+the employee's eligibility, payment quantity and effective release
+have been reviewed. A salary-relative derived component would use the
+employee's own salary and can produce the wrong result for this allowance.
+
+Clauses 46.3–46.9 restrict eligibility to approved, non-casual AHP2
+and AHP3 employees and require reassessment after three years. Under
+46.12–46.13, payment is fortnightly and prorated by agreed hours for
+part-time employees. Include approved paid leave, exclude unpaid or
+unauthorised leave, and exclude higher duties except under 44.9.
+Include the allowance in the superannuation base and exclude it from
+overtime and penalty bases. AHP3 EP1 and EP2 are mutually exclusive.
+Use a reviewed payroll quantity for a dated payment, since Schedule D
+expresses the rate annually. Clause 44.10 separately affects higher-duties
+rate selection when current salary inclusive of the allowance meets or
+exceeds the higher position's minimum. Review Annexure A before accepting
+a release.
+
+For AHP3, apply the [exclusive quote group](exclusive_quotes.md) to EP1
+and EP2 allocations in the same costing request. Use the employee as
+the resource and the reviewed entitlement interval as the exposure
+window. Split windows where the accepted quote or approved status
+changes. Validate the set together so overlapping allocations can be
+detected. Keep the selected allowance as a separate component when
+applying the reviewed superannuation base.
