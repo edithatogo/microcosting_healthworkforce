@@ -150,3 +150,20 @@ the historical model. For current WorkCover costing, classify the
 payment against the applicable premium guidance. The [WorkCover
 wages manual](https://www.worksafe.qld.gov.au/__data/assets/pdf_file/0014/17240/wages-definition-manual.pdf)
 distinguishes remuneration from reimbursement of work expenses.
+
+Central West HHS's [2024–25 financial statements, notes B2-1 and B2-2](https://www.centralwest.health.qld.gov.au/__data/assets/pdf_file/0018/450702/central-west-hhs-annual-report-2024-2025.PDF)
+show separate premium costs for directly employed staff and charges
+for staff supplied by the Department of Health. When costing supplied
+staff from the HHS perspective, use the applicable service charge.
+When consolidating the HHS and Department perspectives, eliminate the
+internal recharge and retain the external premium once. The annual
+report establishes the accounting pathways. A dated policy or service
+charge schedule is needed to price an individual assignment.
+
+A reviewed fixed service charge can be priced as a dated unit quote
+using the service agreement as its source. A reviewed percentage charge
+can use a single contribution alternative with the agreement's explicit
+earnings base. Keep the recharge and insurer premium in distinct
+components and ledgers. These pricing APIs calculate the separate
+charges. Consolidation and verification of matching inter-entity entries
+require a separate accounting step.
