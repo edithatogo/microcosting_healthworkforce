@@ -189,8 +189,13 @@ def test_assignment_comparison_cli_emits_exact_difference(tmp_path: Path) -> Non
     assert_that(Fraction(data["alternative"]["total"]) == Fraction(180))
 
 
-def test_assignment_and_reviewed_expenses_keep_separate_ledgers(tmp_path: Path) -> None:
-    """A proven expense enters the total once alongside dated wage slices."""
+@pytest.mark.parametrize("approved_expenses", [True, False])
+def test_assignment_and_reviewed_expenses_keep_separate_ledgers(
+    tmp_path: Path,
+    *,
+    approved_expenses: bool,
+) -> None:
+    """Reviewed SA development duty and approved expenses are costed separately."""
     path = timeline()
     request = AssignmentActivitiesRequest(mode="activities", activities=(activity(),))
     period = ReimbursementPeriod(
@@ -207,8 +212,11 @@ def test_assignment_and_reviewed_expenses_keep_separate_ledgers(tmp_path: Path) 
                 eligible_amount=Decimal("75.25"),
                 approval_evidence="Synthetic approved expense",
             ),
-        ),
+        )
+        if approved_expenses
+        else (),
     )
+    expected_expenses = Fraction("75.25") if approved_expenses else Fraction(0)
     result = cost_assignment_with_reimbursements(
         path,
         request,
@@ -216,8 +224,8 @@ def test_assignment_and_reviewed_expenses_keep_separate_ledgers(tmp_path: Path) 
         reviewed_subject_id=path.subject_id,
     )
     assert_that(result.assignment.total == Fraction(110))
-    assert_that(result.reimbursements.total == Fraction("75.25"))
-    assert_that(result.total == Fraction("185.25"))
+    assert_that(result.reimbursements.total == expected_expenses)
+    assert_that(result.total == Fraction(110) + expected_expenses)
     with pytest.raises(ValueError, match="reviewed assignment subject"):
         cost_assignment_with_reimbursements(
             path,
@@ -247,7 +255,7 @@ def test_assignment_and_reviewed_expenses_keep_separate_ledgers(tmp_path: Path) 
     )
     assert_that(main([*args, "--reimbursements", str(claims_path)]) == 0)
     ledger = json.loads(output.read_bytes())
-    assert_that(Fraction(ledger["total"]) == Fraction("185.25"))
+    assert_that(Fraction(ledger["total"]) == Fraction(110) + expected_expenses)
 
 
 @pytest.mark.parametrize("study_rule", ["nsw-online", "vic-hama-historical"])

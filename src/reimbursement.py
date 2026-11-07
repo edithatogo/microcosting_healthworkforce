@@ -8,7 +8,8 @@ lazy from datetime import date
 
 from pydantic import Field, model_validator
 
-from src.unit_quotes import NonnegativeQuantity, QuoteModel
+from src.unit_quotes import NonnegativeQuantity, QuoteModel, price_units
+lazy from src.unit_quotes import QuoteQuantity, UnitQuoteRelease, UnitQuoteResult
 
 
 class ReimbursementClaim(QuoteModel):
@@ -216,3 +217,69 @@ def sa_ordinary_study_fee_amount(
         msg = "Study fees must be nonnegative"
         raise ValueError(msg)
     return tuition + exams if proof_of_passing else Fraction(0)
+
+
+def sa_residential_course_allowance(
+    programme_days: int,
+    eligible_course_days: int,
+    *,
+    short_course_daily_rate: Fraction,
+    long_course_daily_rate: Fraction,
+) -> Fraction:
+    """Value reviewed course days under SA Salaried Interim Award clause 8.6.
+
+    Programme duration is in calendar days. Eligible attendance excludes
+    travel-only days. Supply both rates from the reviewed operative instrument.
+    """
+    short_course = _sa_short_residential_course(programme_days, eligible_course_days)
+    if min(short_course_daily_rate, long_course_daily_rate) < 0:
+        msg = "Course-day rates must be nonnegative"
+        raise ValueError(msg)
+    rate = short_course_daily_rate if short_course else long_course_daily_rate
+    return eligible_course_days * rate
+
+
+def _sa_short_residential_course(
+    programme_days: int,
+    eligible_course_days: int,
+) -> bool:
+    if programme_days < 1 or not 0 <= eligible_course_days <= programme_days:
+        msg = "Eligible course days must fit the positive programme duration"
+        raise ValueError(msg)
+    two_weeks = 14
+    return programme_days <= two_weeks
+
+
+def price_sa_residential_course_days(
+    release: UnitQuoteRelease,
+    attendance: tuple[QuoteQuantity, ...],
+    *,
+    starts_on: date,
+    ends_on: date,
+) -> UnitQuoteResult:
+    """Price one reviewed programme using one quantity per eligible course date.
+
+    Use course_day quotes with the residential_course_short or
+    residential_course_long component, according to the programme duration.
+    The end date is exclusive. The caller reviews attendance and coverage.
+    """
+    short_course = _sa_short_residential_course(
+        (ends_on - starts_on).days,
+        len(attendance),
+    )
+    if any(not starts_on <= day.valued_on < ends_on for day in attendance):
+        msg = "Attendance date is outside the reviewed programme"
+        raise ValueError(msg)
+    if len({day.valued_on for day in attendance}) != len(attendance) or any(
+        day.quantity != 1 or day.unit != "course_day" for day in attendance
+    ):
+        msg = "Attendance requires one course day per distinct date"
+        raise ValueError(msg)
+    result = price_units(release, attendance)
+    component = (
+        "residential_course_short" if short_course else "residential_course_long"
+    )
+    if any(row.quote.component != component for row in result.rows):
+        msg = "Course-day quote must match the programme duration band"
+        raise ValueError(msg)
+    return result

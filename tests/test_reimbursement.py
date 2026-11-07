@@ -16,13 +16,16 @@ from src.reimbursement import (
     ReimbursementRecoveryDecision,
     build_reimbursement_ledger,
     cost_reimbursements,
+    price_sa_residential_course_days,
     reimbursement_carry_amount,
     reimbursement_cost_after_recovery,
     sa_consultant_development_caps,
     sa_consultant_development_caps_2025,
     sa_ordinary_study_fee_amount,
+    sa_residential_course_allowance,
 )
 from tests.checks import assert_that
+from tests.test_unit_quotes import quantity, quote, release
 
 
 def test_reimbursements_cost_only_approved_expenses_within_remaining_cap() -> None:
@@ -261,3 +264,69 @@ def test_proven_study_fees_enter_claim_ledger_without_rounding() -> None:
         ReimbursementPeriod.model_validate_json(period.model_dump_json()),
     )
     assert_that(ledger.total == Fraction("600.25") + Fraction(1, 3))
+
+
+def test_sa_residential_course_allowance_uses_programme_duration() -> None:
+    """Two weeks uses the short rate and the next day uses the long rate."""
+    rates = {
+        "short_course_daily_rate": Fraction("13.60"),
+        "long_course_daily_rate": Fraction("28.80"),
+    }
+    assert_that(sa_residential_course_allowance(14, 10, **rates) == Fraction(136))
+    assert_that(sa_residential_course_allowance(15, 10, **rates) == Fraction(288))
+    assert_that(sa_residential_course_allowance(15, 0, **rates) == Fraction(0))
+    with pytest.raises(ValueError, match="programme duration"):
+        sa_residential_course_allowance(14, 15, **rates)
+
+
+def test_sa_residential_course_days_keep_dated_quotes_and_enforce_band() -> None:
+    """Select dated short-course quotes and reject the same dates for a long course."""
+    rates = release(
+        quote(
+            quote_id="early",
+            component="residential_course_short",
+            unit="course_day",
+            amount=Decimal("13.60"),
+            ends_on=date(2026, 2, 1),
+        ),
+        quote(
+            quote_id="later",
+            component="residential_course_short",
+            unit="course_day",
+            amount=Decimal("14.10"),
+            starts_on=date(2026, 2, 1),
+        ),
+    )
+    early = quantity(quote_id="early", unit="course_day", valued_on=date(2026, 1, 31))
+    later = quantity(quantity_id="event-2", quote_id="later", unit="course_day")
+    starts_on = date(2026, 1, 30)
+    ends_on = date(2026, 2, 13)
+    result = price_sa_residential_course_days(
+        rates,
+        (early, later),
+        starts_on=starts_on,
+        ends_on=ends_on,
+    )
+    assert_that(result.total == Fraction("27.70"))
+    assert_that([row.quote.quote_id for row in result.rows] == ["early", "later"])
+    with pytest.raises(ValueError, match="duration band"):
+        price_sa_residential_course_days(
+            rates,
+            (early, later),
+            starts_on=starts_on,
+            ends_on=date(2026, 2, 14),
+        )
+    with pytest.raises(ValueError, match="distinct date"):
+        price_sa_residential_course_days(
+            rates,
+            (early, early),
+            starts_on=starts_on,
+            ends_on=ends_on,
+        )
+    with pytest.raises(ValueError, match="outside the reviewed programme"):
+        price_sa_residential_course_days(
+            rates,
+            (early, later),
+            starts_on=starts_on,
+            ends_on=date(2026, 2, 1),
+        )
