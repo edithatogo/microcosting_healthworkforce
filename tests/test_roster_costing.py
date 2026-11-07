@@ -1,7 +1,7 @@
 # Copyright 2026 Dylan. SPDX-License-Identifier: Apache-2.0
 """Overtime examples use synthetic conditions, history and rule assertions."""
 
-from datetime import UTC, date, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta, timezone
 from decimal import Decimal, localcontext
 from fractions import Fraction
 
@@ -71,6 +71,16 @@ def test_prior_hours_and_threshold_determine_overtime() -> None:
     assert_that(result.overtime_hours == Decimal(1))
     assert_that(result.rows[0].condition_ids == ("salary", "hours"))
     assert_that(result.rows[0].rule_id == "synthetic-overtime")
+
+
+def test_pay_period_start_requires_zero_prior_hours() -> None:
+    """Equivalent timestamps cannot carry hours from a previous period."""
+    current = period()
+    boundary = current.starts_at.astimezone(timezone(timedelta(hours=10)))
+    fields = current.model_dump() | {"history_through": boundary}
+    with pytest.raises(ValueError, match="Prior hours must be zero"):
+        PayPeriod.model_validate(fields)
+    PayPeriod.model_validate(fields | {"prior_hours": Decimal(0)})
 
 
 def test_incomplete_history_and_overlapping_shifts_are_rejected() -> None:

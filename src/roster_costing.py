@@ -43,6 +43,11 @@ class PayPeriod(BaseModel):
         ):
             msg = "History boundary must be inside pay period"
             raise ValueError(msg)
+        if self.prior_hours and (
+            self.history_through.astimezone(UTC) == self.starts_at.astimezone(UTC)
+        ):
+            msg = "Prior hours must be zero at the start of the pay period"
+            raise ValueError(msg)
         return self
 
 
