@@ -6,12 +6,15 @@ from decimal import Decimal
 from fractions import Fraction
 
 import pytest
+from pydantic import TypeAdapter
 
 from src.reimbursement import (
     ReimbursementCarryDecision,
     ReimbursementClaim,
+    ReimbursementLedger,
     ReimbursementPeriod,
     ReimbursementRecoveryDecision,
+    build_reimbursement_ledger,
     cost_reimbursements,
     reimbursement_carry_amount,
     reimbursement_cost_after_recovery,
@@ -181,3 +184,37 @@ def test_reimbursement_recovery_is_discretionary_and_limited_to_excess() -> None
     excess = decision.model_copy(update={"approved_recovery": Decimal("3000.26")})
     with pytest.raises(ValueError, match="exceeds reimbursement"):
         reimbursement_cost_after_recovery(excess)
+
+
+def test_reviewed_uncapped_claims_cost_only_eligible_expenses() -> None:
+    """An uncapped period has no balance and creates no standing allowance."""
+    start = date(2022, 7, 1)
+    period = ReimbursementPeriod(
+        currency="AUD",
+        starts_on=start,
+        ends_on=date(2023, 7, 1),
+        cap=None,
+        prior_use=Decimal(0),
+        applicability_evidence="Synthetic covered program and uncapped clause",
+        claims=(),
+    )
+    assert_that(cost_reimbursements(period) == ())
+    claim = ReimbursementClaim(
+        claim_id="development-expense",
+        charged_on=start,
+        eligible_amount=Decimal("625.45"),
+        approval_evidence="Synthetic proof of reasonable expense",
+    )
+    reviewed = ReimbursementPeriod.model_validate_json(
+        period.model_copy(update={"claims": (claim,)}).model_dump_json(),
+    )
+    ledger = build_reimbursement_ledger(reviewed)
+    adapter = TypeAdapter(ReimbursementLedger)
+    assert_that(adapter.validate_json(adapter.dump_json(ledger)) == ledger)
+    assert_that(ledger.period == reviewed)
+    assert_that(ledger.total == Fraction("625.45"))
+    (row,) = ledger.rows
+    assert_that(row.cost == Fraction("625.45"))
+    assert_that(row.remaining is None)
+    with pytest.raises(ValueError, match="Invalid reimbursement period"):
+        cost_reimbursements(period.model_copy(update={"prior_use": Decimal(1)}))

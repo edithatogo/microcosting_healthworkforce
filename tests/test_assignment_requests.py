@@ -2,6 +2,7 @@
 """Explicit assignment requests share pricing and preserve serialized lineage."""
 
 import json
+from datetime import date
 from decimal import Decimal
 from fractions import Fraction
 from pathlib import Path
@@ -15,11 +16,14 @@ from src.assignment_costing import (
     cost_assignment_snapshot,
 )
 from src.assignment_requests import (
+    AssignmentActivitiesRequest,
     AssignmentRequest,
     compare_assignment_requests,
+    cost_assignment_with_reimbursements,
     run_assignment_request,
 )
 from src.conditions_cli import main
+from src.reimbursement import ReimbursementClaim, ReimbursementPeriod
 from tests.checks import assert_that
 from tests.test_assignment_costing import CHANGE, activity, timeline
 
@@ -179,3 +183,64 @@ def test_assignment_comparison_cli_emits_exact_difference(tmp_path: Path) -> Non
     assert_that(Fraction(data["difference"]) == Fraction(60))
     assert_that(Fraction(data["baseline"]["total"]) == Fraction(120))
     assert_that(Fraction(data["alternative"]["total"]) == Fraction(180))
+
+
+def test_assignment_and_reviewed_expenses_keep_separate_ledgers(tmp_path: Path) -> None:
+    """A proven expense enters the total once alongside dated wage slices."""
+    path = timeline()
+    request = AssignmentActivitiesRequest(mode="activities", activities=(activity(),))
+    period = ReimbursementPeriod(
+        currency="AUD",
+        starts_on=date(2026, 6, 1),
+        ends_on=date(2026, 7, 1),
+        cap=None,
+        prior_use=Decimal(0),
+        applicability_evidence="Synthetic reviewed covered development program",
+        claims=(
+            ReimbursementClaim(
+                claim_id="synthetic-expense",
+                charged_on=date(2026, 6, 2),
+                eligible_amount=Decimal("75.25"),
+                approval_evidence="Synthetic approved expense",
+            ),
+        ),
+    )
+    result = cost_assignment_with_reimbursements(
+        path,
+        request,
+        period,
+        reviewed_subject_id=path.subject_id,
+    )
+    assert_that(result.assignment.total == Fraction(110))
+    assert_that(result.reimbursements.total == Fraction("75.25"))
+    assert_that(result.total == Fraction("185.25"))
+    with pytest.raises(ValueError, match="reviewed assignment subject"):
+        cost_assignment_with_reimbursements(
+            path,
+            request,
+            period,
+            reviewed_subject_id="another-subject",
+        )
+    later_period = period.model_copy(
+        update={"starts_on": date(2026, 6, 2)},
+    )
+    with pytest.raises(ValueError, match="outside the reimbursement reporting period"):
+        cost_assignment_with_reimbursements(
+            path,
+            request,
+            later_period,
+            reviewed_subject_id=path.subject_id,
+        )
+    args, output = files(tmp_path, "activities")
+    claims_path = tmp_path / "claims.json"
+    claims_path.write_text(
+        json.dumps(
+            {
+                "reviewed_subject_id": path.subject_id,
+                "period": period.model_dump(mode="json"),
+            },
+        ),
+    )
+    assert_that(main([*args, "--reimbursements", str(claims_path)]) == 0)
+    ledger = json.loads(output.read_bytes())
+    assert_that(Fraction(ledger["total"]) == Fraction("185.25"))
