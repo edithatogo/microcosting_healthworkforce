@@ -541,6 +541,7 @@ class PaidContributionCost:
     rows: tuple[PaidContributionRow, ...]
     alternatives: tuple[ContributionTotal, ...]
     contribution: Fraction
+    allowance_reconciliations: tuple[AllowancePaymentReconciliation, ...] = ()
 
 
 def cost_contribution_payments(
@@ -548,10 +549,17 @@ def cost_contribution_payments(
     period: ContributionPeriod,
     rule: ContributionRule,
     payments: tuple[ContributionPayment, ...],
+    *,
+    allowance_reconciliations: tuple[AllowancePaymentReconciliation, ...] = (),
 ) -> PaidContributionCost:
     """Price complete paid earnings using posting time and explicit basis membership."""
     _, period, rule = _prepare(release, period, rule, paid_basis=True)
     start, end = _utc(period.starts_at), _utc(period.ends_at)
+    reconciled = tuple(
+        reconcile_allowance_payment(item.allowance, item.payment)
+        for item in allowance_reconciliations
+    )
+    payments += tuple(item.payment for item in reconciled)
     payments = tuple(
         ContributionPayment.model_validate(payment.model_dump()) for payment in payments
     )
@@ -614,4 +622,5 @@ def cost_contribution_payments(
         tuple(rows),
         tuple(totals),
         max(t.amount for t in totals),
+        reconciled,
     )

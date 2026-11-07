@@ -1,7 +1,7 @@
 # Copyright 2026 Dylan. SPDX-License-Identifier: Apache-2.0
 """Test explicit periodic allowance calculation without inferring eligibility."""
 
-from datetime import UTC, date, datetime
+from datetime import date
 from decimal import Decimal
 from fractions import Fraction
 
@@ -9,7 +9,11 @@ import pytest
 
 from src.condition_history import release_sha256
 from src.conditions import ConditionRelease
-from src.period_contributions import ContributionPayment, reconcile_allowance_payment
+from src.period_contributions import (
+    ContributionPayment,
+    cost_contribution_payments,
+    reconcile_allowance_payment,
+)
 from src.periodic_allowance import (
     AllowancePeriod,
     AllowancePortion,
@@ -20,6 +24,8 @@ from src.periodic_allowance import (
 from src.source_registry import SourceRegistry
 from tests.checks import assert_that
 from tests.test_conditions import condition
+from tests.test_period_contributions import START, prices, rule
+from tests.test_period_contributions import period as contribution_period
 from tests.test_source_registry import source
 
 
@@ -253,14 +259,16 @@ def test_reconcile_actual_posting_against_payable_allowance() -> None:
     allowance = cost_periodic_allowance(
         release(),
         "training",
-        period(portion("half-pay", "19", "1", "0.5")),
+        period(portion("half-pay", "19", "1", "0.5")).model_copy(
+            update={"starts_on": START.date(), "ends_on": date(2026, 1, 15)},
+        ),
     )
     payment = ContributionPayment(
         payment_id="posting",
         resource_id="staff",
         allocation_id="worker",
         component="training",
-        paid_at=datetime(2026, 6, 15, tzinfo=UTC),
+        paid_at=START,
         amount=Decimal("9.50"),
         evidence="Synthetic payroll posting",
     )
@@ -268,6 +276,26 @@ def test_reconcile_actual_posting_against_payable_allowance() -> None:
     assert_that(result.allowance == allowance and result.payment == payment)
     assert_that(result.paid_minus_payable == Fraction("9.50") - allowance.payable)
     assert_that(allowance.payable != allowance.accrued)
+    original = rule()
+    basis = original.alternatives[0].model_copy(update={"bases": ("training",)})
+    policy = original.model_copy(update={"alternatives": (basis,)})
+    priced = cost_contribution_payments(
+        prices(),
+        contribution_period(),
+        policy,
+        (),
+        allowance_reconciliations=(result,),
+    )
+    assert_that(priced.contribution == Fraction("0.95"))
+    assert_that(priced.allowance_reconciliations == (result,))
+    with pytest.raises(ValueError, match="Duplicate contribution payment"):
+        cost_contribution_payments(
+            prices(),
+            contribution_period(),
+            policy,
+            (payment,),
+            allowance_reconciliations=(result,),
+        )
     with pytest.raises(ValueError, match="component does not match"):
         reconcile_allowance_payment(
             allowance,
