@@ -684,3 +684,9 @@ The Queensland vehicle diagnostic reconciled 96 downstream outputs over
 the dated applicability questions. PR #227 tests the comparison of two
 paid-earnings bases using synthetic postings. The actual payroll component
 mapping is still required for a source-backed release.
+
+The [primary component replay](../../../docs/workbook_primary_components.md)
+matched 600 jurisdiction-role outputs, 60 aggregate amounts and 60 formatted
+aggregate shares against the private recalculation. The workbook uses the
+first jurisdiction's midpoint cost in the aggregate share displays.
+The intended interpretation as a national aggregate remains open.
