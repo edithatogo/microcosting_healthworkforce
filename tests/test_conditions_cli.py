@@ -1,6 +1,7 @@
 # Copyright 2026 Dylan. SPDX-License-Identifier: Apache-2.0
 """Exercise the installed-style v2 CLI with synthetic inputs and safe output."""
 
+import json
 from datetime import UTC, datetime
 from decimal import Decimal
 lazy from pathlib import Path
@@ -78,7 +79,22 @@ def test_snapshot_cli_preserves_exact_total_and_rejects_invalid_mode(
         "--output",
         str(output),
     ]
-    assert_that(main(args) == 0)
+    origin_path = tmp_path / "origins.json"
+    origin = {
+        "workbook_sha256": "b" * 64,
+        "sheet": "Synthetic worksheet",
+        "coordinate": "V16",
+        "applicability": "conflicting",
+        "review_evidence": "Synthetic workbook review",
+    }
+    mapped_args = [*args, "--workbook-origins", str(origin_path)]
+    origin_path.write_text(json.dumps({"salary": origin}), encoding="utf-8")
+    with pytest.raises(ValueError, match="verified cell applicability"):
+        main(mapped_args)
+    assert_that(not output.exists())
+    origin["applicability"] = "verified"
+    origin_path.write_text(json.dumps({"salary": origin}), encoding="utf-8")
+    assert_that(main(mapped_args) == 0)
 
     result = ConditionSnapshotResult.model_validate_json(output.read_bytes())
     assert_that(result.total == Decimal(100))

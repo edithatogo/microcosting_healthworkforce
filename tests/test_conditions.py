@@ -7,6 +7,7 @@ from fractions import Fraction
 
 import pytest
 
+from src.condition_history import release_sha256
 from src.conditions import (
     Condition,
     ConditionRelease,
@@ -292,6 +293,14 @@ def test_workbook_origin_roundtrip_requires_reviewed_applicability() -> None:
     result = cost_condition_snapshot(restored, date(2026, 6, 1), Decimal(2))
     assert_that(result.total == Decimal(100))
     assert_that(result.conditions[0].workbook_origin == origin)
+
+    changed_origin = origin.model_copy(update={"coordinate": "X16"})
+    changed_salary = salary.model_copy(update={"workbook_origin": changed_origin})
+    changed_release = restored.model_copy(
+        update={"conditions": (changed_salary, *restored.conditions[1:])},
+    )
+    assert_that(release_sha256(restored) == release_sha256(release))
+    assert_that(release_sha256(changed_release) != release_sha256(release))
 
     for status in ("conflicting", "unresolved"):
         revised_origin = origin.model_copy(update={"applicability": status})
