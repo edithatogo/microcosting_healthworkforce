@@ -341,3 +341,34 @@ def test_exact_component_aggregation_is_independent_of_segmentation(
             )
             == Fraction(5, 12),
         )
+
+
+def test_dated_replacement_cover_uses_operative_rates() -> None:
+    """Explicit cover crosses a rate boundary while the snapshot holds price fixed."""
+    starts = datetime(2026, 1, 1, 11, 30, tzinfo=UTC)
+    cover = Activity(
+        activity_id="replacement-cover",
+        resource_id="staff",
+        allocation_id="replacement-worker",
+        starts_at=starts,
+        ends_at=starts + timedelta(hours=1),
+        resources=Decimal(1),
+    )
+    dated = cost_dynamic(release(), (cover,))
+    snapshot = cost_static(
+        release(),
+        starts,
+        (ResourceUse(resource_id="staff", hours=Decimal(1)),),
+    )
+    assert_that([row.rate_id for row in dated.rows] == ["morning", "afternoon"])
+    assert_that(all(row.activity_id == cover.activity_id for row in dated.rows))
+    assert_that(all(row.allocation_id == cover.allocation_id for row in dated.rows))
+    assert_that(
+        [row.citation for row in dated.rows]
+        == [
+            "Synthetic clause 1",
+            "Synthetic clause 2",
+        ],
+    )
+    assert_that(dated.total == Decimal(60))
+    assert_that(snapshot.total == Decimal(50))

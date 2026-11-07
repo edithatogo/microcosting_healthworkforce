@@ -352,6 +352,7 @@ class DatedResourceUse(FrozenModel):
     quantity_kind: Literal["observed_use", "analyst_assumption"]
     quantity_basis: str = Field(min_length=1)
     allocation_id: str | None = None
+    covers_absence_id: str | None = None
 
     @model_validator(mode="after")
     def valid_quantity(self) -> Self:
@@ -373,6 +374,9 @@ class DatedResourceUse(FrozenModel):
             msg = (
                 "An individual quantity needs a nonblank allocation and feasible hours"
             )
+            raise ValueError(msg)
+        if self.covers_absence_id is not None and not self.covers_absence_id.strip():
+            msg = "Covered absence identity must be nonblank"
             raise ValueError(msg)
         return self
 

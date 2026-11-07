@@ -225,3 +225,19 @@ def test_explicit_units_distribution_and_quantity_basis_are_required() -> None:
         del data[field]
         with pytest.raises(ValidationError, match=field):
             DatedResourceUse.model_validate(data)
+
+
+def test_dated_cover_retains_declared_absence_link() -> None:
+    """Join split rate rows to a declared cover quantity and its absence."""
+    cover = quantity().model_copy(update={"covers_absence_id": "synthetic-absence"})
+    result = cost_dated_quantities(release(), (cover,))
+    restored = type(result).model_validate_json(result.model_dump_json())
+    assert_that(restored.quantities[0].covers_absence_id == "synthetic-absence")
+    assert_that(
+        all(row.activity_id == cover.quantity_id for row in restored.ledger.rows),
+    )
+    with pytest.raises(ValueError, match="absence identity"):
+        cost_dated_quantities(
+            release(),
+            (cover.model_copy(update={"covers_absence_id": " "}),),
+        )

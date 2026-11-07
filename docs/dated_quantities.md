@@ -77,3 +77,8 @@ Use the source-qualified historical base and quantity rules before constructing
 an actual paid-absence scenario. Payment, resource use, productive capacity and
 cash savings are different outputs. Do not infer any of them from the width of
 the selected interval or from a successful price calculation alone.
+
+For replacement cover, an optional `covers_absence_id` retains a nonblank
+caller-supplied absence reference on the dated quantity. Join the ledger
+rows by their activity ID to the quantity ID to retrieve that reference.
+The caller substantiates the link and the hours covered.
