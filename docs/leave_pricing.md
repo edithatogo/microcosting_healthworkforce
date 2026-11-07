@@ -60,3 +60,22 @@ Price base leave pay for all applicable leave hours. Price the loading
 increment using only the returned hours and the applicable rate for each
 portion. Provide the correct cap period and starting consumption for each
 run. Resetting prior consumption within one cap period can overstate loading.
+
+## Price historical weekend leave credit
+
+For the Victorian medical scientist agreement, group ordinary shifts by
+weekend within one reviewed 12-month period. Pass each shift as
+`WeekendLeaveShift` with its total ordinary duration and the ordinary hours
+attributable to the weekend. Use `Fraction` values for both.
+
+For example, an eight-hour qualifying shift with two hours attributable
+to the weekend gives one hour of agreement leave credit. For a part-time
+employee with qualifying shifts on both days, use the longer shift.
+Equal-duration shifts with different weekend hours require a reviewed
+selection before pricing. Pass any separately assessed NES shiftworker
+credit in hours. The function returns the greater of that credit and
+the capped agreement credit.
+
+The resulting hours are a leave balance input. Use the applicable dated
+salary and leave payment rules when valuing a later period of leave.
+Confirm employer and classification coverage before applying the rule.
