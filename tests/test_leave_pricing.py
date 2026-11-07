@@ -10,11 +10,13 @@ from typing import Literal
 import pytest
 
 from src.leave_pricing import (
+    LeaveLoadingComparison,
     LeaveLoadingMoneyCap,
     LeavePriceSelection,
     allocate_leave_loading_hours,
     price_leave_loading,
     price_paid_leave,
+    select_leave_loading_alternative,
 )
 from src.paid_leave import PaidLeaveSchedule, build_paid_leave
 from tests.checks import assert_that
@@ -440,3 +442,56 @@ def test_loading_applies_hours_and_money_caps_independently() -> None:
     assert_that(result == (Fraction("52.50"), Fraction("7.50"), Fraction(0)))
     with pytest.raises(ValueError, match="prior payments"):
         price_leave_loading(hours, rates, Fraction(80), Fraction(81))
+
+
+@pytest.mark.parametrize(("penalties", "expected"), [(0, 200), (200, 200), (250, 250)])
+def test_cash_loading_selects_the_higher_amount(penalties: int, expected: int) -> None:
+    """Compare two amounts from the same leave exposure without adding them."""
+    result = select_leave_loading_alternative(
+        Fraction(1000),
+        Fraction("0.20"),
+        Fraction(penalties),
+    )
+    assert_that(result.cash == expected and result.additional_days == 0)
+
+
+def test_leave_election_replaces_cash_and_preserves_days() -> None:
+    """A reviewed election needs no cash comparator, unlike the default route."""
+    base, rate = Fraction(1000), Fraction("0.20")
+    days = Fraction(4)
+    result = select_leave_loading_alternative(base, rate, None, elected_days=days)
+    assert_that(result.cash == 0 and result.additional_days == days)
+    with pytest.raises(ValueError, match="reviewed forgone penalties"):
+        select_leave_loading_alternative(base, rate, None)
+
+
+def test_paid_leave_ledger_retains_cash_and_allocated_election() -> None:
+    """Cash enters the row total while elected days remain a quantity."""
+    leave = schedule()
+    first, second = choices(leave, second_quote="salary-new")
+    rate = Decimal("0.20")
+    cash = LeaveLoadingComparison(
+        rate=rate,
+        forgone_penalties=Decimal(250),
+        evidence="Reviewed synthetic roster",
+    )
+    election = LeaveLoadingComparison(
+        rate=rate,
+        elected_days=Decimal(4),
+        evidence="Reviewed synthetic election allocated once",
+    )
+    result = price_paid_leave(
+        dated_prices(),
+        selection(),
+        leave,
+        (
+            first.model_copy(update={"loading_comparison": cash}),
+            second.model_copy(update={"loading_comparison": election}),
+        ),
+    )
+    assert_that(result.total == Fraction(73500, 73) + 250)
+    cash_result, election_result = (row.loading_alternative for row in result.rows)
+    if cash_result is None or election_result is None:
+        pytest.fail("Expected both loading decisions")
+    assert_that(cash_result.cash == Fraction(250))
+    assert_that(election_result.additional_days == Fraction(4))
