@@ -8,6 +8,8 @@ import pytest
 from polars.testing import assert_frame_equal
 from pydantic import ValidationError
 
+from src.data_loader import load_and_clean_data
+from src.formula_engine import load_formulas
 from src.legacy_compatibility import CompatibilityRequest, cost_legacy_compatibility
 from src.workbook_run import WorkforceRun
 from tests.checks import assert_that
@@ -162,3 +164,29 @@ def test_workbook_projection_is_explicit_and_adjusts_fixed_cost() -> None:
     assert_that(workbook["Calculated_Hourly_Mid_Y4"][0] == pytest.approx(104400 / 2080))
     assert_that("Calculated_Cost_Mid_Y5" not in workbook.columns)
     assert_that("Calculated_Cost_Mid_Y5" in default.columns)
+
+
+def test_explicit_workbook_projection_replays_nsw_admin_midpoint() -> None:
+    """Replay the original year-four formula without changing compound mode."""
+    data = load_and_clean_data(
+        "data/Labour Model - v3, 20240328.xlsx",
+        "Labour - Prices",
+    )
+    admin = data.filter(
+        pl.col("Jurisdiction").cast(pl.String).str.contains("NSW")
+        & pl.col("Personnel type").cast(pl.String).str.contains("(?i)admin"),
+    )
+    formulas = load_formulas("data/formulas.json")
+    replay = cost_legacy_compatibility(
+        request().model_copy(update={"mode": "workbook_projection_v1"}),
+        admin,
+        formulas,
+    )
+    compound = cost_legacy_compatibility(request(), admin, formulas)
+    assert_that(replay.manifest.mode == "workbook_projection_v1")
+    assert_that(
+        replay.frame["Calculated_Cost_Mid_Y4"][0] == pytest.approx(136997.189904528),
+    )
+    assert_that(
+        compound.frame["Calculated_Cost_Mid_Y4"][0] == pytest.approx(145316.633922364),
+    )

@@ -18,7 +18,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from src import config
 from src.contracts import FORMULA_ADAPTER
 from src.formula_engine import apply_formulas
-from src.projection import project_costs
+from src.projection import project_costs, project_workbook_costs
 from src.rate_converter import convert_annual_cost_to_rates
 
 
@@ -27,7 +27,7 @@ class CompatibilityRequest(BaseModel):
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
-    mode: Literal["legacy_compatibility_v1"]
+    mode: Literal["legacy_compatibility_v1", "workbook_projection_v1"]
     workbook_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
     sheet: str = Field(pattern=r"\S")
     extraction_id: str = Field(pattern=r"\S")
@@ -96,14 +96,21 @@ def cost_legacy_compatibility(
     selected = CompatibilityRequest.model_validate(request.model_dump())
     document = FORMULA_ADAPTER.validate_python(formulas)
     frame = inputs.clone()
-    result = convert_annual_cost_to_rates(
-        project_costs(
-            apply_formulas(frame, document),
-            frame,
+    base = apply_formulas(frame, document)
+    if selected.mode == "workbook_projection_v1":
+        productive = frame["Grade(s)_Average productive time (%)"].cast(pl.Float64)
+        if not (productive.is_finite() & (productive > 0)).fill_null(value=False).all():
+            msg = "Workbook projection requires a positive productive-time factor"
+            raise ValueError(msg)
+        projected = project_workbook_costs(
+            base,
+            frame["Grade(s)_Indexation per annum (%)"],
+            frame["Grade(s)_Professional Development Allowance ($)"] / productive,
             selected.projection_years,
-        ),
-        frame,
-    )
+        )
+    else:
+        projected = project_costs(base, frame, selected.projection_years)
+    result = convert_annual_cost_to_rates(projected, frame)
     root = Path(__file__).parent
     engine = {
         name: hashlib.sha256((root / name).read_bytes()).hexdigest()
