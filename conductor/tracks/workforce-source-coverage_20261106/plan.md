@@ -423,3 +423,19 @@ and its [development policy companion](../../reviews/qld-hpdo-development-intera
 record instrument and policy dependencies, dated rate comparisons and
 qualification boundaries. Individual eligibility and application approvals
 remain separate from the documented source chain.
+
+## Vehicle and exemplary practice source checkpoint
+
+For Queensland medical officer vehicle allowances, MOCA7 clause 11.33
+supports a recurring payroll remuneration classification. The WorkCover
+wages manual distinguishes remuneration from reimbursement. Confirm the
+employer premium scope, eligible gross salary mapping for the Treasury
+long-service leave levy and the applicable Commonwealth and Queensland
+superannuation bases before approving a release.
+
+For NT Aboriginal health practitioners, the Fair Work Commission register
+establishes the 31 March 2026 agreement operation date. Schedule D and
+clause 46 establish the fixed classification reference and payment
+conditions. PR #225 verifies the generic dated quote arithmetic with
+synthetic amounts. The signed Annexure A undertaking and actual payroll
+conversion still require evidence.
