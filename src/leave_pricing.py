@@ -121,6 +121,7 @@ class LeaveLoadingComparison(QuoteModel):
     forgone_penalties: NonnegativeQuantity | None = None
     elected_days: NonnegativeQuantity | None = None
     evidence: str
+    comparison_id: str | None = None
 
     def select(self, base_pay: Fraction) -> LeaveLoadingAlternative:
         """Keep supplied election days as an explicitly allocated quantity."""
@@ -232,6 +233,61 @@ def _dated_coverage(
             raise ValueError(msg)
 
 
+def _apply_loading_comparisons(
+    rows: list[PricedLeaveRow],
+    *,
+    has_cap: bool,
+) -> None:
+    """Compare each declared cash interval once and allocate its winning basis."""
+    groups: dict[str, list[tuple[int, LeaveLoadingComparison]]] = {}
+    for index, row in enumerate(rows):
+        supplied = row.choice.loading_comparison
+        if supplied is None:
+            continue
+        if has_cap or any(
+            item.quote.component == "leave_loading"
+            for item in row.pricing.pricing.rows[1:]
+        ):
+            msg = "Loading comparison cannot combine with a loading quote or cap"
+            raise ValueError(msg)
+        comparison = LeaveLoadingComparison.model_validate(dict(supplied))
+        if comparison.comparison_id is None:
+            alternative = comparison.select(row.pricing.pricing.rows[0].cost)
+            rows[index] = replace(row, loading_alternative=alternative)
+        else:
+            groups.setdefault(comparison.comparison_id, []).append((index, comparison))
+    for group in groups.values():
+        _allocate_grouped_loading(rows, group)
+
+
+def _allocate_grouped_loading(
+    rows: list[PricedLeaveRow],
+    group: list[tuple[int, LeaveLoadingComparison]],
+) -> None:
+    rate = group[0][1].rate
+    if any(
+        comparison.rate != rate
+        or comparison.elected_days is not None
+        or comparison.forgone_penalties is None
+        for _, comparison in group
+    ) or any(
+        rows[left].exposure.ends_on != rows[right].exposure.starts_on
+        for (left, _), (right, _) in pairwise(group)
+    ):
+        msg = "Grouped loading requires contiguous cash rows, penalties and one rate"
+        raise ValueError(msg)
+    floors = [
+        rows[index].pricing.pricing.rows[0].cost * Fraction(rate) for index, _ in group
+    ]
+    penalties = [Fraction(comparison.forgone_penalties or 0) for _, comparison in group]
+    winning = floors if sum(floors) >= sum(penalties) else penalties
+    for (index, _), cash in zip(group, winning, strict=True):
+        rows[index] = replace(
+            rows[index],
+            loading_alternative=LeaveLoadingAlternative(cash, Fraction(0)),
+        )
+
+
 def _apply_loading_caps(
     rows: list[PricedLeaveRow],
     caps: tuple[LeaveLoadingMoneyCap, ...],
@@ -328,21 +384,8 @@ def price_paid_leave(
             raise ValueError(msg)
         _dated_coverage(release, choice)
         priced = price_selected_hours(release, selection, request, choice.allowances)
-        alternative = None
-        if choice.loading_comparison is not None:
-            if loading_cap or any(
-                item.quote.component == "leave_loading"
-                for item in priced.pricing.rows[1:]
-            ):
-                msg = "Loading comparison cannot combine with a loading quote or cap"
-                raise ValueError(msg)
-            comparison = LeaveLoadingComparison.model_validate(
-                dict(choice.loading_comparison),
-            )
-            alternative = comparison.select(priced.pricing.rows[0].cost)
-        rows.append(
-            PricedLeaveRow(exposure, choice, priced, loading_alternative=alternative),
-        )
+        rows.append(PricedLeaveRow(exposure, choice, priced))
+    _apply_loading_comparisons(rows, has_cap=bool(loading_cap))
     single_cap = loading_cap if isinstance(loading_cap, LeaveLoadingMoneyCap) else None
     multiple_caps = loading_cap if isinstance(loading_cap, tuple) else ()
     caps = (single_cap,) if single_cap is not None else multiple_caps
