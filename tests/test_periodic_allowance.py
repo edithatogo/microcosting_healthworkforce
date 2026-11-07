@@ -137,6 +137,21 @@ def test_split_period_retains_nominal_denominator_and_condition_lineage(
     assert_that(after.condition.condition_id == "second")
     assert_that(before.release_sha256 == after.release_sha256)
     assert_that(before.release_sha256 == release_sha256(dated))
+    unsplit = period(portion("whole", "76", "1", "1")).model_copy(
+        update={"starts_on": first_half.starts_on, "ends_on": second_half.ends_on},
+    )
+    with pytest.raises(ValueError, match="cover the whole period"):
+        cost_periodic_allowance(dated, "training", unsplit)
+    scheduled = cost_periodic_allowance_schedule(
+        dated,
+        "training",
+        unsplit.model_copy(
+            update={"portions": first_half.portions + second_half.portions},
+        ),
+        (first_half, second_half),
+    )
+    assert_that(scheduled.segments == (before, after))
+    assert_that(scheduled.payable == before.payable + after.payable)
 
 
 def test_schedule_conserves_hours_across_rate_change() -> None:
