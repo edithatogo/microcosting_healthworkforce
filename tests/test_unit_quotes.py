@@ -8,7 +8,13 @@ from fractions import Fraction
 import pytest
 
 from src.source_registry import SourceRegistry
-from src.unit_quotes import QuoteQuantity, UnitQuote, UnitQuoteRelease, price_units
+from src.unit_quotes import (
+    QuoteQuantity,
+    UnitQuote,
+    UnitQuoteRelease,
+    price_location_pool,
+    price_units,
+)
 from tests.checks import assert_that
 from tests.test_source_registry import source
 
@@ -242,3 +248,19 @@ def test_rational_zero_denominator_json_and_unchecked_float_fail() -> None:
     copied = quantity().model_copy(update={"quantity": 0.5})
     with pytest.raises(ValueError, match=r"instance|Decimal"):
         price_units(release(), (copied,))
+
+
+def test_location_pool_preserves_exact_total_and_rejects_overallocation() -> None:
+    """A complete reviewed cohort shares one price at a single date."""
+    first = quantity(quantity=Fraction(1, 3))
+    second = quantity(quantity_id="event-2", quantity=Fraction(2, 3))
+    result = price_location_pool(release(), (first, second))
+    assert_that(result.total == Fraction("100.01"))
+    assert_that(result.rows[0].cost == Fraction("100.01") / 3)
+    for invalid in (
+        (first,),
+        (first, second, quantity(quantity_id="event-3")),
+        (first, second.model_copy(update={"valued_on": date(2026, 2, 2)})),
+    ):
+        with pytest.raises(ValueError, match="Location pool"):
+            price_location_pool(release(), invalid)

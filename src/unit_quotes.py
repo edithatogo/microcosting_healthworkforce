@@ -196,3 +196,25 @@ def price_units(
         tuple(rows),
         sum((row.cost for row in rows), Fraction(0)),
     )
+
+
+def price_location_pool(
+    release: UnitQuoteRelease,
+    shares: tuple[QuoteQuantity, ...],
+) -> UnitQuoteResult:
+    """Allocate one reviewed location pool for one valuation date.
+
+    Each quantity is a documented participant's share of the quoted pool.
+    The caller supplies the complete cohort and allocation evidence.
+    """
+    shares = tuple(QuoteQuantity.model_validate(dict(share)) for share in shares)
+    if (
+        len({(share.quote_id, share.valued_on) for share in shares}) != 1
+        or any(
+            not share.basis.strip() or not share.quantity_id.strip() for share in shares
+        )
+        or sum((Fraction(share.quantity) for share in shares), Fraction(0)) != 1
+    ):
+        msg = "Location pool requires evidenced shares totaling one for one quote date"
+        raise ValueError(msg)
+    return price_units(release, shares)
