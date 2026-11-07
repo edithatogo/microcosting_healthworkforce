@@ -783,3 +783,6 @@ def test_victorian_weekend_credit_applies_grouping_cap_and_nes_substitution() ->
     assert_that(
         credit(crossing, part_time=False, nes_credit_hours=Fraction(0)) == Fraction(1),
     )
+    ambiguous = (crossing[0] + (WeekendLeaveShift(Fraction(8), Fraction(8)),),)
+    with pytest.raises(ValueError, match="reviewed weekend credit selection"):
+        credit(ambiguous, part_time=True, nes_credit_hours=Fraction(0))

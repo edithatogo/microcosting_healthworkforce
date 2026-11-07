@@ -157,8 +157,16 @@ def victorian_medical_scientist_weekend_leave_credit(
             if shift.shift_hours > minimum_shift_hours and shift.weekend_hours > 0
         )
         if part_time and eligible:
-            longest = max(eligible, key=lambda shift: shift.shift_hours)
-            qualifying_hours += longest.weekend_hours
+            longest_hours = max(shift.shift_hours for shift in eligible)
+            creditable_hours = {
+                shift.weekend_hours
+                for shift in eligible
+                if shift.shift_hours == longest_hours
+            }
+            if len(creditable_hours) > 1:
+                msg = "Equal-length shifts require a reviewed weekend credit selection"
+                raise ValueError(msg)
+            qualifying_hours += next(iter(creditable_hours))
         else:
             qualifying_hours += sum(
                 (shift.weekend_hours for shift in eligible),
