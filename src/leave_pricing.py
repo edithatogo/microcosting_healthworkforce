@@ -10,11 +10,17 @@ lazy from datetime import date
 from src.historical_hours import select_normal_hours
 from src.normal_pay import HoursPricingRequest, price_selected_hours
 from src.paid_leave import build_paid_leave
-from src.unit_quotes import NonnegativeQuantity, QuoteModel, UnitQuoteRelease
+from src.unit_quotes import (
+    NonnegativeQuantity,
+    QuoteModel,
+    QuoteQuantity,
+    UnitQuoteRelease,
+    price_units,
+)
 lazy from src.historical_hours import NormalHoursSelection
 lazy from src.normal_pay import SelectedHoursPricing
 lazy from src.paid_leave import LeaveExposureRow, PaidLeaveSchedule
-lazy from src.unit_quotes import QuoteQuantity
+lazy from src.unit_quotes import UnitQuoteResult
 
 
 @dataclass(frozen=True)
@@ -206,6 +212,61 @@ class AdvanceLoadingTiming(QuoteModel):
         ):
             return None
         return facts.entitled_on
+
+
+class AdvanceLoadingPrices(QuoteModel):
+    """Explicit weekly salary and benchmark selections for deferred loading."""
+
+    salary_quote_id: str
+    benchmark_quote_id: str
+    eligible_weeks: NonnegativeQuantity
+    loading_rate: NonnegativeQuantity
+
+
+@dataclass(frozen=True)
+class DeferredLeaveLoading:
+    """Exact loading amount and the dated prices behind it."""
+
+    timing: AdvanceLoadingTiming
+    prices: AdvanceLoadingPrices
+    ledger: UnitQuoteResult
+    amount: Fraction
+
+
+def price_advance_loading(
+    release: UnitQuoteRelease,
+    timing: AdvanceLoadingTiming,
+    prices: AdvanceLoadingPrices,
+) -> DeferredLeaveLoading | None:
+    """Use the entitlement date for both reviewed weekly price selections."""
+    payable_on = timing.payable_on()
+    if release.as_known_on != timing.as_known_on:
+        msg = "Advance loading and the price release must share a knowledge date"
+        raise ValueError(msg)
+    if payable_on is None:
+        return None
+    prices = AdvanceLoadingPrices.model_validate(dict(prices))
+    ledger = price_units(
+        release,
+        tuple(
+            QuoteQuantity(
+                quantity_id=label,
+                quote_id=quote_id,
+                unit="week",
+                quantity=prices.eligible_weeks,
+                valued_on=payable_on,
+                quantity_kind="analyst_assumption",
+                basis=timing.evidence,
+            )
+            for label, quote_id in (
+                ("salary", prices.salary_quote_id),
+                ("benchmark", prices.benchmark_quote_id),
+            )
+        ),
+    )
+    salary, benchmark = ledger.rows
+    amount = min(salary.cost, benchmark.cost) * Fraction(prices.loading_rate)
+    return DeferredLeaveLoading(timing, prices, ledger, amount)
 
 
 class LeavePriceSelection(QuoteModel):

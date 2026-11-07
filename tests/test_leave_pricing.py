@@ -10,12 +10,14 @@ from typing import Literal
 import pytest
 
 from src.leave_pricing import (
+    AdvanceLoadingPrices,
     AdvanceLoadingTiming,
     LeaveLoadingComparison,
     LeaveLoadingMoneyCap,
     LeavePriceSelection,
     allocate_leave_loading_hours,
     combined_leave_hours,
+    price_advance_loading,
     price_leave_loading,
     price_paid_leave,
     qualifying_shift_leave_credit,
@@ -597,3 +599,54 @@ def test_advance_loading_requires_continued_employment_without_prior_penalties()
     )
     with pytest.raises(ValueError, match="evidence dates"):
         timing.model_copy(update={"as_known_on": START}).payable_on()
+
+
+def test_deferred_loading_prices_both_quotes_on_entitlement_date() -> None:
+    """A stale salary quote cannot price the delayed loading."""
+    timing = AdvanceLoadingTiming(
+        leave_taken_on=START,
+        entitled_on=MID,
+        employment_confirmed_through=MID,
+        as_known_on=MID,
+        ordinary_penalties_already_paid=False,
+        evidence="Synthetic reviewed deferred loading",
+    )
+    release = prices().model_copy(
+        update={
+            "as_known_on": MID,
+            "quotes": (
+                quote(quote_id="old", component="salary", unit="week", ends_on=MID),
+                quote(
+                    quote_id="new",
+                    component="salary",
+                    unit="week",
+                    starts_on=MID,
+                    amount=Decimal(2000),
+                ),
+                quote(
+                    quote_id="cap",
+                    component="benchmark",
+                    unit="week",
+                    starts_on=MID,
+                    amount=Decimal(1600),
+                ),
+            ),
+        },
+    )
+    selected = AdvanceLoadingPrices(
+        salary_quote_id="new",
+        benchmark_quote_id="cap",
+        eligible_weeks=Fraction(1, 2),
+        loading_rate=Decimal("0.175"),
+    )
+    result = price_advance_loading(release, timing, selected)
+    if result is None:
+        pytest.fail("Expected deferred loading after entitlement")
+    assert_that(result.amount == Fraction(140))
+    assert_that(all(row.quantity.valued_on == MID for row in result.ledger.rows))
+    with pytest.raises(ValueError, match="date"):
+        price_advance_loading(
+            release,
+            timing,
+            selected.model_copy(update={"salary_quote_id": "old"}),
+        )
