@@ -9,9 +9,11 @@ from typing import Literal
 import pytest
 
 from src.inaccessibility import (
+    InaccessibilityCategoryPayment,
     InaccessibilityFirstPayment,
     InaccessibilityRecurringPayment,
     InaccessibilityRotationPayment,
+    price_inaccessibility_category_payments,
     price_inaccessibility_first_payment,
     price_inaccessibility_recurring_payment,
     price_inaccessibility_rotation_payment,
@@ -173,4 +175,57 @@ def test_vocational_rotation_exception_uses_reviewed_proration() -> None:
         price_inaccessibility_rotation_payment(
             rates,
             request.model_copy(update={"valued_on": date(2025, 12, 30)}),
+        )
+
+
+def test_reviewed_category_payments_use_separate_quotes() -> None:
+    """Retain category rows and apply employment proration once."""
+    rates = release(
+        quote(
+            component="inaccessibility-category-1", unit="annum", amount=Decimal(1200),
+        ),
+        quote(
+            quote_id="category-4",
+            component="inaccessibility-category-4",
+            unit="annum",
+            amount=Decimal(600),
+        ),
+    )
+    first = InaccessibilityCategoryPayment(
+        category=1,
+        payment_id="category-1-payment",
+        annual_quote_id="period-1",
+        valued_on=date(2026, 2, 1),
+        service_assessed_through=date(2026, 1, 31),
+        employment_fraction=Decimal("0.5"),
+        reviewed_annual_fraction=Fraction(1, 3),
+        review_evidence="Synthetic reviewed concurrent category share",
+    )
+    second = InaccessibilityCategoryPayment.model_validate(
+        dict(
+            first,
+            category=4,
+            payment_id="category-4-payment",
+            annual_quote_id="category-4",
+        ),
+    )
+    result = price_inaccessibility_category_payments(rates, (first, second))
+    assert_that([row.cost for row in result.rows] == [200, 100])
+    assert_that(result.total == Fraction(300))
+    with pytest.raises(ValueError, match="Duplicate quantity identity"):
+        price_inaccessibility_category_payments(rates, (first, first))
+    with pytest.raises(ValueError, match="inaccessibility category"):
+        price_inaccessibility_category_payments(
+            rates,
+            (second.model_copy(update={"annual_quote_id": "period-1"}),),
+        )
+    with pytest.raises(ValueError, match="assessment cannot follow"):
+        price_inaccessibility_category_payments(
+            rates,
+            (
+                first.model_copy(
+                    update={"service_assessed_through": date(2026, 2, 2)},
+                ),
+                second,
+            ),
         )
