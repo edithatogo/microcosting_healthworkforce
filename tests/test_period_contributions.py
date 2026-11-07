@@ -593,7 +593,13 @@ def test_paid_contribution_uses_posting_boundary_and_remaining_cap() -> None:
         evidence="Synthetic salary posting",
     )
     late = early.model_copy(
-        update={"payment_id": "vehicle", "component": "vehicle", "paid_at": boundary},
+        update={
+            "payment_id": "vehicle",
+            "component": "vehicle",
+            "paid_at": boundary,
+            "earned_from": (START - timedelta(days=14)).date(),
+            "earned_to": START.date(),
+        },
     )
     result = cost_contribution_payments(prices(), period(), policy, (late, early))
     assert_that(result.contribution == Fraction(12))
