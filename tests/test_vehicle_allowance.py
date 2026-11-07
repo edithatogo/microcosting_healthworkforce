@@ -7,7 +7,7 @@ from fractions import Fraction
 
 import pytest
 
-from src.periodic_allowance import cost_periodic_allowance
+from src.periodic_allowance import cost_periodic_allowance_allocations
 from src.source_registry import SourceRegistry
 from src.vehicle_allowance import (
     Moca7VehicleAppointment,
@@ -156,17 +156,17 @@ def test_moca7_vehicle_level_change_across_fortnight() -> None:
         portion("half-pay", "19", "1", "0.5"),
         portion("unpaid", "19", "0", "0"),
     ).model_copy(update={"starts_on": boundary})
-    first = cost_periodic_allowance(
-        rates,
-        f"vehicle-{moca7_vehicle_level(appointment)}",
-        before,
+    allocations = (
+        (rates, f"vehicle-{moca7_vehicle_level(appointment)}", before),
+        (rates, f"vehicle-{moca7_vehicle_level(promoted)}", after),
     )
-    second = cost_periodic_allowance(
-        rates,
-        f"vehicle-{moca7_vehicle_level(promoted)}",
-        after,
+    parent = period(*before.portions, *after.portions)
+    result = cost_periodic_allowance_allocations(parent, allocations)
+    assert_that(
+        [segment.condition.condition_id for segment in result.segments]
+        == ["vehicle-1", "vehicle-2"],
     )
-    assert_that(first.condition.condition_id == "vehicle-1")
-    assert_that(second.condition.condition_id == "vehicle-2")
-    assert_that(first.payable + second.payable == Fraction(75))
-    assert_that(first.accrued + second.accrued == Fraction(100))
+    assert_that(result.payable == Fraction(75))
+    assert_that(result.accrued == Fraction(100))
+    with pytest.raises(ValueError, match="conserve classified hours"):
+        cost_periodic_allowance_allocations(period(*before.portions), allocations)
