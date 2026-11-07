@@ -79,3 +79,25 @@ the capped agreement credit.
 The resulting hours are a leave balance input. Use the applicable dated
 salary and leave payment rules when valuing a later period of leave.
 Confirm employer and classification coverage before applying the rule.
+
+## Price historical NSW leave adjustments
+
+For the general Conditions Award shift credit, pass the reviewed count
+of ordinary Sunday and public-holiday shifts for one qualifying year to
+`nsw_general_shift_leave_credit`. At 35 or more shifts the credit is one
+ordinary working week. Below 35, the credit is prorated. A positive
+prorated credit for a worker below 38 ordinary weekly hours also requires
+the reviewed rounding increment in hours.
+
+For deferred loading after advance leave, provide `AdvanceLoadingTiming`
+with the entitlement date and evidence of continuing employment. Supply
+separate weekly salary and benchmark quote IDs with `AdvanceLoadingPrices`.
+`price_advance_loading` selects both rates at the entitlement date and
+returns their ledger with the capped loading amount.
+
+For separation, first establish the reason and the leave balance eligible
+for loading. `price_separation_loading` uses that reviewed exposure and
+requires explicit evidence for the valuation date. Advance ordinary-pay
+excess is a separate calculation through `AdvanceLeaveTermination`, using
+reviewed ordinary pay due and the relevant service-year completion date.
+Its result is the excess before any payroll deduction.
