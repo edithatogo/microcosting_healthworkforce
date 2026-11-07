@@ -9,8 +9,10 @@ import pytest
 
 from src.source_registry import SourceRegistry
 from src.vehicle_allowance import (
+    Moca7VehicleAppointment,
     VehicleTravelCase,
     VehicleTravelExclusion,
+    moca7_vehicle_level,
     price_vehicle_travel,
 )
 from tests.checks import assert_that
@@ -104,3 +106,21 @@ def test_receipt_excludes_travel_before_pricing() -> None:
             rule.model_copy(update={"source_id": "late-rule"}),
             (suppressed,),
         )
+
+
+@pytest.mark.parametrize(
+    ("classification", "manager_level", "expected"),
+    [(13, 0, 1), (24, 5, 1), (24, 6, 2), (25, 0, 2), (29, 0, 2)],
+)
+def test_moca7_vehicle_level(
+    classification: int,
+    manager_level: int,
+    expected: int,
+) -> None:
+    """Apply the grade boundary and reviewed manager receipt exception."""
+    appointment = Moca7VehicleAppointment(
+        classification_level=classification,
+        received_manager_allowance_level=manager_level,
+        review_evidence="Synthetic covered appointment and receipt assessment",
+    )
+    assert_that(moca7_vehicle_level(appointment) == expected)
