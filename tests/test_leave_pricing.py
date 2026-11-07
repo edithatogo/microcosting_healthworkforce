@@ -42,6 +42,7 @@ from src.leave_pricing import (
     vic_hama_historical_study_leave_hours,
     vic_scientist_development_credit_balance,
     vic_scientist_development_time_in_lieu_value,
+    vic_scientist_ungranted_development_leave_credit,
     victorian_hama_additional_leave_weeks,
     victorian_hama_leave_loading,
     victorian_hama_weekend_termination_pay,
@@ -1126,3 +1127,28 @@ def test_vic_scientist_development_credit_reconciles_redeemed_time() -> None:
         balance(Fraction(3, 2), Fraction(2))
     with pytest.raises(ValueError, match="earned development credit"):
         balance(Fraction(3, 2), Fraction(-1))
+
+
+@pytest.mark.parametrize(
+    ("valid_application", "granted", "expected"),
+    [
+        (True, False, Fraction(15, 2)),
+        (True, True, Fraction(0)),
+        (False, False, Fraction(0)),
+    ],
+)
+def test_vic_scientist_ungranted_development_remedy(
+    *,
+    valid_application: bool,
+    granted: bool,
+    expected: Fraction,
+) -> None:
+    """Only a valid application yielding no leave creates the one-day remedy."""
+    assert_that(
+        vic_scientist_ungranted_development_leave_credit(
+            Fraction(15, 2),
+            valid_application=valid_application,
+            leave_granted_in_calendar_year=granted,
+        )
+        == expected,
+    )

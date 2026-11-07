@@ -1067,3 +1067,22 @@ def vic_scientist_development_credit_balance(
         msg = "Redeemed hours must fit the earned development credit"
         raise ValueError(msg)
     return earned_hours - redeemed_hours
+
+
+def vic_scientist_ungranted_development_leave_credit(
+    ordinary_day_hours: Fraction,
+    *,
+    valid_application: bool,
+    leave_granted_in_calendar_year: bool,
+) -> Fraction:
+    """Calculate the historical AE426645 clause 70.7 one-day remedy.
+
+    Supply the reviewed ordinary hours for the credited day. Use the result
+    for annual leave credit or another mutually agreed use of the same time.
+    """
+    if ordinary_day_hours <= 0:
+        msg = "Ordinary day hours must be positive"
+        raise ValueError(msg)
+    if valid_application and not leave_granted_in_calendar_year:
+        return ordinary_day_hours
+    return Fraction(0)
