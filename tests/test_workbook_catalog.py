@@ -3,10 +3,13 @@
 
 import hashlib
 from datetime import time
+from zipfile import ZipFile
 lazy from pathlib import Path
 
 import openpyxl
+import pytest
 from openpyxl.workbook.defined_name import DefinedName
+from openpyxl.worksheet.datavalidation import DataValidation
 from openpyxl.worksheet.formula import ArrayFormula
 
 from src.workbook_catalog import read_workbook_catalog
@@ -56,10 +59,15 @@ def test_intake_preserves_array_formula_range_and_time(tmp_path: Path) -> None:
     sheet = book.create_sheet("Array")
     sheet["A1"] = ArrayFormula("A1:A2", "=ROW(A1:A2)")
     sheet["B1"] = time(8, 30)
+    validation = DataValidation(type="whole", formula1="1", sqref="C1")
+    sheet.add_data_validation(validation)
     book.save(path)
     book.close()
 
     catalog = read_workbook_catalog(path, sheet_names=("Array",))
+    (rule,) = catalog.validations
+    assert_that(rule.sheet == "Array" and "C1" in rule.rule_xml)
+    assert_that(read_workbook_catalog(path, sheet_names=("Sheet",)).validations == ())
     (selected,) = catalog.sheets
     formula, clock = selected.cells
     assert_that(formula.value == "=ROW(A1:A2)" and formula.cached is None)
@@ -67,3 +75,43 @@ def test_intake_preserves_array_formula_range_and_time(tmp_path: Path) -> None:
     assert_that(clock.value == clock.cached == time(8, 30))
     ranges = catalog.cells_frame()["array_formula_range"]
     assert_that(ranges.to_list() == ["A1:A2", None])
+
+
+def test_intake_retains_extended_validation(tmp_path: Path) -> None:
+    """Read a validation extension that openpyxl omits from its model."""
+    original = tmp_path / "original.xlsx"
+    extended = tmp_path / "extended.xlsx"
+    book = openpyxl.Workbook()
+    book.save(original)
+    book.close()
+    extension = (
+        b'<extLst><ext uri="{CCE6A557-97BC-4B89-ADB6-D9C93CAAB3DF}">'
+        b'<x14:dataValidations xmlns:x14="http://schemas.microsoft.com/office/'
+        b'spreadsheetml/2009/9/main" xmlns:xm="http://schemas.microsoft.com/'
+        b'office/excel/2006/main" count="1">'
+        b'<x14:dataValidation type="list"><x14:formula1><xm:f>AllowedOptions</xm:f>'
+        b"</x14:formula1><xm:sqref>K6:K55</xm:sqref></x14:dataValidation>"
+        b"</x14:dataValidations></ext></extLst>"
+    )
+    with ZipFile(original) as source, ZipFile(extended, "w") as target:
+        for name in source.namelist():
+            data = source.read(name)
+            if name == "xl/worksheets/sheet1.xml":
+                data = data.replace(b"</worksheet>", extension + b"</worksheet>")
+            target.writestr(name, data)
+
+    with pytest.warns(UserWarning, match="Data Validation extension"):
+        catalog = read_workbook_catalog(extended)
+    (rule,) = catalog.validations
+    assert_that(rule.sheet == "Sheet")
+    assert_that("AllowedOptions" in rule.rule_xml and "K6:K55" in rule.rule_xml)
+
+
+def test_intake_rejects_document_type_before_parsing(tmp_path: Path) -> None:
+    """Reject declarations before either workbook reader parses the XML."""
+    path = tmp_path / "doctype.xlsx"
+    xml = "<!DOCTYPE workbook><workbook/>"
+    with ZipFile(path, "w") as archive:
+        archive.writestr("xl/workbook.xml", xml.encode("utf-16"))
+    with pytest.raises(ValueError, match="document type declaration"):
+        read_workbook_catalog(path)
