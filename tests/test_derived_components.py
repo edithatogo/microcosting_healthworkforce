@@ -134,3 +134,72 @@ def test_activity_rejects_rule_expiring_mid_shift() -> None:
     )
     with pytest.raises(ValueError, match="costing date"):
         cost_derived_activity(baseline(), activity, "UTC", (expiring,))
+
+
+def test_budget_premiums_feed_distinct_oncost_bases() -> None:
+    """Synthetic budget fractions preserve premium exclusions and levy ordering."""
+    rules = (
+        rule("qualification", "qualification", ("salary",), "0.2"),
+        rule("overtime", "overtime", ("salary", "qualification"), "0.1"),
+        rule("penalty", "penalty", ("salary", "qualification"), "0.05"),
+        rule("premium_super", "premium_super", ("qualification", "penalty"), "0.1"),
+        rule(
+            "levy",
+            "levy",
+            ("salary", "qualification", "overtime", "penalty"),
+            "0.02",
+        ),
+        rule(
+            "insurance",
+            "insurance",
+            (
+                "salary",
+                "super",
+                "qualification",
+                "overtime",
+                "penalty",
+                "premium_super",
+                "levy",
+            ),
+            "0.01",
+        ),
+    )
+    day = date(2026, 6, 2)
+    snapshot = cost_derived_snapshot(baseline(), day, Decimal(1), rules)
+    start = datetime(2026, 6, 2, 9, tzinfo=UTC)
+    activity = Activity(
+        activity_id="budget-comparison",
+        resource_id="worker",
+        starts_at=start,
+        ends_at=start + timedelta(hours=1),
+        resources=Decimal(1),
+    )
+    dynamic = cost_derived_activity(baseline(), activity, "UTC", rules)
+
+    assert_that(
+        [row.base_hourly for row in snapshot.rows]
+        == [
+            Fraction(50),
+            Fraction(60),
+            Fraction(60),
+            Fraction(13),
+            Fraction(69),
+            Fraction("76.68"),
+        ],
+    )
+    assert_that(snapshot.exact_total == dynamic.exact_total == Fraction("77.4468"))
+
+
+def test_grossed_up_backfill_remains_visible_in_downstream_bases() -> None:
+    """Expose nested on-costs when a grossed-up component enters super again."""
+    rules = (
+        rule("backfill", "backfill", ("salary",), "0.2323"),
+        rule("backfill_super", "backfill_super", ("backfill",), "0.1"),
+        rule("backfill_cover", "backfill_cover", ("backfill_super",), "0.01"),
+    )
+    result = cost_derived_snapshot(baseline(), date(2026, 6, 2), Decimal(2), rules)
+    backfill, super_cost, cover = result.rows
+    assert_that(backfill.amount == Fraction("23.23"))
+    assert_that(super_cost.amount == Fraction("2.323"))
+    assert_that(cover.amount == Fraction("0.02323"))
+    assert_that(result.exact_total == Fraction("135.57623"))
