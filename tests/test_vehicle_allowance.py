@@ -7,6 +7,7 @@ from fractions import Fraction
 
 import pytest
 
+from src.periodic_allowance import cost_periodic_allowance
 from src.source_registry import SourceRegistry
 from src.vehicle_allowance import (
     Moca7VehicleAppointment,
@@ -16,6 +17,9 @@ from src.vehicle_allowance import (
     price_vehicle_travel,
 )
 from tests.checks import assert_that
+from tests.test_conditions import condition
+from tests.test_periodic_allowance import period, portion
+from tests.test_periodic_allowance import release as condition_release
 from tests.test_unit_quotes import quantity, quote, release
 
 
@@ -124,3 +128,45 @@ def test_moca7_vehicle_level(
         review_evidence="Synthetic covered appointment and receipt assessment",
     )
     assert_that(moca7_vehicle_level(appointment) == expected)
+
+
+def test_moca7_vehicle_level_change_across_fortnight() -> None:
+    """Price a reviewed manager receipt change with one nominal denominator."""
+    appointment = Moca7VehicleAppointment(
+        classification_level=24,
+        received_manager_allowance_level=0,
+        review_evidence="Synthetic reviewed nonreceipt",
+    )
+    promoted = appointment.model_copy(
+        update={
+            "received_manager_allowance_level": 6,
+            "review_evidence": "Synthetic reviewed manager receipt",
+        },
+    )
+    conditions = (
+        condition("vehicle-1", "fixed_annual", "2600", "AUD/year"),
+        condition("vehicle-2", "fixed_annual", "5200", "AUD/year"),
+    )
+    rates = condition_release().model_copy(update={"conditions": conditions})
+    boundary = date(2026, 6, 8)
+    before = period(portion("ordinary", "38", "1", "1")).model_copy(
+        update={"ends_on": boundary},
+    )
+    after = period(
+        portion("half-pay", "19", "1", "0.5"),
+        portion("unpaid", "19", "0", "0"),
+    ).model_copy(update={"starts_on": boundary})
+    first = cost_periodic_allowance(
+        rates,
+        f"vehicle-{moca7_vehicle_level(appointment)}",
+        before,
+    )
+    second = cost_periodic_allowance(
+        rates,
+        f"vehicle-{moca7_vehicle_level(promoted)}",
+        after,
+    )
+    assert_that(first.condition.condition_id == "vehicle-1")
+    assert_that(second.condition.condition_id == "vehicle-2")
+    assert_that(first.payable + second.payable == Fraction(75))
+    assert_that(first.accrued + second.accrued == Fraction(100))
