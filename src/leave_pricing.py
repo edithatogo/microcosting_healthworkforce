@@ -103,6 +103,8 @@ def nsw_general_shift_leave_credit(
     if worked_shifts < 0 or ordinary_weekly_hours <= 0:
         msg = "Shift count and ordinary weekly hours must be valid"
         raise ValueError(msg)
+    if worked_shifts == 0:
+        return Fraction(0)
     annual_shift_threshold = 35
     full_time_weekly_hours = 38
     if worked_shifts >= annual_shift_threshold:

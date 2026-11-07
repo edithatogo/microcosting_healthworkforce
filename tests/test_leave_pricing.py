@@ -738,6 +738,8 @@ def test_separation_loading_uses_reason_and_reviewed_exposure() -> None:
 
 def test_nsw_general_shift_credit_prorates_and_rounds_below_threshold() -> None:
     """Keep the 35-shift credit distinct from the Staff Specialists rule."""
+    assert_that(nsw_general_shift_leave_credit(0, Fraction(19)) == 0)
+    assert_that(nsw_general_shift_leave_credit(36, Fraction(19)) == Fraction(19))
     assert_that(nsw_general_shift_leave_credit(34, Fraction(38)) == Fraction(1292, 35))
     assert_that(nsw_general_shift_leave_credit(35, Fraction(38)) == Fraction(38))
     assert_that(
