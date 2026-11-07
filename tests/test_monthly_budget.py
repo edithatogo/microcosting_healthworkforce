@@ -57,7 +57,7 @@ def test_full_year_and_one_day() -> None:
     assert_that(daily.total == Fraction(10000, 29))
 
 
-def test_rejects_gaps_overlaps_invalid_inputs_and_partial_rate_month() -> None:
+def test_rejects_gaps_overlaps_and_invalid_inputs() -> None:
     """Reject ambiguous or invalid scenario inputs."""
     first = rate("a", date(2024, 1, 1), date(2024, 2, 1), "120000")
     with pytest.raises(ValueError, match="missing"):
@@ -69,8 +69,8 @@ def test_rejects_gaps_overlaps_invalid_inputs_and_partial_rate_month() -> None:
             Decimal(1),
             (first, rate("b", date(2024, 1, 1), date(2024, 3, 1), "1")),
         )
-    with pytest.raises(ValueError, match="whole calendar"):
-        rate("c", date(2024, 1, 2), date(2024, 2, 1), "1")
+    with pytest.raises(ValueError, match="nonempty"):
+        rate("c", date(2024, 2, 1), date(2024, 2, 1), "1")
     with pytest.raises(ValueError, match="FTE"):
         monthly_salary_budget(
             date(2024, 1, 1),
@@ -84,4 +84,28 @@ def test_rejects_gaps_overlaps_invalid_inputs_and_partial_rate_month() -> None:
             date(2024, 1, 2),
             Decimal(1),
             (first, first),
+        )
+
+
+def test_midmonth_rate_change_and_gap() -> None:
+    """Leap-month changes retain exact amounts and each contributing rate."""
+    rates = (
+        rate("old", date(2024, 2, 1), date(2024, 2, 15), "120000"),
+        rate("new", date(2024, 2, 15), date(2024, 3, 1), "144000"),
+    )
+    result = monthly_salary_budget(
+        date(2024, 2, 10),
+        date(2024, 2, 20),
+        Decimal("0.5"),
+        rates,
+    )
+    assert_that([r.covered_days for r in result.rows] == [5, 6])
+    assert_that([r.rate.rate_id for r in result.rows] == ["old", "new"])
+    assert_that(result.total == Fraction(5000 * 5 + 6000 * 6, 29))
+    with pytest.raises(ValueError, match="missing"):
+        monthly_salary_budget(
+            date(2024, 2, 10),
+            date(2024, 2, 20),
+            Decimal(1),
+            (rates[0],),
         )
