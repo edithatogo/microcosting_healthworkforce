@@ -9,6 +9,7 @@ from pydantic import TypeAdapter
 
 from src.assignment_costing import AssignmentCost, AssignmentTimeline
 from src.assignment_requests import AssignmentRequest, run_assignment_request
+from src.capacity_costing import CapacityScenarioInputs, capacity_scenario
 from src.conditions import (
     ConditionRelease,
     SnapshotQuantity,
@@ -24,6 +25,12 @@ class SnapshotRequest(SnapshotQuantity):
     as_of: date
 
 
+class CapacityRequest(CapacityScenarioInputs):
+    """Explicit annual capacity assumptions and valuation date."""
+
+    as_of: date
+
+
 def main(argv: list[str] | None = None) -> int:
     """Validate both inputs, then create a new output without overwriting files."""
     parser = argparse.ArgumentParser(description=__doc__)
@@ -33,6 +40,7 @@ def main(argv: list[str] | None = None) -> int:
     inputs = parser.add_mutually_exclusive_group(required=True)
     inputs.add_argument("--activity", type=Path)
     inputs.add_argument("--snapshot", type=Path)
+    inputs.add_argument("--capacity", type=Path)
     inputs.add_argument("--assignment-request", type=Path)
     parser.add_argument("--timezone")
     parser.add_argument("--output", type=Path, required=True)
@@ -53,19 +61,39 @@ def main(argv: list[str] | None = None) -> int:
         parser.error("--assignment-request requires --timeline")
     if args.activity is not None and args.timezone is None:
         parser.error("--activity requires --timezone")
-    if args.snapshot is not None and args.timezone is not None:
+    if args.activity is None and args.timezone is not None:
         parser.error("--timezone applies only to --activity")
     release = ConditionRelease.model_validate_json(args.release.read_bytes())
-    if args.snapshot is not None:
+    if args.capacity is not None:
+        capacity = CapacityRequest.model_validate_json(args.capacity.read_bytes())
+        assumptions = CapacityScenarioInputs.model_validate(
+            capacity.model_dump(exclude={"as_of"}),
+        )
+        encoded = capacity_scenario(
+            release,
+            capacity.as_of,
+            assumptions,
+        ).model_dump_json()
+    elif args.snapshot is not None:
         request = SnapshotRequest.model_validate_json(args.snapshot.read_bytes())
-        result = cost_condition_snapshot(release, request.as_of, request.hours)
+        encoded = cost_condition_snapshot(
+            release,
+            request.as_of,
+            request.hours,
+        ).model_dump_json()
     elif args.activity is not None and args.timezone is not None:
         activity = Activity.model_validate_json(args.activity.read_bytes())
-        result = cost_condition_activity(release, activity, args.timezone)
+        encoded = cost_condition_activity(
+            release,
+            activity,
+            args.timezone,
+        ).model_dump_json()
     else:
-        parser.error("An activity and timezone or a snapshot is required")
+        parser.error(
+            "An activity and timezone, a snapshot or a capacity request is required",
+        )
     with args.output.open("x", encoding="utf-8") as output:
-        output.write(result.model_dump_json())
+        output.write(encoded)
         output.write("\n")
     return 0
 
