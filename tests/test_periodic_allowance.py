@@ -289,6 +289,15 @@ def test_reconcile_actual_posting_against_payable_allowance() -> None:
     )
     assert_that(priced.contribution == Fraction("0.95"))
     assert_that(priced.allowance_reconciliations == (result,))
+    excluded = cost_contribution_payments(
+        prices(),
+        contribution_period(),
+        original,
+        (),
+        allowance_reconciliations=(result,),
+    )
+    assert_that(excluded.contribution == Fraction(0))
+    assert_that(excluded.allowance_reconciliations == (result,))
     with pytest.raises(ValueError, match="Duplicate contribution payment"):
         cost_contribution_payments(
             prices(),
