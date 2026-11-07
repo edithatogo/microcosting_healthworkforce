@@ -1,10 +1,14 @@
 # Copyright 2026 Dylan. SPDX-License-Identifier: Apache-2.0
-"""Run a versioned condition snapshot or activity calculation from JSON."""
+"""Run explicit single-release or assignment-path costing from JSON."""
 
 import argparse
 from pathlib import Path
 lazy from datetime import date
 
+from pydantic import TypeAdapter
+
+from src.assignment_costing import AssignmentCost, AssignmentTimeline
+from src.assignment_requests import AssignmentRequest, run_assignment_request
 from src.conditions import (
     ConditionRelease,
     SnapshotQuantity,
@@ -23,13 +27,30 @@ class SnapshotRequest(SnapshotQuantity):
 def main(argv: list[str] | None = None) -> int:
     """Validate both inputs, then create a new output without overwriting files."""
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--release", type=Path, required=True)
+    sources = parser.add_mutually_exclusive_group(required=True)
+    sources.add_argument("--release", type=Path)
+    sources.add_argument("--timeline", type=Path)
     inputs = parser.add_mutually_exclusive_group(required=True)
     inputs.add_argument("--activity", type=Path)
     inputs.add_argument("--snapshot", type=Path)
+    inputs.add_argument("--assignment-request", type=Path)
     parser.add_argument("--timezone")
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args(argv)
+    if args.timeline is not None:
+        if args.assignment_request is None or args.timezone is not None:
+            parser.error("--timeline requires --assignment-request and state timezones")
+        timeline = AssignmentTimeline.model_validate_json(args.timeline.read_bytes())
+        request = TypeAdapter(AssignmentRequest).validate_json(
+            args.assignment_request.read_bytes(),
+        )
+        assignment = run_assignment_request(timeline, request)
+        encoded = TypeAdapter(AssignmentCost).dump_json(assignment).decode("utf-8")
+        with args.output.open("x", encoding="utf-8") as output:
+            output.write(encoded + "\n")
+        return 0
+    if args.assignment_request is not None:
+        parser.error("--assignment-request requires --timeline")
     if args.activity is not None and args.timezone is None:
         parser.error("--activity requires --timezone")
     if args.snapshot is not None and args.timezone is not None:
