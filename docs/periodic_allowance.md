@@ -138,3 +138,11 @@ termination payment bases when applying C24. Use separate travel quantities
 for authorised private-vehicle travel.
 
 [Queensland Health policy C24, sections 1 and 1.4](https://www.health.qld.gov.au/__data/assets/pdf_file/0026/164078/qh-pol-176.pdf)
+
+## Payroll assignment binding
+
+Set both `resource_id` and `allocation_id` on an allowance period to
+bind it to a payroll assignment. Every segment of a bound schedule
+carries the same pair. Payment reconciliation checks that the payroll
+posting has those identities. For unbound periods the caller supplies
+the assignment match.
