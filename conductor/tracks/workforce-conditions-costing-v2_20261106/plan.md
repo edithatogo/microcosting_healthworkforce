@@ -653,3 +653,18 @@ acceptance remain open.
 The 17 delivered validation diagnostics still report differences above a
 cent. Identical diagnostics establish package parity for the tested outputs.
 The archived workbook discrepancies retain their separate dispositions.
+
+## DSA validation evidence boundaries
+
+The installed-package run at cc7e809 passed 20 live scenario checks,
+covering 500 state-role comparisons, with a maximum absolute difference
+of about 5.82e-10 AUD. The live oracle changes workbook inputs and
+recalculates the scenario before comparison.
+
+The archived diagnostic reads the delivered DSA Values sheet. Direct
+inspection confirmed that each of the nine matched column groups selects
+its MP column. The Leave Loading (%) group is present at BK1 with two trailing tabs.
+The legacy exact match skips both variants. The archive mapping can
+identify that group by its reviewed coordinate and preserve its raw label. Preserve the
+17 existing archived flags and the unmatched mapping as historical
+evidence. Neither represents a failure of the live scenario oracle.
