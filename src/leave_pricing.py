@@ -1,7 +1,7 @@
 # Copyright 2026 Dylan. SPDX-License-Identifier: Apache-2.0
 """Price explicit leave exposures without inferring payroll or continuation rules."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from fractions import Fraction
 from typing import Literal
 lazy from datetime import date
@@ -9,7 +9,7 @@ lazy from datetime import date
 from src.historical_hours import select_normal_hours
 from src.normal_pay import HoursPricingRequest, price_selected_hours
 from src.paid_leave import build_paid_leave
-from src.unit_quotes import QuoteModel, UnitQuoteRelease
+from src.unit_quotes import NonnegativeQuantity, QuoteModel, UnitQuoteRelease
 lazy from src.historical_hours import NormalHoursSelection
 lazy from src.normal_pay import SelectedHoursPricing
 lazy from src.paid_leave import LeaveExposureRow, PaidLeaveSchedule
@@ -33,13 +33,45 @@ def allocate_leave_loading_hours(
     ):
         msg = "Leave loading hours and prior cap consumption must be valid"
         raise ValueError(msg)
-    remaining = cap_hours - prior_loaded_hours
+    return _allocate_cap(eligible_hours, cap_hours - prior_loaded_hours)
+
+
+def _allocate_cap(
+    amounts: tuple[Fraction, ...],
+    remaining: Fraction,
+) -> tuple[Fraction, ...]:
     allocated: list[Fraction] = []
-    for hours in eligible_hours:
-        loaded = min(hours, remaining)
-        allocated.append(loaded)
-        remaining -= loaded
+    for amount in amounts:
+        used = min(amount, remaining)
+        allocated.append(used)
+        remaining -= used
     return tuple(allocated)
+
+
+def price_leave_loading(
+    loaded_hours: tuple[Fraction, ...],
+    hourly_loading: tuple[Fraction, ...],
+    monetary_cap: Fraction,
+    prior_paid: Fraction,
+) -> tuple[Fraction, ...]:
+    """Apply reviewed hourly loading prices and a separate monetary maximum.
+
+    Inputs share one currency and cap period. Hours are already allocated
+    to eligible portions and ordered for payment. The caller supplies the
+    prorated maximum and prior payments for that period.
+    """
+    if (
+        monetary_cap < 0
+        or not 0 <= prior_paid <= monetary_cap
+        or any(hours < 0 for hours in loaded_hours)
+        or any(price < 0 for price in hourly_loading)
+    ):
+        msg = "Leave loading prices, hours and prior payments must be valid"
+        raise ValueError(msg)
+    amounts = tuple(
+        hours * price for hours, price in zip(loaded_hours, hourly_loading, strict=True)
+    )
+    return _allocate_cap(amounts, monetary_cap - prior_paid)
 
 
 class LeavePriceSelection(QuoteModel):
@@ -51,6 +83,17 @@ class LeavePriceSelection(QuoteModel):
     valuation_basis: str
     pricing: HoursPricingRequest
     allowances: tuple[QuoteQuantity, ...]
+    loading_accrued_on: date | None = None
+
+
+class LeaveLoadingMoneyCap(QuoteModel):
+    """Reviewed monetary maximum and prior paid amount in release currency."""
+
+    starts_on: date
+    ends_on: date
+    maximum: NonnegativeQuantity
+    prior_paid: NonnegativeQuantity
+    evidence: str
 
 
 @dataclass(frozen=True)
@@ -60,6 +103,7 @@ class PricedLeaveRow:
     exposure: LeaveExposureRow
     choice: LeavePriceSelection
     pricing: SelectedHoursPricing
+    loading_reduction: Fraction = Fraction(0)
 
 
 @dataclass(frozen=True)
@@ -72,6 +116,7 @@ class PricedLeave:
     currency: str
     rows: tuple[PricedLeaveRow, ...]
     total: Fraction
+    loading_cap: LeaveLoadingMoneyCap | None = None
 
 
 def _choices(
@@ -119,6 +164,8 @@ def price_paid_leave(
     selection: NormalHoursSelection,
     schedule: PaidLeaveSchedule,
     choices: tuple[LeavePriceSelection, ...],
+    *,
+    loading_cap: LeaveLoadingMoneyCap | None = None,
 ) -> PricedLeave:
     """Compose reviewed inputs and separately declared salary/allowance exposure.
 
@@ -156,11 +203,38 @@ def price_paid_leave(
         _dated_coverage(release, choice)
         priced = price_selected_hours(release, selection, request, choice.allowances)
         rows.append(PricedLeaveRow(exposure, choice, priced))
+    if loading_cap is not None:
+        loading_cap = LeaveLoadingMoneyCap.model_validate(dict(loading_cap))
+        loading = [
+            (index, item)
+            for index, row in enumerate(rows)
+            for item in row.pricing.pricing.rows[1:]
+            if item.quote.component == "leave_loading"
+        ]
+        if not loading or any(item.quote.unit != "hour" for _, item in loading):
+            msg = "Loading cap requires separately priced hourly leave loading"
+            raise ValueError(msg)
+        for index, _ in loading:
+            accrued_on = rows[index].choice.loading_accrued_on
+            if accrued_on is None or not (
+                loading_cap.starts_on <= accrued_on < loading_cap.ends_on
+            ):
+                msg = "Leave loading requires an accrual date within the cap period"
+                raise ValueError(msg)
+        capped = price_leave_loading(
+            tuple(Fraction(item.quantity.quantity) for _, item in loading),
+            tuple(Fraction(item.quote.amount) for _, item in loading),
+            Fraction(loading_cap.maximum),
+            Fraction(loading_cap.prior_paid),
+        )
+        for (index, item), cost in zip(loading, capped, strict=True):
+            rows[index] = replace(rows[index], loading_reduction=item.cost - cost)
     return PricedLeave(
         "paid_leave_selected_hours_pricing_v1",
         schedule,
         selection,
         release.currency,
         tuple(rows),
-        sum((r.pricing.pricing.total for r in rows), Fraction(0)),
+        sum((r.pricing.pricing.total - r.loading_reduction for r in rows), Fraction(0)),
+        loading_cap,
     )

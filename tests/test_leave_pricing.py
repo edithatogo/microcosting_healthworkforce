@@ -10,8 +10,10 @@ from typing import Literal
 import pytest
 
 from src.leave_pricing import (
+    LeaveLoadingMoneyCap,
     LeavePriceSelection,
     allocate_leave_loading_hours,
+    price_leave_loading,
     price_paid_leave,
 )
 from src.paid_leave import PaidLeaveSchedule, build_paid_leave
@@ -368,3 +370,46 @@ def test_capped_loading_prices_separately_across_dated_quotes() -> None:
         == [Fraction("52.5"), Fraction(35)],
     )
     assert_that(result.total == Fraction(73500, 73) + Fraction("87.5"))
+    cap = LeaveLoadingMoneyCap(
+        starts_on=date(2026, 1, 1),
+        ends_on=date(2027, 1, 1),
+        maximum=Decimal(80),
+        prior_paid=Decimal(20),
+        evidence="Synthetic reviewed cap",
+    )
+    accrued = tuple(
+        choice.model_copy(update={"loading_accrued_on": cap.starts_on})
+        for choice in with_loading
+    )
+    capped = price_paid_leave(release, selection(), leave, accrued, loading_cap=cap)
+    with pytest.raises(ValueError, match="accrual date within"):
+        price_paid_leave(release, selection(), leave, with_loading, loading_cap=cap)
+    outside = accrued[1].model_copy(update={"loading_accrued_on": cap.ends_on})
+    with pytest.raises(ValueError, match="accrual date within"):
+        price_paid_leave(
+            release,
+            selection(),
+            leave,
+            (accrued[0], outside),
+            loading_cap=cap,
+        )
+    assert_that(capped.loading_cap == cap)
+    assert_that([row.loading_reduction for row in capped.rows] == [0, Fraction("27.5")])
+    assert_that(capped.total == Fraction(73500, 73) + 60)
+    with pytest.raises(ValueError, match="separately priced hourly"):
+        price_paid_leave(release, selection(), leave, selected, loading_cap=cap)
+
+
+def test_loading_applies_hours_and_money_caps_independently() -> None:
+    """A monetary cap can bind even while eligible hours remain."""
+    hours = allocate_leave_loading_hours(
+        (Fraction(10), Fraction(10), Fraction(5)),
+        Fraction(20),
+        Fraction(5),
+    )
+    rates = (Fraction("5.25"), Fraction(7), Fraction(8))
+    result = price_leave_loading(hours, rates, Fraction(80), Fraction(20))
+    assert_that(hours == (Fraction(10), Fraction(5), Fraction(0)))
+    assert_that(result == (Fraction("52.50"), Fraction("7.50"), Fraction(0)))
+    with pytest.raises(ValueError, match="prior payments"):
+        price_leave_loading(hours, rates, Fraction(80), Fraction(81))
