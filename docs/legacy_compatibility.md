@@ -9,8 +9,9 @@ default projection horizon remains five years after year zero; zero selects
 only year zero. The original CLI and PSA are unchanged.
 
 The manifest records source assertions, input/configuration/output hashes,
-calculation-module identity, runtime versions and selected horizon. Typed IPC
-fingerprints distinguish null from NaN and preserve column/row order. Pins
+calculation-module identity, runtime versions and selected horizon. Fingerprints
+bind original dtypes and scalar string values, distinguish null from NaN, and
+preserve column/row order. They exclude unused Arrow storage-buffer bytes. Pins
 describe data at calculation time; the returned Polars table remains mutable.
 The adapter does not open, recalculate or independently verify a workbook, read
 staff data, write outputs, run stochastic analysis or infer effective dates.

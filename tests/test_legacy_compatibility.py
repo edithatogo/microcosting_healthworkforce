@@ -1,6 +1,8 @@
 # Copyright 2026 Dylan. SPDX-License-Identifier: Apache-2.0
 """Explicit legacy mode preserves its pipeline and declares its limitations."""
 
+from io import BytesIO
+
 import polars as pl
 import pytest
 from polars.testing import assert_frame_equal
@@ -125,3 +127,18 @@ def test_compatibility_distinguishes_nan_null_and_explicit_zero_year_horizon() -
     snapshot = cost_legacy_compatibility(selected, inputs(), formulas())
     assert_that("Calculated_Cost_Mid_Y1" not in snapshot.frame.columns)
     assert_that(snapshot.manifest.projection_years == 0)
+
+
+def test_compatibility_identity_survives_lossless_table_storage() -> None:
+    """Typed table identity must not depend on unused null-buffer storage bytes."""
+    frame = inputs().with_columns(
+        pl.lit(None, dtype=pl.Float64).alias("missing_number"),
+        pl.lit(None, dtype=pl.String).alias("missing_text"),
+    )
+    storage = BytesIO()
+    frame.write_parquet(storage)
+    restored = pl.read_parquet(storage.getvalue())
+    assert_frame_equal(frame, restored)
+    first = cost_legacy_compatibility(request(), frame, formulas())
+    replay = cost_legacy_compatibility(request(), restored, formulas())
+    assert_that(first.manifest == replay.manifest)

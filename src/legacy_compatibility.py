@@ -68,9 +68,18 @@ def _digest(value: object) -> str:
 
 
 def _frame_digest(frame: pl.DataFrame) -> str:
-    """Retain typed values, including the distinction between NaN and null."""
-    encoded = frame.rechunk().write_ipc(None, compression="uncompressed")
-    return hashlib.sha256(encoded.getvalue()).hexdigest()
+    """Hash typed scalar content without unused Arrow buffer bytes.
+
+    Polars string conversion preserves null separately from the literal NaN
+    representation. The schema binds the original type, column and row order.
+    Unsupported string conversions fail instead of hashing an opaque object.
+    """
+    return _digest(
+        {
+            "schema": [(name, str(dtype)) for name, dtype in frame.schema.items()],
+            "values": frame.select(pl.all().cast(pl.String)).write_json(),
+        },
+    )
 
 
 def cost_legacy_compatibility(
