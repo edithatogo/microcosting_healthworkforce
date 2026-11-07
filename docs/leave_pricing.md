@@ -46,3 +46,58 @@ quantity. This output is an economic price exposure, not an actual cash or payro
 ledger. KIT work/extensions, pay-cycle timing, progression, actual leave credits,
 family/route eligibility and replacement cover require their separate rules.
 The API neither applies a KIT extension nor reprices a contract automatically.
+
+## Allocate a leave loading cap
+
+Call `allocate_leave_loading_hours` with the eligible portions in payroll
+order, the reviewed cap in hours and the hours already loaded in that cap
+period. Use exact fractions for all three inputs. For a static scenario,
+supply one eligible portion. For dated costing, supply ordered portions
+split wherever the applicable loading rate changes. The result gives the
+loaded hours for each input portion in the same order.
+
+Price base leave pay for all applicable leave hours. Price the loading
+increment using only the returned hours and the applicable rate for each
+portion. Provide the correct cap period and starting consumption for each
+run. Resetting prior consumption within one cap period can overstate loading.
+
+## Price historical weekend leave credit
+
+For the Victorian medical scientist agreement, group ordinary shifts by
+weekend within one reviewed 12-month period. Pass each shift as
+`WeekendLeaveShift` with its total ordinary duration and the ordinary hours
+attributable to the weekend. Use `Fraction` values for both.
+
+For example, an eight-hour qualifying shift with two hours attributable
+to the weekend gives one hour of agreement leave credit. For a part-time
+employee with qualifying shifts on both days, use the longer shift.
+Equal-duration shifts with different weekend hours require a reviewed
+selection before pricing. Pass any separately assessed NES shiftworker
+credit in hours. The function returns the greater of that credit and
+the capped agreement credit.
+
+The resulting hours are a leave balance input. Use the applicable dated
+salary and leave payment rules when valuing a later period of leave.
+Confirm employer and classification coverage before applying the rule.
+
+## Price historical NSW leave adjustments
+
+For the general Conditions Award shift credit, pass the reviewed count
+of ordinary Sunday and public-holiday shifts for one qualifying year to
+`nsw_general_shift_leave_credit`. At 35 or more shifts the credit is one
+ordinary working week. Below 35, the credit is prorated. A positive
+prorated credit for a worker below 38 ordinary weekly hours also requires
+the reviewed rounding increment in hours.
+
+For deferred loading after advance leave, provide `AdvanceLoadingTiming`
+with the entitlement date and evidence of continuing employment. Supply
+separate weekly salary and benchmark quote IDs with `AdvanceLoadingPrices`.
+`price_advance_loading` selects both rates at the entitlement date and
+returns their ledger with the capped loading amount.
+
+For separation, first establish the reason and the leave balance eligible
+for loading. `price_separation_loading` uses that reviewed exposure and
+requires explicit evidence for the valuation date. Advance ordinary-pay
+excess is a separate calculation through `AdvanceLeaveTermination`, using
+reviewed ordinary pay due and the relevant service-year completion date.
+Its result is the excess before any payroll deduction.
