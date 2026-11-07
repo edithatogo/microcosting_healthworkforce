@@ -40,6 +40,7 @@ from src.leave_pricing import (
     sa_part_time_study_paid_hours,
     select_leave_loading_alternative,
     vic_hama_historical_study_leave_hours,
+    vic_scientist_development_credit_balance,
     vic_scientist_development_time_in_lieu_value,
     victorian_hama_additional_leave_weeks,
     victorian_hama_leave_loading,
@@ -1114,3 +1115,14 @@ def test_vic_scientist_development_credit_prices_dated_slices() -> None:
             rates,
             (quantity(quote_id="premium", unit="hour"),),
         )
+
+
+def test_vic_scientist_development_credit_reconciles_redeemed_time() -> None:
+    """Partial redemption preserves exact hours and cannot overdraw the credit."""
+    balance = vic_scientist_development_credit_balance
+    assert_that(balance(Fraction(3, 2), Fraction(1, 4)) == Fraction(5, 4))
+    assert_that(balance(Fraction(3, 2), Fraction(3, 2)) == Fraction(0))
+    with pytest.raises(ValueError, match="earned development credit"):
+        balance(Fraction(3, 2), Fraction(2))
+    with pytest.raises(ValueError, match="earned development credit"):
+        balance(Fraction(3, 2), Fraction(-1))

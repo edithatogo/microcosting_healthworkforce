@@ -26,6 +26,7 @@ from src.conditions_cli import main
 from src.leave_pricing import (
     nsw_online_study_leave_hours,
     vic_hama_historical_study_leave_hours,
+    vic_scientist_development_credit_balance,
 )
 from src.reimbursement import ReimbursementClaim, ReimbursementPeriod
 from tests.checks import assert_that
@@ -286,4 +287,25 @@ def test_approved_study_hours_price_across_dated_wage_change(study_rule: str) ->
         [row.exact_hours for row in result.rows] == [Fraction(1), Fraction(1, 2)],
     )
     assert_that({row.activity_id for row in result.rows} == {"approved-study"})
+    assert_that(result.total == Fraction(80))
+
+
+def test_development_credit_redemption_reconciles_dated_roster_hours() -> None:
+    """Reconcile one approved redemption against its time credit."""
+    path = timeline()
+    original = activity()
+    redemption = original.model_copy(
+        update={
+            "activity_id": "development-credit-redemption",
+            "ends_at": original.starts_at + timedelta(minutes=90),
+        },
+    )
+    request = AssignmentActivitiesRequest(mode="activities", activities=(redemption,))
+    result = run_assignment_request(path, request)
+    redeemed = sum((row.exact_hours for row in result.rows), Fraction(0))
+    assert_that(redeemed == Fraction(3, 2))
+    assert_that(
+        vic_scientist_development_credit_balance(Fraction(2), redeemed)
+        == Fraction(1, 2),
+    )
     assert_that(result.total == Fraction(80))
