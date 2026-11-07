@@ -118,3 +118,17 @@ the remaining kilometres against the applicable release.
 Value the recurring allowance separately using its own payable
 period and leave portions. The caller must match the receipt evidence
 to the worker and travel date.
+
+## EDON recurring vehicle allowance
+
+For an appointment verified under Queensland Health C24, use the dated SES
+amount and classify the period into paid, half-pay and unpaid leave portions.
+The policy pays the vehicle allowance in full during paid leave, at half
+rate during half-pay leave and at zero during unpaid leave. Keep these
+payment factors separate from any independently established accrual factors.
+
+Exclude this component from the superannuation, annual leave loading and
+termination payment bases when applying C24. Use separate travel quantities
+for authorised private-vehicle travel.
+
+[Queensland Health policy C24, sections 1 and 1.4](https://www.health.qld.gov.au/__data/assets/pdf_file/0026/164078/qh-pol-176.pdf)
