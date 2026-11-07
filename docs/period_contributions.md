@@ -89,3 +89,53 @@ A period may retain an explicit `planned_remittance_at` timestamp at or after
 its end. This is a timing assumption carried with the ledger. Pricing still
 uses the earnings period. The timestamp does not establish a due date or
 record a completed payment.
+
+## Queensland medical officer vehicle allowance
+
+For a reviewed MOCA7 scenario, clause 2.7.4 calls for comparing the
+Commonwealth and Queensland employer contributions. Configure each
+alternative with its own dated base, factor and applicable cap. Compare
+the calculated amounts over the same reviewed period. The Commonwealth
+and Queensland rates alone cannot determine which amount is greater.
+
+Clause 11.33 describes a recurring cash payment in lieu of a supplied
+vehicle. Keep it separate from reimbursement of work-related vehicle
+expenses. For each alternative, resolve the payment's treatment against
+the dated earnings definition and employee category. The Queensland
+regulation distinguishes employer salary under section 4 from
+superannuable salary under section 5. Apply the definition referenced
+by the selected contribution row, including any applicable section 15
+agreement. For a paid-earnings calculation, qualify the allowance's
+payroll posting and assignment binding before including it.
+
+## Queensland long-service leave levy
+
+The [Treasury Central Scheme guidelines](https://www.treasury.qld.gov.au/files/Long-Service-Leave-Central-Scheme-Guidelines-2.pdf)
+distinguish monthly expense recognition from quarterly remittance.
+Use a single contribution alternative for a reviewed levy base. For
+monthly costing, price each month using its eligible gross earnings.
+Aggregate those expenses for the quarter and retain the remittance
+date separately. The engine preserves an explicit planned remittance
+timestamp. A statutory due date requires the applicable working-day
+calendar and the agency's remittance schedule.
+
+Confirm member agency coverage, employee eligibility and payroll
+component mapping before setting the base. The historical workbook
+includes the vehicle allowance. A current levy calculation requires
+evidence that the agency includes that payment in eligible gross
+salary. Keep claims for leave paid separate from levy expenses.
+
+## Historical Queensland workbook reconciliation
+
+In the recalculated Senior Medical Officer diagnostic, 24 assignment
+months had positive vehicle allowance. Independent component sums
+reproduced all 96 downstream results for superannuation, long-service
+leave levy, WorkCover and total cost within AUD 0.00000001.
+
+The workbook includes vehicle allowance directly in each on-cost
+base. Its WorkCover calculation also includes superannuation and
+long-service leave levy. Preserve those dependencies when reproducing
+the historical model. For current WorkCover costing, classify the
+payment against the applicable premium guidance. The [WorkCover
+wages manual](https://www.worksafe.qld.gov.au/__data/assets/pdf_file/0014/17240/wages-definition-manual.pdf)
+distinguishes remuneration from reimbursement of work expenses.
