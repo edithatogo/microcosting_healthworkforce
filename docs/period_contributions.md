@@ -1,7 +1,7 @@
 # Whole-period contribution comparisons
 
 `src.period_contributions` implements `aggregate_then_greater_total_v1` for
-reviewed alternative contribution definitions. Each alternative names its own
+one or more reviewed contribution definitions. Each alternative names its own
 hourly earnings components and effective-dated fraction schedule. The library
 sums each alternative over one explicit comparison period, then selects the
 largest **period total once**. It retains losing alternatives and all ties.
@@ -21,12 +21,15 @@ where required by the selected comparison period. An empty complete period is
 zero earnings; missing history cannot be represented as an empty period.
 
 Create a reviewed `ContributionRule` with an output component, effective local
-dates, timezone, source identity/hash/citation and two or more
+dates, timezone, source identity/hash/citation and one or more
 `ContributionAlternative` definitions. Each alternative supplies explicit base
 component names and reviewed `ContributionFactor` intervals. Sources must cover
 the exact employer, jurisdiction, classification and entire comparison period.
 Every relevant rate must contain every required base, including explicit zeros
-for known absent components. Missing components are errors.
+for known absent components. Missing components are errors. For a levy with one
+reviewed basis, supply a single alternative. Its total is the selected amount.
+Periodic allowance payments require a separately dated posting and assignment
+binding before they can be included in a paid-earnings basis.
 
 Call `cost_contribution_activities(release, period, rule, activities)` for
 complete earned activities. Wage and factor changes split the candidate ledger
