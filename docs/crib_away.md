@@ -87,7 +87,7 @@ remain prerequisites for real-case use; no source data is distributed here.
 
 ## Ambulance Tasmania missed meal breaks
 
-For a reviewed shift under Part III clause 6(i), pass a count of zero, one
+For a shift with a reviewed missed-break entitlement, pass a count of zero, one
 or two missed breaks to `src.missed_meal_breaks.missed_break_overtime_quantity`
 with unit `break`, the shift-end valuation date and the hourly overtime quote
 ID. Pass the returned hourly quantity to `price_units`. Each missed break adds
@@ -98,4 +98,17 @@ Verify the shift entitlement, applicable payroll boundary and overtime quote.
 Review the relationship to composite wages before adding the result to an
 existing shift cost.
 
-[Ambulance Tasmania Award, Part III clause 6](https://www.tic.tas.gov.au/__data/assets/pdf_file/0007/929248/T15375-No-4-of-2026-Consolidated-Ambulance-Tasmania-Award-S004.pdf)
+The 2024 consolidation records the same paid quantity in Part III clause
+6(j). The 2026 consolidation records it in clause 6(i). Cite the edition
+and clause applicable to the shift and verify the operative payroll boundary
+for any variation being applied.
+
+[2024 consolidation, clause 6(j)](https://www.tic.tas.gov.au/__data/assets/pdf_file/0009/776601/T15090-No-1-of-2024-Ambulance-Tasmania-Award-.-S004.pdf) · [2026 consolidation, clause 6(i)](https://www.tic.tas.gov.au/__data/assets/pdf_file/0007/929248/T15375-No-4-of-2026-Consolidated-Ambulance-Tasmania-Award-S004.pdf)
+
+For the 2026 edition, use separate occasion quotes for the away-training
+meal allowance and the spoiled-meal allowance. Under clause 6(f), record one
+occasion for a qualifying away training course where neither a meal nor
+suitable facilities are provided. Under clause 6(g), retain each qualifying
+disturbance in the first 15 minutes of a meal break as a distinct occasion.
+The spoiled-meal count is uncapped in that edition. Verify the dated amount
+and whether the case supports combining any of these payments.
