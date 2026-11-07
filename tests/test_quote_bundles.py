@@ -12,6 +12,7 @@ from src.quote_bundles import (
     QuoteBundleCase,
     QuoteBundleDefinition,
     QuoteBundleFacts,
+    QuoteBundlePercentage,
     QuoteBundleRule,
     price_highest_quote_bundles,
 )
@@ -276,3 +277,72 @@ def test_reviewed_tie_priority_only_changes_the_paid_tie() -> None:
     invalid = policy.model_copy(update={"tie_priority": ("single", "single")})
     with pytest.raises(ValueError, match="each alternative exactly once"):
         price_highest_quote_bundles(invalid, bundle_release(), (bundle_case(),))
+
+
+def test_percentage_basis_is_audited_without_being_paid() -> None:
+    """A different basis quote contributes only its calculated percentage."""
+    quotes = bundle_release("120")
+    basis = next(q for q in quotes.quotes if q.component == "incentive")
+    percentage = QuoteBundlePercentage(
+        component="calculated",
+        basis_component=basis.component,
+        fraction=Decimal("0.05"),
+        source_id=basis.source_id,
+        source_sha256=basis.source_sha256,
+        citation="Synthetic percentage clause",
+        starts_on=basis.starts_on,
+        ends_on=basis.ends_on,
+        known_from=basis.known_from,
+        reviewed=True,
+    )
+    policy = bundle_rule()
+    combined, single = policy.bundles
+    policy = policy.model_copy(
+        update={
+            "bundles": (
+                combined.model_copy(
+                    update={"components": ("two_context",), "percentage": percentage},
+                ),
+                single,
+            ),
+        },
+    )
+    exposure = bundle_case()
+    protected, advanced = exposure.alternatives
+    modified = exposure.model_copy(
+        update={
+            "alternatives": (
+                protected.model_copy(
+                    update={
+                        "facts": (fact("two_context"),),
+                        "percentage_basis": fact("incentive"),
+                    },
+                ),
+                advanced,
+            ),
+        },
+    )
+    result = price_highest_quote_bundles(policy, quotes, (modified,))
+    assert_that(result.selections[0].selected_alternative == "combined")
+    assert_that(result.prices.total == Fraction(551, 100))
+    assert_that(result.total == Fraction(1151, 100))
+    assert_that(result.paid_percentages[0].basis_quote == basis)
+    assert_that(result.paid_percentages[0].cost == Fraction(6))
+    assert_that(len(result.prices.rows) == 1)
+    with pytest.raises(ValueError, match="percentage basis fact"):
+        price_highest_quote_bundles(
+            policy,
+            quotes,
+            (
+                modified.model_copy(
+                    update={
+                        "alternatives": (
+                            protected.model_copy(
+                                update={"facts": (fact("two_context"),)},
+                            ),
+                            advanced,
+                        ),
+                    },
+                ),
+            ),
+        )
