@@ -400,3 +400,18 @@ candidate rates from worker-level applicability.
 - [Hospital science chain](../../reviews/nsw-hospital-science-chain-20261107.md)
 - [PTO parent chain](../../reviews/nsw-pto-parent-chain-20261107.md)
 - [Skilled trades chain](../../reviews/nsw-skilled-trades-chain-20261107.md)
+
+## Nursing, retention and delegate award evidence
+
+- [Public nursing source chain](../../reviews/public-nursing-source-chain-20261107.md)
+  records at least one held candidate for each of the eight public nursing and
+  midwifery screening rows.
+- [Nursing dependencies](../../reviews/nursing-dependency-chain-20261107.md)
+  records subsequent source acquisitions and operative-text corrections.
+- [Retention source boundary](../../reviews/retention-source-boundary-20261107.md)
+  records conditional source-price parity for the NTPS retention allowance.
+- [NT delegate award dependency](../../reviews/nt-delegate-award-dependency-20261107.md)
+  records acquisition of the award referenced by the approval undertaking.
+
+The review counts describe their respective matrix versions. Worker coverage,
+eligibility and payroll evidence remain separate acceptance requirements.
