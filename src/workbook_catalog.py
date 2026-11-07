@@ -60,6 +60,28 @@ class WorkbookCatalog:
     defined_names: dict[str, str]
     validations: tuple[WorkbookValidation, ...] = ()
 
+    def defined_name_at(self, sheet: str, name: str) -> tuple[str | None, str]:
+        """Return the defining worksheet (or workbook scope) and raw expression."""
+        local = next((item for item in self.sheets if item.name == sheet), None)
+        if local is None:
+            msg = "Defined-name resolution requires the context sheet in the catalog"
+            raise ValueError(msg)
+        for scope, definitions in (
+            (sheet, local.defined_names),
+            (None, self.defined_names),
+        ):
+            matches = [
+                expression
+                for key, expression in definitions.items()
+                if key.casefold() == name.casefold()
+            ]
+            if len(matches) > 1:
+                msg = "Ambiguous workbook defined name in one scope"
+                raise ValueError(msg)
+            if matches:
+                return scope, matches[0]
+        raise KeyError(name)
+
     def cells_frame(self) -> pl.DataFrame:
         """Return typed coordinates and lossless JSON scalar representations."""
         schema = {

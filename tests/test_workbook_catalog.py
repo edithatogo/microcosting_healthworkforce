@@ -34,6 +34,7 @@ def test_complete_intake_preserves_formula_names_and_empty_sheet(
     sheet["A4"].hyperlink = "https://example.org/source"
     sheet.merge_cells("A4:B4")
     sheet.defined_names.add(DefinedName("LocalTitle", attr_text="'Inputs'!$A$1"))
+    book.defined_names.add(DefinedName("LocalTitle", attr_text="Inputs!$B$1"))
     book.create_sheet("Empty")
     book.save(path)
     book.close()
@@ -47,6 +48,10 @@ def test_complete_intake_preserves_formula_names_and_empty_sheet(
     formula = next(c for c in catalog.sheets[0].cells if c.coordinate == "C2")
     assert_that(formula.value == "=B2*2" and formula.cached is None)
     assert_that(catalog.sheets[0].defined_names["LocalTitle"] == "'Inputs'!$A$1")
+    assert_that(catalog.defined_name_at("Inputs", "localtitle")[0] == "Inputs")
+    assert_that(catalog.defined_name_at("Empty", "localtitle") == (None, "Inputs!$B$1"))
+    with pytest.raises(KeyError, match="UnknownName"):
+        catalog.defined_name_at("Inputs", "UnknownName")
     expected_cells = 6
     assert_that(catalog.cells_frame().height == expected_cells)
     assert_that(catalog.sheets[0].merged_ranges == ("A4:B4",))
