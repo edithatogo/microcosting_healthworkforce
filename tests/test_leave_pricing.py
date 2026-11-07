@@ -34,11 +34,13 @@ from src.leave_pricing import (
     price_leave_loading,
     price_paid_leave,
     price_separation_loading,
+    price_vic_scientist_development_time_in_lieu,
     qualifying_shift_leave_credit,
     sa_part_time_study_block_days,
     sa_part_time_study_paid_hours,
     select_leave_loading_alternative,
     vic_hama_historical_study_leave_hours,
+    vic_scientist_development_time_in_lieu_value,
     victorian_hama_additional_leave_weeks,
     victorian_hama_leave_loading,
     victorian_hama_weekend_termination_pay,
@@ -49,7 +51,7 @@ from src.paid_leave import PaidLeaveSchedule, build_paid_leave
 from tests.checks import assert_that
 from tests.test_normal_pay import allowance, exposure, prices, selection
 from tests.test_paid_leave import policy, request
-from tests.test_unit_quotes import quote
+from tests.test_unit_quotes import quantity, quote, release
 lazy from src.leave_pricing import PricedLeave
 lazy from src.unit_quotes import UnitQuoteRelease
 
@@ -1061,3 +1063,54 @@ def test_vic_hama_historical_study_leave_checks_prorated_cumulative_hours() -> N
         validate(Fraction(1), Fraction(-1), employment_fraction=Fraction(1))
     with pytest.raises(ValueError, match="Employment fraction"):
         validate(Fraction(0), Fraction(0), employment_fraction=Fraction(0))
+
+
+def test_vic_scientist_development_credit_uses_exact_ordinary_pay() -> None:
+    """Value only approved off-roster time at the supplied ordinary rate."""
+    value = vic_scientist_development_time_in_lieu_value
+    assert_that(value(Fraction(3, 2), Fraction("50.25")) == Fraction("75.375"))
+    assert_that(value(Fraction(0), Fraction(50)) == Fraction(0))
+    with pytest.raises(ValueError, match="nonnegative"):
+        value(Fraction(-1), Fraction(50))
+    with pytest.raises(ValueError, match="nonnegative"):
+        value(Fraction(1), Fraction(-50))
+
+
+def test_vic_scientist_development_credit_prices_dated_slices() -> None:
+    """Retain two ordinary salary quotes across a change and reject allowances."""
+    rates = release(
+        quote(
+            quote_id="before",
+            component="salary",
+            unit="hour",
+            amount=Decimal(50),
+            ends_on=date(2026, 2, 1),
+        ),
+        quote(
+            quote_id="after",
+            component="salary",
+            unit="hour",
+            amount=Decimal(60),
+            starts_on=date(2026, 2, 1),
+        ),
+        quote(quote_id="premium", component="penalty", unit="hour"),
+    )
+    before = quantity(
+        quote_id="before",
+        unit="hour",
+        valued_on=date(2026, 1, 31),
+    )
+    after = quantity(
+        quantity_id="event-2",
+        quote_id="after",
+        unit="hour",
+        quantity=Fraction(1, 2),
+    )
+    result = price_vic_scientist_development_time_in_lieu(rates, (before, after))
+    assert_that(result.total == Fraction(80))
+    assert_that([row.quote.quote_id for row in result.rows] == ["before", "after"])
+    with pytest.raises(ValueError, match="ordinary hourly salary"):
+        price_vic_scientist_development_time_in_lieu(
+            rates,
+            (quantity(quote_id="premium", unit="hour"),),
+        )

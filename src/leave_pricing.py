@@ -1016,3 +1016,39 @@ def vic_hama_historical_study_leave_hours(
         msg = "Study leave must fit the prorated annual limit"
         raise ValueError(msg)
     return approved_hours
+
+
+def vic_scientist_development_time_in_lieu_value(
+    approved_off_roster_hours: Fraction,
+    ordinary_hourly_rate: Fraction,
+) -> Fraction:
+    """Value the time-for-time credit under historical AE426645 clause 70.9.
+
+    Supply the reviewed off-roster portion of an approved course and its
+    applicable ordinary rate. The result values the credit, with redemption
+    and any cash settlement accounted for separately.
+    """
+    if min(approved_off_roster_hours, ordinary_hourly_rate) < 0:
+        msg = "Approved hours and ordinary hourly rate must be nonnegative"
+        raise ValueError(msg)
+    return approved_off_roster_hours * ordinary_hourly_rate
+
+
+def price_vic_scientist_development_time_in_lieu(
+    ordinary_rates: UnitQuoteRelease,
+    approved_hours: tuple[QuoteQuantity, ...],
+) -> UnitQuoteResult:
+    """Price reviewed off-roster credit slices using dated ordinary salary quotes.
+
+    Each slice supplies its own valuation date and approved hours. Split a
+    course at applicable rate boundaries before submitting the slices.
+    The returned ledger records credit exposure independently of redemption.
+    """
+    priced = price_units(ordinary_rates, approved_hours)
+    if any(
+        row.quote.component != "salary" or row.quote.unit != "hour"
+        for row in priced.rows
+    ):
+        msg = "Development time credit requires ordinary hourly salary quotes"
+        raise ValueError(msg)
+    return priced
