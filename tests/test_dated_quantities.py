@@ -241,3 +241,39 @@ def test_dated_cover_retains_declared_absence_link() -> None:
             release(),
             (cover.model_copy(update={"covers_absence_id": " "}),),
         )
+
+
+def test_linked_cover_shares_one_declared_absence_balance() -> None:
+    """Separate replacements cannot each consume the same absence hours."""
+    cover = quantity().model_copy(update={"covers_absence_id": "absence"})
+    second = cover.model_copy(
+        update={"quantity_id": "second", "allocation_id": "second-worker"},
+    )
+    limits = {"absence": Decimal("2.25")}
+    result = cost_dated_quantities(
+        release(),
+        (cover, second),
+        absence_hour_limits=limits,
+    )
+    assert_that(result.ledger.total == Decimal(120))
+    assert_that(result.absence_hour_limits == limits)
+    restored = type(result).model_validate_json(result.model_dump_json())
+    assert_that(restored.remaining_absence_hours == {"absence": Fraction(1, 4)})
+    with pytest.raises(ValueError, match="exceeds"):
+        cost_dated_quantities(
+            release(),
+            (cover, second),
+            absence_hour_limits={"absence": Decimal("1.9")},
+        )
+    with pytest.raises(ValueError, match="without an hour limit"):
+        cost_dated_quantities(release(), (cover,), absence_hour_limits={})
+
+
+@pytest.mark.parametrize(
+    "limits",
+    [{" ": Decimal(2)}, {"absence": Decimal("NaN")}, {"absence": Decimal(-1)}],
+)
+def test_absence_limits_reject_invalid_values(limits: dict[str, Decimal]) -> None:
+    """Validate the limit mapping even when the scenario has no cover rows."""
+    with pytest.raises(ValueError, match=r"Absence hour limits|finite number"):
+        cost_dated_quantities(release(), (), absence_hour_limits=limits)
