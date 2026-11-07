@@ -2,7 +2,7 @@
 """Test explicit periodic allowance calculation without inferring eligibility."""
 
 from dataclasses import replace
-from datetime import date
+from datetime import date, timedelta
 from decimal import Decimal
 from fractions import Fraction
 
@@ -100,24 +100,39 @@ def test_invalid_or_changing_period_is_rejected() -> None:
         period(portion("same", "1", "1", "1"), portion("same", "1", "1", "1"))
 
 
-def test_split_period_retains_nominal_denominator_and_condition_lineage() -> None:
+@pytest.mark.parametrize(
+    ("boundary", "old_amount", "new_amount"),
+    [
+        (date(2026, 6, 8), "1975", "3950"),
+        (date(2026, 7, 1), "23395", "24097"),
+        (date(2026, 7, 1), "28408", "29260"),
+    ],
+)
+def test_split_period_retains_nominal_denominator_and_condition_lineage(
+    boundary: date,
+    old_amount: str,
+    new_amount: str,
+) -> None:
     """A mid-period rate change is split without charging a full period twice."""
-    first = condition("first", "fixed_annual", "1975", "AUD/year").model_copy(
-        update={"component": "training", "effective_to": date(2026, 6, 8)},
+    first = condition("first", "fixed_annual", old_amount, "AUD/year").model_copy(
+        update={"component": "training", "effective_to": boundary},
     )
-    second = condition("second", "fixed_annual", "3950", "AUD/year").model_copy(
-        update={"component": "training", "effective_from": date(2026, 6, 8)},
+    second = condition("second", "fixed_annual", new_amount, "AUD/year").model_copy(
+        update={"component": "training", "effective_from": boundary},
     )
     dated = release().model_copy(update={"conditions": (first, second)})
     first_half = period(portion("first-half", "38", "1", "1")).model_copy(
-        update={"ends_on": date(2026, 6, 8)},
+        update={"starts_on": boundary - timedelta(days=7), "ends_on": boundary},
     )
     second_half = period(portion("second-half", "38", "1", "1")).model_copy(
-        update={"starts_on": date(2026, 6, 8)},
+        update={"starts_on": boundary, "ends_on": boundary + timedelta(days=7)},
     )
     before = cost_periodic_allowance(dated, "training", first_half)
     after = cost_periodic_allowance(dated, "training", second_half)
-    assert_that(before.payable + after.payable == Fraction(5925, 52))
+    assert_that(
+        before.payable + after.payable
+        == (Fraction(old_amount) + Fraction(new_amount)) / 52,
+    )
     assert_that(before.condition.condition_id == "first")
     assert_that(after.condition.condition_id == "second")
     assert_that(before.release_sha256 == after.release_sha256)
