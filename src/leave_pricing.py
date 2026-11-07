@@ -122,30 +122,48 @@ def nsw_general_shift_leave_credit(
     return rounded_units * rounding_increment_hours
 
 
+@dataclass(frozen=True)
+class WeekendLeaveShift:
+    """Reviewed ordinary shift duration and hours attributable to the weekend."""
+
+    shift_hours: Fraction
+    weekend_hours: Fraction
+
+
 def victorian_medical_scientist_weekend_leave_credit(
-    weekends: tuple[tuple[Fraction, ...], ...],
+    weekends: tuple[tuple[WeekendLeaveShift, ...], ...],
     *,
     part_time: bool,
     nes_credit_hours: Fraction,
 ) -> Fraction:
     """Calculate clause 61.8 hours for one reviewed 12-month roster window.
 
-    Group ordinary shifts by weekend and provide the hours on each weekend day
-    for each qualifying shift. Supply zero NES credit when reviewed inapplicable.
+    Group ordinary shifts by weekend. Supply reviewed weekend attribution for
+    shifts crossing a day boundary and zero NES credit when inapplicable.
     """
     if nes_credit_hours < 0 or any(
-        hours < 0 for weekend in weekends for hours in weekend
+        not 0 <= shift.weekend_hours <= shift.shift_hours
+        for weekend in weekends
+        for shift in weekend
     ):
-        msg = "Weekend hours and NES credit must be nonnegative"
+        msg = "Weekend hours must fit the shift and NES credit must be nonnegative"
         raise ValueError(msg)
     minimum_shift_hours = 4
     qualifying_hours = Fraction(0)
     for weekend in weekends:
-        eligible = tuple(hours for hours in weekend if hours > minimum_shift_hours)
-        if part_time:
-            qualifying_hours += max(eligible, default=Fraction(0))
+        eligible = tuple(
+            shift
+            for shift in weekend
+            if shift.shift_hours > minimum_shift_hours and shift.weekend_hours > 0
+        )
+        if part_time and eligible:
+            longest = max(eligible, key=lambda shift: shift.shift_hours)
+            qualifying_hours += longest.weekend_hours
         else:
-            qualifying_hours += sum(eligible, Fraction(0))
+            qualifying_hours += sum(
+                (shift.weekend_hours for shift in eligible),
+                Fraction(0),
+            )
     agreement_credit = min(Fraction(38), qualifying_hours / 2)
     return max(agreement_credit, nes_credit_hours)
 

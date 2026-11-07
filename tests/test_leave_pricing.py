@@ -17,6 +17,7 @@ from src.leave_pricing import (
     LeaveLoadingMoneyCap,
     LeavePriceSelection,
     SeparationLoadingEligibility,
+    WeekendLeaveShift,
     allocate_leave_loading_hours,
     combined_leave_hours,
     nsw_general_shift_leave_credit,
@@ -758,7 +759,13 @@ def test_nsw_general_shift_credit_prorates_and_rounds_below_threshold() -> None:
 def test_victorian_weekend_credit_applies_grouping_cap_and_nes_substitution() -> None:
     """Part-time picks the longer shift, and NES credit replaces lower credit."""
     credit = victorian_medical_scientist_weekend_leave_credit
-    weekends = ((Fraction(4),), (Fraction(6), Fraction(8)))
+    weekends = (
+        (WeekendLeaveShift(Fraction(4), Fraction(4)),),
+        (
+            WeekendLeaveShift(Fraction(6), Fraction(6)),
+            WeekendLeaveShift(Fraction(8), Fraction(8)),
+        ),
+    )
     assert_that(
         credit(weekends, part_time=True, nes_credit_hours=Fraction(0)) == Fraction(4),
     )
@@ -771,4 +778,8 @@ def test_victorian_weekend_credit_applies_grouping_cap_and_nes_substitution() ->
     )
     assert_that(
         credit(weekends, part_time=True, nes_credit_hours=Fraction(5)) == Fraction(5),
+    )
+    crossing = ((WeekendLeaveShift(Fraction(8), Fraction(2)),),)
+    assert_that(
+        credit(crossing, part_time=False, nes_credit_hours=Fraction(0)) == Fraction(1),
     )
