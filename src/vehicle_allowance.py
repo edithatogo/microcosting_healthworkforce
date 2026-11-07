@@ -173,3 +173,16 @@ class ExcessVehicleDistance(QuoteModel):
                 ),
             ),
         )
+
+
+class C24NursingAppointment(QuoteModel):
+    """Reviewed Queensland Health EDON appointment covered by C24."""
+
+    classification: Literal["grade_11_band_4", "grade_12"]
+    review_evidence: str
+
+
+def c24_nursing_vehicle_level(appointment: C24NursingAppointment) -> Literal[1, 2]:
+    """Select the SES band for a reviewed EDON appointment."""
+    appointment = C24NursingAppointment.model_validate(appointment.model_dump())
+    return 1 if appointment.classification == "grade_11_band_4" else 2
