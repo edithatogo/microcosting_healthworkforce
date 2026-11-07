@@ -458,3 +458,11 @@ The pathology workforce review provides a senior-scientist FTE
 benchmark. Its Fellow counts describe a narrower population in
 headcount. An accepted replacement series still requires a matched
 extract, a common denominator and coverage of all five roles.
+
+The public Working Population Profile uses broader occupation groups.
+The September 2026 ABS data-item list identifies TableBuilder Basic
+Employment, Income & Education as the route for six-digit occupation,
+industry, workplace geography and the workplace imputation flag. Basic
+provides hours bands. Pro lists a separate hours worked field. A native
+export must still verify industry class selection and suppression before
+these data can support replacement weights.
