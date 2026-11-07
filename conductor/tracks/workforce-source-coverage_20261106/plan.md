@@ -439,3 +439,22 @@ clause 46 establish the fixed classification reference and payment
 conditions. PR #225 verifies the generic dated quote arithmetic with
 synthetic amounts. The signed Annexure A undertaking and actual payroll
 conversion still require evidence.
+
+## Candidate workforce weighting sources
+
+The [2021 Census occupation dictionary](https://www.abs.gov.au/census/guide-census-data/census-dictionary/2021/variables-topic/income-and-work/occupation-occp)
+uses ANZSCO 2013 v1.3. Candidate matches for three workbook roles are
+Medical Laboratory Scientist (234611), Medical Laboratory Technician
+(311213) and Pathologist (253915). Administrative and bioinformatics
+staff still need service-specific role definitions.
+
+Cross-tabulate by workplace state or territory and main-job industry.
+Compare all-industry counts with separate hospital (8401) and pathology
+and diagnostic imaging (8520) strata. Retain unknown and imputed
+workplace geography separately. These industry codes do not identify
+hospital laboratory departments or isolate pathology from imaging.
+
+The pathology workforce review provides a senior-scientist FTE
+benchmark. Its Fellow counts describe a narrower population in
+headcount. An accepted replacement series still requires a matched
+extract, a common denominator and coverage of all five roles.
