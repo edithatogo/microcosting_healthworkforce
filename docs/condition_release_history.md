@@ -28,3 +28,8 @@ authority changes the pin.
 This initial contract supports a linear history for one scope. It does not
 model parallel interpretations, automatic source acquisition, legal pay-period
 application, backpay or cash timing, or a complete source acceptance process.
+
+For explicitly declared changes between classifications, use the separate
+[assignment timeline costing API](assignment_costing.md). It composes independently
+scoped condition releases with dated decision evidence while preserving this
+single-classification history contract.
