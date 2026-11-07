@@ -2,12 +2,17 @@
 """Qualify a completed higher-classification relief spell from explicit days."""
 
 from dataclasses import dataclass
-from datetime import date, timedelta
+from datetime import date, time, timedelta
+from zoneinfo import ZoneInfo
 
 from pydantic import Field
 
+from src.assignment_costing import AssignmentTimeline
+from src.assignment_requests import run_assignment_request
 from src.source_registry import SourceRegistry
 from src.unit_quotes import QuoteModel
+lazy from src.assignment_costing import AssignmentCost, AssignmentState
+lazy from src.assignment_requests import AssignmentRequest
 
 
 class ReliefRule(QuoteModel):
@@ -41,6 +46,8 @@ class ReliefSpell(QuoteModel):
     """A bounded declared appointment with complete calendar-day evidence."""
 
     spell_id: str
+    subject_id: str
+    timezone: str
     starts_on: date
     ends_on: date
     as_known_on: date
@@ -111,3 +118,53 @@ def qualify_relief(
         spell.starts_on if qualifies else None,
         spell.ends_on if qualifies else None,
     )
+
+
+@dataclass(frozen=True)
+class ReliefCost:
+    """Keep the qualifying evidence beside the assignment cost ledger."""
+
+    qualification: ReliefQualification
+    cost: AssignmentCost
+
+
+def cost_relief(
+    rule: ReliefRule,
+    spell: ReliefSpell,
+    sources: SourceRegistry,
+    assignment: AssignmentState,
+    request: AssignmentRequest,
+) -> ReliefCost:
+    """Price explicit relief quantities using a reviewed higher-class assignment."""
+    qualification = qualify_relief(rule, spell, sources)
+    if qualification.payable_from is None:
+        msg = "The completed spell does not qualify for relief pricing"
+        raise ValueError(msg)
+    rule = qualification.rule
+    spell = qualification.spell
+    timeline = AssignmentTimeline.model_validate(
+        {
+            "timeline_id": spell.spell_id,
+            "subject_id": spell.subject_id,
+            "as_known_on": spell.as_known_on,
+            "history_complete": True,
+            "states": (assignment.model_dump(),),
+        },
+    )
+    state = timeline.states[0]
+    zone = ZoneInfo(state.timezone)
+    start = state.starts_at.astimezone(zone)
+    end = state.ends_at.astimezone(zone)
+    release = state.release
+    if (
+        state.timezone != spell.timezone
+        or start.date() != qualification.payable_from
+        or end.date() != qualification.payable_to
+        or start.time() != time.min
+        or end.time() != time.min
+        or (release.jurisdiction, release.employer, release.classification)
+        != (rule.jurisdiction, rule.employer, rule.classification)
+    ):
+        msg = "Assignment must match the qualified relief window and price scope"
+        raise ValueError(msg)
+    return ReliefCost(qualification, run_assignment_request(timeline, request))
