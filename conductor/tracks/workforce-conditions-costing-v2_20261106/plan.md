@@ -668,3 +668,19 @@ The legacy exact match skips both variants. The archive mapping can
 identify that group by its reviewed coordinate and preserve its raw label. Preserve the
 17 existing archived flags and the unmatched mapping as historical
 evidence. Neither represents a failure of the live scenario oracle.
+
+## Workbook and contribution validation checkpoint
+
+The pinned historical workbook extraction assigns every populated cell
+across 267 sections and 20 sheets, including one empty sheet. The isolated
+AK39 zero stays outside costing inputs. AK34 stays missing in the extracted
+bound. PRs #228 and #229 document the mapping and the independent replay of
+all 300 aggregate DSA outputs against a private LibreOffice recalculation.
+The evidence qualifies historical arithmetic. The scientific provenance of
+the bounds remains open.
+
+The Queensland vehicle diagnostic reconciled 96 downstream outputs over
+24 positive vehicle months. PR #226 documents the historical bases and
+the dated applicability questions. PR #227 tests the comparison of two
+paid-earnings bases using synthetic postings. The actual payroll component
+mapping is still required for a source-backed release.
