@@ -13,8 +13,8 @@ from src.assignment_costing import (
     cost_assignment_activities,
     cost_assignment_snapshot,
 )
-from src.condition_history import ConditionHistory, ReleaseEdition
-from src.conditions import ConditionRelease
+from src.condition_history import ConditionHistory, ReleaseEdition, release_sha256
+from src.conditions import ConditionRelease, WorkbookConditionOrigin
 from src.costing import Activity
 from src.source_registry import SourceRegistry
 from tests.checks import assert_that
@@ -447,3 +447,33 @@ def test_backdated_decision_needs_review_separate_from_late_discovery() -> None:
     assert_that(
         cost_assignment_activities(reviewed, (activity(),)).total == Fraction(110),
     )
+
+
+def test_assignment_json_preserves_workbook_origin_in_release_hash() -> None:
+    """A dated activity binds the verified origin to the affected release segment."""
+    original = timeline()
+    first, second = original.states
+    origin = WorkbookConditionOrigin(
+        workbook_sha256="b" * 64,
+        sheet="Synthetic worksheet",
+        coordinate="V16",
+        applicability="verified",
+        review_evidence="Synthetic reviewed binding",
+    )
+    salary, hours = first.release.conditions
+    mapped_salary = salary.model_copy(update={"workbook_origin": origin})
+    mapped_release = first.release.model_copy(
+        update={"conditions": (mapped_salary, hours)},
+    )
+    mapped = original.model_copy(
+        update={
+            "states": (first.model_copy(update={"release": mapped_release}), second),
+        },
+    )
+    restored = AssignmentTimeline.model_validate_json(mapped.model_dump_json())
+    result = cost_assignment_activities(restored, (activity(),))
+    assert_that(result.total == Fraction(110))
+    assert_that(restored.states[0].release.conditions[0].workbook_origin == origin)
+    assert_that(result.rows[0].release_sha256 == release_sha256(mapped_release))
+    assert_that(result.rows[0].release_sha256 != release_sha256(first.release))
+    assert_that(result.rows[1].release_sha256 == release_sha256(second.release))
