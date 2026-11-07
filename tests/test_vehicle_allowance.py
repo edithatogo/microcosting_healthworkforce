@@ -189,6 +189,13 @@ def test_moca7_vehicle_level_change_across_fortnight(
     )
     assert_that(result.payable == payable)
     assert_that(result.accrued == accrued)
+    frozen = cost_periodic_allowance_allocations(
+        parent,
+        (allocations[0], (rates, allocations[0][1], after)),
+    )
+    assert_that(
+        result.payable - frozen.payable == Fraction(int(upper) - int(lower), 208),
+    )
     with pytest.raises(ValueError, match="conserve classified hours"):
         cost_periodic_allowance_allocations(period(*before.portions), allocations)
 
