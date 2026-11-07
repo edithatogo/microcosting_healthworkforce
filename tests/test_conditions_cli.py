@@ -93,6 +93,10 @@ def test_snapshot_cli_preserves_exact_total_and_rejects_invalid_mode(
         main(mapped_args)
     assert_that(not output.exists())
     origin["applicability"] = "verified"
+    origin_path.write_text(json.dumps({"unknown-condition": origin}), encoding="utf-8")
+    with pytest.raises(ValueError, match="unknown condition IDs"):
+        main(mapped_args)
+    assert_that(not output.exists())
     origin_path.write_text(json.dumps({"salary": origin}), encoding="utf-8")
     assert_that(main(mapped_args) == 0)
 
@@ -100,6 +104,19 @@ def test_snapshot_cli_preserves_exact_total_and_rejects_invalid_mode(
     assert_that(result.total == Decimal(100))
     assert_that(result.exact_total_numerator == Decimal(100))
     assert_that(result.conditions != ())
+    stored = result.conditions[0]
+    assert_that(stored.workbook_origin is not None)
+    original = release()
+    with_origin = original.model_copy(
+        update={"conditions": (stored, *original.conditions[1:])},
+    )
+    release_path.write_text(with_origin.model_dump_json(), encoding="utf-8")
+    origin["coordinate"] = "X16"
+    origin_path.write_text(json.dumps({"salary": origin}), encoding="utf-8")
+    before = output.read_bytes()
+    with pytest.raises(ValueError, match="conflicts with existing release evidence"):
+        main(mapped_args)
+    assert_that(output.read_bytes() == before)
     with pytest.raises(FileExistsError):
         main(args)
     with pytest.raises(SystemExit):
