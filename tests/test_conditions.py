@@ -10,7 +10,9 @@ import pytest
 from src.conditions import (
     Condition,
     ConditionRelease,
+    WorkbookConditionOrigin,
     cost_condition_activity,
+    cost_condition_snapshot,
     hourly_components,
 )
 from src.costing import Activity
@@ -235,3 +237,67 @@ def test_exact_total_preserves_nonterminating_annual_rate() -> None:
         Fraction(result.exact_total_numerator, result.exact_total_denominator)
         == Fraction(100, 3),
     )
+
+
+@pytest.mark.parametrize("applicability", ["conflicting", "unresolved"])
+def test_costing_revalidates_source_applicability(applicability: str) -> None:
+    """Static and dated pricing reject a release whose source lost verification."""
+    release = ConditionRelease(
+        release_id="reviewed",
+        jurisdiction="QLD",
+        employer="Synthetic employer",
+        classification="Synthetic grade",
+        sources=SourceRegistry(records=(source(),)),
+        conditions=(
+            condition("salary", "salary", "100000", "AUD/year"),
+            condition("hours", "paid_hours", "2000", "hours/year"),
+        ),
+    )
+    held = source().model_copy(update={"applicability": applicability})
+    revised = release.model_copy(update={"sources": SourceRegistry(records=(held,))})
+    activity = Activity(
+        activity_id="cross-midnight",
+        resource_id="worker",
+        starts_at=datetime(2026, 6, 1, 23, tzinfo=UTC),
+        ends_at=datetime(2026, 6, 2, 1, tzinfo=UTC),
+        resources=Decimal(1),
+    )
+    with pytest.raises(ValueError, match="No verified source coverage"):
+        cost_condition_snapshot(revised, date(2026, 6, 1), Decimal(1))
+    with pytest.raises(ValueError, match="No verified source coverage"):
+        cost_condition_activity(revised, activity, "UTC")
+
+
+def test_workbook_origin_roundtrip_requires_reviewed_applicability() -> None:
+    """A verified cell survives JSON loading and an unresolved cell fails."""
+    origin = WorkbookConditionOrigin(
+        workbook_sha256="b" * 64,
+        sheet="Synthetic workbook",
+        coordinate="V16",
+        applicability="verified",
+        review_evidence="Synthetic workbook source reconciliation",
+    )
+    salary = condition("salary", "salary", "100000", "AUD/year").model_copy(
+        update={"workbook_origin": origin},
+    )
+    release = ConditionRelease(
+        release_id="workbook-derived",
+        jurisdiction="QLD",
+        employer="Synthetic employer",
+        classification="Synthetic grade",
+        sources=SourceRegistry(records=(source(),)),
+        conditions=(salary, condition("hours", "paid_hours", "2000", "hours/year")),
+    )
+    restored = ConditionRelease.model_validate_json(release.model_dump_json())
+    result = cost_condition_snapshot(restored, date(2026, 6, 1), Decimal(2))
+    assert_that(result.total == Decimal(100))
+    assert_that(result.conditions[0].workbook_origin == origin)
+
+    for status in ("conflicting", "unresolved"):
+        revised_origin = origin.model_copy(update={"applicability": status})
+        revised = salary.model_copy(
+            update={"workbook_origin": revised_origin},
+        )
+        invalid = release.model_copy(update={"conditions": (revised,)})
+        with pytest.raises(ValueError, match="verified cell applicability"):
+            ConditionRelease.model_validate_json(invalid.model_dump_json())

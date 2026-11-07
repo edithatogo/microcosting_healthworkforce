@@ -17,6 +17,17 @@ ConditionKind = Literal["salary", "paid_hours", "fixed_annual", "salary_fraction
 ConditionUnit = Literal["AUD/year", "hours/year", "fraction"]
 
 
+class WorkbookConditionOrigin(BaseModel):
+    """Reviewed applicability of a workbook cell proposed as a condition."""
+
+    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
+    workbook_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
+    sheet: str = Field(min_length=1)
+    coordinate: str = Field(pattern=r"^[A-Z]{1,3}[1-9][0-9]*$")
+    applicability: Literal["verified", "unresolved", "conflicting"]
+    review_evidence: str = Field(min_length=1)
+
+
 class Condition(BaseModel):
     """A single versioned condition; acceptance is an explicit reviewer assertion."""
 
@@ -34,6 +45,7 @@ class Condition(BaseModel):
     status: Literal["candidate", "accepted", "rejected"]
     retrospective: RetrospectiveAuthority | None = None
     included_components: tuple[str, ...] = ()
+    workbook_origin: WorkbookConditionOrigin | None = None
 
     @model_validator(mode="after")
     def valid_condition(self) -> Self:
@@ -94,6 +106,12 @@ class ConditionRelease(BaseModel):
             ids.add(item.condition_id)
             if item.status != "accepted":
                 msg = "Costing releases require accepted conditions"
+                raise ValueError(msg)
+            origin = item.workbook_origin
+            if origin is not None and (
+                origin.applicability != "verified" or not origin.review_evidence.strip()
+            ):
+                msg = "Workbook conditions require verified cell applicability"
                 raise ValueError(msg)
             self._validate_source(item)
         for index, left in enumerate(self.conditions):
