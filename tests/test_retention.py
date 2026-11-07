@@ -14,6 +14,7 @@ from src.retention import (
     RetentionAuthority,
     RetentionEvidence,
     RetentionHistorySegment,
+    assess_pharmacy_retention,
     assess_retention,
     assess_retention_history,
     assess_sourced_retention,
@@ -385,3 +386,47 @@ def test_pharmacy_fraction_survives_json_roundtrip() -> None:
         pharmacy_request().model_dump_json(),
     )
     assert_that(prorate_pharmacy_retention(r) == Fraction(625))
+
+
+def test_pharmacy_bound_path_does_not_import_general_absence_threshold() -> None:
+    """Four measured weeks do not override an independently reviewed credit factor."""
+    p, r, e = sourced_inputs()
+    p = p.model_copy(update={"method": "pharmacy_retention"})
+    proration = pharmacy_request().model_copy(
+        update={
+            "assessment_id": "synthetic-anniversary",
+            "annual_amount": Decimal(2000),
+        },
+    )
+    result = assess_pharmacy_retention(
+        p,
+        r,
+        request(unpaid_leave_weeks=Fraction(4)),
+        e,
+        proration,
+    )
+    assert_that(result.amount == result.prices.total == Fraction(250))
+    assert_that(result.scenario)
+
+
+def test_pharmacy_cannot_use_general_method() -> None:
+    """Method selection is an explicit reviewed decision, not inferred from a price."""
+    p, r, e = sourced_inputs()
+    with pytest.raises(ValueError, match="pharmacy method"):
+        assess_pharmacy_retention(p, r, request(), e, pharmacy_request())
+
+
+def test_competing_receipt_does_not_reverse_pharmacy_priority() -> None:
+    """Existing general payment needs settlement, not inverse exclusion."""
+    p, r, e = sourced_inputs()
+    p = p.model_copy(update={"method": "pharmacy_retention"})
+    proration = pharmacy_request().model_copy(
+        update={
+            "assessment_id": "synthetic-anniversary",
+            "annual_amount": Decimal(2000),
+        },
+    )
+    with pytest.raises(ValueError, match="settlement"):
+        assess_pharmacy_retention(
+            p, r, request(competing_receipt="received"), e, proration,
+        )

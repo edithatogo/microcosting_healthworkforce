@@ -12,6 +12,7 @@ from pydantic import Field, model_validator
 from src.unit_quotes import (
     QuoteModel,
     QuoteQuantity,
+    UnitQuote,
     UnitQuoteRelease,
     UnitQuoteResult,
     price_units,
@@ -104,6 +105,7 @@ def assess_retention(assessment: RetentionAssessment) -> RetentionResult:
 class RetentionAuthority(QuoteModel):
     """Reviewed clause-53 authority, price selection and exact worker scope."""
 
+    method: Literal["general_clause53", "pharmacy_retention"] = "general_clause53"
     rule_id: str
     source_id: str
     source_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
@@ -148,6 +150,42 @@ def assess_sourced_retention(
     release = UnitQuoteRelease.model_validate(release.model_dump())
     assessment = RetentionAssessment.model_validate(dict(assessment))
     evidence = RetentionEvidence.model_validate(dict(evidence))
+    if rule.method != "general_clause53":
+        msg = "General retention requires the general clause53 method"
+        raise ValueError(msg)
+    quote = _validate_retention_binding(rule, release, assessment, evidence)
+    day = assessment.assessment_on
+    result = assess_retention(assessment)
+    scenario = (
+        result.scenario
+        or rule.interpretation_kind == "analyst_assumption"
+        or evidence.input_kind == "analyst_assumption"
+    )
+    result = RetentionResult(assessment, result.amount, result.reasons, scenario)
+    priced = price_units(
+        release,
+        (
+            QuoteQuantity(
+                quantity_id=assessment.assessment_id,
+                quote_id=quote.quote_id,
+                unit=quote.unit,
+                quantity=Fraction(0) if result.reasons else assessment.snapshot_fte,
+                valued_on=day,
+                quantity_kind="analyst_assumption" if scenario else "observed_use",
+                basis=assessment.basis,
+            ),
+        ),
+    )
+    return result, priced
+
+
+def _validate_retention_binding(
+    rule: RetentionAuthority,
+    release: UnitQuoteRelease,
+    assessment: RetentionAssessment,
+    evidence: RetentionEvidence,
+) -> UnitQuote:
+    """Shared source/evidence validation without imposing a service formula."""
     day = assessment.assessment_on
     if (
         not rule.reviewed
@@ -200,28 +238,7 @@ def assess_sourced_retention(
     ):
         msg = "Retention anniversary quote must match amount, unit and assessment date"
         raise ValueError(msg)
-    result = assess_retention(assessment)
-    scenario = (
-        result.scenario
-        or rule.interpretation_kind == "analyst_assumption"
-        or evidence.input_kind == "analyst_assumption"
-    )
-    result = RetentionResult(assessment, result.amount, result.reasons, scenario)
-    priced = price_units(
-        release,
-        (
-            QuoteQuantity(
-                quantity_id=assessment.assessment_id,
-                quote_id=quote.quote_id,
-                unit=quote.unit,
-                quantity=Fraction(0) if result.reasons else assessment.snapshot_fte,
-                valued_on=day,
-                quantity_kind="analyst_assumption" if scenario else "observed_use",
-                basis=assessment.basis,
-            ),
-        ),
-    )
-    return result, priced
+    return quote
 
 
 class RetentionHistorySegment(QuoteModel):
@@ -419,3 +436,93 @@ def prorate_pharmacy_retention(request: PharmacyRetentionProration) -> Fraction:
         Fraction(0),
     )
     return Fraction(request.annual_amount) * weighted / request.period_units
+
+
+@dataclass(frozen=True)
+class PharmacyRetentionResult:
+    """Retain source, service allocation, evidence and exact priced entitlement."""
+
+    authority: RetentionAuthority
+    evidence: RetentionEvidence
+    snapshot: RetentionAssessment
+    proration: PharmacyRetentionProration
+    amount: Fraction
+    scenario: bool
+    prices: UnitQuoteResult
+
+
+def assess_pharmacy_retention(
+    rule: RetentionAuthority,
+    release: UnitQuoteRelease,
+    snapshot: RetentionAssessment,
+    evidence: RetentionEvidence,
+    proration: PharmacyRetentionProration,
+) -> PharmacyRetentionResult:
+    """Bind explicit pharmacy service allocation to authority and known receipt.
+
+    The general four-week disqualification and snapshot-FTE multiplication are
+    not applied. The proration already contains its reviewed service/FTE factors.
+    Actual dated measurement and source interpretation remain caller evidence.
+    """
+    rule = RetentionAuthority.model_validate(dict(rule))
+    release = UnitQuoteRelease.model_validate(release.model_dump())
+    snapshot = RetentionAssessment.model_validate(dict(snapshot))
+    evidence = RetentionEvidence.model_validate(dict(evidence))
+    proration = PharmacyRetentionProration.model_validate(
+        dict(proration)
+        | {
+            "portions": tuple(
+                PharmacyServicePortion.model_validate(dict(p))
+                for p in proration.portions
+            ),
+        },
+    )
+    if rule.method != "pharmacy_retention":
+        msg = "Pharmacy retention requires an explicit pharmacy method"
+        raise ValueError(msg)
+    quote = _validate_retention_binding(rule, release, snapshot, evidence)
+    if (
+        proration.assessment_id != snapshot.assessment_id
+        or proration.annual_amount != snapshot.annual_amount
+    ):
+        msg = "Pharmacy proration must match the assessment identity and annual amount"
+        raise ValueError(msg)
+    amount = prorate_pharmacy_retention(proration)
+    if (
+        not snapshot.employment_eligible_confirmed
+        or not snapshot.eligible_location_confirmed
+    ):
+        amount = Fraction(0)
+    if snapshot.competing_receipt == "received":
+        msg = "Existing competing receipt requires separate settlement review"
+        raise ValueError(msg)
+    scenario = (
+        snapshot.input_kind == "analyst_assumption"
+        or evidence.input_kind == "analyst_assumption"
+        or rule.interpretation_kind == "analyst_assumption"
+        or proration.interpretation_kind == "analyst_assumption"
+    )
+    quantity = amount / Fraction(quote.amount) if quote.amount else Fraction(0)
+    prices = price_units(
+        release,
+        (
+            QuoteQuantity(
+                quantity_id=snapshot.assessment_id,
+                quote_id=quote.quote_id,
+                unit=quote.unit,
+                quantity=quantity,
+                valued_on=snapshot.assessment_on,
+                quantity_kind="analyst_assumption" if scenario else "observed_use",
+                basis=proration.interpretation_basis,
+            ),
+        ),
+    )
+    return PharmacyRetentionResult(
+        rule,
+        evidence,
+        snapshot,
+        proration,
+        amount,
+        scenario,
+        prices,
+    )

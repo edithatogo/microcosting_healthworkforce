@@ -12,8 +12,9 @@ caller assertions; the library does not inspect referenced evidence files.
 The separate pharmacy helper uses an explicitly reviewed credited-service/FTE
 allocation convention and denominator. It does not infer calendar/workday units,
 resolve changing-FTE policy, establish continuity or decide unpaid-leave credit.
-Compensation and nonemployment cannot receive service credit. Pharmacy dated
-source/receipt composition remains unfinished. No general four-week eligibility
+Compensation and nonemployment cannot receive service credit. Pharmacy source/evidence pricing now uses an explicit method selector; dated
+pharmacy history measurement remains unfinished. An existing competing payment
+requires settlement review rather than automatically reversing pharmacy priority. No general four-week eligibility
 rule is imported into pharmacy proration.
 
 Still required: complete pharmacy binding, additional source-specific/adversarial
