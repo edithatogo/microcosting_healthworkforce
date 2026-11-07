@@ -214,6 +214,30 @@ class AdvanceLoadingTiming(QuoteModel):
         return facts.entitled_on
 
 
+class AdvanceLeaveTermination(QuoteModel):
+    """Reviewed ordinary-pay amounts for a single advance-leave settlement."""
+
+    terminated_on: date
+    service_year_completed_on: date
+    as_known_on: date
+    advance_ordinary_pay: NonnegativeQuantity
+    ordinary_pay_due: NonnegativeQuantity
+    evidence: str
+
+    def excess_ordinary_pay(self) -> Fraction:
+        """Return the clause 17A(i) excess before any payroll deduction."""
+        facts = AdvanceLeaveTermination.model_validate(dict(self))
+        if facts.terminated_on > facts.as_known_on:
+            msg = "Termination must be known at the valuation cutoff"
+            raise ValueError(msg)
+        if facts.terminated_on >= facts.service_year_completed_on:
+            return Fraction(0)
+        return max(
+            Fraction(0),
+            Fraction(facts.advance_ordinary_pay) - Fraction(facts.ordinary_pay_due),
+        )
+
+
 class AdvanceLoadingPrices(QuoteModel):
     """Explicit weekly salary and benchmark selections for deferred loading."""
 

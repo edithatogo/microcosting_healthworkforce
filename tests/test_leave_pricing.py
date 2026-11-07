@@ -10,6 +10,7 @@ from typing import Literal
 import pytest
 
 from src.leave_pricing import (
+    AdvanceLeaveTermination,
     AdvanceLoadingPrices,
     AdvanceLoadingTiming,
     LeaveLoadingComparison,
@@ -656,3 +657,27 @@ def test_deferred_loading_prices_both_quotes_on_entitlement_date() -> None:
             timing,
             selected.model_copy(update={"benchmark_quote_id": "new"}),
         )
+
+
+def test_advance_ordinary_pay_excess_only_before_service_year_completion() -> None:
+    """The recovery basis excludes non-excess and completed service years."""
+    settlement = AdvanceLeaveTermination(
+        terminated_on=START,
+        service_year_completed_on=MID,
+        as_known_on=MID,
+        advance_ordinary_pay=Decimal("900.01"),
+        ordinary_pay_due=Decimal(650),
+        evidence="Synthetic reviewed ordinary-pay amounts",
+    )
+    assert_that(settlement.excess_ordinary_pay() == Fraction(25001, 100))
+    assert_that(
+        settlement.model_copy(update={"terminated_on": MID}).excess_ordinary_pay() == 0,
+    )
+    assert_that(
+        settlement.model_copy(
+            update={"ordinary_pay_due": Decimal(950)},
+        ).excess_ordinary_pay()
+        == 0,
+    )
+    with pytest.raises(ValueError, match="valuation cutoff"):
+        settlement.model_copy(update={"terminated_on": END}).excess_ordinary_pay()
