@@ -166,7 +166,11 @@ def test_workbook_projection_is_explicit_and_adjusts_fixed_cost() -> None:
     assert_that("Calculated_Cost_Mid_Y5" in default.columns)
 
 
-def test_explicit_workbook_projection_replays_nsw_admin_midpoint() -> None:
+@pytest.mark.parametrize("rename_inputs", [False, True])
+def test_explicit_workbook_projection_replays_nsw_admin_midpoint(
+    *,
+    rename_inputs: bool,
+) -> None:
     """Replay the original year-four formula without changing compound mode."""
     data = load_and_clean_data(
         "data/Labour Model - v3, 20240328.xlsx",
@@ -177,6 +181,14 @@ def test_explicit_workbook_projection_replays_nsw_admin_midpoint() -> None:
         & pl.col("Personnel type").cast(pl.String).str.contains("(?i)admin"),
     )
     formulas = load_formulas("data/formulas.json")
+    if rename_inputs:
+        midpoint = formulas["outputs"][1]
+        if "parameter_mapping" not in midpoint:
+            raise AssertionError
+        mapping = midpoint["parameter_mapping"]
+        for key in ("productive_time_factor", "professional_development_allowance"):
+            admin = admin.rename({mapping[key]: key})
+            mapping[key] = key
     replay = cost_legacy_compatibility(
         request().model_copy(update={"mode": "workbook_projection_v1"}),
         admin,
