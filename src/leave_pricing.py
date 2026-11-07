@@ -65,6 +65,24 @@ class CombinedLeaveHours:
     maximum_loaded: Fraction
 
 
+def qualifying_shift_leave_credit(
+    worked_shifts: int,
+    required_shifts: int,
+    full_time_credit: Fraction,
+    ordinary_hours_fraction: Fraction,
+) -> Fraction:
+    """Calculate one reviewed period's credit before applying the annual cap."""
+    if worked_shifts < 0 or required_shifts <= 0:
+        msg = "Qualifying shift counts require a positive threshold"
+        raise ValueError(msg)
+    if full_time_credit < 0 or not 0 < ordinary_hours_fraction <= 1:
+        msg = "Leave credit and ordinary hours fraction must be valid"
+        raise ValueError(msg)
+    if worked_shifts < required_shifts:
+        return Fraction(0)
+    return full_time_credit * ordinary_hours_fraction
+
+
 def combined_leave_hours(
     loading_eligible: Fraction,
     base_only: Fraction,

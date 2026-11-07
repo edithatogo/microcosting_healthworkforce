@@ -17,6 +17,7 @@ from src.leave_pricing import (
     combined_leave_hours,
     price_leave_loading,
     price_paid_leave,
+    qualifying_shift_leave_credit,
     select_leave_loading_alternative,
 )
 from src.paid_leave import PaidLeaveSchedule, build_paid_leave
@@ -544,3 +545,25 @@ def test_combined_leave_cap_preserves_loading_allocation_range(
         (result.total, result.minimum_loaded, result.maximum_loaded)
         == tuple(map(Fraction, expected)),
     )
+
+
+@pytest.mark.parametrize(
+    ("worked", "required", "share", "expected"),
+    [
+        (3, 4, "1", "0"),
+        (4, 4, "1", "2.92"),
+        (8, 4, "1", "2.92"),
+        (1, 1, "0.25", "0.73"),
+    ],
+)
+def test_shift_credit_applies_once_per_qualifying_period(
+    worked: int,
+    required: int,
+    share: str,
+    expected: str,
+) -> None:
+    """Extra shifts do not generate additional credits within a period."""
+    credit = qualifying_shift_leave_credit(
+        worked, required, Fraction("2.92"), Fraction(share),
+    )
+    assert_that(credit == Fraction(expected))
