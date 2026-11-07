@@ -79,6 +79,7 @@ class PeriodicAllowanceCost:
     portions: tuple[AllowancePortionCost, ...]
     accrued: Fraction
     payable: Fraction
+    scope: tuple[str, str, str] | None = None
 
 
 def cost_periodic_allowance(
@@ -136,6 +137,7 @@ def cost_periodic_allowance(
         rows,
         sum((row.accrued for row in rows), Fraction(0)),
         sum((row.payable for row in rows), Fraction(0)),
+        (release.jurisdiction, release.employer, release.classification),
     )
 
 

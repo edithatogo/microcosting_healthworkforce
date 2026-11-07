@@ -1,6 +1,7 @@
 # Copyright 2026 Dylan. SPDX-License-Identifier: Apache-2.0
 """Test explicit periodic allowance calculation without inferring eligibility."""
 
+from dataclasses import replace
 from datetime import date
 from decimal import Decimal
 from fractions import Fraction
@@ -305,4 +306,19 @@ def test_reconcile_actual_posting_against_payable_allowance() -> None:
         reconcile_allowance_payment(
             allowance,
             payment.model_copy(update={"evidence": " "}),
+        )
+    wrong_scope = replace(
+        result,
+        allowance=replace(
+            allowance,
+            scope=("QLD", "Other employer", "Synthetic grade"),
+        ),
+    )
+    with pytest.raises(ValueError, match="differs from payroll"):
+        cost_contribution_payments(
+            prices(),
+            contribution_period(),
+            policy,
+            (),
+            allowance_reconciliations=(wrong_scope,),
         )

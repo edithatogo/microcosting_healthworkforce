@@ -570,12 +570,19 @@ def cost_contribution_payments(
     allowance_reconciliations: tuple[AllowancePaymentReconciliation, ...] = (),
 ) -> PaidContributionCost:
     """Price complete paid earnings using posting time and explicit basis membership."""
-    _, period, rule = _prepare(release, period, rule, paid_basis=True)
+    release, period, rule = _prepare(release, period, rule, paid_basis=True)
     start, end = _utc(period.starts_at), _utc(period.ends_at)
     reconciled = tuple(
         reconcile_allowance_payment(item.allowance, item.payment)
         for item in allowance_reconciliations
     )
+    rate = next(
+        rate for rate in release.rates if rate.resource_id == period.resource_id
+    )
+    scope = (rate.jurisdiction, rate.employer, rate.classification)
+    if any(item.allowance.scope != scope for item in reconciled):
+        msg = "Allowance jurisdiction, employer or classification differs from payroll"
+        raise ValueError(msg)
     payments += tuple(item.payment for item in reconciled)
     payments = tuple(
         ContributionPayment.model_validate(payment.model_dump()) for payment in payments
