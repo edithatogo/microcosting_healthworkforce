@@ -1,7 +1,9 @@
 # Copyright 2026 Dylan. SPDX-License-Identifier: Apache-2.0
 """Project annual costs using the scenario's annual indexation rate."""
 
+from fractions import Fraction
 from math import floor, isfinite
+lazy from decimal import Decimal
 
 import polars as pl
 
@@ -66,6 +68,32 @@ def project_workbook_costs(
         for year in range(1, num_years + 1)
         for tier in ("LL", "Mid", "UL")
     )
+
+
+def project_workbook_vehicle_amounts(
+    opening_amount: Decimal | None,
+    monthly_rates: tuple[Decimal, ...],
+) -> tuple[int, ...]:
+    """Replay projected whole-dollar amounts from a separate opening cell.
+
+    Rates are fractions, so 0.02 means two percent. An opening blank
+    acts as zero during projection. The caller retains that blank separately.
+    """
+    if opening_amount is not None and (
+        not opening_amount.is_finite() or opening_amount < 0
+    ):
+        msg = "Vehicle opening amount must be finite and nonnegative"
+        raise ValueError(msg)
+    carried = Fraction(opening_amount or 0)
+    projected: list[int] = []
+    for rate in monthly_rates:
+        if not rate.is_finite() or rate < -1:
+            msg = "Vehicle indexation rates must be finite and at least minus one"
+            raise ValueError(msg)
+        rounded = floor(carried * (1 + Fraction(rate)) + Fraction(1, 2))
+        projected.append(rounded)
+        carried = Fraction(rounded)
+    return tuple(projected)
 
 
 def project_workbook_pda_amount(opening_amount: float, factor: float) -> float:
