@@ -29,3 +29,10 @@ estimand. A title does not make it an accepted PSA oracle. The isolated zero on
 the DSA sheet also remains unresolved. Assumed units and all scientific/source
 qualification gaps remain explicit, including the retained failed archive
 interpretation diagnostics. No numeric costing or stochastic method changes.
+
+A private LibreOffice recalculation verified all 120 publication
+comparison ratios. Dividing the corresponding scenario costs in
+column BC reproduced the four comparison columns across five
+personnel blocks and six rows per block within an absolute ratio
+difference of 0.000000000001. The original BI and BS display labels
+remain preserved alongside the formula-derived roles.
