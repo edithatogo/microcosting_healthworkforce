@@ -66,10 +66,17 @@ def test_allowance_and_incremental_oncost_are_added_once() -> None:
     assert_that(result.base.total == Decimal(55))
 
 
-def test_dynamic_and_static_match_at_constant_dates() -> None:
+@pytest.mark.parametrize(
+    ("allowance_fraction", "expected_total"),
+    [("0.05", "115.50"), ("0.085", "119.35")],
+)
+def test_dynamic_and_static_match_at_constant_dates(
+    allowance_fraction: str,
+    expected_total: str,
+) -> None:
     """The dated activity and nominal snapshot share exact component logic."""
     rules = (
-        rule("allowance-rule", "allowance", ("salary",), "0.05"),
+        rule("allowance-rule", "allowance", ("salary",), allowance_fraction),
         rule("oncost-rule", "allowance_super", ("allowance",), "0.1"),
     )
     start = datetime(2026, 6, 2, 9, tzinfo=UTC)
@@ -82,7 +89,7 @@ def test_dynamic_and_static_match_at_constant_dates() -> None:
     )
     dynamic = cost_derived_activity(baseline(), activity, "UTC", rules)
     static = cost_derived_snapshot(baseline(), date(2026, 6, 2), Decimal(2), rules)
-    assert_that(dynamic.exact_total == static.exact_total == Fraction(231, 2))
+    assert_that(dynamic.exact_total == static.exact_total == Fraction(expected_total))
 
 
 def test_unknown_order_duplicate_and_unreviewed_rules_fail_closed() -> None:
@@ -317,3 +324,35 @@ def test_backfill_scenario_separates_direct_cost_and_loaded_super_base() -> None
         == [Fraction(100), Fraction("16.15"), Fraction("11.615")],
     )
     assert_that(result.exact_total == Fraction("5627.765"))
+
+
+def test_allowance_reprices_at_base_salary_boundary() -> None:
+    """An unchanged allowance fraction follows each effective salary edition."""
+    original = release()
+    salary, paid_hours = original.conditions
+    boundary = date(2026, 6, 3)
+    before = salary.model_copy(update={"effective_to": boundary})
+    after = salary.model_copy(
+        update={
+            "condition_id": "salary-new",
+            "effective_from": boundary,
+            "value": Decimal(120000),
+        },
+    )
+    dated = original.model_copy(update={"conditions": (before, after, paid_hours)})
+    rules = (rule("dental", "practice_allowance", ("salary",), "0.085"),)
+    start = datetime(2026, 6, 2, 23, tzinfo=UTC)
+    activity = Activity(
+        activity_id="overnight",
+        resource_id="worker",
+        starts_at=start,
+        ends_at=start + timedelta(hours=2),
+        resources=Decimal(1),
+    )
+    dynamic = cost_derived_activity(dated, activity, "UTC", rules)
+    first = cost_derived_snapshot(dated, start.date(), Decimal(1), rules)
+    second = cost_derived_snapshot(dated, boundary, Decimal(1), rules)
+    assert_that(
+        [row.amount for row in dynamic.rows] == [Fraction("4.25"), Fraction("5.10")],
+    )
+    assert_that(dynamic.exact_total == first.exact_total + second.exact_total)
