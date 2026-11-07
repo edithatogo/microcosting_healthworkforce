@@ -40,6 +40,11 @@ class WorkbookValidation:
             msg = "Formula translation requires a single validation range"
             raise ValueError(msg)
         target = CellRange(self.targets[0])
+        address = CellRange(cell)
+        if address.title is not None or address.size != {"columns": 1, "rows": 1}:
+            msg = "Formula translation requires one unqualified cell"
+            raise ValueError(msg)
+        cell = f"{get_column_letter(address.min_col)}{address.min_row}"
         if cell not in target:
             msg = "Cell is outside the validation range"
             raise ValueError(msg)
