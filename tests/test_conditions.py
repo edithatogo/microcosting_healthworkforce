@@ -11,6 +11,7 @@ from src.conditions import (
     Condition,
     ConditionRelease,
     cost_condition_activity,
+    cost_condition_snapshot,
     hourly_components,
 )
 from src.costing import Activity
@@ -235,3 +236,32 @@ def test_exact_total_preserves_nonterminating_annual_rate() -> None:
         Fraction(result.exact_total_numerator, result.exact_total_denominator)
         == Fraction(100, 3),
     )
+
+
+@pytest.mark.parametrize("applicability", ["conflicting", "unresolved"])
+def test_costing_revalidates_source_applicability(applicability: str) -> None:
+    """Static and dated pricing reject a release whose source lost verification."""
+    release = ConditionRelease(
+        release_id="reviewed",
+        jurisdiction="QLD",
+        employer="Synthetic employer",
+        classification="Synthetic grade",
+        sources=SourceRegistry(records=(source(),)),
+        conditions=(
+            condition("salary", "salary", "100000", "AUD/year"),
+            condition("hours", "paid_hours", "2000", "hours/year"),
+        ),
+    )
+    held = source().model_copy(update={"applicability": applicability})
+    revised = release.model_copy(update={"sources": SourceRegistry(records=(held,))})
+    activity = Activity(
+        activity_id="cross-midnight",
+        resource_id="worker",
+        starts_at=datetime(2026, 6, 1, 23, tzinfo=UTC),
+        ends_at=datetime(2026, 6, 2, 1, tzinfo=UTC),
+        resources=Decimal(1),
+    )
+    with pytest.raises(ValueError, match="No verified source coverage"):
+        cost_condition_snapshot(revised, date(2026, 6, 1), Decimal(1))
+    with pytest.raises(ValueError, match="No verified source coverage"):
+        cost_condition_activity(revised, activity, "UTC")
