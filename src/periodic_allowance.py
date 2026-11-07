@@ -129,3 +129,64 @@ def cost_periodic_allowance(
         sum((row.accrued for row in rows), Fraction(0)),
         sum((row.payable for row in rows), Fraction(0)),
     )
+
+
+@dataclass(frozen=True)
+class PeriodicAllowanceSchedule:
+    """A complete payroll-period allocation with every priced segment retained."""
+
+    period: AllowancePeriod
+    segments: tuple[PeriodicAllowanceCost, ...]
+    accrued: Fraction
+    payable: Fraction
+
+
+def _classified_hours(
+    periods: tuple[AllowancePeriod, ...],
+) -> dict[tuple[str, Decimal, Decimal], Fraction]:
+    """Aggregate hours without losing classification or independent factors."""
+    totals: dict[tuple[str, Decimal, Decimal], Fraction] = {}
+    for period in periods:
+        for part in period.portions:
+            key = (part.label, part.accrual_factor, part.payment_factor)
+            totals[key] = totals.get(key, Fraction(0)) + Fraction(part.hours)
+    return totals
+
+
+def cost_periodic_allowance_schedule(
+    release: ConditionRelease,
+    component: str,
+    period: AllowancePeriod,
+    segments: tuple[AllowancePeriod, ...],
+) -> PeriodicAllowanceSchedule:
+    """Price explicit contiguous splits while conserving the parent allocation."""
+    period = AllowancePeriod.model_validate(period.model_dump())
+    segments = tuple(AllowancePeriod.model_validate(s.model_dump()) for s in segments)
+    if not segments:
+        msg = "Allowance schedule requires at least one segment"
+        raise ValueError(msg)
+    expected_start = period.starts_on
+    for segment in segments:
+        if segment.starts_on != expected_start or segment.ends_on > period.ends_on:
+            msg = "Allowance segments must cover the parent period contiguously"
+            raise ValueError(msg)
+        if (
+            segment.full_time_hours != period.full_time_hours
+            or segment.periods_per_year != period.periods_per_year
+        ):
+            msg = "Allowance segments must retain the parent denominators"
+            raise ValueError(msg)
+        expected_start = segment.ends_on
+    if expected_start != period.ends_on:
+        msg = "Allowance segments must cover the parent period contiguously"
+        raise ValueError(msg)
+    if _classified_hours(segments) != _classified_hours((period,)):
+        msg = "Allowance segments must conserve classified hours and factors"
+        raise ValueError(msg)
+    costs = tuple(cost_periodic_allowance(release, component, s) for s in segments)
+    return PeriodicAllowanceSchedule(
+        period,
+        costs,
+        sum((cost.accrued for cost in costs), Fraction(0)),
+        sum((cost.payable for cost in costs), Fraction(0)),
+    )
