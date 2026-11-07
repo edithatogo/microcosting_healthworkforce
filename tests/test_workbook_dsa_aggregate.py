@@ -80,3 +80,14 @@ def test_aggregate_axes_preserve_original_formula_lineage() -> None:
                 cell.column_name == f"salary_{unit}_lower_midpoint_upper_display",
             )
             assert_that(cell.role == "presentation")
+
+    for table_id, axis, rows in (
+        ("WS07-R01-leave_loading", "leave_loading", range(4, 29)),
+        ("WS07-R01-summary_salary", "salary", range(29, 34)),
+    ):
+        table = next(t for t in extraction.tables if t.definition.table_id == table_id)
+        values = [cell for cell in table.cells if cell.source.row in rows]
+        assert_that(len(values) == 6 * len(rows))
+        assert_that(
+            all((cell.column_name or "").startswith(f"{axis}_") for cell in values),
+        )

@@ -16328,7 +16328,7 @@
     {
       "table_id": "WS07-R01-leave_loading",
       "sheet": "Labour - Prices (DSA, Values)",
-      "area": "BK1:BP33",
+      "area": "BK1:BP28",
       "status": "archived_candidate",
       "purpose": "Archived DSA output; baseline and axes require reconciliation",
       "columns": [
@@ -16374,6 +16374,52 @@
         2,
         3
       ]
+    },
+    {
+      "table_id": "WS07-R01-summary_salary",
+      "sheet": "Labour - Prices (DSA, Values)",
+      "area": "BK29:BP33",
+      "status": "archived_candidate",
+      "purpose": "Archived occupation summary salary scenarios under the shared leave-loading header",
+      "columns": [
+        {
+          "column": "BK",
+          "name": "salary_annual_lower",
+          "unit": "AUD/year",
+          "role": "archived_sensitivity_bound"
+        },
+        {
+          "column": "BL",
+          "name": "salary_annual_midpoint",
+          "unit": "AUD/year",
+          "role": "archived_sensitivity_bound"
+        },
+        {
+          "column": "BM",
+          "name": "salary_annual_upper",
+          "unit": "AUD/year",
+          "role": "archived_sensitivity_bound"
+        },
+        {
+          "column": "BN",
+          "name": "salary_hourly_lower",
+          "unit": "AUD/hour",
+          "role": "archived_sensitivity_bound"
+        },
+        {
+          "column": "BO",
+          "name": "salary_hourly_midpoint",
+          "unit": "AUD/hour",
+          "role": "archived_sensitivity_bound"
+        },
+        {
+          "column": "BP",
+          "name": "salary_hourly_upper",
+          "unit": "AUD/hour",
+          "role": "archived_sensitivity_bound"
+        }
+      ],
+      "header_rows": []
     },
     {
       "table_id": "WS08-R01",

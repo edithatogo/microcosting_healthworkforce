@@ -16,7 +16,7 @@ def test_candidate_profile_reconciles_original_workbook() -> None:
     catalog = read_workbook_catalog(Path("data/Labour Model - v3, 20240328.xlsx"))
     profile = load_candidate_profile()
     extraction = extract_tables(catalog, profile.table_definitions(catalog.sha256))
-    expected_sections = 266
+    expected_sections = 267
     expected_cells = 27929
     assert_that(len(extraction.tables) == expected_sections)
     assert_that(sum(len(table.cells) for table in extraction.tables) == expected_cells)
