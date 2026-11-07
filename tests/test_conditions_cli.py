@@ -93,6 +93,10 @@ def test_snapshot_cli_preserves_exact_total_and_rejects_invalid_mode(
         main(mapped_args)
     assert_that(not output.exists())
     origin["applicability"] = "verified"
+    origin_path.write_text(json.dumps({"unknown-condition": origin}), encoding="utf-8")
+    with pytest.raises(ValueError, match="unknown condition IDs"):
+        main(mapped_args)
+    assert_that(not output.exists())
     origin_path.write_text(json.dumps({"salary": origin}), encoding="utf-8")
     assert_that(main(mapped_args) == 0)
 
