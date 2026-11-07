@@ -991,3 +991,28 @@ def nsw_online_study_leave_hours(
         msg = "Online study grant must fit the applicable weekly limit"
         raise ValueError(msg)
     return approved_weekly_hours
+
+
+def vic_hama_historical_study_leave_hours(
+    approved_hours: Fraction,
+    prior_hours: Fraction,
+    *,
+    employment_fraction: Fraction,
+) -> Fraction:
+    """Check a reviewed grant under AE422598 section 2 cl 88 or section 3 cl 72.
+
+    Supply prior paid study hours in the same entitlement year and the
+    applicable employment fraction for that year. Review coverage, course
+    eligibility, approval and the agreed schedule before calling this check.
+    """
+    if not 0 < employment_fraction <= 1:
+        msg = "Employment fraction must be greater than zero and at most one"
+        raise ValueError(msg)
+    annual_limit = 4 * 26 * employment_fraction
+    if (
+        min(approved_hours, prior_hours) < 0
+        or approved_hours + prior_hours > annual_limit
+    ):
+        msg = "Study leave must fit the prorated annual limit"
+        raise ValueError(msg)
+    return approved_hours

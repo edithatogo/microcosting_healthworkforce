@@ -23,7 +23,10 @@ from src.assignment_requests import (
     run_assignment_request,
 )
 from src.conditions_cli import main
-from src.leave_pricing import nsw_online_study_leave_hours
+from src.leave_pricing import (
+    nsw_online_study_leave_hours,
+    vic_hama_historical_study_leave_hours,
+)
 from src.reimbursement import ReimbursementClaim, ReimbursementPeriod
 from tests.checks import assert_that
 from tests.test_assignment_costing import CHANGE, activity, timeline
@@ -247,12 +250,21 @@ def test_assignment_and_reviewed_expenses_keep_separate_ledgers(tmp_path: Path) 
     assert_that(Fraction(ledger["total"]) == Fraction("185.25"))
 
 
-def test_approved_study_hours_price_across_dated_wage_change() -> None:
+@pytest.mark.parametrize("study_rule", ["nsw-online", "vic-hama-historical"])
+def test_approved_study_hours_price_across_dated_wage_change(study_rule: str) -> None:
     """One approved study interval retains its identity across two wage slices."""
-    approved = nsw_online_study_leave_hours(
-        Fraction("1.5"),
-        equivalent_compulsory_hours=Fraction(3),
-    )
+    requested_hours = Fraction(3, 2)
+    if study_rule == "nsw-online":
+        approved = nsw_online_study_leave_hours(
+            requested_hours,
+            equivalent_compulsory_hours=Fraction(3),
+        )
+    else:
+        approved = vic_hama_historical_study_leave_hours(
+            requested_hours,
+            Fraction(101, 2),
+            employment_fraction=Fraction(1, 2),
+        )
     original = activity()
     study = original.model_copy(
         update={
