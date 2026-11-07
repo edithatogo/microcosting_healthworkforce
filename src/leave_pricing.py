@@ -214,6 +214,35 @@ class AdvanceLoadingTiming(QuoteModel):
         return facts.entitled_on
 
 
+class SeparationLoadingEligibility(QuoteModel):
+    """Reviewed separation facts for the historical NSW loading provision."""
+
+    separated_on: date
+    as_known_on: date
+    reason: Literal[
+        "retirement",
+        "resignation",
+        "employer_termination",
+        "misconduct",
+        "other",
+    ]
+    entitled_loading_weeks: NonnegativeQuantity
+    evidence: str
+
+    def eligible_weeks(self) -> Fraction:
+        """Return the exposure admitted under clause 17B(g) and (h)."""
+        facts = SeparationLoadingEligibility.model_validate(dict(self))
+        if facts.separated_on > facts.as_known_on:
+            msg = "Separation must be known at the valuation cutoff"
+            raise ValueError(msg)
+        if facts.reason == "other":
+            msg = "Separation reason is outside the reviewed loading provision"
+            raise ValueError(msg)
+        if facts.reason in {"resignation", "misconduct"}:
+            return Fraction(0)
+        return Fraction(facts.entitled_loading_weeks)
+
+
 class AdvanceLeaveTermination(QuoteModel):
     """Reviewed ordinary-pay amounts for a single advance-leave settlement."""
 

@@ -16,6 +16,7 @@ from src.leave_pricing import (
     LeaveLoadingComparison,
     LeaveLoadingMoneyCap,
     LeavePriceSelection,
+    SeparationLoadingEligibility,
     allocate_leave_loading_hours,
     combined_leave_hours,
     price_advance_loading,
@@ -681,3 +682,25 @@ def test_advance_ordinary_pay_excess_only_before_service_year_completion() -> No
     )
     with pytest.raises(ValueError, match="valuation cutoff"):
         settlement.model_copy(update={"terminated_on": END}).excess_ordinary_pay()
+
+
+def test_separation_loading_uses_reason_and_reviewed_exposure() -> None:
+    """Only retirement and covered employer termination admit the exposure."""
+    facts = SeparationLoadingEligibility(
+        separated_on=START,
+        as_known_on=MID,
+        reason="retirement",
+        entitled_loading_weeks=Fraction(3, 2),
+        evidence="Synthetic reviewed loading eligibility",
+    )
+    for reason in ("retirement", "employer_termination"):
+        assert_that(
+            facts.model_copy(update={"reason": reason}).eligible_weeks()
+            == Fraction(3, 2),
+        )
+    for reason in ("resignation", "misconduct"):
+        assert_that(facts.model_copy(update={"reason": reason}).eligible_weeks() == 0)
+    with pytest.raises(ValueError, match="outside"):
+        facts.model_copy(update={"reason": "other"}).eligible_weeks()
+    with pytest.raises(ValueError, match="valuation cutoff"):
+        facts.model_copy(update={"separated_on": END}).eligible_weeks()
