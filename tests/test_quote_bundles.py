@@ -369,3 +369,68 @@ def test_percentage_basis_is_audited_without_being_paid() -> None:
         )
         with pytest.raises(ValueError, match=error):
             price_highest_quote_bundles(invalid_policy, quotes, (modified,))
+
+
+def test_protected_pay_compares_complete_bundles_before_rounding() -> None:
+    """Compare a reviewed retained base plus incentive with a new base."""
+    release_with_incentive = bundle_release()
+    amounts = {"two_context-2026": Decimal(2893), "single_context-2026": Decimal(3008)}
+    rates = UnitQuoteRelease.model_validate(
+        {
+            **release_with_incentive.model_dump(),
+            "quotes": tuple(
+                q.model_copy(update={"amount": amounts[q.quote_id]})
+                if q.quote_id in amounts
+                else q
+                for q in release_with_incentive.quotes
+            ),
+        },
+    )
+    basis = next(q for q in rates.quotes if q.quote_id == "two_context-2026")
+    percentage = QuoteBundlePercentage(
+        component="protected-incentive",
+        basis_component=basis.component,
+        fraction=Decimal("0.055"),
+        source_id=basis.source_id,
+        source_sha256=basis.source_sha256,
+        citation="Reviewed comparison scenario",
+        starts_on=basis.starts_on,
+        ends_on=basis.ends_on,
+        known_from=basis.known_from,
+        reviewed=True,
+    )
+    policy = bundle_rule()
+    combined, single = policy.bundles
+    policy = policy.model_copy(
+        update={
+            "bundles": (
+                combined.model_copy(
+                    update={"components": ("two_context",), "percentage": percentage},
+                ),
+                single,
+            ),
+        },
+    )
+    exposure = bundle_case()
+    protected, advanced = exposure.alternatives
+    exposure = exposure.model_copy(
+        update={
+            "alternatives": (
+                protected.model_copy(
+                    update={
+                        "facts": (fact("two_context"),),
+                        "percentage_basis": fact("two_context"),
+                    },
+                ),
+                advanced,
+            ),
+        },
+    )
+    result = price_highest_quote_bundles(policy, rates, (exposure,))
+    selected = result.selections[0]
+    assert_that(selected.selected_alternative == "combined")
+    assert_that(result.paid_percentages[0].cost == Fraction("159.115"))
+    assert_that(result.total == Fraction("3052.115"))
+    assert_that(
+        result.total - Fraction(3008) == Fraction("44.115"),
+    )
