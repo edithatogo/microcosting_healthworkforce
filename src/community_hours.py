@@ -23,3 +23,16 @@ def tas_rural_base_community_hours(population: int) -> int:
     if population < _UPPER_BREAKPOINT:
         return 3
     return 4
+
+
+def tas_rural_community_hours(
+    population: int,
+    *,
+    supports_volunteer_ambulance: bool,
+) -> int:
+    """Return the community pool using the reviewed Schedule 3 support status."""
+    if type(supports_volunteer_ambulance) is not bool:
+        msg = "Volunteer ambulance support must be explicitly confirmed or ruled out"
+        raise ValueError(msg)
+    base = tas_rural_base_community_hours(population)
+    return base + (2 if supports_volunteer_ambulance else 0)
