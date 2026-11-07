@@ -389,3 +389,14 @@ market allowance, retention and receipt-based exclusions. Approval
 undertakings and operative, transition and end dates are documented.
 Actual worker cohort and service history, missing instrument links and
 payroll treatment remain open.
+
+## NSW source chain reviews
+
+The retained reviews qualify selected source chains and distinguish
+candidate rates from worker-level applicability.
+
+- [Crib-away rate chain](../../reviews/nsw-crib-away-rate-chain-20261107.md)
+- [Dental source chain](../../reviews/nsw-dental-source-chain-20261107.md)
+- [Hospital science chain](../../reviews/nsw-hospital-science-chain-20261107.md)
+- [PTO parent chain](../../reviews/nsw-pto-parent-chain-20261107.md)
+- [Skilled trades chain](../../reviews/nsw-skilled-trades-chain-20261107.md)
