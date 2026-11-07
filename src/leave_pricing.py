@@ -3,6 +3,7 @@
 
 from dataclasses import dataclass, replace
 from fractions import Fraction
+from itertools import pairwise
 from typing import Literal
 lazy from datetime import date
 
@@ -117,6 +118,7 @@ class PricedLeave:
     rows: tuple[PricedLeaveRow, ...]
     total: Fraction
     loading_cap: LeaveLoadingMoneyCap | None = None
+    loading_caps: tuple[LeaveLoadingMoneyCap, ...] = ()
 
 
 def _choices(
@@ -159,13 +161,66 @@ def _dated_coverage(
             raise ValueError(msg)
 
 
+def _apply_loading_caps(
+    rows: list[PricedLeaveRow],
+    caps: tuple[LeaveLoadingMoneyCap, ...],
+) -> None:
+    """Allocate each period's remaining cap only to leave accrued in that period."""
+    caps = tuple(
+        sorted(
+            (LeaveLoadingMoneyCap.model_validate(dict(cap)) for cap in caps),
+            key=lambda cap: cap.starts_on,
+        ),
+    )
+    if any(cap.starts_on >= cap.ends_on for cap in caps) or any(
+        left.ends_on > right.starts_on for left, right in pairwise(caps)
+    ):
+        msg = "Loading cap periods must be nonempty and nonoverlapping"
+        raise ValueError(msg)
+    loading = [
+        (index, item)
+        for index, row in enumerate(rows)
+        for item in row.pricing.pricing.rows[1:]
+        if item.quote.component == "leave_loading"
+    ]
+    if not loading or any(item.quote.unit != "hour" for _, item in loading):
+        msg = "Loading cap requires separately priced hourly leave loading"
+        raise ValueError(msg)
+    for index, _ in loading:
+        accrued_on = rows[index].choice.loading_accrued_on
+        if accrued_on is None or not any(
+            cap.starts_on <= accrued_on < cap.ends_on for cap in caps
+        ):
+            msg = "Leave loading requires an accrual date within the cap period"
+            raise ValueError(msg)
+    for cap in caps:
+        period_loading = [
+            (index, item)
+            for index, item in loading
+            if (accrued_on := rows[index].choice.loading_accrued_on) is not None
+            and cap.starts_on <= accrued_on < cap.ends_on
+        ]
+        capped = price_leave_loading(
+            tuple(Fraction(item.quantity.quantity) for _, item in period_loading),
+            tuple(Fraction(item.quote.amount) for _, item in period_loading),
+            Fraction(cap.maximum),
+            Fraction(cap.prior_paid),
+        )
+        for (index, item), cost in zip(period_loading, capped, strict=True):
+            row = rows[index]
+            rows[index] = replace(
+                row,
+                loading_reduction=row.loading_reduction + item.cost - cost,
+            )
+
+
 def price_paid_leave(
     release: UnitQuoteRelease,
     selection: NormalHoursSelection,
     schedule: PaidLeaveSchedule,
     choices: tuple[LeavePriceSelection, ...],
     *,
-    loading_cap: LeaveLoadingMoneyCap | None = None,
+    loading_cap: LeaveLoadingMoneyCap | tuple[LeaveLoadingMoneyCap, ...] | None = None,
 ) -> PricedLeave:
     """Compose reviewed inputs and separately declared salary/allowance exposure.
 
@@ -203,32 +258,11 @@ def price_paid_leave(
         _dated_coverage(release, choice)
         priced = price_selected_hours(release, selection, request, choice.allowances)
         rows.append(PricedLeaveRow(exposure, choice, priced))
-    if loading_cap is not None:
-        loading_cap = LeaveLoadingMoneyCap.model_validate(dict(loading_cap))
-        loading = [
-            (index, item)
-            for index, row in enumerate(rows)
-            for item in row.pricing.pricing.rows[1:]
-            if item.quote.component == "leave_loading"
-        ]
-        if not loading or any(item.quote.unit != "hour" for _, item in loading):
-            msg = "Loading cap requires separately priced hourly leave loading"
-            raise ValueError(msg)
-        for index, _ in loading:
-            accrued_on = rows[index].choice.loading_accrued_on
-            if accrued_on is None or not (
-                loading_cap.starts_on <= accrued_on < loading_cap.ends_on
-            ):
-                msg = "Leave loading requires an accrual date within the cap period"
-                raise ValueError(msg)
-        capped = price_leave_loading(
-            tuple(Fraction(item.quantity.quantity) for _, item in loading),
-            tuple(Fraction(item.quote.amount) for _, item in loading),
-            Fraction(loading_cap.maximum),
-            Fraction(loading_cap.prior_paid),
-        )
-        for (index, item), cost in zip(loading, capped, strict=True):
-            rows[index] = replace(rows[index], loading_reduction=item.cost - cost)
+    single_cap = loading_cap if isinstance(loading_cap, LeaveLoadingMoneyCap) else None
+    multiple_caps = loading_cap if isinstance(loading_cap, tuple) else ()
+    caps = (single_cap,) if single_cap is not None else multiple_caps
+    if caps:
+        _apply_loading_caps(rows, caps)
     return PricedLeave(
         "paid_leave_selected_hours_pricing_v1",
         schedule,
@@ -236,5 +270,6 @@ def price_paid_leave(
         release.currency,
         tuple(rows),
         sum((r.pricing.pricing.total - r.loading_reduction for r in rows), Fraction(0)),
-        loading_cap,
+        single_cap,
+        multiple_caps,
     )

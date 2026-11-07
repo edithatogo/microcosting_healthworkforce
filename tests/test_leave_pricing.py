@@ -399,6 +399,33 @@ def test_capped_loading_prices_separately_across_dated_quotes() -> None:
     with pytest.raises(ValueError, match="separately priced hourly"):
         price_paid_leave(release, selection(), leave, selected, loading_cap=cap)
 
+    older = cap.model_copy(update={"ends_on": MID, "maximum": Decimal(50)})
+    newer = cap.model_copy(
+        update={"starts_on": MID, "maximum": Decimal(40), "prior_paid": Decimal(10)},
+    )
+    split = (
+        accrued[0],
+        accrued[1].model_copy(update={"loading_accrued_on": MID}),
+    )
+    dated = price_paid_leave(
+        release,
+        selection(),
+        leave,
+        split,
+        loading_cap=(older, newer),
+    )
+    assert_that(dated.loading_caps == (older, newer))
+    assert_that([row.loading_reduction for row in dated.rows] == [Fraction("22.5"), 5])
+    assert_that(dated.total == Fraction(73500, 73) + 60)
+    with pytest.raises(ValueError, match="nonoverlapping"):
+        price_paid_leave(
+            release,
+            selection(),
+            leave,
+            split,
+            loading_cap=(cap, newer),
+        )
+
 
 def test_loading_applies_hours_and_money_caps_independently() -> None:
     """A monetary cap can bind even while eligible hours remain."""
