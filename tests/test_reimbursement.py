@@ -9,6 +9,7 @@ import pytest
 from pydantic import TypeAdapter
 
 from src.reimbursement import (
+    LeaveSchemeReconciliation,
     ReimbursementCarryDecision,
     ReimbursementClaim,
     ReimbursementLedger,
@@ -16,6 +17,7 @@ from src.reimbursement import (
     ReimbursementRecoveryDecision,
     build_reimbursement_ledger,
     cost_reimbursements,
+    net_leave_scheme_cost,
     nsw_level_one_tesl_available_funding,
     nsw_level_one_tesl_funding,
     nsw_level_one_tesl_retained_funding_split,
@@ -526,3 +528,20 @@ def test_nsw_tesl_retained_entitlement_split_conserves_balance() -> None:
             terminated_on=terminated,
             starts_on=(date(2023, 3, 1),),
         )
+
+
+def test_leave_scheme_credit_excludes_replacement_labour() -> None:
+    """A reviewed credit offsets leave pay while retaining replacement cost."""
+    case = LeaveSchemeReconciliation(
+        case_id="synthetic-leave",
+        paid_leave=Decimal(100),
+        paid_leave_oncost=Decimal(10),
+        replacement_cost=Decimal(50),
+        scheme_credit=Decimal(110),
+        review_evidence="Synthetic matched claim",
+    )
+    assert_that(net_leave_scheme_cost(case) == Fraction(50))
+    partial = case.model_copy(update={"scheme_credit": Fraction(239, 3)})
+    assert_that(net_leave_scheme_cost(partial) == Fraction(241, 3))
+    with pytest.raises(ValueError, match="exceeds the matched paid leave"):
+        net_leave_scheme_cost(case.model_copy(update={"scheme_credit": Decimal(111)}))
