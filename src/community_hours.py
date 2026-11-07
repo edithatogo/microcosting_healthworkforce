@@ -1,6 +1,15 @@
 # Copyright 2026 Dylan. SPDX-License-Identifier: Apache-2.0
 """Replay the reviewed Tasmanian rural-medical community-hours schedule."""
 
+from fractions import Fraction
+
+from src.unit_quotes import (
+    QuoteQuantity,
+    UnitQuoteRelease,
+    UnitQuoteResult,
+    price_units,
+)
+
 _LOWER_BREAKPOINT = 5_000
 _UPPER_BREAKPOINT = 10_000
 
@@ -36,3 +45,34 @@ def tas_rural_community_hours(
         raise ValueError(msg)
     base = tas_rural_base_community_hours(population)
     return base + (2 if supports_volunteer_ambulance else 0)
+
+
+def price_tas_rural_community_hours(
+    release: UnitQuoteRelease,
+    population: int,
+    shares: tuple[QuoteQuantity, ...],
+    *,
+    supports_volunteer_ambulance: bool,
+) -> UnitQuoteResult:
+    """Price one fortnight's reviewed community allocation at hourly rates.
+
+    Each input quantity is a participant's negotiated fraction. Use one
+    valuation date and a distinct quantity identity for each participant.
+    """
+    hours = tas_rural_community_hours(
+        population,
+        supports_volunteer_ambulance=supports_volunteer_ambulance,
+    )
+    shares = tuple(QuoteQuantity.model_validate(dict(share)) for share in shares)
+    if (
+        len({share.valued_on for share in shares}) != 1
+        or any(share.unit != "hour" or not share.basis.strip() for share in shares)
+        or sum((Fraction(share.quantity) for share in shares), Fraction(0)) != 1
+    ):
+        msg = "Community hours require hourly quotes and full shares at one date"
+        raise ValueError(msg)
+    quantities = tuple(
+        share.model_copy(update={"quantity": Fraction(share.quantity) * hours})
+        for share in shares
+    )
+    return price_units(release, quantities)
