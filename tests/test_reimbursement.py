@@ -23,6 +23,7 @@ from src.reimbursement import (
     sa_consultant_development_caps_2025,
     sa_ordinary_study_fee_amount,
     sa_residential_course_allowance,
+    validate_vic_development_reimbursement,
 )
 from tests.checks import assert_that
 from tests.test_unit_quotes import quantity, quote, release
@@ -330,3 +331,56 @@ def test_sa_residential_course_days_keep_dated_quotes_and_enforce_band() -> None
             starts_on=starts_on,
             ends_on=date(2026, 2, 1),
         )
+
+
+@pytest.mark.parametrize(
+    ("applied_on", "receipt", "error"),
+    [
+        (date(2023, 1, 15), "Reviewed official receipt", None),
+        (date(2023, 1, 16), "Reviewed official receipt", "within 14 days"),
+        (date(2022, 12, 31), "Reviewed official receipt", "within 14 days"),
+        (date(2023, 1, 15), " ", "receipt evidence"),
+    ],
+)
+def test_vic_development_reimbursement_filing(
+    applied_on: date,
+    receipt: str,
+    error: str | None,
+) -> None:
+    """Preserve the approved amount and check filing and receipt evidence."""
+    claim = ReimbursementClaim(
+        claim_id="development",
+        charged_on=date(2023, 2, 1),
+        eligible_amount=Fraction("75.25"),
+        approval_evidence="Synthetic partial approval",
+    )
+    arguments = {
+        "returned_on": date(2023, 1, 1),
+        "applied_on": applied_on,
+    }
+    if error is None:
+        approved = validate_vic_development_reimbursement(
+            claim,
+            receipt_evidence=receipt,
+            **arguments,
+        )
+        assert_that(approved == claim)
+        period = ReimbursementPeriod(
+            currency="AUD",
+            starts_on=date(2023, 2, 1),
+            ends_on=date(2023, 3, 1),
+            cap=None,
+            prior_use=Decimal(0),
+            applicability_evidence="Synthetic reviewed Victorian clause 75 coverage",
+            claims=(approved,),
+        )
+        ledger = build_reimbursement_ledger(period)
+        assert_that(len(ledger.rows) == 1)
+        assert_that(ledger.total == Fraction("75.25"))
+    else:
+        with pytest.raises(ValueError, match=error):
+            validate_vic_development_reimbursement(
+                claim,
+                receipt_evidence=receipt,
+                **arguments,
+            )
