@@ -92,3 +92,40 @@ def test_byte_verification_and_exclusive_evidence_horizon(tmp_path: Path) -> Non
             "Synthetic employer",
             "Synthetic grade",
         )
+
+
+@pytest.mark.parametrize("published", [date(2025, 12, 1), date(2026, 6, 1)])
+def test_publication_date_does_not_replace_effective_date(published: date) -> None:
+    """Publication can precede or follow effect without changing scoped selection."""
+    record = source(published_on=published)
+    restored = SourceRecord.model_validate_json(record.model_dump_json())
+    assert_that(restored.published_on == published)
+    assert_that(restored.effective_from == date(2026, 1, 1))
+    registry = SourceRegistry(records=(restored,))
+    assert_that(
+        registry.require_applicable(
+            record.source_id,
+            date(2026, 2, 1),
+            "QLD",
+            "Synthetic employer",
+            "Synthetic grade",
+        )
+        == restored,
+    )
+    unresolved = restored.model_copy(update={"applicability": "unresolved"})
+    with pytest.raises(ValueError, match="scope"):
+        SourceRegistry(records=(unresolved,)).require_applicable(
+            record.source_id,
+            date(2026, 2, 1),
+            "QLD",
+            "Synthetic employer",
+            "Synthetic grade",
+        )
+
+
+def test_legacy_source_without_publication_date_round_trips() -> None:
+    """Previously created source records keep an unknown publication date."""
+    legacy = source().model_dump_json(exclude={"published_on"})
+    restored = SourceRecord.model_validate_json(legacy)
+    assert_that(restored.published_on is None)
+    assert_that(restored.effective_from == date(2026, 1, 1))
