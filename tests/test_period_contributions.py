@@ -605,3 +605,16 @@ def test_paid_contribution_uses_posting_boundary_and_remaining_cap() -> None:
     assert_that(result.contribution == Fraction(12))
     assert_that([row.eligible_base for row in result.rows] == [80, 20])
     assert_that([row.factor.factor_id for row in result.rows] == ["early", "late"])
+
+
+def test_paid_contribution_rejects_mixed_classification_scope() -> None:
+    """Require a separate contribution calculation after a scope transition."""
+    original = prices()
+    first, second = original.rates
+    changed = original.model_copy(
+        update={
+            "rates": (first, second.model_copy(update={"classification": "Other"})),
+        },
+    )
+    with pytest.raises(ValueError, match="Resource identity has conflicting scopes"):
+        cost_contribution_payments(changed, period(), rule(), ())

@@ -275,7 +275,7 @@ def _prepare(
     rule: ContributionRule,
     *,
     paid_basis: bool = False,
-) -> tuple[CostRelease, ContributionPeriod, ContributionRule]:
+) -> tuple[CostRelease, ContributionPeriod, ContributionRule, tuple[str, str, str]]:
     release = CostRelease.model_validate(release.model_dump())
     period = ContributionPeriod.model_validate(period.model_dump())
     rule = ContributionRule.model_validate(rule.model_dump())
@@ -322,7 +322,7 @@ def _prepare(
             )
         for left, right, factor in _pieces(alternative, start, end):
             _require_source(release, factor, (left, right), scope, zone)
-    return release, period, rule
+    return release, period, rule, scope
 
 
 def _calculate(
@@ -426,7 +426,7 @@ def cost_contribution_activities(
     factor changes split candidate rows before each alternative's total is summed.
     Payment dates and statutory base selection are supplied outside this calculation.
     """
-    release, period, rule = _prepare(release, period, rule)
+    release, period, rule, _ = _prepare(release, period, rule)
     activities = tuple(Activity.model_validate(a.model_dump()) for a in activities)
     for activity in activities:
         if (
@@ -463,7 +463,7 @@ def cost_contribution_snapshot(
     This is a constant-price quantity scenario, not earned/payment history.
     Each alternative needs one factor covering the entire declared period.
     """
-    release, period, rule = _prepare(release, period, rule)
+    release, period, rule, _ = _prepare(release, period, rule)
     resource = ResourceUse.model_validate(resource.model_dump())
     if (
         resource.resource_id != period.resource_id
@@ -591,16 +591,12 @@ def cost_contribution_payments(
     allowance_reconciliations: tuple[AllowancePaymentReconciliation, ...] = (),
 ) -> PaidContributionCost:
     """Price complete paid earnings using posting time and explicit basis membership."""
-    release, period, rule = _prepare(release, period, rule, paid_basis=True)
+    release, period, rule, scope = _prepare(release, period, rule, paid_basis=True)
     start, end = _utc(period.starts_at), _utc(period.ends_at)
     reconciled = tuple(
         reconcile_allowance_payment(item.allowance, item.payment)
         for item in allowance_reconciliations
     )
-    rate = next(
-        rate for rate in release.rates if rate.resource_id == period.resource_id
-    )
-    scope = (rate.jurisdiction, rate.employer, rate.classification)
     if any(item.allowance.scope != scope for item in reconciled):
         msg = "Allowance jurisdiction, employer or classification differs from payroll"
         raise ValueError(msg)
