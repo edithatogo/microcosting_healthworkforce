@@ -126,10 +126,14 @@ def test_snapshot_cli_preserves_exact_total_and_rejects_invalid_mode(
         main([*args, "--activity", "unused.json"])
 
 
-@pytest.mark.parametrize("leave_hours", ["200", "601/3"])
+@pytest.mark.parametrize(
+    ("leave_hours", "cover_hours"),
+    [("200", "100"), ("601/3", "301/3")],
+)
 def test_capacity_cli_retains_assumptions_and_exact_total(
     tmp_path: Path,
     leave_hours: str,
+    cover_hours: str,
 ) -> None:
     """Expose separate paid cost, cover and productive hours through JSON."""
     release_path = tmp_path / "release.json"
@@ -138,7 +142,8 @@ def test_capacity_cli_retains_assumptions_and_exact_total(
     release_path.write_text(release().model_dump_json(), encoding="utf-8")
     request.write_text(
         f'{{"as_of":"2026-06-01","losses":[{{"loss_id":"leave","hours":"{leave_hours}"}}],'
-        '"cover_hours":"100","cover_hourly_cost":"60","losses_disjoint":true}',
+        f'"cover_hours":"{cover_hours}","cover_hourly_cost":"60",'
+        '"losses_disjoint":true}',
         encoding="utf-8",
     )
     args = [
@@ -155,17 +160,22 @@ def test_capacity_cli_retains_assumptions_and_exact_total(
     assert_that(main(args) == 0)
     result = CapacityScenarioResult.model_validate_json(output.read_bytes())
     assert_that(result.paid_cost == Decimal(100000))
-    assert_that(result.incremental_cover_cost == Decimal(6000))
+    cover_cost = Fraction(cover_hours) * 60
+    assert_that(Fraction(result.assumptions.cover_hours) == Fraction(cover_hours))
+    assert_that(Fraction(result.incremental_cover_cost) == cover_cost)
     productive = Fraction(2000) - Fraction(leave_hours)
     assert_that(
         Fraction(
             result.exact_productive_rate_numerator,
             result.exact_productive_rate_denominator,
         )
-        == Fraction(106000) / productive,
+        == (100000 + cover_cost) / productive,
     )
     assert_that(Fraction(result.assumptions.losses[0].hours) == Fraction(leave_hours))
-    assert_that(result.exact_total_numerator == Decimal(106000))
+    assert_that(
+        Fraction(result.exact_total_numerator, result.exact_total_denominator)
+        == 100000 + cover_cost,
+    )
     assert_that(result.exact_total_denominator == 1)
     assert_that(result.assumptions.losses[0].loss_id == "leave")
     with pytest.raises(FileExistsError):

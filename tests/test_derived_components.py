@@ -297,3 +297,23 @@ def test_leave_levy_uses_only_selected_gross_salary_components() -> None:
     assert_that(snapshot.rows[-1].amount == Fraction("2.86"))
     assert_that(dated.rows == snapshot.rows)
     assert_that(dated.exact_total == snapshot.exact_total == Fraction("125.06"))
+
+
+def test_backfill_scenario_separates_direct_cost_and_loaded_super_base() -> None:
+    """Retain direct backfill, its on-costs and downstream super separately."""
+    rules = (
+        rule("relief", "direct_backfill", ("salary",), "0.02"),
+        rule("relief-load", "backfill_oncost", ("direct_backfill",), "0.1615"),
+        rule(
+            "relief-super",
+            "additional_super",
+            ("direct_backfill", "backfill_oncost"),
+            "0.1",
+        ),
+    )
+    result = cost_derived_snapshot(baseline(), date(2026, 6, 2), Decimal(100), rules)
+    assert_that(
+        [row.amount for row in result.rows]
+        == [Fraction(100), Fraction("16.15"), Fraction("11.615")],
+    )
+    assert_that(result.exact_total == Fraction("5627.765"))

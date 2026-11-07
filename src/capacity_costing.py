@@ -24,7 +24,7 @@ class CapacityScenarioInputs(BaseModel):
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
     losses: tuple[CapacityLoss, ...]
-    cover_hours: Decimal = Field(ge=0, allow_inf_nan=False)
+    cover_hours: NonnegativeQuantity
     cover_hourly_cost: Decimal = Field(ge=0, allow_inf_nan=False)
     losses_disjoint: bool
 

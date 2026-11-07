@@ -13,3 +13,12 @@ payroll amounts, leave, on-costs, pay-point progression or a rounding policy.
 It is separate from elapsed-hour roster costing and does not assert full parity
 with any workbook. Where a source rate changes within a month, this method cannot
 represent the change and requires a different qualified method.
+
+## Terminal partial months
+
+The end date remains inclusive in the final budget month. At an annual
+salary of AUD 120,000 and one FTE, a 1 May to 15 June assignment costs
+AUD 10,000 for May and AUD 5,000 for June. The historical Queensland
+template can price June as a full month when June is the last modelled
+month and progression supplies a pay point. Treat this as a documented
+difference when comparing the two methods.
