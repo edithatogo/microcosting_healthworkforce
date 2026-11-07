@@ -225,3 +225,19 @@ def test_report_dsa_results(caplog: LogCaptureFixture) -> None:
 def clone_pipeline(df: pl.DataFrame, _formulas: dict[str, Any]) -> pl.DataFrame:
     """Preserve input rows in the DSA pipeline fixture."""
     return df.clone()
+
+
+def test_dsa_rejects_ambiguous_scenario_records(base_dsa_data: dict[str, Any]) -> None:
+    """Reject overwritten outputs and incomplete parameter assignments."""
+    scenario = {
+        "name": "baseline",
+        "parameter_to_vary": "param1",
+        "variation": {"type": "absolute", "value": 0},
+    }
+    with pytest.raises(ValueError, match="Duplicate DSA scenario name"):
+        run_dsa_analysis(**base_dsa_data, scenarios=[scenario, scenario])
+    with pytest.raises(ValueError, match="one variation per parameter"):
+        run_dsa_analysis(
+            **base_dsa_data,
+            scenarios=[{"name": "baseline", "parameters_to_vary": ["param1"]}],
+        )
