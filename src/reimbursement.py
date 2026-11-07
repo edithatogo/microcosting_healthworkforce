@@ -5,7 +5,6 @@ from dataclasses import dataclass
 from fractions import Fraction
 from typing import Literal, Self
 lazy from datetime import date
-lazy from decimal import Decimal
 
 from pydantic import Field, model_validator
 
@@ -17,7 +16,7 @@ class ReimbursementClaim(QuoteModel):
 
     claim_id: str
     charged_on: date
-    eligible_amount: Decimal = Field(ge=0, allow_inf_nan=False)
+    eligible_amount: NonnegativeQuantity
     approval_evidence: str
 
 
@@ -198,3 +197,22 @@ def reimbursement_cost_after_recovery(
     """
     decision = ReimbursementRecoveryDecision.model_validate(dict(decision))
     return Fraction(decision.reimbursed) - Fraction(decision.approved_recovery)
+
+
+def sa_ordinary_study_fee_amount(
+    compulsory_tuition: NonnegativeQuantity,
+    examination_fees: NonnegativeQuantity,
+    *,
+    proof_of_passing: bool,
+) -> Fraction:
+    """Value the ordinary fee route in SA Health HR Manual 7/22 section 7-1-4.
+
+    Supply only reviewed eligible tuition and examination fees. Withdrawal,
+    apprenticeship and discretionary assistance require separate review.
+    """
+    tuition = Fraction(compulsory_tuition)
+    exams = Fraction(examination_fees)
+    if min(tuition, exams) < 0:
+        msg = "Study fees must be nonnegative"
+        raise ValueError(msg)
+    return tuition + exams if proof_of_passing else Fraction(0)

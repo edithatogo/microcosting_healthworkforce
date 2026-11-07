@@ -65,3 +65,20 @@ def test_psa_title_is_a_label_while_scalar_meaning_remains_unknown() -> None:
     assert_that(cells["A2"].role == "unresolved_historical_value")
     assert_that(cells["A2"].unit is None)
     assert_that(table.definition.status == "archived_candidate")
+
+
+def test_unresolved_historical_values_are_preserved_without_units() -> None:
+    """Both unresolved numeric cells stay distinct from priced conditions."""
+    unresolved = {
+        (table.definition.sheet, cell.coordinate): (cell.unit, table.definition.status)
+        for table in extracted().tables
+        for cell in table.cells
+        if cell.role == "unresolved_historical_value"
+    }
+    assert_that(
+        unresolved
+        == {
+            ("Labour - Prices (DSA)", "AK39"): (None, "physical_region_unresolved"),
+            ("PSA - Validation", "A2"): (None, "archived_candidate"),
+        },
+    )

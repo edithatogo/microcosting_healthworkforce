@@ -197,8 +197,8 @@ def main(argv: list[str] | None = None) -> int:
     release = _load_release(args.release, args.workbook_origins)
     if args.capacity is not None:
         capacity = CapacityRequest.model_validate_json(args.capacity.read_bytes())
-        assumptions = CapacityScenarioInputs.model_validate(
-            capacity.model_dump(exclude={"as_of"}),
+        assumptions = CapacityScenarioInputs.model_validate_json(
+            capacity.model_dump_json(exclude={"as_of"}),
         )
         encoded = capacity_scenario(
             release,

@@ -20,6 +20,7 @@ from src.reimbursement import (
     reimbursement_cost_after_recovery,
     sa_consultant_development_caps,
     sa_consultant_development_caps_2025,
+    sa_ordinary_study_fee_amount,
 )
 from tests.checks import assert_that
 
@@ -218,3 +219,45 @@ def test_reviewed_uncapped_claims_cost_only_eligible_expenses() -> None:
     assert_that(row.remaining is None)
     with pytest.raises(ValueError, match="Invalid reimbursement period"):
         cost_reimbursements(period.model_copy(update={"prior_use": Decimal(1)}))
+
+
+def test_sa_ordinary_study_fees_require_proof_of_passing() -> None:
+    """Only proven compulsory tuition and examination fees price here."""
+    price = sa_ordinary_study_fee_amount
+    tuition, exams = Decimal("675.25"), Fraction(1, 3)
+    assert_that(
+        price(tuition, exams, proof_of_passing=True) == Fraction("675.25") + exams,
+    )
+    assert_that(price(tuition, exams, proof_of_passing=False) == 0)
+    with pytest.raises(ValueError, match="nonnegative"):
+        price(Decimal(-1), exams, proof_of_passing=True)
+
+
+def test_proven_study_fees_enter_claim_ledger_without_rounding() -> None:
+    """The exact fee result can be used directly in a serialized claim."""
+    amount = sa_ordinary_study_fee_amount(
+        Decimal("600.25"),
+        Fraction(1, 3),
+        proof_of_passing=True,
+    )
+    start = date(2022, 7, 1)
+    period = ReimbursementPeriod(
+        currency="AUD",
+        starts_on=start,
+        ends_on=date(2023, 7, 1),
+        cap=None,
+        prior_use=Decimal(0),
+        applicability_evidence="Synthetic reviewed ordinary study fee route",
+        claims=(
+            ReimbursementClaim(
+                claim_id="study-fees",
+                charged_on=start,
+                eligible_amount=amount,
+                approval_evidence="Synthetic proof of passing and fee evidence",
+            ),
+        ),
+    )
+    ledger = build_reimbursement_ledger(
+        ReimbursementPeriod.model_validate_json(period.model_dump_json()),
+    )
+    assert_that(ledger.total == Fraction("600.25") + Fraction(1, 3))
