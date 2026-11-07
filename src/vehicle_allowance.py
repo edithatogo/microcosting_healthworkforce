@@ -32,6 +32,9 @@ class VehicleTravelExclusion(QuoteModel):
     source_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
     citation: str
     reviewed: bool
+    effective_from: date
+    effective_to: date
+    known_from: date
 
 
 @dataclass(frozen=True)
@@ -54,6 +57,12 @@ def price_vehicle_travel(
     if not rule.reviewed:
         msg = "Vehicle travel exclusion requires a reviewed rule"
         raise ValueError(msg)
+    if (
+        rule.effective_from >= rule.effective_to
+        or rule.known_from > release.as_known_on
+    ):
+        msg = "Vehicle exclusion requires valid dates and a known rule"
+        raise ValueError(msg)
     cases = tuple(VehicleTravelCase.model_validate(c.model_dump()) for c in cases)
     if len({case.travel.quantity_id for case in cases}) != len(cases):
         msg = "Duplicate vehicle travel quantity identity"
@@ -63,6 +72,9 @@ def price_vehicle_travel(
     payable: list[QuoteQuantity] = []
     for case in cases:
         travel = case.travel
+        if not rule.effective_from <= travel.valued_on < rule.effective_to:
+            msg = "Vehicle exclusion does not cover the travel date"
+            raise ValueError(msg)
         if case.receipt_known_on > release.as_known_on:
             msg = "Vehicle receipt evidence exceeds the release knowledge cutoff"
             raise ValueError(msg)

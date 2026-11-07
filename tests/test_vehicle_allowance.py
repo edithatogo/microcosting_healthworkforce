@@ -25,6 +25,9 @@ def test_receipt_excludes_travel_before_pricing() -> None:
         source_sha256="a" * 64,
         citation="Synthetic exclusion clause",
         reviewed=True,
+        effective_from=date(2026, 1, 1),
+        effective_to=date(2027, 1, 1),
+        known_from=date(2026, 1, 1),
     )
     paid = VehicleTravelCase(
         travel=quantity(unit="km", quantity=Decimal(20)),
@@ -57,5 +60,11 @@ def test_receipt_excludes_travel_before_pricing() -> None:
         price_vehicle_travel(
             rates,
             rule.model_copy(update={"travel_component": "unrelated"}),
+            (paid,),
+        )
+    with pytest.raises(ValueError, match="does not cover the travel date"):
+        price_vehicle_travel(
+            rates,
+            rule.model_copy(update={"effective_to": paid.travel.valued_on}),
             (paid,),
         )
