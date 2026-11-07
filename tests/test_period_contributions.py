@@ -140,6 +140,16 @@ def test_greater_of_period_totals_is_not_sum_of_segment_maxima() -> None:
     )
 
 
+def test_single_period_contribution_basis() -> None:
+    """Price a single contribution basis across effective-dated segments."""
+    original = rule()
+    single = original.model_copy(update={"alternatives": (original.alternatives[0],)})
+    result = cost_contribution_activities(prices(), period(), single, (activity(),))
+    assert_that(result.winning_alternative_ids == ("broad",))
+    assert_that(result.contribution == Fraction(30))
+    assert_that(result.exact_total == Fraction(330))
+
+
 def test_segmentation_order_and_alternative_order_preserve_money() -> None:
     """Splitting at an arbitrary minute cannot reset the comparison period."""
     whole = cost_contribution_activities(prices(), period(), rule(), (activity(),))
@@ -191,20 +201,27 @@ def test_factor_change_and_wage_change_are_split_before_comparing_totals() -> No
         )
 
 
-def test_static_and_dynamic_agree_for_constant_prices_and_factors() -> None:
+@pytest.mark.parametrize("basis_count", [1, 2])
+def test_static_and_dynamic_agree_for_constant_prices_and_factors(
+    basis_count: int,
+) -> None:
     """At a stationary200/hour, broad40 beats narrow30; total440."""
     original = prices()
     constant = original.model_copy(
         update={"rates": (original.rates[0].model_copy(update={"ends_at": None}),)},
     )
+    policy = rule()
+    policy = policy.model_copy(
+        update={"alternatives": policy.alternatives[:basis_count]},
+    )
     static = cost_contribution_snapshot(
         constant,
         period(),
-        rule(),
+        policy,
         START,
         ResourceUse(resource_id="staff", hours=Decimal(2)),
     )
-    dynamic = cost_contribution_activities(constant, period(), rule(), (activity(),))
+    dynamic = cost_contribution_activities(constant, period(), policy, (activity(),))
     assert_that(static.contribution == dynamic.contribution == Fraction(40))
     assert_that(static.exact_total == dynamic.exact_total == Fraction(440))
     assert_that(

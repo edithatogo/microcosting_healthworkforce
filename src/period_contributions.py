@@ -149,11 +149,11 @@ class ContributionAlternative(FrozenModel):
 
 
 class ContributionRule(FrozenModel):
-    """Select one maximum after each alternative is summed over the whole period."""
+    """Apply one basis or select the maximum of whole-period alternatives."""
 
     rule_id: str = Field(min_length=1)
     component: str = Field(min_length=1)
-    alternatives: tuple[ContributionAlternative, ...] = Field(min_length=2)
+    alternatives: tuple[ContributionAlternative, ...] = Field(min_length=1)
     source_id: str = Field(min_length=1)
     source_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
     citation: str = Field(min_length=1)
