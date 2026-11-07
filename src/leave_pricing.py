@@ -924,3 +924,70 @@ def sa_part_time_study_block_days(
         msg = "Annual block release above 20 days requires a separate approval"
         raise ValueError(msg)
     return approved_block_days + approved_additional_block_days
+
+
+def nsw_face_to_face_study_leave_guide(compulsory_weekly_hours: Fraction) -> Fraction:
+    """Calculate the full-time face-to-face guide in NSW Health PD2022_006.
+
+    The organisation decides the grant. Apply reviewed part-time treatment
+    separately and value only the leave actually approved.
+    """
+    if compulsory_weekly_hours < 0:
+        msg = "Compulsory weekly attendance must be nonnegative"
+        raise ValueError(msg)
+    return min(Fraction(4), compulsory_weekly_hours / 2)
+
+
+def nsw_research_study_leave_guide(
+    academic_year_weeks: Fraction,
+    study_fraction: Fraction,
+) -> Fraction:
+    """Calculate the NSW PD2022_006 research study guide in hours.
+
+    Supply the institution's academic-year length and reviewed study fraction.
+    The organisation determines the actual leave grant separately.
+    """
+    if academic_year_weeks < 0 or not 0 <= study_fraction <= 1:
+        msg = (
+            "Academic weeks must be nonnegative and study fraction between zero and one"
+        )
+        raise ValueError(msg)
+    return 4 * academic_year_weeks * study_fraction
+
+
+def nsw_examination_leave_days(
+    approved_days: Fraction,
+    prior_days: Fraction,
+) -> Fraction:
+    """Validate a reviewed examination grant under NSW Health PD2022_006.
+
+    Supply days for travel and examination during work hours, and prior
+    usage in the same calendar year. Pre-examination leave is separate.
+    """
+    annual_limit = 5
+    if min(approved_days, prior_days) < 0 or approved_days + prior_days > annual_limit:
+        msg = "Examination leave must fit the five-day calendar-year limit"
+        raise ValueError(msg)
+    return approved_days
+
+
+def nsw_online_study_leave_hours(
+    approved_weekly_hours: Fraction,
+    *,
+    equivalent_compulsory_hours: Fraction | None,
+) -> Fraction:
+    """Check a reviewed full-time online study grant under PD2022_006.
+
+    A supplied face-to-face equivalence uses the same guide. Without
+    equivalence, the discretionary weekly grant is bounded by four hours.
+    The caller verifies course accreditation and part-time treatment.
+    """
+    limit = (
+        Fraction(4)
+        if equivalent_compulsory_hours is None
+        else nsw_face_to_face_study_leave_guide(equivalent_compulsory_hours)
+    )
+    if not 0 <= approved_weekly_hours <= limit:
+        msg = "Online study grant must fit the applicable weekly limit"
+        raise ValueError(msg)
+    return approved_weekly_hours
