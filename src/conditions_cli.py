@@ -13,6 +13,7 @@ from src.capacity_costing import CapacityScenarioInputs, capacity_scenario
 from src.conditions import (
     ConditionRelease,
     SnapshotQuantity,
+    WorkbookConditionOrigin,
     cost_condition_activity,
     cost_condition_snapshot,
 )
@@ -31,6 +32,41 @@ class CapacityRequest(CapacityScenarioInputs):
     as_of: date
 
 
+def _load_release(release_path: Path, origin_path: Path | None) -> ConditionRelease:
+    """Bind an explicit origin mapping before accepting the release for costing."""
+    release = ConditionRelease.model_validate_json(release_path.read_bytes())
+    if origin_path is not None:
+        origins = TypeAdapter(dict[str, WorkbookConditionOrigin]).validate_json(
+            origin_path.read_bytes(),
+        )
+        if not origins.keys() <= {item.condition_id for item in release.conditions}:
+            msg = "Workbook origins reference unknown condition IDs"
+            raise ValueError(msg)
+        for item in release.conditions:
+            origin = origins.get(item.condition_id)
+            if origin is not None and item.workbook_origin not in (None, origin):
+                msg = "Workbook origin conflicts with existing release evidence"
+                raise ValueError(msg)
+        updated = release.model_copy(
+            update={
+                "conditions": tuple(
+                    item.model_copy(
+                        update={
+                            "workbook_origin": origins.get(
+                                item.condition_id,
+                                item.workbook_origin,
+                            ),
+                        },
+                    )
+                    for item in release.conditions
+                ),
+            },
+        )
+        release = ConditionRelease.model_validate(updated.model_dump())
+
+    return release
+
+
 def main(argv: list[str] | None = None) -> int:
     """Validate both inputs, then create a new output without overwriting files."""
     parser = argparse.ArgumentParser(description=__doc__)
@@ -42,11 +78,16 @@ def main(argv: list[str] | None = None) -> int:
     inputs.add_argument("--snapshot", type=Path)
     inputs.add_argument("--capacity", type=Path)
     inputs.add_argument("--assignment-request", type=Path)
+    parser.add_argument("--workbook-origins", type=Path)
     parser.add_argument("--timezone")
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args(argv)
     if args.timeline is not None:
-        if args.assignment_request is None or args.timezone is not None:
+        if (
+            args.assignment_request is None
+            or args.timezone is not None
+            or args.workbook_origins is not None
+        ):
             parser.error("--timeline requires --assignment-request and state timezones")
         timeline = AssignmentTimeline.model_validate_json(args.timeline.read_bytes())
         request = TypeAdapter(AssignmentRequest).validate_json(
@@ -63,7 +104,7 @@ def main(argv: list[str] | None = None) -> int:
         parser.error("--activity requires --timezone")
     if args.activity is None and args.timezone is not None:
         parser.error("--timezone applies only to --activity")
-    release = ConditionRelease.model_validate_json(args.release.read_bytes())
+    release = _load_release(args.release, args.workbook_origins)
     if args.capacity is not None:
         capacity = CapacityRequest.model_validate_json(args.capacity.read_bytes())
         assumptions = CapacityScenarioInputs.model_validate(
