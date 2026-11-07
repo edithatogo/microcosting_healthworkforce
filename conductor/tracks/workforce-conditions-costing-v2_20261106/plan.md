@@ -724,3 +724,11 @@ labour costs. The cost formulas use the column H series. The evidence
 establishes the workbook's arithmetic and selected denominator. Using
 these weights for workforce estimates still requires evidence that the
 underlying population represents the workforce being costed.
+
+PR #242 adds a quarterly long-service leave levy deadline calculator.
+It counts 12 working days after calendar quarter end using explicit daily
+classifications and rejects missing dates. The March and September 2026
+Queensland holiday scenarios yield 20 April and 19 October respectively.
+Main CI and Security passed at 334f8eb. An actual deadline still requires
+the applicable pay-office calendar, and the calculated date remains
+separate from the actual remittance timestamp.
