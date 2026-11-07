@@ -231,3 +231,17 @@ def test_periodic_allowance_rejects_component_in_salary_bundle() -> None:
             "training",
             period(portion("ordinary", "76", "1", "1")),
         )
+
+
+def test_vehicle_allowance_prorates_mixed_leave_in_one_fortnight() -> None:
+    """Price full-pay, half-pay and unpaid portions of a part-time period."""
+    result = cost_periodic_allowance(
+        release(),
+        "training",
+        period(
+            portion("full-pay", "19", "1", "1"),
+            portion("half-pay", "19", "0.5", "0.5"),
+            portion("unpaid", "19", "0", "0"),
+        ),
+    )
+    assert_that(result.payable == result.accrued == Fraction(5925, 208))
