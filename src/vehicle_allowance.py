@@ -2,6 +2,7 @@
 """Price travel after an explicitly evidenced recurring allowance exclusion."""
 
 from dataclasses import dataclass
+from typing import Literal
 lazy from datetime import date
 
 from pydantic import Field
@@ -113,3 +114,28 @@ def _require_known_source(source: SourceRecord, cutoff: date) -> None:
     if source.retrieved_at is None or source.retrieved_at.date() > cutoff:
         msg = "Vehicle exclusion source exceeds the release knowledge cutoff"
         raise ValueError(msg)
+
+
+class Moca7VehicleAppointment(QuoteModel):
+    """Reviewed covered SMO or MPPP appointment for one valuation."""
+
+    classification_level: int = Field(ge=13, le=29)
+    received_manager_allowance_level: int = Field(ge=0)
+    review_evidence: str
+
+
+def moca7_vehicle_level(appointment: Moca7VehicleAppointment) -> Literal[1, 2]:
+    """Select the SES equivalent under MOCA7 clause 11.33.2.
+
+    Zero manager allowance level means reviewed nonreceipt. The caller
+    establishes appointment coverage and selects the dated amount separately.
+    """
+    appointment = Moca7VehicleAppointment.model_validate(appointment.model_dump())
+    upper_classification_start = 25
+    manager_override_start = 6
+    if (
+        appointment.classification_level >= upper_classification_start
+        or appointment.received_manager_allowance_level >= manager_override_start
+    ):
+        return 2
+    return 1
