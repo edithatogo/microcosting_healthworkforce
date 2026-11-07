@@ -2,7 +2,7 @@
 """Project annual costs using the scenario's annual indexation rate."""
 
 from fractions import Fraction
-from math import floor
+from math import floor, isfinite
 lazy from decimal import Decimal
 
 import polars as pl
@@ -94,3 +94,18 @@ def project_workbook_vehicle_amounts(
         projected.append(rounded)
         carried = Fraction(rounded)
     return tuple(projected)
+
+
+def project_workbook_pda_amount(opening_amount: float, factor: float) -> float:
+    """Replay the delivered Queensland PDA cache for one stream and month."""
+    if not isfinite(opening_amount) or not isfinite(factor):
+        msg = "PDA projection inputs must be finite"
+        raise ValueError(msg)
+    if opening_amount < 0 or factor < 0:
+        msg = "PDA projection inputs must be nonnegative"
+        raise ValueError(msg)
+    tenths = opening_amount * factor / 0.1
+    if not isfinite(tenths):
+        msg = "PDA projection exceeds the supported range"
+        raise ValueError(msg)
+    return floor(tenths + 0.5) * 0.1

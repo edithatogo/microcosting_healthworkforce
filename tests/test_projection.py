@@ -6,7 +6,11 @@ from decimal import Decimal
 import polars as pl
 import pytest
 
-from src.projection import project_workbook_costs, project_workbook_vehicle_amounts
+from src.projection import (
+    project_workbook_costs,
+    project_workbook_pda_amount,
+    project_workbook_vehicle_amounts,
+)
 from tests.checks import assert_that
 
 
@@ -57,3 +61,11 @@ def test_vehicle_projection_rounds_each_carried_amount() -> None:
     assert_that(project_workbook_vehicle_amounts(None, rates) == (0, 0))
     with pytest.raises(ValueError, match="indexation rates"):
         project_workbook_vehicle_amounts(Decimal(100), (Decimal("NaN"),))
+
+
+def test_pda_projection_preserves_binary_rounding_boundary() -> None:
+    """Replay the cached binary rounding on either side of a boundary."""
+    assert_that(project_workbook_pda_amount(1.15, 1) == pytest.approx(1.1))
+    assert_that(project_workbook_pda_amount(1.16, 1) == pytest.approx(1.2))
+    with pytest.raises(ValueError, match="finite"):
+        project_workbook_pda_amount(100, float("nan"))

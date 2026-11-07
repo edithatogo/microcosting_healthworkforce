@@ -7,13 +7,19 @@ from fractions import Fraction
 
 import pytest
 
+from src.periodic_allowance import cost_periodic_allowance_allocations
 from src.source_registry import SourceRegistry
 from src.vehicle_allowance import (
+    Moca7VehicleAppointment,
     VehicleTravelCase,
     VehicleTravelExclusion,
+    moca7_vehicle_level,
     price_vehicle_travel,
 )
 from tests.checks import assert_that
+from tests.test_conditions import condition
+from tests.test_periodic_allowance import period, portion
+from tests.test_periodic_allowance import release as condition_release
 from tests.test_unit_quotes import quantity, quote, release
 
 
@@ -104,3 +110,63 @@ def test_receipt_excludes_travel_before_pricing() -> None:
             rule.model_copy(update={"source_id": "late-rule"}),
             (suppressed,),
         )
+
+
+@pytest.mark.parametrize(
+    ("classification", "manager_level", "expected"),
+    [(13, 0, 1), (24, 5, 1), (24, 6, 2), (25, 0, 2), (29, 0, 2)],
+)
+def test_moca7_vehicle_level(
+    classification: int,
+    manager_level: int,
+    expected: int,
+) -> None:
+    """Apply the grade boundary and reviewed manager receipt exception."""
+    appointment = Moca7VehicleAppointment(
+        classification_level=classification,
+        received_manager_allowance_level=manager_level,
+        review_evidence="Synthetic covered appointment and receipt assessment",
+    )
+    assert_that(moca7_vehicle_level(appointment) == expected)
+
+
+def test_moca7_vehicle_level_change_across_fortnight() -> None:
+    """Price a reviewed manager receipt change with one nominal denominator."""
+    appointment = Moca7VehicleAppointment(
+        classification_level=24,
+        received_manager_allowance_level=0,
+        review_evidence="Synthetic reviewed nonreceipt",
+    )
+    promoted = appointment.model_copy(
+        update={
+            "received_manager_allowance_level": 6,
+            "review_evidence": "Synthetic reviewed manager receipt",
+        },
+    )
+    conditions = (
+        condition("vehicle-1", "fixed_annual", "2600", "AUD/year"),
+        condition("vehicle-2", "fixed_annual", "5200", "AUD/year"),
+    )
+    rates = condition_release().model_copy(update={"conditions": conditions})
+    boundary = date(2026, 6, 8)
+    before = period(portion("ordinary", "38", "1", "1")).model_copy(
+        update={"ends_on": boundary},
+    )
+    after = period(
+        portion("half-pay", "19", "1", "0.5"),
+        portion("unpaid", "19", "0", "0"),
+    ).model_copy(update={"starts_on": boundary})
+    allocations = (
+        (rates, f"vehicle-{moca7_vehicle_level(appointment)}", before),
+        (rates, f"vehicle-{moca7_vehicle_level(promoted)}", after),
+    )
+    parent = period(*before.portions, *after.portions)
+    result = cost_periodic_allowance_allocations(parent, allocations)
+    assert_that(
+        [segment.condition.condition_id for segment in result.segments]
+        == ["vehicle-1", "vehicle-2"],
+    )
+    assert_that(result.payable == Fraction(75))
+    assert_that(result.accrued == Fraction(100))
+    with pytest.raises(ValueError, match="conserve classified hours"):
+        cost_periodic_allowance_allocations(period(*before.portions), allocations)

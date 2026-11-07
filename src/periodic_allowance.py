@@ -181,10 +181,21 @@ def cost_periodic_allowance_across_releases(
     allocations: tuple[tuple[ConditionRelease, AllowancePeriod], ...],
 ) -> PeriodicAllowanceSchedule:
     """Price each reviewed segment with its own source release."""
+    return cost_periodic_allowance_allocations(
+        period,
+        tuple((release, component, segment) for release, segment in allocations),
+    )
+
+
+def cost_periodic_allowance_allocations(
+    period: AllowancePeriod,
+    allocations: tuple[tuple[ConditionRelease, str, AllowancePeriod], ...],
+) -> PeriodicAllowanceSchedule:
+    """Price reviewed component changes while conserving the parent allocation."""
     period = AllowancePeriod.model_validate(period.model_dump())
     segments = tuple(
         AllowancePeriod.model_validate(segment.model_dump())
-        for _, segment in allocations
+        for _, _, segment in allocations
     )
     if not segments:
         msg = "Allowance schedule requires at least one segment"
@@ -209,7 +220,7 @@ def cost_periodic_allowance_across_releases(
         raise ValueError(msg)
     costs = tuple(
         cost_periodic_allowance(release, component, segment)
-        for (release, _), segment in zip(allocations, segments, strict=True)
+        for (release, component, _), segment in zip(allocations, segments, strict=True)
     )
     return PeriodicAllowanceSchedule(
         period,
