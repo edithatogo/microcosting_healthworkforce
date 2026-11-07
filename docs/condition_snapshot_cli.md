@@ -30,3 +30,17 @@ explicit, nonoverlapping loss and cover assumptions.
 The result reports paid cost, incremental cover, productive hours for the
 original worker, exact cost fractions and the original assumptions. Choose
 one request mode. The output path must be new.
+
+## Attach reviewed workbook provenance
+
+For a single release, pass `--workbook-origins origins.json` to attach
+reviewed workbook origins before pricing. The JSON object is keyed by
+condition ID. Each value supplies `workbook_sha256`, `sheet`,
+`coordinate`, `applicability`, and `review_evidence`.
+
+The mapped condition must already have an accepted release and a
+verified instrument source. Workbook applicability must also be
+`verified`. An unknown condition ID, conflicting existing provenance
+or unresolved applicability prevents output creation. Retain the
+reviewed mapping with the release evidence. Assignment timelines
+carry provenance inside their pinned releases.
