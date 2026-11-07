@@ -139,6 +139,18 @@ def test_band_boundaries_select_one_price_without_maximizing(
     assert_that(result.release == release())
 
 
+def test_uncovered_interior_count_is_not_a_zero_entitlement() -> None:
+    """Reject a gap between two payable bands without interpolating."""
+    current = policy()
+    bands = tuple(
+        band.model_copy(update={"minimum": 7}) if band.band_id == "medium" else band
+        for band in current.bands
+    )
+    current = current.model_copy(update={"bands": bands})
+    with pytest.raises(ValueError, match="Exactly one explicit count band"):
+        price_count_bands(current, release(), (case(6),))
+
+
 def test_unknown_count_above_published_band_fails_even_if_zero_or_ineligible() -> None:
     """Unknown bands cannot become zero or reuse the last published price."""
     c = case(20)
