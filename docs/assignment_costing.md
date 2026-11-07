@@ -101,4 +101,51 @@ A frozen earlier timeline can be replayed independently of a later decision
 snapshot. The result is a nominal-hour valuation: historical cash paid, backpay,
 settlement, productive capacity, overtime and source-specific progression rules
 remain separate. No automatic FTE, month-length, payroll-cycle, approval or source
-priority rule is added. This is a Python API; CLI defaults and PSA are unchanged.
+priority rule is added. Existing single-release CLI behavior and PSA are unchanged.
+
+
+## Explicit JSON requests and CLI
+
+The existing `microcosting-healthworkforce-v2` command also accepts an assignment
+timeline. Save the complete `AssignmentTimeline.model_dump_json()` in
+`timeline.json`, including its independently qualified releases. Select exactly
+one request mode in `request.json`:
+
+```json
+{"mode": "snapshot", "when": "2026-06-02T00:00:00+00:00", "hours": "2"}
+```
+
+For dated work, supply an `activities` array of the existing `Activity` JSON
+objects. The subject must match the timeline; each state supplies its timezone.
+
+```json
+{
+  "mode": "activities",
+  "activities": [{
+    "activity_id": "fictional-shift",
+    "resource_id": "opaque-subject",
+    "starts_at": "2026-06-02T00:00:00+00:00",
+    "ends_at": "2026-06-02T02:00:00+00:00",
+    "resources": "1"
+  }]
+}
+```
+
+```bash
+uv run --locked microcosting-healthworkforce-v2 --timeline timeline.json --assignment-request request.json --output result.json
+```
+
+The output retains the full validated timeline, its hash, supplied activities or
+snapshot instant, release/source pins and exact component ledger. Rational hours
+and amounts serialize as strings such as `"1/3"`; parse them with `Fraction`
+when exact arithmetic is needed. Output creation is exclusive and never replaces
+an existing file. Unknown modes/fields, naive snapshot times and invalid inputs
+fail before a new output is created. Assignment requests cannot be combined with
+`--release`, `--snapshot`, `--activity` or an external `--timezone`.
+
+For scenario calls, validate with
+`TypeAdapter(AssignmentRequest).validate_json(request_bytes)` and invoke
+`run_assignment_request(timeline, request)` from `src.assignment_requests`.
+The adapter revalidates unchecked copies and delegates directly to the same
+snapshot/activity functions used by the CLI. It introduces no default prices,
+probabilities, promotion decisions, worker eligibility or uncertainty model.
