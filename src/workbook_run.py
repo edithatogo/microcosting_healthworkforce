@@ -21,7 +21,7 @@ from src import config
 from src.formula_engine import apply_formulas, load_formulas
 from src.libreoffice import recalculate
 from src.numeric import numeric, row_filter
-from src.projection import project_costs
+from src.projection import project_costs, project_workbook_costs
 from src.psa_analysis import report_psa_results, run_psa_analysis
 from src.psa_simulation import SimulationSpec
 from src.rate_converter import convert_annual_cost_to_rates
@@ -115,16 +115,27 @@ class WorkforceRun:
             raise ValueError(message)
         self.mapping = primary_output["parameter_mapping"]
 
-    def calculate(self, data: pl.DataFrame) -> pl.DataFrame:
-        """Apply the unchanged calculation, projection and rate pipeline."""
-        return convert_annual_cost_to_rates(
-            project_costs(
-                apply_formulas(data, self.formulas),
-                data,
-                config.PROJECTION_YEARS,
-            ),
-            data,
-        )
+    def calculate(
+        self,
+        data: pl.DataFrame,
+        *,
+        workbook_projection: bool = False,
+    ) -> pl.DataFrame:
+        """Calculate base costs and apply the selected projection and rate method."""
+        base = apply_formulas(data, self.formulas)
+        if workbook_projection:
+            fixed = (
+                data[self.mapping["professional_development_allowance"]]
+                / data[self.mapping["productive_time_factor"]]
+            )
+            projected = project_workbook_costs(
+                base,
+                data["Grade(s)_Indexation per annum (%)"],
+                fixed,
+            )
+        else:
+            projected = project_costs(base, data, config.PROJECTION_YEARS)
+        return convert_annual_cost_to_rates(projected, data)
 
     def validate_baseline(self, result: pl.DataFrame) -> None:
         """Retain the source-backed baseline parity rejection."""
@@ -277,7 +288,10 @@ def run(args: argparse.Namespace) -> None:
     """Execute all original stages and their workbook acceptance checks."""
     execution = WorkforceRun(args)
     execution.prepare()
-    result = execution.calculate(execution.frame)
+    result = execution.calculate(
+        execution.frame,
+        workbook_projection=getattr(args, "workbook_projection", False),
+    )
     result.write_csv(execution.dest / "base_case_results.csv")
     execution.validate_baseline(result)
     execution.run_dsa(result)

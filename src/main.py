@@ -49,6 +49,11 @@ def _setup_arg_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Disable DSA validation.",
     )
+    parser.add_argument(
+        "--workbook-projection",
+        action="store_true",
+        help="Use workbook simple indexation for the four base-case projection years.",
+    )
     parser.add_argument("--seed", type=int, default=20261103)
     return parser
 
