@@ -13,6 +13,7 @@ from src.unit_quotes import (
     UnitQuoteResult,
     price_units,
 )
+lazy from src.source_registry import SourceRecord
 
 
 class VehicleTravelCase(QuoteModel):
@@ -96,6 +97,7 @@ def price_vehicle_travel(
         if source.sha256 != rule.source_sha256 or travel.unit != "km":
             msg = "Vehicle travel requires a matching source hash and kilometre units"
             raise ValueError(msg)
+        _require_known_source(source, release.as_known_on)
         if case.recurring_allowance_received:
             suppressed.append(case)
         else:
@@ -105,3 +107,9 @@ def price_vehicle_travel(
         tuple(suppressed),
         price_units(release, tuple(payable)),
     )
+
+
+def _require_known_source(source: SourceRecord, cutoff: date) -> None:
+    if source.retrieved_at is None or source.retrieved_at.date() > cutoff:
+        msg = "Vehicle exclusion source exceeds the release knowledge cutoff"
+        raise ValueError(msg)
