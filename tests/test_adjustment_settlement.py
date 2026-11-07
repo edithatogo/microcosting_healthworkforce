@@ -55,3 +55,40 @@ def test_settlement_retains_signed_lines_and_separate_cash_date() -> None:
                 update={"lines": (line, line.model_copy(update={"line_id": "copy"}))},
             ),
         )
+
+
+def test_pharmacy_transition_preserves_components_and_effective_boundary() -> None:
+    """Use reviewed counterfactual and credited amounts for the transition."""
+    market = AdjustmentLine(
+        line_id="market",
+        component="pharmacy-market",
+        starts_on=date(2026, 2, 6),
+        ends_on=date(2026, 5, 13),
+        entitled=Decimal("150.25"),
+        credited=Decimal("100.10"),
+        entitlement_evidence="synthetic amended market calculation",
+        credit_evidence="synthetic prior market payment",
+    )
+    retention = market.model_copy(
+        update={
+            "line_id": "retention",
+            "component": "pharmacy-retention",
+            "entitled": Decimal("110.10"),
+            "credited": Decimal("120.25"),
+        },
+    )
+    result = reconcile_adjustment(
+        AdjustmentSettlement(
+            case_id="synthetic-pharmacy-transition",
+            currency="AUD",
+            crystallised_on=date(2026, 5, 13),
+            reviewed_on=date(2026, 5, 14),
+            as_known_on=date(2026, 5, 14),
+            planned_payment_on=None,
+            review_evidence="synthetic reviewed matched transition window",
+            lines=(market, retention),
+        ),
+    )
+    assert_that(result.differences == (Fraction("50.15"), Fraction("-10.15")))
+    assert_that(result.net_difference == Fraction(40))
+    assert_that(result.request.planned_payment_on is None)
