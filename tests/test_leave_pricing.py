@@ -495,3 +495,31 @@ def test_paid_leave_ledger_retains_cash_and_allocated_election() -> None:
         pytest.fail("Expected both loading decisions")
     assert_that(cash_result.cash == Fraction(250))
     assert_that(election_result.additional_days == Fraction(4))
+
+
+def test_grouped_loading_compares_once_across_a_rate_change() -> None:
+    """A pricing split does not select the higher cash basis twice."""
+    leave = schedule()
+    selected = choices(leave, second_quote="salary-new")
+    grouped = tuple(
+        row.model_copy(
+            update={
+                "loading_comparison": LeaveLoadingComparison(
+                    rate=Decimal("0.20"),
+                    forgone_penalties=Decimal(penalties),
+                    evidence="Synthetic reviewed comparison period",
+                    comparison_id="approved-leave",
+                ),
+            },
+        )
+        for row, penalties in zip(selected, (0, 190), strict=True)
+    )
+    result = price_paid_leave(dated_prices(), selection(), leave, grouped)
+    base = Fraction(73500, 73)
+    assert_that(result.total == base * Fraction(6, 5))
+    assert_that(
+        all(
+            row.total == row.pricing.pricing.total * Fraction(6, 5)
+            for row in result.rows
+        ),
+    )
