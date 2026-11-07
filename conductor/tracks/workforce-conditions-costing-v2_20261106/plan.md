@@ -696,3 +696,9 @@ matched all 120 ratios against the private recalculation within an absolute
 difference of 0.000000000001. The formula-derived personnel roles and original
 display labels remain separately traceable. This validates the ratios given
 their scenario costs. It does not qualify the underlying sensitivity bounds.
+
+The [archived PSA reference](../../../docs/workbook_aggregate_inputs.md)
+was introduced in `8bb90f9` and retains its original value. The
+introducing validator used an unweighted mean of result-row means.
+The scalar remains a historical reference with unresolved generating
+method and unit. Scientific PSA qualification remains separate.

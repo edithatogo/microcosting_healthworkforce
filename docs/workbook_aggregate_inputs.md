@@ -59,3 +59,24 @@ columns, and mixed archival layouts below the main numeric block. Unknown-unit
 or mixed historical values retain no economic unit. Formula displays keep their
 source links, including archived mean/95% CI labels; those labels do not establish
 statistical validity. Layout fragments remain contextual or unresolved records.
+
+The PSA Validation sheet labels A2 as an expected mean cost. A2 is a
+numeric literal with no explicit formula references from other sheets
+in the pinned workbook. The label does not identify the unit, weighting
+or generating model. Retain it as a historical reference pending
+provenance for those fields.
+
+No numeric cell on another sheet in the private recalculation matched
+A2 within an absolute difference of 0.00000001. This comparison checks
+individual cells. The scalar's generating calculation remains unknown.
+
+Git commit `8bb90f9` introduced the validation sheet on 5 August 2025.
+Its validator compared A2 with the unweighted mean of the supplied
+PSA result rows' `mean_cost` values. That establishes the original
+comparison method in the code. The commit does not identify how A2
+was generated or substantiate the comparison's scientific assumptions.
+
+The scalar matches its value in the introducing commit. Git history
+on the current branch records no subsequent edits to the workbook.
+Treat the scalar as evidence from that historical validation setup
+when comparing it with later analysis code.
