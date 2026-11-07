@@ -63,7 +63,11 @@ def price_vehicle_travel(
     ):
         msg = "Vehicle exclusion requires valid dates and a known rule"
         raise ValueError(msg)
-    cases = tuple(VehicleTravelCase.model_validate(c.model_dump()) for c in cases)
+    # Preserve exact Fraction quantities while revalidating the nested input.
+    cases = tuple(
+        VehicleTravelCase.model_validate(dict(case, travel=dict(case.travel)))
+        for case in cases
+    )
     if len({case.travel.quantity_id for case in cases}) != len(cases):
         msg = "Duplicate vehicle travel quantity identity"
         raise ValueError(msg)

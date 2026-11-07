@@ -44,6 +44,12 @@ def test_receipt_excludes_travel_before_pricing() -> None:
     result = price_vehicle_travel(rates, rule, (paid, suppressed))
     assert_that(result.prices.total == Fraction(15))
     assert_that(result.suppressed == (suppressed,))
+    fractional = paid.model_copy(
+        update={"travel": quantity(unit="km", quantity=Fraction(1, 3))},
+    )
+    assert_that(
+        price_vehicle_travel(rates, rule, (fractional,)).prices.total == Fraction(1, 4),
+    )
     with pytest.raises(ValueError, match="matching source hash"):
         price_vehicle_travel(
             rates,
@@ -67,4 +73,16 @@ def test_receipt_excludes_travel_before_pricing() -> None:
             rates,
             rule.model_copy(update={"effective_to": paid.travel.valued_on}),
             (paid,),
+        )
+    with pytest.raises(ValueError, match="Duplicate vehicle travel quantity identity"):
+        price_vehicle_travel(
+            rates,
+            rule,
+            (paid, paid.model_copy(update={"recurring_allowance_received": True})),
+        )
+    with pytest.raises(ValueError, match="kilometre units"):
+        price_vehicle_travel(
+            rates,
+            rule,
+            (suppressed.model_copy(update={"travel": quantity(unit="annum")}),),
         )
