@@ -210,6 +210,17 @@ def test_schedule_rejects_gaps_overlaps_and_changed_denominators() -> None:
             parent,
             (parent, parent),
         )
+    bound = parent.model_copy(
+        update={"resource_id": "staff", "allocation_id": "worker"},
+    )
+    assert_that(
+        cost_periodic_allowance_schedule(release(), "training", bound, (bound,))
+        .segments[0]
+        .period.allocation_id
+        == "worker",
+    )
+    with pytest.raises(ValueError, match="retain the parent assignment"):
+        cost_periodic_allowance_schedule(release(), "training", bound, (parent,))
     changed = parent.model_copy(update={"periods_per_year": Decimal(27)})
     with pytest.raises(ValueError, match="denominators"):
         cost_periodic_allowance_schedule(release(), "training", parent, (changed,))
@@ -303,6 +314,16 @@ def test_reconcile_actual_posting_against_payable_allowance() -> None:
         amount=Decimal("9.50"),
         evidence="Synthetic payroll posting",
     )
+    bound_period = allowance.period.model_copy(
+        update={"resource_id": "staff", "allocation_id": "worker"},
+    )
+    bound = replace(allowance, period=bound_period)
+    assert_that(reconcile_allowance_payment(bound, payment).payment == payment)
+    with pytest.raises(ValueError, match="priced allowance assignment"):
+        reconcile_allowance_payment(
+            bound,
+            payment.model_copy(update={"allocation_id": "different-worker"}),
+        )
     result = reconcile_allowance_payment(allowance, payment)
     assert_that(result.allowance == allowance and result.payment == payment)
     assert_that(result.paid_minus_payable == Fraction("9.50") - allowance.payable)

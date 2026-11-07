@@ -40,10 +40,18 @@ class AllowancePeriod(BaseModel):
     full_time_hours: Decimal = Field(gt=0, allow_inf_nan=False)
     periods_per_year: Decimal = Field(gt=0, allow_inf_nan=False)
     portions: tuple[AllowancePortion, ...] = Field(min_length=1)
+    resource_id: str | None = None
+    allocation_id: str | None = None
 
     @model_validator(mode="after")
     def valid_period(self) -> Self:
         """Reject invalid periods and excessive allocations."""
+        binding = (self.resource_id, self.allocation_id)
+        if binding != (None, None) and any(
+            identity is None or not identity.strip() for identity in binding
+        ):
+            msg = "Allowance binding requires resource and allocation identities"
+            raise ValueError(msg)
         if self.ends_on <= self.starts_on:
             msg = "Allowance period must be nonempty"
             raise ValueError(msg)
@@ -204,6 +212,12 @@ def cost_periodic_allowance_allocations(
         raise ValueError(msg)
     expected_start = period.starts_on
     for segment in segments:
+        if (segment.resource_id, segment.allocation_id) != (
+            period.resource_id,
+            period.allocation_id,
+        ):
+            msg = "Allowance segments must retain the parent assignment"
+            raise ValueError(msg)
         if segment.starts_on != expected_start or segment.ends_on > period.ends_on:
             msg = "Allowance segments must cover the parent period contiguously"
             raise ValueError(msg)

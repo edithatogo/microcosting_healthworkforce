@@ -19,7 +19,7 @@ from src.costing import (
     cost_dynamic,
     cost_static,
 )
-lazy from src.periodic_allowance import PeriodicAllowanceCost
+lazy from src.periodic_allowance import AllowancePeriod, PeriodicAllowanceCost
 
 
 def _utc(value: datetime) -> datetime:
@@ -529,6 +529,13 @@ def reconcile_allowance_payment(
     payment = ContributionPayment.model_validate(payment.model_dump())
     if payment.component != allowance.condition.component:
         msg = "Payment component does not match the priced allowance"
+        raise ValueError(msg)
+    period = AllowancePeriod.model_validate(allowance.period.model_dump())
+    if period.resource_id is not None and (
+        period.resource_id != payment.resource_id
+        or period.allocation_id != payment.allocation_id
+    ):
+        msg = "Payment does not match the priced allowance assignment"
         raise ValueError(msg)
     return AllowancePaymentReconciliation(
         allowance,
