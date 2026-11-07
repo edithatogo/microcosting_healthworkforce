@@ -2,7 +2,7 @@
 """Overtime examples use synthetic conditions, history and rule assertions."""
 
 from datetime import UTC, date, datetime, timedelta
-from decimal import Decimal
+from decimal import Decimal, localcontext
 from fractions import Fraction
 
 import pytest
@@ -178,6 +178,28 @@ def test_overtime_exact_total_is_invariant_for_fractional_hour_splits() -> None:
     )
     a = cost_overtime_period(release(), period(), current_rule, (whole,), "UTC")
     b = cost_overtime_period(release(), period(), current_rule, parts, "UTC")
+    with localcontext() as context:
+        context.prec = 2
+        low_precision = cost_overtime_period(
+            release(),
+            period(),
+            current_rule,
+            parts,
+            "UTC",
+        )
+        all_ordinary = cost_overtime_period(release(), period(), rule(), parts, "UTC")
+        all_overtime = cost_overtime_period(
+            release(),
+            period(),
+            rule().model_copy(update={"threshold_hours": Decimal(39)}),
+            parts,
+            "UTC",
+        )
+    assert_that(all_ordinary.ordinary_hours == Decimal(1))
+    assert_that(all_overtime.overtime_hours == Decimal(1))
+    assert_that(low_precision.total == Decimal(62))
+    assert_that(low_precision.rows[1].ordinary_hours == Decimal("0.17"))
+    assert_that(low_precision.rows[1].overtime_hours == Decimal("0.17"))
     expected = Fraction(125, 2)
     assert_that(
         Fraction(a.exact_total_numerator, a.exact_total_denominator) == expected,

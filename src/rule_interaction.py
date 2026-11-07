@@ -115,19 +115,19 @@ def cost_minimum_with_overtime(
         (activity,),
         local_timezone,
     )
-    increment = sum((row.overtime_increment for row in worked.rows), Decimal(0))
+    premium = Fraction(worked.exact_premium_numerator, worked.exact_premium_denominator)
     exact = Fraction(
         guaranteed.exact_total_numerator,
         guaranteed.exact_total_denominator,
     )
-    exact += Fraction(worked.exact_premium_numerator, worked.exact_premium_denominator)
+    exact += premium
     return InteractionResult(
         method=rules.method,
         minimum_result=guaranteed,
         overtime_result=worked,
         minimum_total=guaranteed.total,
-        overtime_increment=increment,
-        total=guaranteed.total + increment,
+        overtime_increment=Decimal(premium.numerator) / premium.denominator,
+        total=Decimal(exact.numerator) / exact.denominator,
         exact_total_numerator=exact.numerator,
         exact_total_denominator=exact.denominator,
         interaction_rule_id=rules.rule_id,
