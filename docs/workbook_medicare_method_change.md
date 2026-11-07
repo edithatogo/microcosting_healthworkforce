@@ -25,3 +25,15 @@ and selected five-state weight formulas retain their different meanings.
 The separate PSA scalar, mixed publication values, isolated zero, assumed units
 and scientific/source applicability gaps retain their existing qualifications.
 No numerical costing path or weighting formula is changed by this metadata fix.
+
+An independent replay against the private recalculation matched all 17
+outputs in the Weightings sheet's two five-state normalisations. Column D
+uses the column C subtotal at C10, while column H uses the sum of G2:G6.
+H7 checks the latter weights sum to one. These calculations establish
+the workbook's selected-state denominators. Workforce representativeness
+still requires separate evidence.
+
+All ten weighted labour outputs in Z46:Z50 and AC46:AC50 on
+`Labour - Prices (WM)` use the column H weights. Independent weighted
+sums reproduced the annual and hourly results within 0.00000001.
+The formula scan found 50 references to column H and none to column D.
