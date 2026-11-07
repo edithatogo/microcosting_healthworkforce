@@ -38,6 +38,7 @@ from src.leave_pricing import (
     sa_part_time_study_block_days,
     sa_part_time_study_paid_hours,
     select_leave_loading_alternative,
+    vic_hama_historical_study_leave_hours,
     victorian_hama_additional_leave_weeks,
     victorian_hama_leave_loading,
     victorian_hama_weekend_termination_pay,
@@ -1041,3 +1042,22 @@ def test_nsw_online_study_uses_reviewed_equivalence_or_discretionary_limit() -> 
         price(Fraction(3), equivalent_compulsory_hours=Fraction(5))
     with pytest.raises(ValueError, match="weekly limit"):
         price(Fraction("4.01"), equivalent_compulsory_hours=None)
+
+
+def test_vic_hama_historical_study_leave_checks_prorated_cumulative_hours() -> None:
+    """Allow exact annual limits and preserve fractional approved hours."""
+    validate = vic_hama_historical_study_leave_hours
+    assert_that(
+        validate(Fraction(38), Fraction(66), employment_fraction=Fraction(1))
+        == Fraction(38),
+    )
+    assert_that(
+        validate(Fraction(5, 2), Fraction(99, 2), employment_fraction=Fraction(1, 2))
+        == Fraction(5, 2),
+    )
+    with pytest.raises(ValueError, match="prorated annual limit"):
+        validate(Fraction(3), Fraction(50), employment_fraction=Fraction(1, 2))
+    with pytest.raises(ValueError, match="prorated annual limit"):
+        validate(Fraction(1), Fraction(-1), employment_fraction=Fraction(1))
+    with pytest.raises(ValueError, match="Employment fraction"):
+        validate(Fraction(0), Fraction(0), employment_fraction=Fraction(0))
