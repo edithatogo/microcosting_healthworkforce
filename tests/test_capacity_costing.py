@@ -156,3 +156,38 @@ def test_approved_sa_study_hours_preserve_exact_capacity_ratio() -> None:
         )
         == Fraction(300000, 5984),
     )
+
+
+def test_partial_leave_backfill_prices_replacement_hours_separately() -> None:
+    """Cover half of four 38-hour leave weeks without reducing paid cost."""
+    scenario = capacity_scenario(
+        release(),
+        date(2026, 6, 1),
+        CapacityScenarioInputs(
+            losses=(CapacityLoss(loss_id="annual-leave", hours=Decimal(152)),),
+            cover_hours=Decimal(76),
+            cover_hourly_cost=Decimal(50),
+            losses_disjoint=True,
+        ),
+    )
+    assert_that(scenario.productive_hours == Decimal(1848))
+    assert_that(scenario.assumptions.cover_hours == Decimal(76))
+    assert_that(scenario.incremental_cover_cost == Decimal(3800))
+    assert_that(scenario.total_cost == Decimal(103800))
+
+
+def test_fractional_cover_hours_preserve_exact_cost() -> None:
+    """A third of an hour at 50 retains its exact cost in the ledger total."""
+    result = capacity_scenario(
+        release(),
+        date(2026, 6, 1),
+        CapacityScenarioInputs(
+            losses=(CapacityLoss(loss_id="leave", hours=Decimal(1)),),
+            cover_hours=Fraction(1, 3),
+            cover_hourly_cost=Decimal(50),
+            losses_disjoint=True,
+        ),
+    )
+    assert_that(result.assumptions.cover_hours == Fraction(1, 3))
+    exact = Fraction(result.exact_total_numerator, result.exact_total_denominator)
+    assert_that(exact == Fraction(100000) + Fraction(50, 3))

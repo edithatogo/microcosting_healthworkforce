@@ -109,3 +109,45 @@ def test_midmonth_rate_change_and_gap() -> None:
             Decimal(1),
             (rates[0],),
         )
+
+
+def test_midmonth_rate_change_differs_from_month_start_snapshot() -> None:
+    """Split 30 days equally between the two operative annual salaries."""
+    start = date(2026, 6, 1)
+    change = date(2026, 6, 16)
+    end = date(2026, 7, 1)
+    last = date(2026, 6, 30)
+    dated = monthly_salary_budget(
+        start,
+        last,
+        Decimal(1),
+        (
+            rate("before", start, change, "120000"),
+            rate("after", change, end, "144000"),
+        ),
+    )
+    snapshot = monthly_salary_budget(
+        start,
+        last,
+        Decimal(1),
+        (rate("month-start", start, end, "120000"),),
+    )
+    assert_that([row.covered_days for row in dated.rows] == [15, 15])
+    assert_that([row.amount for row in dated.rows] == [Fraction(5000), Fraction(6000)])
+    assert_that(dated.total == Fraction(11000))
+    assert_that(snapshot.total == Fraction(10000))
+
+
+def test_terminal_month_stops_on_inclusive_assignment_end() -> None:
+    """Prorate the final month even when the preceding month is full."""
+    start = date(2026, 5, 1)
+    result = monthly_salary_budget(
+        start,
+        date(2026, 6, 15),
+        Decimal(1),
+        (rate("salary", start, date(2026, 7, 1), "120000"),),
+    )
+    assert_that([row.covered_days for row in result.rows] == [31, 15])
+    amounts = [row.amount for row in result.rows]
+    assert_that(amounts == [Fraction(10000), Fraction(5000)])
+    assert_that(result.total == Fraction(15000))
