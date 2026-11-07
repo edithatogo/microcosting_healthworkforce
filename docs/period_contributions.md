@@ -81,3 +81,8 @@ In particular, the unresolved Queensland VMO superannuation source chain is not
 promoted by these synthetic tests. No universal rate, common base or VMO worker
 eligibility is supplied. This capability supports testing a later verified rule;
 actual source and arrangement qualification remains a separate task.
+
+A period may retain an explicit `planned_remittance_at` timestamp at or after
+its end. This is a timing assumption carried with the ledger. Pricing still
+uses the earnings period. The timestamp does not establish a due date or
+record a completed payment.

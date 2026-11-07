@@ -189,6 +189,34 @@ def test_budget_premiums_feed_distinct_oncost_bases() -> None:
     )
     assert_that(snapshot.exact_total == dynamic.exact_total == Fraction("77.4468"))
 
+    # Removing one premium isolates its direct and downstream contribution.
+    for index, expected_delta in ((1, "6.1812"), (2, "3.3936")):
+        without_premium = (
+            *rules[:index],
+            rules[index].model_copy(update={"fraction": Decimal(0)}),
+            *rules[index + 1 :],
+        )
+        reduced_snapshot = cost_derived_snapshot(
+            baseline(),
+            day,
+            Decimal(1),
+            without_premium,
+        )
+        reduced_activity = cost_derived_activity(
+            baseline(),
+            activity,
+            "UTC",
+            without_premium,
+        )
+        assert_that(
+            snapshot.exact_total - reduced_snapshot.exact_total
+            == Fraction(expected_delta),
+        )
+        assert_that(
+            dynamic.exact_total - reduced_activity.exact_total
+            == Fraction(expected_delta),
+        )
+
 
 def test_grossed_up_backfill_remains_visible_in_downstream_bases() -> None:
     """Expose nested on-costs when a grossed-up component enters super again."""
@@ -229,3 +257,43 @@ def test_casual_budget_loading_is_visible_in_selected_bases() -> None:
     )
     assert_that(dynamic.rows == snapshot.rows)
     assert_that(dynamic.exact_total == snapshot.exact_total == Fraction("75.625"))
+
+
+def test_budget_premium_distinguishes_explicit_zero_from_missing() -> None:
+    """An explicit zero retains its base and provenance in the scenario ledger."""
+    rules = (
+        rule("qualification", "qualification", ("salary",), "0.2"),
+        rule("overtime", "overtime", ("salary", "qualification"), "0.1"),
+        rule("penalty", "penalty", ("salary", "qualification"), "0"),
+    )
+    day = date(2026, 6, 2)
+    explicit = cost_derived_snapshot(baseline(), day, Decimal(1), rules)
+    omitted = cost_derived_snapshot(baseline(), day, Decimal(1), rules[:-1])
+    assert_that(explicit.exact_total == omitted.exact_total == Fraction(71))
+    assert_that(explicit.rows[:-1] == omitted.rows)
+    assert_that(explicit.rows[-1].base_hourly == Fraction(60))
+    assert_that(explicit.rows[-1].amount == Fraction(0))
+
+
+def test_leave_levy_uses_only_selected_gross_salary_components() -> None:
+    """The levy follows eligible pay, excluding super and insurance."""
+    rules = (
+        rule("loading", "leave_loading", ("salary",), "0.1"),
+        rule("insurance", "insurance", ("salary", "super"), "0.02"),
+        rule("levy", "leave_levy", ("salary", "leave_loading"), "0.026"),
+    )
+    day = date(2026, 6, 2)
+    start = datetime(2026, 6, 2, 9, tzinfo=UTC)
+    activity = Activity(
+        activity_id="levy-example",
+        resource_id="worker",
+        starts_at=start,
+        ends_at=start + timedelta(hours=2),
+        resources=Decimal(1),
+    )
+    snapshot = cost_derived_snapshot(baseline(), day, Decimal(2), rules)
+    dated = cost_derived_activity(baseline(), activity, "UTC", rules)
+    assert_that(snapshot.rows[-1].base_hourly == Fraction(55))
+    assert_that(snapshot.rows[-1].amount == Fraction("2.86"))
+    assert_that(dated.rows == snapshot.rows)
+    assert_that(dated.exact_total == snapshot.exact_total == Fraction("125.06"))
