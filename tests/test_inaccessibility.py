@@ -189,6 +189,7 @@ def test_reviewed_category_payments_use_separate_quotes() -> None:
             component="inaccessibility-category-4",
             unit="annum",
             amount=Decimal(600),
+            starts_on=date(2026, 3, 1),
         ),
     )
     first = InaccessibilityCategoryPayment(
@@ -207,6 +208,7 @@ def test_reviewed_category_payments_use_separate_quotes() -> None:
             category=4,
             payment_id="category-4-payment",
             annual_quote_id="category-4",
+            valued_on=date(2026, 3, 1),
         ),
     )
     result = price_inaccessibility_category_payments(rates, (first, second))
@@ -228,4 +230,9 @@ def test_reviewed_category_payments_use_separate_quotes() -> None:
                 ),
                 second,
             ),
+        )
+    with pytest.raises(ValueError, match="outside the selected quote"):
+        price_inaccessibility_category_payments(
+            rates,
+            (second.model_copy(update={"valued_on": date(2026, 2, 28)}),),
         )
