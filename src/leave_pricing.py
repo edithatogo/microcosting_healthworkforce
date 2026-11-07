@@ -181,6 +181,33 @@ class LeaveLoadingComparison(QuoteModel):
         )
 
 
+class AdvanceLoadingTiming(QuoteModel):
+    """Reviewed facts for loading deferred until leave entitlement is reached."""
+
+    leave_taken_on: date
+    entitled_on: date
+    employment_confirmed_through: date
+    as_known_on: date
+    ordinary_penalties_already_paid: bool
+    evidence: str
+
+    def payable_on(self) -> date | None:
+        """Return the entitlement date only once continued employment is known."""
+        facts = AdvanceLoadingTiming.model_validate(dict(self))
+        if (
+            facts.leave_taken_on >= facts.entitled_on
+            or facts.employment_confirmed_through > facts.as_known_on
+        ):
+            msg = "Advance loading requires valid leave and employment evidence dates"
+            raise ValueError(msg)
+        if (
+            facts.ordinary_penalties_already_paid
+            or facts.employment_confirmed_through < facts.entitled_on
+        ):
+            return None
+        return facts.entitled_on
+
+
 class LeavePriceSelection(QuoteModel):
     """An explicit price/exposure choice for exactly one schedule interval."""
 

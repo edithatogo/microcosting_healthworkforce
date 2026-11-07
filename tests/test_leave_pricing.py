@@ -10,6 +10,7 @@ from typing import Literal
 import pytest
 
 from src.leave_pricing import (
+    AdvanceLoadingTiming,
     LeaveLoadingComparison,
     LeaveLoadingMoneyCap,
     LeavePriceSelection,
@@ -570,3 +571,29 @@ def test_shift_credit_applies_once_per_qualifying_period(
         Fraction(share),
     )
     assert_that(credit == Fraction(expected))
+
+
+def test_advance_loading_requires_continued_employment_without_prior_penalties() -> (
+    None
+):
+    """The deferred loading is valued at entitlement after continued service."""
+    entitled = date(2026, 12, 1)
+    timing = AdvanceLoadingTiming(
+        leave_taken_on=START,
+        entitled_on=entitled,
+        employment_confirmed_through=entitled,
+        as_known_on=entitled,
+        ordinary_penalties_already_paid=False,
+        evidence="Synthetic reviewed employment confirmation",
+    )
+    assert_that(timing.payable_on() == entitled)
+    assert_that(
+        timing.model_copy(update={"employment_confirmed_through": START}).payable_on()
+        is None,
+    )
+    assert_that(
+        timing.model_copy(update={"ordinary_penalties_already_paid": True}).payable_on()
+        is None,
+    )
+    with pytest.raises(ValueError, match="evidence dates"):
+        timing.model_copy(update={"as_known_on": START}).payable_on()
