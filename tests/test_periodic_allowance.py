@@ -301,3 +301,8 @@ def test_reconcile_actual_posting_against_payable_allowance() -> None:
             allowance,
             payment.model_copy(update={"component": "other"}),
         )
+    with pytest.raises(ValueError, match="evidence must be nonblank"):
+        reconcile_allowance_payment(
+            allowance,
+            payment.model_copy(update={"evidence": " "}),
+        )

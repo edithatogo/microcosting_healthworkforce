@@ -493,6 +493,24 @@ class ContributionPayment(FrozenModel):
     amount: Decimal = Field(ge=0, allow_inf_nan=False)
     evidence: str = Field(min_length=1)
 
+    @model_validator(mode="after")
+    def valid_posting(self) -> Self:
+        """Require an aware timestamp and substantive posting evidence."""
+        _utc(self.paid_at)
+        if not all(
+            value.strip()
+            for value in (
+                self.payment_id,
+                self.resource_id,
+                self.allocation_id,
+                self.component,
+                self.evidence,
+            )
+        ):
+            msg = "Payroll posting identities and evidence must be nonblank"
+            raise ValueError(msg)
+        return self
+
 
 @dataclass(frozen=True)
 class AllowancePaymentReconciliation:
@@ -509,7 +527,6 @@ def reconcile_allowance_payment(
 ) -> AllowancePaymentReconciliation:
     """Compare a caller-matched posting with the exact payable allowance."""
     payment = ContributionPayment.model_validate(payment.model_dump())
-    _utc(payment.paid_at)
     if payment.component != allowance.condition.component:
         msg = "Payment component does not match the priced allowance"
         raise ValueError(msg)
@@ -572,10 +589,6 @@ def cost_contribution_payments(
             or payment.allocation_id != period.allocation_id
             or not start <= _utc(payment.paid_at) < end
             or payment.component == rule.component
-            or not all(
-                value.strip()
-                for value in (payment.payment_id, payment.component, payment.evidence)
-            )
         ):
             msg = "Payment does not match the contribution period or scope"
             raise ValueError(msg)
