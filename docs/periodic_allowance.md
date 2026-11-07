@@ -103,6 +103,12 @@ retain its full-time hours and annual divisor, and reconcile the hours
 for every label and pair of accrual and payment factors. Retain the
 appointment and receipt evidence for each selection.
 
+The Queensland Labour comparator reselects the vehicle level using each
+month's progressed pay point. The FTE comparator keeps its initial level.
+Record which behavior a workbook comparison uses. For MOCA7, select a
+level from the reviewed appointment for each effective interval. The
+workbooks' projected rate increases are separate from that selection.
+
 [QIRC certified MOCA7, clause 11.33](https://www.qirc.qld.gov.au/sites/default/files/2025-11/2025_cb128.pdf)
 
 ## Receipt-based vehicle travel exclusion
