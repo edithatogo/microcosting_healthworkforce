@@ -324,6 +324,19 @@ def test_reconcile_actual_posting_against_payable_allowance() -> None:
             bound,
             payment.model_copy(update={"allocation_id": "different-worker"}),
         )
+    late = payment.model_copy(
+        update={
+            "earned_from": allowance.period.starts_on,
+            "earned_to": allowance.period.ends_on,
+            "paid_at": START + timedelta(days=30),
+        },
+    )
+    assert_that(reconcile_allowance_payment(allowance, late).payment == late)
+    with pytest.raises(ValueError, match="earning interval does not match"):
+        reconcile_allowance_payment(
+            allowance,
+            late.model_copy(update={"earned_to": date(2026, 1, 16)}),
+        )
     result = reconcile_allowance_payment(allowance, payment)
     assert_that(result.allowance == allowance and result.payment == payment)
     assert_that(result.paid_minus_payable == Fraction("9.50") - allowance.payable)

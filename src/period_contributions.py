@@ -492,11 +492,20 @@ class ContributionPayment(FrozenModel):
     paid_at: datetime
     amount: Decimal = Field(ge=0, allow_inf_nan=False)
     evidence: str = Field(min_length=1)
+    earned_from: date | None = None
+    earned_to: date | None = None
 
     @model_validator(mode="after")
     def valid_posting(self) -> Self:
         """Require an aware timestamp and substantive posting evidence."""
         _utc(self.paid_at)
+        if (self.earned_from, self.earned_to) != (None, None) and (
+            self.earned_from is None
+            or self.earned_to is None
+            or self.earned_to <= self.earned_from
+        ):
+            msg = "Payment earning interval requires ordered start and end dates"
+            raise ValueError(msg)
         if not all(
             value.strip()
             for value in (
@@ -536,6 +545,11 @@ def reconcile_allowance_payment(
         or period.allocation_id != payment.allocation_id
     ):
         msg = "Payment does not match the priced allowance assignment"
+        raise ValueError(msg)
+    if payment.earned_from is not None and (
+        payment.earned_from != period.starts_on or payment.earned_to != period.ends_on
+    ):
+        msg = "Payment earning interval does not match the priced allowance period"
         raise ValueError(msg)
     return AllowancePaymentReconciliation(
         allowance,

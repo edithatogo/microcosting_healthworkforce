@@ -146,3 +146,9 @@ bind it to a payroll assignment. Every segment of a bound schedule
 carries the same pair. Payment reconciliation checks that the payroll
 posting has those identities. For unbound periods the caller supplies
 the assignment match.
+
+A posting may also carry `earned_from` and `earned_to` as a half-open
+date interval. Supply both dates when payroll identifies the earning
+period. Reconciliation checks them against the priced allowance period.
+The paid contribution calculation still selects its period and rate
+using `paid_at`, including when the payment arrives late.
