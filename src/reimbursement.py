@@ -3,13 +3,13 @@
 
 from dataclasses import dataclass
 from fractions import Fraction
-from typing import Self
+from typing import Literal, Self
 lazy from datetime import date
 lazy from decimal import Decimal
 
 from pydantic import Field, model_validator
 
-from src.unit_quotes import QuoteModel
+from src.unit_quotes import NonnegativeQuantity, QuoteModel
 
 
 class ReimbursementClaim(QuoteModel):
@@ -27,8 +27,8 @@ class ReimbursementPeriod(QuoteModel):
     currency: str = Field(pattern=r"^[A-Z]{3}$")
     starts_on: date
     ends_on: date
-    cap: Decimal = Field(ge=0, allow_inf_nan=False)
-    prior_use: Decimal = Field(ge=0, allow_inf_nan=False)
+    cap: NonnegativeQuantity
+    prior_use: NonnegativeQuantity
     applicability_evidence: str
     claims: tuple[ReimbursementClaim, ...]
 
@@ -65,7 +65,9 @@ def cost_reimbursements(
     The caller determines coverage, proration, eligible costs and the period
     to charge. A cap alone creates no cost.
     """
-    period = ReimbursementPeriod.model_validate(period.model_dump())
+    period = ReimbursementPeriod.model_validate(
+        {**dict(period), "claims": tuple(dict(claim) for claim in period.claims)},
+    )
     remaining = Fraction(period.cap) - Fraction(period.prior_use)
     rows: list[ReimbursementRow] = []
     for claim in period.claims:
@@ -73,3 +75,29 @@ def cost_reimbursements(
         remaining -= cost
         rows.append(ReimbursementRow(claim, cost, remaining))
     return tuple(rows)
+
+
+class ReimbursementCarryDecision(QuoteModel):
+    """Reviewed closing balances and the ceiling available for carry-over."""
+
+    current_remaining: NonnegativeQuantity
+    prior_remaining: NonnegativeQuantity
+    carry_limit: NonnegativeQuantity
+    eligible_balances: Literal["none", "current", "current_and_prior"]
+    decision_evidence: str
+
+
+def reimbursement_carry_amount(decision: ReimbursementCarryDecision) -> Fraction:
+    """Value eligible carry using an explicit limit and reviewed balance split.
+
+    The limit is the amount available for carry after any other allocations
+    under the applicable accumulation ceiling. No claim allocation, employer
+    transfer or cash payment is implied.
+    """
+    decision = ReimbursementCarryDecision.model_validate(dict(decision))
+    if decision.eligible_balances == "none":
+        return Fraction(0)
+    eligible = Fraction(decision.current_remaining)
+    if decision.eligible_balances == "current_and_prior":
+        eligible += Fraction(decision.prior_remaining)
+    return min(eligible, Fraction(decision.carry_limit))
