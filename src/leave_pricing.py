@@ -122,6 +122,60 @@ def nsw_general_shift_leave_credit(
     return rounded_units * rounding_increment_hours
 
 
+@dataclass(frozen=True)
+class WeekendLeaveShift:
+    """Reviewed ordinary shift duration and hours attributable to the weekend."""
+
+    shift_hours: Fraction
+    weekend_hours: Fraction
+
+
+def victorian_medical_scientist_weekend_leave_credit(
+    weekends: tuple[tuple[WeekendLeaveShift, ...], ...],
+    *,
+    part_time: bool,
+    nes_credit_hours: Fraction,
+) -> Fraction:
+    """Calculate clause 61.8 hours for one reviewed 12-month roster window.
+
+    Group ordinary shifts by weekend. Supply reviewed weekend attribution for
+    shifts crossing a day boundary and zero NES credit when inapplicable.
+    """
+    if nes_credit_hours < 0 or any(
+        not 0 <= shift.weekend_hours <= shift.shift_hours
+        for weekend in weekends
+        for shift in weekend
+    ):
+        msg = "Weekend hours must fit the shift and NES credit must be nonnegative"
+        raise ValueError(msg)
+    minimum_shift_hours = 4
+    qualifying_hours = Fraction(0)
+    for weekend in weekends:
+        eligible = tuple(
+            shift
+            for shift in weekend
+            if shift.shift_hours > minimum_shift_hours and shift.weekend_hours > 0
+        )
+        if part_time and eligible:
+            longest_hours = max(shift.shift_hours for shift in eligible)
+            creditable_hours = {
+                shift.weekend_hours
+                for shift in eligible
+                if shift.shift_hours == longest_hours
+            }
+            if len(creditable_hours) > 1:
+                msg = "Equal-length shifts require a reviewed weekend credit selection"
+                raise ValueError(msg)
+            qualifying_hours += next(iter(creditable_hours))
+        else:
+            qualifying_hours += sum(
+                (shift.weekend_hours for shift in eligible),
+                Fraction(0),
+            )
+    agreement_credit = min(Fraction(38), qualifying_hours / 2)
+    return max(agreement_credit, nes_credit_hours)
+
+
 def combined_leave_hours(
     loading_eligible: Fraction,
     base_only: Fraction,

@@ -17,6 +17,7 @@ from src.leave_pricing import (
     LeaveLoadingMoneyCap,
     LeavePriceSelection,
     SeparationLoadingEligibility,
+    WeekendLeaveShift,
     allocate_leave_loading_hours,
     combined_leave_hours,
     nsw_general_shift_leave_credit,
@@ -26,6 +27,7 @@ from src.leave_pricing import (
     price_separation_loading,
     qualifying_shift_leave_credit,
     select_leave_loading_alternative,
+    victorian_medical_scientist_weekend_leave_credit,
 )
 from src.paid_leave import PaidLeaveSchedule, build_paid_leave
 from tests.checks import assert_that
@@ -752,3 +754,35 @@ def test_nsw_general_shift_credit_prorates_and_rounds_below_threshold() -> None:
     )
     with pytest.raises(ValueError, match="rounding increment"):
         nsw_general_shift_leave_credit(7, Fraction(35, 2))
+
+
+def test_victorian_weekend_credit_applies_grouping_cap_and_nes_substitution() -> None:
+    """Part-time picks the longer shift, and NES credit replaces lower credit."""
+    credit = victorian_medical_scientist_weekend_leave_credit
+    weekends = (
+        (WeekendLeaveShift(Fraction(4), Fraction(4)),),
+        (
+            WeekendLeaveShift(Fraction(6), Fraction(6)),
+            WeekendLeaveShift(Fraction(8), Fraction(8)),
+        ),
+    )
+    assert_that(
+        credit(weekends, part_time=True, nes_credit_hours=Fraction(0)) == Fraction(4),
+    )
+    assert_that(
+        credit(weekends, part_time=False, nes_credit_hours=Fraction(0)) == Fraction(7),
+    )
+    assert_that(
+        credit(weekends * 10, part_time=False, nes_credit_hours=Fraction(0))
+        == Fraction(38),
+    )
+    assert_that(
+        credit(weekends, part_time=True, nes_credit_hours=Fraction(5)) == Fraction(5),
+    )
+    crossing = ((WeekendLeaveShift(Fraction(8), Fraction(2)),),)
+    assert_that(
+        credit(crossing, part_time=False, nes_credit_hours=Fraction(0)) == Fraction(1),
+    )
+    ambiguous = (crossing[0] + (WeekendLeaveShift(Fraction(8), Fraction(8)),),)
+    with pytest.raises(ValueError, match="reviewed weekend credit selection"):
+        credit(ambiguous, part_time=True, nes_credit_hours=Fraction(0))
