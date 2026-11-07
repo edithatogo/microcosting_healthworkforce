@@ -122,6 +122,34 @@ def nsw_general_shift_leave_credit(
     return rounded_units * rounding_increment_hours
 
 
+def victorian_medical_scientist_weekend_leave_credit(
+    weekends: tuple[tuple[Fraction, ...], ...],
+    *,
+    part_time: bool,
+    nes_credit_hours: Fraction,
+) -> Fraction:
+    """Calculate clause 61.8 hours for one reviewed 12-month roster window.
+
+    Group ordinary shifts by weekend and provide the hours on each weekend day
+    for each qualifying shift. Supply zero NES credit when reviewed inapplicable.
+    """
+    if nes_credit_hours < 0 or any(
+        hours < 0 for weekend in weekends for hours in weekend
+    ):
+        msg = "Weekend hours and NES credit must be nonnegative"
+        raise ValueError(msg)
+    minimum_shift_hours = 4
+    qualifying_hours = Fraction(0)
+    for weekend in weekends:
+        eligible = tuple(hours for hours in weekend if hours > minimum_shift_hours)
+        if part_time:
+            qualifying_hours += max(eligible, default=Fraction(0))
+        else:
+            qualifying_hours += sum(eligible, Fraction(0))
+    agreement_credit = min(Fraction(38), qualifying_hours / 2)
+    return max(agreement_credit, nes_credit_hours)
+
+
 def combined_leave_hours(
     loading_eligible: Fraction,
     base_only: Fraction,
