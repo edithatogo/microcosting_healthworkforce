@@ -603,3 +603,21 @@ Continuation was interrupted by ENOSPC while creating a rule-interaction module;
 Compare the discovered restricted templates' costing categories and time bases
 with this track's rule model using synthetic fixtures and source-backed decisions.
 Structural discovery is not rule extraction or parity. See [template discovery](../../reviews/workforce-budget-template-discovery-20261106.md).
+
+## Queensland dependent dropdown reconciliation
+
+Both retained editions use a named blank fallback in the list validation
+guard when dependent inputs are populated. The Labour edition has six
+populated targets on this branch. Four of those targets are populated
+in the FTE edition and resolve to the same guard. Preserve their stored
+selections and the original rule. The blank fallback represents a guard
+branch, while normal grade and award options are selected separately.
+
+An isolated synthetic Calc replay distinguished the trailing-comma
+VLOOKUP form from the three-argument form. The trailing-comma result
+matched explicit zero in the probe. Applying that behavior to cached
+values yields three provisional members in Labour and two in FTE
+among the previously unresolved cases. Keep those dispositions
+provisional pending native Excel lookup and manual-entry verification.
+Private lineage v3 retains the original rule evidence and both review
+dispositions by edition.
