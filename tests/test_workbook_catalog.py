@@ -7,6 +7,7 @@ lazy from pathlib import Path
 
 import openpyxl
 from openpyxl.workbook.defined_name import DefinedName
+from openpyxl.worksheet.datavalidation import DataValidation
 from openpyxl.worksheet.formula import ArrayFormula
 
 from src.workbook_catalog import read_workbook_catalog
@@ -56,10 +57,15 @@ def test_intake_preserves_array_formula_range_and_time(tmp_path: Path) -> None:
     sheet = book.create_sheet("Array")
     sheet["A1"] = ArrayFormula("A1:A2", "=ROW(A1:A2)")
     sheet["B1"] = time(8, 30)
+    validation = DataValidation(type="whole", formula1="1", sqref="C1")
+    sheet.add_data_validation(validation)
     book.save(path)
     book.close()
 
     catalog = read_workbook_catalog(path, sheet_names=("Array",))
+    (rule,) = catalog.validations
+    assert_that(rule.sheet == "Array" and "C1" in rule.rule_xml)
+    assert_that(read_workbook_catalog(path, sheet_names=("Sheet",)).validations == ())
     (selected,) = catalog.sheets
     formula, clock = selected.cells
     assert_that(formula.value == "=ROW(A1:A2)" and formula.cached is None)

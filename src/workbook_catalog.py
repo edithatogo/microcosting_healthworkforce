@@ -13,6 +13,8 @@ import polars as pl
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.formula import ArrayFormula
 
+from src.workbook_validations import WorkbookValidation, read_workbook_validations
+
 if TYPE_CHECKING:
     from openpyxl.worksheet.worksheet import Worksheet
 
@@ -56,6 +58,7 @@ class WorkbookCatalog:
     sha256: str
     sheets: tuple[SheetCatalog, ...]
     defined_names: dict[str, str]
+    validations: tuple[WorkbookValidation, ...] = ()
 
     def cells_frame(self) -> pl.DataFrame:
         """Return typed coordinates and lossless JSON scalar representations."""
@@ -199,10 +202,16 @@ def read_workbook_catalog(
                 msg = "Workbook sheet selection must contain known, unique names"
                 raise ValueError(msg)
             selected = [sheet for sheet in selected if sheet.title in requested]
+        selected_names = {sheet.title for sheet in selected}
         result = WorkbookCatalog(
             digest,
             tuple(_sheet(sheet, cached[sheet.title]) for sheet in selected),
             {key: str(value.attr_text) for key, value in book.defined_names.items()},
+            tuple(
+                rule
+                for rule in read_workbook_validations(path)
+                if rule.sheet in selected_names
+            ),
         )
     finally:
         book.close()
