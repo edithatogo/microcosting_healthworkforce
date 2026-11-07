@@ -90,6 +90,33 @@ class HighestQuoteResult:
     )
 
 
+def resolve_quote_eligibility(
+    fact: QuoteEligibility,
+    policy: ExclusiveQuoteRule,
+    by_id: dict[str, UnitQuote],
+    first: date,
+    last: date,
+) -> UnitQuote | None:
+    """Resolve a complete known fact against a whole comparable window."""
+    if fact.known_on > policy.as_known_on or (
+        fact.input_kind == "observed_case_evidence" and fact.known_on < last
+    ):
+        msg = "Alternative evidence exceeds knowledge or predates its window"
+        raise ValueError(msg)
+    if not fact.eligible:
+        return None
+    quote = by_id.get(fact.quote_id or "")
+    if (
+        quote is None
+        or quote.component != fact.component
+        or quote.unit != policy.unit
+        or not quote.starts_on <= first <= last < quote.ends_on
+    ):
+        msg = "Every eligible quote must match component/unit and whole window"
+        raise ValueError(msg)
+    return quote
+
+
 def price_highest_quotes(
     rule: HighestQuoteRule,
     release: UnitQuoteRelease,
@@ -142,24 +169,10 @@ def price_highest_quotes(
             or exposure.input_kind == "analyst_assumption"
         )
         for fact in case.alternatives:
-            if fact.known_on > policy.as_known_on or (
-                fact.input_kind == "observed_case_evidence" and fact.known_on < last
-            ):
-                msg = "Alternative evidence exceeds knowledge or predates its window"
-                raise ValueError(msg)
             case_scenario |= fact.input_kind == "analyst_assumption"
-            if not fact.eligible:
-                continue
-            quote = by_id.get(fact.quote_id or "")
-            if (
-                quote is None
-                or quote.component != fact.component
-                or quote.unit != policy.unit
-                or not quote.starts_on <= first <= last < quote.ends_on
-            ):
-                msg = "Every eligible quote must match component/unit and whole window"
-                raise ValueError(msg)
-            eligible.append(quote)
+            quote = resolve_quote_eligibility(fact, policy, by_id, first, last)
+            if quote is not None:
+                eligible.append(quote)
         scenario |= case_scenario
         eligible.sort(key=lambda q: q.quote_id)
         maximum = max((q.amount for q in eligible), default=None)
