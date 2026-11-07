@@ -98,14 +98,26 @@ def cost_legacy_compatibility(
     frame = inputs.clone()
     base = apply_formulas(frame, document)
     if selected.mode == "workbook_projection_v1":
-        productive = frame["Grade(s)_Average productive time (%)"].cast(pl.Float64)
+        midpoint = next(
+            (
+                output
+                for output in document["outputs"]
+                if output["name"] == "Calculated_Cost_Mid"
+            ),
+            None,
+        )
+        if midpoint is None or "parameter_mapping" not in midpoint:
+            msg = "Workbook projection requires a mapped midpoint output"
+            raise ValueError(msg)
+        mapping = midpoint["parameter_mapping"]
+        productive = frame[mapping["productive_time_factor"]].cast(pl.Float64)
         if not (productive.is_finite() & (productive > 0)).fill_null(value=False).all():
             msg = "Workbook projection requires a positive productive-time factor"
             raise ValueError(msg)
         projected = project_workbook_costs(
             base,
             frame["Grade(s)_Indexation per annum (%)"],
-            frame["Grade(s)_Professional Development Allowance ($)"] / productive,
+            frame[mapping["professional_development_allowance"]] / productive,
             selected.projection_years,
         )
     else:
