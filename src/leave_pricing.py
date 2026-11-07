@@ -10,11 +10,17 @@ lazy from datetime import date
 from src.historical_hours import select_normal_hours
 from src.normal_pay import HoursPricingRequest, price_selected_hours
 from src.paid_leave import build_paid_leave
-from src.unit_quotes import NonnegativeQuantity, QuoteModel, UnitQuoteRelease
+from src.unit_quotes import (
+    NonnegativeQuantity,
+    QuoteModel,
+    QuoteQuantity,
+    UnitQuoteRelease,
+    price_units,
+)
 lazy from src.historical_hours import NormalHoursSelection
 lazy from src.normal_pay import SelectedHoursPricing
 lazy from src.paid_leave import LeaveExposureRow, PaidLeaveSchedule
-lazy from src.unit_quotes import QuoteQuantity
+lazy from src.unit_quotes import UnitQuoteResult
 
 
 @dataclass(frozen=True)
@@ -179,6 +185,192 @@ class LeaveLoadingComparison(QuoteModel):
             if self.elected_days is None
             else Fraction(self.elected_days),
         )
+
+
+class AdvanceLoadingTiming(QuoteModel):
+    """Reviewed facts for loading deferred until leave entitlement is reached."""
+
+    leave_taken_on: date
+    entitled_on: date
+    employment_confirmed_through: date
+    as_known_on: date
+    ordinary_penalties_already_paid: bool
+    evidence: str
+
+    def payable_on(self) -> date | None:
+        """Return the entitlement date only once continued employment is known."""
+        facts = AdvanceLoadingTiming.model_validate(dict(self))
+        if (
+            facts.leave_taken_on >= facts.entitled_on
+            or facts.employment_confirmed_through > facts.as_known_on
+        ):
+            msg = "Advance loading requires valid leave and employment evidence dates"
+            raise ValueError(msg)
+        if (
+            facts.ordinary_penalties_already_paid
+            or facts.employment_confirmed_through < facts.entitled_on
+        ):
+            return None
+        return facts.entitled_on
+
+
+class SeparationLoadingEligibility(QuoteModel):
+    """Reviewed separation facts for the historical NSW loading provision."""
+
+    separated_on: date
+    as_known_on: date
+    reason: Literal[
+        "retirement",
+        "resignation",
+        "employer_termination",
+        "misconduct",
+        "other",
+    ]
+    entitled_loading_weeks: NonnegativeQuantity
+    evidence: str
+
+    def eligible_weeks(self) -> Fraction:
+        """Return the exposure admitted under clause 17B(g) and (h)."""
+        facts = SeparationLoadingEligibility.model_validate(dict(self))
+        if facts.separated_on > facts.as_known_on:
+            msg = "Separation must be known at the valuation cutoff"
+            raise ValueError(msg)
+        if facts.reason == "other":
+            msg = "Separation reason is outside the reviewed loading provision"
+            raise ValueError(msg)
+        if facts.reason in {"resignation", "misconduct"}:
+            return Fraction(0)
+        return Fraction(facts.entitled_loading_weeks)
+
+
+class AdvanceLeaveTermination(QuoteModel):
+    """Reviewed ordinary-pay amounts for a single advance-leave settlement."""
+
+    terminated_on: date
+    service_year_completed_on: date
+    as_known_on: date
+    advance_ordinary_pay: NonnegativeQuantity
+    ordinary_pay_due: NonnegativeQuantity
+    evidence: str
+
+    def excess_ordinary_pay(self) -> Fraction:
+        """Return the clause 17A(i) excess before any payroll deduction."""
+        facts = AdvanceLeaveTermination.model_validate(dict(self))
+        if facts.terminated_on > facts.as_known_on:
+            msg = "Termination must be known at the valuation cutoff"
+            raise ValueError(msg)
+        if facts.terminated_on >= facts.service_year_completed_on:
+            return Fraction(0)
+        return max(
+            Fraction(0),
+            Fraction(facts.advance_ordinary_pay) - Fraction(facts.ordinary_pay_due),
+        )
+
+
+class AdvanceLoadingPrices(QuoteModel):
+    """Explicit weekly salary and benchmark selections for deferred loading."""
+
+    salary_quote_id: str
+    benchmark_quote_id: str
+    eligible_weeks: NonnegativeQuantity
+    loading_rate: NonnegativeQuantity
+
+
+@dataclass(frozen=True)
+class DeferredLeaveLoading:
+    """Exact loading amount and the dated prices behind it."""
+
+    timing: AdvanceLoadingTiming
+    prices: AdvanceLoadingPrices
+    ledger: UnitQuoteResult
+    amount: Fraction
+
+
+def price_advance_loading(
+    release: UnitQuoteRelease,
+    timing: AdvanceLoadingTiming,
+    prices: AdvanceLoadingPrices,
+) -> DeferredLeaveLoading | None:
+    """Use the entitlement date for both reviewed weekly price selections."""
+    payable_on = timing.payable_on()
+    if release.as_known_on != timing.as_known_on:
+        msg = "Advance loading and the price release must share a knowledge date"
+        raise ValueError(msg)
+    if payable_on is None:
+        return None
+    prices = AdvanceLoadingPrices.model_validate(dict(prices))
+    ledger, amount = _price_capped_weekly_loading(
+        release,
+        prices,
+        prices.eligible_weeks,
+        payable_on,
+        timing.evidence,
+    )
+    return DeferredLeaveLoading(timing, prices, ledger, amount)
+
+
+def _price_capped_weekly_loading(
+    release: UnitQuoteRelease,
+    prices: AdvanceLoadingPrices,
+    weeks: NonnegativeQuantity,
+    valued_on: date,
+    evidence: str,
+) -> tuple[UnitQuoteResult, Fraction]:
+    ledger = price_units(
+        release,
+        tuple(
+            QuoteQuantity(
+                quantity_id=label,
+                quote_id=quote_id,
+                unit="week",
+                quantity=weeks,
+                valued_on=valued_on,
+                quantity_kind="analyst_assumption",
+                basis=evidence,
+            )
+            for label, quote_id in (
+                ("salary", prices.salary_quote_id),
+                ("benchmark", prices.benchmark_quote_id),
+            )
+        ),
+    )
+    salary, benchmark = ledger.rows
+    if (salary.quote.component, benchmark.quote.component) != ("salary", "benchmark"):
+        msg = "Capped loading requires a salary quote and a benchmark quote"
+        raise ValueError(msg)
+    amount = min(salary.cost, benchmark.cost) * Fraction(prices.loading_rate)
+    return ledger, amount
+
+
+def price_separation_loading(
+    release: UnitQuoteRelease,
+    eligibility: SeparationLoadingEligibility,
+    prices: AdvanceLoadingPrices,
+    *,
+    valued_on: date,
+    valuation_evidence: str,
+) -> tuple[UnitQuoteResult, Fraction] | None:
+    """Price eligible separation loading on an explicitly reviewed rate date."""
+    weeks = eligibility.eligible_weeks()
+    if release.as_known_on != eligibility.as_known_on:
+        msg = "Separation and the price release must share a knowledge date"
+        raise ValueError(msg)
+    if not valuation_evidence.strip() or valued_on > eligibility.as_known_on:
+        msg = "Separation loading requires reviewed valuation evidence at cutoff"
+        raise ValueError(msg)
+    if not weeks:
+        return None
+    prices = AdvanceLoadingPrices.model_validate(dict(prices))
+    if Fraction(prices.eligible_weeks) != weeks:
+        msg = "Selected pricing weeks must equal eligible separation weeks"
+        raise ValueError(msg)
+    return _price_capped_weekly_loading(
+        release,
+        prices,
+        weeks,
+        valued_on,
+        valuation_evidence,
+    )
 
 
 class LeavePriceSelection(QuoteModel):

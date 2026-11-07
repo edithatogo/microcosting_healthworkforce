@@ -10,13 +10,19 @@ from typing import Literal
 import pytest
 
 from src.leave_pricing import (
+    AdvanceLeaveTermination,
+    AdvanceLoadingPrices,
+    AdvanceLoadingTiming,
     LeaveLoadingComparison,
     LeaveLoadingMoneyCap,
     LeavePriceSelection,
+    SeparationLoadingEligibility,
     allocate_leave_loading_hours,
     combined_leave_hours,
+    price_advance_loading,
     price_leave_loading,
     price_paid_leave,
+    price_separation_loading,
     qualifying_shift_leave_credit,
     select_leave_loading_alternative,
 )
@@ -570,3 +576,160 @@ def test_shift_credit_applies_once_per_qualifying_period(
         Fraction(share),
     )
     assert_that(credit == Fraction(expected))
+
+
+def test_advance_loading_requires_continued_employment_without_prior_penalties() -> (
+    None
+):
+    """The deferred loading is valued at entitlement after continued service."""
+    entitled = date(2026, 12, 1)
+    timing = AdvanceLoadingTiming(
+        leave_taken_on=START,
+        entitled_on=entitled,
+        employment_confirmed_through=entitled,
+        as_known_on=entitled,
+        ordinary_penalties_already_paid=False,
+        evidence="Synthetic reviewed employment confirmation",
+    )
+    assert_that(timing.payable_on() == entitled)
+    assert_that(
+        timing.model_copy(update={"employment_confirmed_through": START}).payable_on()
+        is None,
+    )
+    assert_that(
+        timing.model_copy(update={"ordinary_penalties_already_paid": True}).payable_on()
+        is None,
+    )
+    with pytest.raises(ValueError, match="evidence dates"):
+        timing.model_copy(update={"as_known_on": START}).payable_on()
+
+
+def test_deferred_loading_prices_both_quotes_on_entitlement_date() -> None:
+    """A stale salary quote cannot price the delayed loading."""
+    timing = AdvanceLoadingTiming(
+        leave_taken_on=START,
+        entitled_on=MID,
+        employment_confirmed_through=MID,
+        as_known_on=MID,
+        ordinary_penalties_already_paid=False,
+        evidence="Synthetic reviewed deferred loading",
+    )
+    release = prices().model_copy(
+        update={
+            "as_known_on": MID,
+            "quotes": (
+                quote(quote_id="old", component="salary", unit="week", ends_on=MID),
+                quote(
+                    quote_id="new",
+                    component="salary",
+                    unit="week",
+                    starts_on=MID,
+                    amount=Decimal(2000),
+                ),
+                quote(
+                    quote_id="cap",
+                    component="benchmark",
+                    unit="week",
+                    starts_on=MID,
+                    amount=Decimal(1600),
+                ),
+            ),
+        },
+    )
+    selected = AdvanceLoadingPrices(
+        salary_quote_id="new",
+        benchmark_quote_id="cap",
+        eligible_weeks=Fraction(1, 2),
+        loading_rate=Decimal("0.175"),
+    )
+    result = price_advance_loading(release, timing, selected)
+    if result is None:
+        pytest.fail("Expected deferred loading after entitlement")
+    assert_that(result.amount == Fraction(140))
+    assert_that(all(row.quantity.valued_on == MID for row in result.ledger.rows))
+    with pytest.raises(ValueError, match="date"):
+        price_advance_loading(
+            release,
+            timing,
+            selected.model_copy(update={"salary_quote_id": "old"}),
+        )
+    with pytest.raises(ValueError, match="salary quote and a benchmark quote"):
+        price_advance_loading(
+            release,
+            timing,
+            selected.model_copy(update={"benchmark_quote_id": "new"}),
+        )
+
+    separation = SeparationLoadingEligibility(
+        separated_on=MID,
+        as_known_on=MID,
+        reason="retirement",
+        entitled_loading_weeks=Fraction(1, 2),
+        evidence="Synthetic retirement record",
+    )
+    priced = price_separation_loading(
+        release,
+        separation,
+        selected,
+        valued_on=MID,
+        valuation_evidence="Synthetic reviewed rate date",
+    )
+    if priced is None:
+        pytest.fail("Expected loading on eligible separation")
+    ledger, amount = priced
+    assert_that(amount == Fraction(140))
+    assert_that(all(row.quantity.valued_on == MID for row in ledger.rows))
+    with pytest.raises(ValueError, match="eligible separation weeks"):
+        price_separation_loading(
+            release,
+            separation,
+            selected.model_copy(update={"eligible_weeks": Fraction(1)}),
+            valued_on=MID,
+            valuation_evidence="Synthetic reviewed rate date",
+        )
+
+
+def test_advance_ordinary_pay_excess_only_before_service_year_completion() -> None:
+    """The recovery basis excludes non-excess and completed service years."""
+    settlement = AdvanceLeaveTermination(
+        terminated_on=START,
+        service_year_completed_on=MID,
+        as_known_on=MID,
+        advance_ordinary_pay=Decimal("900.01"),
+        ordinary_pay_due=Decimal(650),
+        evidence="Synthetic reviewed ordinary-pay amounts",
+    )
+    assert_that(settlement.excess_ordinary_pay() == Fraction(25001, 100))
+    assert_that(
+        settlement.model_copy(update={"terminated_on": MID}).excess_ordinary_pay() == 0,
+    )
+    assert_that(
+        settlement.model_copy(
+            update={"ordinary_pay_due": Decimal(950)},
+        ).excess_ordinary_pay()
+        == 0,
+    )
+    with pytest.raises(ValueError, match="valuation cutoff"):
+        settlement.model_copy(update={"terminated_on": END}).excess_ordinary_pay()
+
+
+def test_separation_loading_uses_reason_and_reviewed_exposure() -> None:
+    """Only retirement and covered employer termination admit the exposure."""
+    facts = SeparationLoadingEligibility(
+        separated_on=START,
+        as_known_on=MID,
+        reason="retirement",
+        entitled_loading_weeks=Fraction(3, 2),
+        evidence="Synthetic reviewed loading eligibility",
+    )
+    for reason in ("retirement", "employer_termination"):
+        assert_that(
+            facts.model_copy(update={"reason": reason}).eligible_weeks()
+            == Fraction(3, 2),
+        )
+    for reason in ("resignation", "misconduct"):
+        assert_that(facts.model_copy(update={"reason": reason}).eligible_weeks() == 0)
+    with pytest.raises(ValueError, match="outside"):
+        facts.model_copy(update={"reason": "other"}).eligible_weeks()
+    with pytest.raises(ValueError, match="valuation cutoff"):
+        facts.model_copy(update={"separated_on": END}).eligible_weeks()
