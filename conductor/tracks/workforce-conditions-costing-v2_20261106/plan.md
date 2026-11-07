@@ -717,3 +717,10 @@ component code to the applicable superannuation and levy bases. Where the
 HHS receives a service recharge, verify the dated recharge schedule instead
 of applying a direct insurer premium to that HHS ledger. Preserve the
 historical workbook calculation under its own basis.
+
+The [historical weighting replay](../../../docs/workbook_medicare_method_change.md)
+matched all 17 normalisation outputs and ten weighted annual and hourly
+labour costs. The cost formulas use the column H series. The evidence
+establishes the workbook's arithmetic and selected denominator. Using
+these weights for workforce estimates still requires evidence that the
+underlying population represents the workforce being costed.
