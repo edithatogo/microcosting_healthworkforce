@@ -11,7 +11,14 @@ from fractions import Fraction
 from typing import Literal, Self
 from zoneinfo import ZoneInfo
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    TypeAdapter,
+    field_validator,
+    model_validator,
+)
 
 lazy from src.source_registry import SourceRegistry
 
@@ -387,6 +394,8 @@ class DatedQuantityCost(FrozenModel):
     quantity_method_id: Literal["uniform_elapsed_quantity_v1"]
     quantities: tuple[DatedResourceUse, ...]
     ledger: CostResult
+    absence_hour_limits: dict[str, Decimal] | None = None
+    remaining_absence_hours: dict[str, Fraction] | None = None
 
 
 def _duration_micros(duration: timedelta) -> int:
@@ -422,6 +431,8 @@ def _quantity_order(
 def cost_dated_quantities(
     release: CostRelease,
     quantities: tuple[DatedResourceUse, ...],
+    *,
+    absence_hour_limits: dict[str, Decimal] | None = None,
 ) -> DatedQuantityCost:
     """Price declared resource hours spread uniformly over selected elapsed intervals.
 
@@ -433,6 +444,29 @@ def cost_dated_quantities(
     quantities = _quantity_order(
         tuple(DatedResourceUse.model_validate(q.model_dump()) for q in quantities),
     )
+    remaining: dict[str, Fraction] | None = None
+    if absence_hour_limits is not None:
+        absence_hour_limits = TypeAdapter(dict[str, Decimal]).validate_python(
+            absence_hour_limits,
+            strict=True,
+        )
+        remaining = {}
+        for identity, limit in absence_hour_limits.items():
+            if not identity.strip() or not limit.is_finite() or limit < 0:
+                msg = "Absence hour limits require nonblank identities and finite hours"
+                raise ValueError(msg)
+            remaining[identity] = Fraction(limit)
+        for quantity in quantities:
+            identity = quantity.covers_absence_id
+            if identity is None:
+                continue
+            if identity not in remaining:
+                msg = "Dated cover references an absence without an hour limit"
+                raise ValueError(msg)
+            remaining[identity] -= Fraction(quantity.hours)
+            if remaining[identity] < 0:
+                msg = "Dated cover exceeds the declared absence hour limit"
+                raise ValueError(msg)
     rows: list[CostRow] = []
     exact = Fraction(0)
     for quantity in quantities:
@@ -465,4 +499,6 @@ def cost_dated_quantities(
         quantity_method_id="uniform_elapsed_quantity_v1",
         quantities=quantities,
         ledger=_result(release, rows, exact),
+        absence_hour_limits=absence_hour_limits,
+        remaining_absence_hours=remaining,
     )

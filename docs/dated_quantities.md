@@ -82,3 +82,9 @@ For replacement cover, an optional `covers_absence_id` retains a nonblank
 caller-supplied absence reference on the dated quantity. Join the ledger
 rows by their activity ID to the quantity ID to retrieve that reference.
 The caller substantiates the link and the hours covered.
+
+Pass `absence_hour_limits` to check the combined cover quantities in a
+run against declared available hours by absence ID. Every linked quantity
+must have a limit in that mapping when supplied. The result retains the
+limits used and exact remaining hours by absence ID. Supply available hours after any cover accounted for outside
+the run.
