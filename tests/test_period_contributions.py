@@ -140,6 +140,16 @@ def test_greater_of_period_totals_is_not_sum_of_segment_maxima() -> None:
     )
 
 
+def test_single_period_contribution_basis() -> None:
+    """Price a single contribution basis across effective-dated segments."""
+    original = rule()
+    single = original.model_copy(update={"alternatives": (original.alternatives[0],)})
+    result = cost_contribution_activities(prices(), period(), single, (activity(),))
+    assert_that(result.winning_alternative_ids == ("broad",))
+    assert_that(result.contribution == Fraction(30))
+    assert_that(result.exact_total == Fraction(330))
+
+
 def test_segmentation_order_and_alternative_order_preserve_money() -> None:
     """Splitting at an arbitrary minute cannot reset the comparison period."""
     whole = cost_contribution_activities(prices(), period(), rule(), (activity(),))
