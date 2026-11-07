@@ -83,12 +83,44 @@ class ContributionFactor(FrozenModel):
         return self
 
 
+class ContributionCap(FrozenModel):
+    """Reviewed earnings ceiling and verified prior usage in its window."""
+
+    limit: Decimal = Field(gt=0, allow_inf_nan=False)
+    prior_eligible_earnings: Decimal = Field(ge=0, allow_inf_nan=False)
+    starts_at: datetime
+    ends_at: datetime
+    history_through: datetime
+    source_id: str = Field(min_length=1)
+    source_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
+    citation: str = Field(min_length=1)
+    reviewed: bool
+
+    @model_validator(mode="after")
+    def valid_history(self) -> Self:
+        """Require an explicit cutoff inside the reviewed cap window."""
+        start = _utc(self.starts_at)
+        cutoff = _utc(self.history_through)
+        if (
+            not self.reviewed
+            or not self.citation.strip()
+            or not start <= cutoff < _utc(self.ends_at)
+            or (start == cutoff and self.prior_eligible_earnings != 0)
+        ):
+            msg = (
+                "Contribution cap requires reviewed dates and consistent prior earnings"
+            )
+            raise ValueError(msg)
+        return self
+
+
 class ContributionAlternative(FrozenModel):
     """One independent base definition and effective-dated factor schedule."""
 
     alternative_id: str = Field(min_length=1)
     bases: tuple[str, ...] = Field(min_length=1)
     factors: tuple[ContributionFactor, ...] = Field(min_length=1)
+    cap: ContributionCap | None = None
 
     @model_validator(mode="after")
     def valid_alternative(self) -> Self:
@@ -163,6 +195,7 @@ class ContributionRow:
     bases: tuple[str, ...]
     base_amount: Fraction
     amount: Fraction
+    eligible_base_amount: Fraction | None = None
 
 
 @dataclass(frozen=True)
@@ -213,7 +246,7 @@ def _pieces(
 
 def _require_source(
     release: CostRelease,
-    evidence: ContributionRule | ContributionFactor,
+    evidence: ContributionRule | ContributionFactor | ContributionCap,
     interval: tuple[datetime, datetime],
     scope: tuple[str, str, str],
     zone: ZoneInfo,
@@ -266,6 +299,18 @@ def _prepare(
     scope = (rates[0].jurisdiction, rates[0].employer, rates[0].classification)
     _require_source(release, rule, (start, end), scope, zone)
     for alternative in rule.alternatives:
+        cap = alternative.cap
+        if cap is not None:
+            if _utc(cap.history_through) != start or end > _utc(cap.ends_at):
+                msg = "Contribution cap must cover the period from its history cutoff"
+                raise ValueError(msg)
+            _require_source(
+                release,
+                cap,
+                (_utc(cap.starts_at), _utc(cap.ends_at)),
+                scope,
+                zone,
+            )
         for left, right, factor in _pieces(alternative, start, end):
             _require_source(release, factor, (left, right), scope, zone)
     return release, period, rule
@@ -289,6 +334,15 @@ def _calculate(
             )
             raise ValueError(msg)
         total = Fraction(0)
+        cap = alternative.cap
+        remaining = (
+            max(
+                Fraction(0),
+                Fraction(cap.limit) - Fraction(cap.prior_eligible_earnings),
+            )
+            if cap is not None
+            else None
+        )
         for row in base.rows:
             hours = Fraction(row.exact_hours_numerator, row.exact_hours_denominator)
             hourly_base = sum(
@@ -311,7 +365,14 @@ def _calculate(
                         duration,
                     )
                 amount_base = hourly_base * quantity
-                amount = amount_base * Fraction(factor.fraction)
+                eligible_base = amount_base
+                if remaining is not None:
+                    if amount_base < 0:
+                        msg = "Capped contributions require nonnegative earnings"
+                        raise ValueError(msg)
+                    eligible_base = min(amount_base, remaining)
+                    remaining -= eligible_base
+                amount = eligible_base * Fraction(factor.fraction)
                 rows.append(
                     ContributionRow(
                         alternative.alternative_id,
@@ -323,6 +384,7 @@ def _calculate(
                         alternative.bases,
                         amount_base,
                         amount,
+                        eligible_base if cap is not None else None,
                     ),
                 )
                 total += amount
@@ -353,7 +415,7 @@ def cost_contribution_activities(
 
     One resource category and one physical allocation are required. Wage and
     factor changes split candidate rows before each alternative's total is summed.
-    Payment dates, contribution caps and statutory base selection are not inferred.
+    Payment dates and statutory base selection are supplied outside this calculation.
     """
     release, period, rule = _prepare(release, period, rule)
     activities = tuple(Activity.model_validate(a.model_dump()) for a in activities)
