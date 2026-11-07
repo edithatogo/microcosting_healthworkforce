@@ -21,11 +21,21 @@ class WorkbookValidation:
     rule_xml: str
 
 
+def _read_xml_part(archive: ZipFile, member: str) -> bytes:
+    data = archive.read(member)
+    if b"<!DOCTYPE" in data.replace(b"\x00", b""):
+        msg = "Workbook XML must not contain a document type declaration"
+        raise ValueError(msg)
+    return data
+
+
 def read_workbook_validations(path: Path) -> tuple[WorkbookValidation, ...]:
     """Retain standard and extended rules, including targets and formulas."""
     with ZipFile(path) as archive:
-        workbook = fromstring(archive.read("xl/workbook.xml"))
-        relationships = fromstring(archive.read("xl/_rels/workbook.xml.rels"))
+        workbook = fromstring(_read_xml_part(archive, "xl/workbook.xml"))
+        relationships = fromstring(
+            _read_xml_part(archive, "xl/_rels/workbook.xml.rels"),
+        )
         targets = {
             rel.attrib["Id"]: rel.attrib["Target"]
             for rel in relationships
@@ -37,7 +47,7 @@ def read_workbook_validations(path: Path) -> tuple[WorkbookValidation, ...]:
             if target is None:
                 continue
             member = target.lstrip("/") if target.startswith("/") else f"xl/{target}"
-            xml = fromstring(archive.read(normpath(member)))
+            xml = fromstring(_read_xml_part(archive, normpath(member)))
             for rule in xml.findall(".//{*}dataValidation"):
                 payload: object = tostring(rule)
                 if isinstance(payload, bytes):

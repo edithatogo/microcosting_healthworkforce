@@ -191,6 +191,7 @@ def read_workbook_catalog(
 ) -> WorkbookCatalog:
     """Read all or explicitly selected sheets without modifying the source."""
     digest = sha256(path.read_bytes()).hexdigest()
+    validations = read_workbook_validations(path)
     # Normal mode gives constant-time cache lookup; read-only indexed lookup rescans.
     book = openpyxl.load_workbook(path, data_only=False)
     cached = openpyxl.load_workbook(path, data_only=True)
@@ -207,11 +208,7 @@ def read_workbook_catalog(
             digest,
             tuple(_sheet(sheet, cached[sheet.title]) for sheet in selected),
             {key: str(value.attr_text) for key, value in book.defined_names.items()},
-            tuple(
-                rule
-                for rule in read_workbook_validations(path)
-                if rule.sheet in selected_names
-            ),
+            tuple(rule for rule in validations if rule.sheet in selected_names),
         )
     finally:
         book.close()
