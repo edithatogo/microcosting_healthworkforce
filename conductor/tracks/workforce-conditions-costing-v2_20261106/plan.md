@@ -702,3 +702,18 @@ was introduced in `8bb90f9` and retains its original value. The
 introducing validator used an unweighted mean of result-row means.
 The scalar remains a historical reference with unresolved generating
 method and unit. Scientific PSA qualification remains separate.
+
+### Contribution release evidence
+
+Paid contribution pricing now preserves assignment identity and earning
+intervals separately from posting dates. PRs #231–#233 verify those boundaries
+and the shared source scope. PR #238 verifies that zero payments still require
+valid factor evidence. This supports static and dynamic calculation checks
+with synthetic inputs.
+
+For a Queensland vehicle release, the next acceptance input is a dated
+payroll example linking the assignment, earning interval, payment date and
+component code to the applicable superannuation and levy bases. Where the
+HHS receives a service recharge, verify the dated recharge schedule instead
+of applying a direct insurer premium to that HHS ledger. Preserve the
+historical workbook calculation under its own basis.
