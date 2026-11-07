@@ -19,6 +19,7 @@ from src.costing import (
     cost_dynamic,
     cost_static,
 )
+lazy from src.periodic_allowance import PeriodicAllowanceCost
 
 
 def _utc(value: datetime) -> datetime:
@@ -491,6 +492,32 @@ class ContributionPayment(FrozenModel):
     paid_at: datetime
     amount: Decimal = Field(ge=0, allow_inf_nan=False)
     evidence: str = Field(min_length=1)
+
+
+@dataclass(frozen=True)
+class AllowancePaymentReconciliation:
+    """Retain both allowance pricing provenance and the actual payroll posting."""
+
+    allowance: PeriodicAllowanceCost
+    payment: ContributionPayment
+    paid_minus_payable: Fraction
+
+
+def reconcile_allowance_payment(
+    allowance: PeriodicAllowanceCost,
+    payment: ContributionPayment,
+) -> AllowancePaymentReconciliation:
+    """Compare a caller-matched posting with the exact payable allowance."""
+    payment = ContributionPayment.model_validate(payment.model_dump())
+    _utc(payment.paid_at)
+    if payment.component != allowance.condition.component:
+        msg = "Payment component does not match the priced allowance"
+        raise ValueError(msg)
+    return AllowancePaymentReconciliation(
+        allowance,
+        payment,
+        Fraction(payment.amount) - allowance.payable,
+    )
 
 
 @dataclass(frozen=True)
