@@ -19,6 +19,7 @@ from src.leave_pricing import (
     SeparationLoadingEligibility,
     allocate_leave_loading_hours,
     combined_leave_hours,
+    nsw_general_shift_leave_credit,
     price_advance_loading,
     price_leave_loading,
     price_paid_leave,
@@ -733,3 +734,21 @@ def test_separation_loading_uses_reason_and_reviewed_exposure() -> None:
         facts.model_copy(update={"reason": "other"}).eligible_weeks()
     with pytest.raises(ValueError, match="valuation cutoff"):
         facts.model_copy(update={"separated_on": END}).eligible_weeks()
+
+
+def test_nsw_general_shift_credit_prorates_and_rounds_below_threshold() -> None:
+    """Keep the 35-shift credit distinct from the Staff Specialists rule."""
+    assert_that(nsw_general_shift_leave_credit(0, Fraction(19)) == 0)
+    assert_that(nsw_general_shift_leave_credit(36, Fraction(19)) == Fraction(19))
+    assert_that(nsw_general_shift_leave_credit(34, Fraction(38)) == Fraction(1292, 35))
+    assert_that(nsw_general_shift_leave_credit(35, Fraction(38)) == Fraction(38))
+    assert_that(
+        nsw_general_shift_leave_credit(
+            7,
+            Fraction(35, 2),
+            rounding_increment_hours=Fraction(1),
+        )
+        == Fraction(4),
+    )
+    with pytest.raises(ValueError, match="rounding increment"):
+        nsw_general_shift_leave_credit(7, Fraction(35, 2))

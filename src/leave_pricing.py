@@ -89,6 +89,39 @@ def qualifying_shift_leave_credit(
     return full_time_credit * ordinary_hours_fraction
 
 
+def nsw_general_shift_leave_credit(
+    worked_shifts: int,
+    ordinary_weekly_hours: Fraction,
+    *,
+    rounding_increment_hours: Fraction | None = None,
+) -> Fraction:
+    """Apply historical NSW Conditions Award 16(i)(b) to reviewed shifts.
+
+    The caller establishes coverage, shift eligibility and the rounding increment
+    for a worker below 38 weekly hours. The count covers one qualifying year.
+    """
+    if worked_shifts < 0 or ordinary_weekly_hours <= 0:
+        msg = "Shift count and ordinary weekly hours must be valid"
+        raise ValueError(msg)
+    if worked_shifts == 0:
+        return Fraction(0)
+    annual_shift_threshold = 35
+    full_time_weekly_hours = 38
+    if worked_shifts >= annual_shift_threshold:
+        return ordinary_weekly_hours
+    if ordinary_weekly_hours >= full_time_weekly_hours:
+        return Fraction(full_time_weekly_hours * worked_shifts, annual_shift_threshold)
+    if rounding_increment_hours is None or rounding_increment_hours <= 0:
+        msg = "Below 38 weekly hours, supply a reviewed rounding increment"
+        raise ValueError(msg)
+    exact_hours = ordinary_weekly_hours * Fraction(
+        worked_shifts,
+        annual_shift_threshold,
+    )
+    rounded_units = (exact_hours / rounding_increment_hours + Fraction(1, 2)) // 1
+    return rounded_units * rounding_increment_hours
+
+
 def combined_leave_hours(
     loading_eligible: Fraction,
     base_only: Fraction,
