@@ -108,6 +108,9 @@ def test_intake_retains_extended_validation(tmp_path: Path) -> None:
     (rule,) = catalog.validations
     assert_that(rule.sheet == "Sheet")
     assert_that(rule.targets == ("K6:K55",))
+    assert_that(rule.validation_type == "list")
+    assert_that(rule.operator == "between")
+    assert_that(not rule.allow_blank)
     assert_that(rule.formula1 == "INDIRECT($J6)")
     assert_that(rule.formula2 is None)
     assert_that(rule.formulas_at("K55") == ("INDIRECT($J55)", None))
