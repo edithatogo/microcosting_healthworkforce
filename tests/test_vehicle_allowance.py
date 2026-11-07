@@ -212,3 +212,26 @@ def test_excess_vehicle_distance(journey: int, expected: int) -> None:
     rates = release(quote(unit="km", amount=Decimal("0.75")))
     assert_that(payable.quantity == Fraction(expected))
     assert_that(price_units(rates, (payable,)).total == Fraction(expected * 3, 4))
+
+
+def test_excess_vehicle_distance_uses_dated_award_rate() -> None:
+    """Retain the quote date across the certified reprint boundary."""
+    boundary = date(2026, 9, 1)
+    rates = release(
+        quote(unit="km", amount=Decimal("0.99"), ends_on=boundary),
+        quote(quote_id="new", unit="km", amount=Decimal(1), starts_on=boundary),
+    )
+    case = ExcessVehicleDistance(
+        journey=quantity(unit="km", quantity=Decimal(30), valued_on=date(2026, 8, 31)),
+        normal_commute_km=Decimal(20),
+        commute_evidence="Synthetic usual commute",
+    )
+    before = case.payable_quantity()
+    later = case.journey.model_copy(
+        update={"quote_id": "new", "quantity_id": "later", "valued_on": boundary},
+    )
+    after = case.model_copy(update={"journey": later}).payable_quantity()
+    result = price_units(rates, (before, after))
+    assert_that(result.total == Fraction("19.90"))
+    with pytest.raises(ValueError, match="date"):
+        price_units(rates, (after.model_copy(update={"quote_id": before.quote_id}),))
