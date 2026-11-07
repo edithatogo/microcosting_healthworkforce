@@ -57,15 +57,16 @@ class AdjustmentSettlement(QuoteModel):
         ):
             msg = "Planned payment cannot precede crystallisation"
             raise ValueError(msg)
-        if len({line.line_id for line in self.lines}) != len(self.lines):
+        if len({line.line_id.strip() for line in self.lines}) != len(self.lines):
             msg = "Duplicate adjustment line identity"
             raise ValueError(msg)
         latest: dict[str, date] = {}
         for line in sorted(self.lines, key=lambda item: item.starts_on):
-            if line.component in latest and line.starts_on < latest[line.component]:
+            component = line.component.strip()
+            if component in latest and line.starts_on < latest[component]:
                 msg = "Overlapping adjustment intervals for a component"
                 raise ValueError(msg)
-            latest[line.component] = line.ends_on
+            latest[component] = line.ends_on
         return self
 
 

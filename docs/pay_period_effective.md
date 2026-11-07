@@ -23,5 +23,13 @@ known-from and as-known-at dates, and the source hash must match. Earlier trigge
 and selected period-start dates must lie inside the reviewed interval. Without
 that assertion, ordinary source-date checks remain unchanged. The authority is a
 caller-reviewed assertion; the resolver does not determine whether the source
-actually grants retrospective effect. Condition-release retrospective pricing,
-backpay and cash timing remain separate capabilities.
+actually grants retrospective effect. A condition release can price reviewed retrospective entitlements in
+snapshots and dated activities when its knowledge date matches the authority.
+Entitlement pricing, payroll backpay settlement and cash timing are separate
+calculations.
+
+For a reviewed payroll adjustment, pass matched entitlement and credited amounts
+to `reconcile_adjustment` in `src.adjustment_settlement`. Each line identifies
+its component, half-open interval and evidence for both amounts. The result is a
+signed difference per line and an exact net balance. The request can retain a
+planned payment date. Actual payment and recovery require separate evidence.
