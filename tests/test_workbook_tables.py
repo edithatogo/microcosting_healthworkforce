@@ -7,7 +7,12 @@ import openpyxl
 import pytest
 
 from src.workbook_catalog import read_workbook_catalog
-from src.workbook_tables import ColumnMeaning, TableDefinition, extract_tables
+from src.workbook_tables import (
+    ColumnMeaning,
+    TableDefinition,
+    extract_tables,
+    extract_vehicle_opening_amounts,
+)
 from tests.checks import assert_that
 
 
@@ -68,3 +73,25 @@ def test_overlapping_or_unmatched_definitions_fail(tmp_path: Path) -> None:
     missing = TableDefinition("c", "missing", "A1:A1", "candidate", "unknown")
     with pytest.raises(ValueError, match="sheet"):
         extract_tables(catalog, (missing,))
+
+
+def test_vehicle_opening_lookup_preserves_blank_amount(tmp_path: Path) -> None:
+    """Distinguish a matched blank, numeric zero and a missing key."""
+    path = tmp_path / "vehicle.xlsx"
+    book = openpyxl.Workbook()
+    sheet = book["Sheet"]
+    sheet.title = "MV Allowance"
+    for row in range(2, 26):
+        sheet[f"C{row}"] = f"key-{row}"
+    sheet["D3"] = 0
+    book.save(path)
+
+    amounts = extract_vehicle_opening_amounts(read_workbook_catalog(path))
+    assert_that("key-2" in amounts and amounts["key-2"] is None)
+    assert_that(amounts["key-3"] == 0)
+    assert_that("unknown" not in amounts)
+    sheet["C25"] = "key-2"
+    book.save(path)
+    book.close()
+    with pytest.raises(ValueError, match="duplicate vehicle lookup key"):
+        extract_vehicle_opening_amounts(read_workbook_catalog(path))
