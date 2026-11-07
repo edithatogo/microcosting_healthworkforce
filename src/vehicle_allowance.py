@@ -2,12 +2,14 @@
 """Price travel after an explicitly evidenced recurring allowance exclusion."""
 
 from dataclasses import dataclass
+from fractions import Fraction
 from typing import Literal
 lazy from datetime import date
 
 from pydantic import Field
 
 from src.unit_quotes import (
+    NonnegativeQuantity,
     QuoteModel,
     QuoteQuantity,
     UnitQuoteRelease,
@@ -143,3 +145,31 @@ def moca7_vehicle_level(appointment: Moca7VehicleAppointment) -> Literal[1, 2]:
     ):
         return 2
     return 1
+
+
+class ExcessVehicleDistance(QuoteModel):
+    """Comparable journey distances for independently reviewed excess travel."""
+
+    journey: QuoteQuantity
+    normal_commute_km: NonnegativeQuantity
+    commute_evidence: str
+
+    def payable_quantity(self) -> QuoteQuantity:
+        """Subtract the usual commute and preserve the dated quote identity."""
+        case = ExcessVehicleDistance.model_validate(
+            dict(self, journey=dict(self.journey)),
+        )
+        if case.journey.unit != "km":
+            msg = "Excess vehicle distance requires kilometre units"
+            raise ValueError(msg)
+        excess = Fraction(case.journey.quantity) - Fraction(case.normal_commute_km)
+        return QuoteQuantity.model_validate(
+            dict(
+                case.journey,
+                quantity=max(Fraction(0), excess),
+                basis=(
+                    f"{case.journey.basis}. "
+                    f"Usual commute evidence {case.commute_evidence}"
+                ),
+            ),
+        )
