@@ -3,6 +3,7 @@
 
 from dataclasses import dataclass
 from posixpath import normpath
+from typing import Protocol, cast
 from zipfile import ZipFile
 lazy from pathlib import Path
 
@@ -14,6 +15,10 @@ from openpyxl.xml.functions import fromstring, tostring
 _RELATIONSHIP_ID = (
     "{http://schemas.openxmlformats.org/officeDocument/2006/relationships}id"
 )
+
+
+class _FormulaTranslator(Protocol):
+    def translate_formula(self, dest: str) -> object: ...
 
 
 @dataclass(frozen=True)
@@ -41,7 +46,14 @@ class WorkbookValidation:
             if formula is None:
                 return None
             expression = "=" + formula.removeprefix("=")
-            result: str = Translator(expression, origin=origin).translate_formula(cell)
+            translator = cast(
+                "_FormulaTranslator",
+                Translator(expression, origin=origin),
+            )
+            result = translator.translate_formula(cell)
+            if not isinstance(result, str):
+                msg = "Validation formula translation did not return text"
+                raise TypeError(msg)
             return result if formula.startswith("=") else result.removeprefix("=")
 
         return translate(self.formula1), translate(self.formula2)
