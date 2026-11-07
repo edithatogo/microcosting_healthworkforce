@@ -44,6 +44,9 @@ def run_dsa_analysis(
 
     for scenario in scenarios:
         scenario_name = scenario["name"]
+        if scenario_name in dsa_results:
+            message = f"Duplicate DSA scenario name: {scenario_name!r}"
+            raise ValueError(message)
         params_to_vary = scenario.get(
             "parameters_to_vary",
             [scenario["parameter_to_vary"]] if "parameter_to_vary" in scenario else [],
@@ -52,14 +55,15 @@ def run_dsa_analysis(
             "variations",
             [scenario["variation"]] if "variation" in scenario else [],
         )
+        if len(params_to_vary) != len(variations):
+            message = f"Scenario {scenario_name!r} needs one variation per parameter"
+            raise ValueError(message)
         row_filter = validate_row_filter(scenario.get("row_filter"))
         logger.info("Running scenario: %s", scenario_name)
 
         scenario_df = base_case_df.clone()
 
-        for i, param_to_vary in enumerate(params_to_vary):
-            variation = variations[i]
-
+        for param_to_vary, variation in zip(params_to_vary, variations, strict=True):
             if param_to_vary not in param_to_col_map:
                 logger.warning(
                     "Param '%s' not in formula mapping. Skipping.",
