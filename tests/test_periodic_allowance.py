@@ -13,6 +13,7 @@ from src.periodic_allowance import (
     AllowancePeriod,
     AllowancePortion,
     cost_periodic_allowance,
+    cost_periodic_allowance_schedule,
 )
 from src.source_registry import SourceRegistry
 from tests.checks import assert_that
@@ -112,3 +113,64 @@ def test_split_period_retains_nominal_denominator_and_condition_lineage() -> Non
     assert_that(after.condition.condition_id == "second")
     assert_that(before.release_sha256 == after.release_sha256)
     assert_that(before.release_sha256 == release_sha256(dated))
+
+
+def test_schedule_conserves_hours_across_rate_change() -> None:
+    """Price the same nominal period once across two explicitly allocated rates."""
+    first = condition("first", "fixed_annual", "1975", "AUD/year").model_copy(
+        update={"component": "training", "effective_to": date(2026, 6, 8)},
+    )
+    second = condition("second", "fixed_annual", "3950", "AUD/year").model_copy(
+        update={"component": "training", "effective_from": date(2026, 6, 8)},
+    )
+    dated = release().model_copy(update={"conditions": (first, second)})
+    parent = period(portion("ordinary", "76", "1", "1"))
+    segments = (
+        period(portion("ordinary", "38", "1", "1")).model_copy(
+            update={"ends_on": date(2026, 6, 8)},
+        ),
+        period(portion("ordinary", "38", "1", "1")).model_copy(
+            update={"starts_on": date(2026, 6, 8)},
+        ),
+    )
+    result = cost_periodic_allowance_schedule(dated, "training", parent, segments)
+    assert_that(result.accrued == result.payable == Fraction(5925, 52))
+    assert_that(
+        [c.condition.condition_id for c in result.segments] == ["first", "second"],
+    )
+    assert_that(result.segments[0].release_sha256 == result.segments[1].release_sha256)
+
+
+def test_schedule_rejects_duplicate_hours_and_changed_factors() -> None:
+    """Contiguous dates cannot hide repeated allocations or altered leave factors."""
+    parent = period(portion("ordinary", "38", "1", "1"))
+    before = parent.model_copy(update={"ends_on": date(2026, 6, 8)})
+    after = parent.model_copy(update={"starts_on": date(2026, 6, 8)})
+    with pytest.raises(ValueError, match="conserve"):
+        cost_periodic_allowance_schedule(release(), "training", parent, (before, after))
+    altered = period(portion("ordinary", "38", "1", "0.5"))
+    with pytest.raises(ValueError, match="conserve"):
+        cost_periodic_allowance_schedule(release(), "training", parent, (altered,))
+
+
+def test_schedule_rejects_gaps_overlaps_and_changed_denominators() -> None:
+    """Every segment belongs to one complete declared payroll period."""
+    parent = period(portion("ordinary", "38", "1", "1"))
+    with pytest.raises(ValueError, match="at least one"):
+        cost_periodic_allowance_schedule(release(), "training", parent, ())
+    for invalid in (
+        parent.model_copy(update={"starts_on": date(2026, 6, 2)}),
+        parent.model_copy(update={"ends_on": date(2026, 6, 14)}),
+    ):
+        with pytest.raises(ValueError, match="contiguously"):
+            cost_periodic_allowance_schedule(release(), "training", parent, (invalid,))
+    with pytest.raises(ValueError, match="contiguously"):
+        cost_periodic_allowance_schedule(
+            release(),
+            "training",
+            parent,
+            (parent, parent),
+        )
+    changed = parent.model_copy(update={"periods_per_year": Decimal(27)})
+    with pytest.raises(ValueError, match="denominators"):
+        cost_periodic_allowance_schedule(release(), "training", parent, (changed,))
