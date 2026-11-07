@@ -164,6 +164,9 @@ def _exact_segment(
         * (Fraction(rule.multiplier) - 1)
         * (hours - ordinary)
     )
+    if premium and salary.included_components:
+        msg = "Overtime premium requires salary without bundled components"
+        raise ValueError(msg)
     return hours, ordinary, premium
 
 

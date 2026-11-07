@@ -129,3 +129,17 @@ def test_legacy_source_without_publication_date_round_trips() -> None:
     restored = SourceRecord.model_validate_json(legacy)
     assert_that(restored.published_on is None)
     assert_that(restored.effective_from == date(2026, 1, 1))
+
+
+def test_same_edition_scope_rejects_cross_employer_grade() -> None:
+    """Match each grade to its verified employer scope."""
+    other = source(source_id="other", employers=("Other",), classifications=("Grade",))
+    registry = SourceRegistry(records=(source(), other))
+    with pytest.raises(ValueError, match="scope"):
+        registry.require_applicable(
+            other.source_id,
+            date(2026, 2, 1),
+            "QLD",
+            "Other",
+            "Synthetic grade",
+        )

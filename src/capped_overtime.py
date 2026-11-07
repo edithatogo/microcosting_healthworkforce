@@ -137,6 +137,9 @@ def cost_capped_daily_overtime(
         c for c in release.conditions if c.effective_from <= day < c.effective_to
     ]
     salary = next(c for c in current if c.kind == "salary")
+    if salary.included_components:
+        msg = "Capped overtime requires salary without bundled components"
+        raise ValueError(msg)
     paid_hours = next(c for c in current if c.kind == "paid_hours")
     salary_rate = Fraction(salary.value) / Fraction(paid_hours.value)
     basis = min(salary_rate, Fraction(rule.salary_cap_hourly))

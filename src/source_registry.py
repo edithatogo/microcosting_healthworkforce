@@ -11,7 +11,11 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 
 
 class SourceRecord(BaseModel):
-    """Retain a source edition without inferring eligibility from its title."""
+    """Retain an edition without inferring eligibility from its title.
+
+    Every listed classification must apply to every listed employer. Use
+    distinct source IDs with the same edition and hash when coverage differs.
+    """
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
     source_id: str = Field(min_length=1)

@@ -253,3 +253,21 @@ def test_overtime_rejects_multiple_or_incomplete_allocation_identities() -> None
         cost_overtime_period(release(), period(), rule(), (first, same), "UTC").total
         == Decimal(125),
     )
+
+
+def test_overtime_rejects_premium_on_composite_salary() -> None:
+    """A bundled salary is not a verified ordinary overtime base."""
+    base = release()
+    salary, hours = base.conditions
+    bundled = salary.model_copy(update={"included_components": ("overtime",)})
+    composite = base.model_copy(update={"conditions": (bundled, hours)})
+    start = period().history_through
+    activity = Activity(
+        activity_id="shift",
+        resource_id="worker",
+        starts_at=start,
+        ends_at=start + timedelta(hours=2),
+        resources=Decimal(1),
+    )
+    with pytest.raises(ValueError, match="salary without bundled components"):
+        cost_overtime_period(composite, period(), rule(), (activity,), "UTC")
