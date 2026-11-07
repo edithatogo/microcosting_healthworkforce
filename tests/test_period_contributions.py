@@ -18,6 +18,7 @@ from src.period_contributions import (
     cost_contribution_activities,
     cost_contribution_payments,
     cost_contribution_snapshot,
+    quarterly_levy_due_date,
 )
 from tests.checks import assert_that
 from tests.test_costing import release
@@ -631,3 +632,18 @@ def test_paid_contribution_rejects_unverified_factor_even_without_postings() -> 
         cost_contribution_payments(prices(), period(), invalid, ())
     empty = cost_contribution_payments(prices(), period(), policy, ())
     assert_that(empty.contribution == 0)
+
+
+def test_quarterly_levy_due_date_requires_complete_calendar() -> None:
+    """Count explicit working days strictly after quarter end."""
+    end = date(2026, 3, 31)
+    holidays = {date(2026, 4, 3), date(2026, 4, 6)}
+    days = [end + timedelta(days=offset) for offset in range(1, 21)]
+    calendar = {day: day.weekday() in range(5) and day not in holidays for day in days}
+    assert_that(quarterly_levy_due_date(end, calendar) == date(2026, 4, 20))
+
+    del calendar[date(2026, 4, 3)]
+    with pytest.raises(ValueError, match="complete working-day calendar"):
+        quarterly_levy_due_date(end, calendar)
+    with pytest.raises(ValueError, match="quarter boundary"):
+        quarterly_levy_due_date(date(2026, 3, 30), calendar)

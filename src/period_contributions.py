@@ -482,6 +482,31 @@ def cost_contribution_snapshot(
     )
 
 
+def quarterly_levy_due_date(
+    quarter_end: date,
+    working_days: dict[date, bool],
+) -> date:
+    """Find the twelfth working day using explicit calendar-day classifications."""
+    if (quarter_end.month, quarter_end.day) not in (
+        (3, 31),
+        (6, 30),
+        (9, 30),
+        (12, 31),
+    ):
+        msg = "Levy period must end on a calendar quarter boundary"
+        raise ValueError(msg)
+    day = quarter_end
+    count = 0
+    working_day_deadline = 12
+    while count < working_day_deadline:
+        day += timedelta(days=1)
+        if type(working_days.get(day)) is not bool:
+            msg = "Levy due date requires a complete working-day calendar"
+            raise ValueError(msg)
+        count += working_days[day]
+    return day
+
+
 class ContributionPayment(FrozenModel):
     """An explicitly classified payroll posting for one allocation."""
 
