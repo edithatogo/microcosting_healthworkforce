@@ -16,6 +16,8 @@ from src.reimbursement import (
     ReimbursementRecoveryDecision,
     build_reimbursement_ledger,
     cost_reimbursements,
+    nsw_level_one_tesl_available_funding,
+    nsw_level_one_tesl_funding,
     price_sa_residential_course_days,
     reimbursement_carry_amount,
     reimbursement_cost_after_recovery,
@@ -421,3 +423,75 @@ def test_vic_specialist_cme_cap_limits_approved_claims() -> None:
     assert_that(
         build_reimbursement_ledger(period.model_copy(update={"claims": ()})).total == 0,
     )
+
+
+def test_nsw_level_one_tesl_prorates_funding_without_assuming_use() -> None:
+    """A fractional allocation provides a ceiling for a reviewed claim ledger."""
+    funding = nsw_level_one_tesl_funding(Fraction(38000), Fraction(3, 5))
+    assert_that(funding == Fraction(22800))
+    period = ReimbursementPeriod(
+        currency="AUD",
+        starts_on=date(2022, 7, 1),
+        ends_on=date(2023, 7, 1),
+        cap=funding,
+        prior_use=Fraction(0),
+        applicability_evidence="Synthetic reviewed Level 1 allocation",
+        claims=(),
+    )
+    assert_that(build_reimbursement_ledger(period).total == 0)
+    with pytest.raises(ValueError, match="positive FTE"):
+        nsw_level_one_tesl_funding(Fraction(38000), Fraction(6, 5))
+
+
+def test_nsw_tesl_part_time_credit_retains_full_time_accumulation_ceiling() -> None:
+    """Prorate the annual credit while applying the reviewed full-time ceiling."""
+    annual_credit = nsw_level_one_tesl_funding(Fraction(38000), Fraction(3, 5))
+    available = nsw_level_one_tesl_available_funding
+    assert_that(
+        available(annual_credit, Fraction(50000), accumulation_ceiling=Fraction(75000))
+        == Fraction(72800),
+    )
+    assert_that(
+        available(annual_credit, Fraction(55000), accumulation_ceiling=Fraction(75000))
+        == Fraction(75000),
+    )
+    with pytest.raises(ValueError, match="must be nonnegative"):
+        available(annual_credit, Fraction(-1), accumulation_ceiling=Fraction(75000))
+
+
+def test_nsw_tesl_carried_funding_limits_dated_claims() -> None:
+    """Apply the accumulated budget and prior charges to approved expenses."""
+    funding = nsw_level_one_tesl_available_funding(
+        nsw_level_one_tesl_funding(Fraction(38000), Fraction(3, 5)),
+        Fraction(55000),
+        accumulation_ceiling=Fraction(75000),
+    )
+    claims = (
+        ReimbursementClaim(
+            claim_id="first",
+            charged_on=date(2022, 8, 1),
+            eligible_amount=Fraction("400.25"),
+            approval_evidence="Synthetic approved course expense",
+        ),
+        ReimbursementClaim(
+            claim_id="second",
+            charged_on=date(2022, 9, 1),
+            eligible_amount=Fraction(800),
+            approval_evidence="Synthetic approved travel expense",
+        ),
+    )
+    period = ReimbursementPeriod(
+        currency="AUD",
+        starts_on=date(2022, 7, 1),
+        ends_on=date(2023, 7, 1),
+        cap=funding,
+        prior_use=Fraction(74000),
+        applicability_evidence="Synthetic reviewed Level 1 funding and prior use",
+        claims=claims,
+    )
+    ledger = build_reimbursement_ledger(period)
+    assert_that(
+        [row.cost for row in ledger.rows] == [Fraction("400.25"), Fraction("599.75")],
+    )
+    assert_that(ledger.total == Fraction(1000))
+    assert_that(ledger.rows[-1].remaining == 0)
