@@ -39,6 +39,8 @@ def release_sha256(release: ConditionRelease) -> str:
     if legacy:
         payload.pop("as_known_at")
     for item in payload["conditions"]:
+        if item["workbook_origin"] is None:
+            item.pop("workbook_origin")
         if legacy:
             item.pop("retrospective")
         if not any(condition.included_components for condition in release.conditions):
