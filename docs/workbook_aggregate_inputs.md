@@ -30,6 +30,10 @@ Four weighted aggregate placeholder blocks and the DSA archived jurisdiction/
 personnel columns carry identity roles only. The isolated AK39 zero retains
 an unresolved historical-value role with no declared economic unit. Recording
 that literal zero does not supply a missing lower-bound input in AK34.
+The formula reference audit found no dependencies on AK39. Neither
+sheet-local defined name targets that cell, and the workbook contains
+no external-link parts. Keep the literal outside costing inputs while
+retaining its original value and coordinate.
 
 On the WM sheet, Y52:Y56 and AB52:AB56 format the weighted annual and hourly
 numeric results from rows 46:50. The component displays J95:X99 and J144:X148

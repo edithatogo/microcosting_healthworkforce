@@ -77,6 +77,14 @@ def test_aggregate_axes_preserve_original_formula_lineage() -> None:
     assert_that(cells["AK35"].source.value == 0)
     assert_that(cells["AK35"].column_name == "annual_leave_lower")
 
+    isolated = next(
+        t for t in extraction.tables if t.definition.table_id == "WS06-R06-isolated"
+    )
+    assert_that(len(isolated.cells) == 1)
+    assert_that(isolated.cells[0].source.coordinate == "AK39")
+    assert_that(isolated.cells[0].source.value == 0)
+    assert_that(isolated.definition.status == "physical_region_unresolved")
+
     display = next(
         t for t in extraction.tables if t.definition.table_id == "WS06-R06-formatted"
     )
