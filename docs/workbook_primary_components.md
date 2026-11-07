@@ -24,3 +24,15 @@ jurisdiction input fractions, then multiply by the first jurisdiction's
 midpoint salary. Fixed allowances and salary bounds are averaged instead. This
 is not generally the mean of the jurisdiction-specific component amounts and
 does not establish an intended or accepted national average.
+
+A private LibreOffice recalculation independently reconciled all 600
+mapped outputs across the 25 jurisdiction-role rows. The comparison
+covered the annual amounts and midpoint-cost shares, using the
+recalculated input operands and a tolerance of 0.00000001 in the
+respective output units. This check covers the jurisdiction blocks.
+
+The replay also matched all 60 `ALL` annual component amounts and
+all 60 formatted share strings. The share strings use the first
+jurisdiction's midpoint-cost denominator for the mean, minimum
+and maximum, then format each result to one decimal percentage point.
+These are historical display ranges.
