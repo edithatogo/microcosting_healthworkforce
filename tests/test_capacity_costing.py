@@ -77,3 +77,31 @@ def test_capacity_ratio_retains_exact_nonterminating_value() -> None:
         )
         == Fraction(530, 9),
     )
+
+
+def test_paid_cost_avoids_intermediate_hourly_rounding() -> None:
+    """Converting a nonterminating hourly rate must preserve annual salary."""
+    baseline = release()
+    revised = baseline.model_copy(
+        update={
+            "conditions": tuple(
+                item.model_copy(
+                    update={
+                        "value": Decimal(300002 if item.kind == "salary" else 2001),
+                    },
+                )
+                for item in baseline.conditions
+            ),
+        },
+    )
+    result = capacity_scenario(
+        revised,
+        date(2026, 6, 1),
+        CapacityScenarioInputs(
+            losses=(),
+            cover_hours=Decimal(0),
+            cover_hourly_cost=Decimal(0),
+            losses_disjoint=True,
+        ),
+    )
+    assert_that(result.paid_cost == result.total_cost == Decimal(300002))

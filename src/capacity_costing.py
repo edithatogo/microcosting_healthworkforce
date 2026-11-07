@@ -7,7 +7,7 @@ lazy from datetime import date
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from src.conditions import ConditionRelease, exact_hourly_components, hourly_components
+from src.conditions import ConditionRelease, exact_hourly_components
 
 
 class CapacityLoss(BaseModel):
@@ -49,6 +49,11 @@ class CapacityScenarioResult(BaseModel):
     assumptions: CapacityScenarioInputs
 
 
+def _as_decimal(value: Fraction) -> Decimal:
+    """Convert an exact result once using the active decimal context."""
+    return Decimal(value.numerator) / Decimal(value.denominator)
+
+
 def capacity_scenario(
     release: ConditionRelease,
     when: date,
@@ -69,48 +74,35 @@ def capacity_scenario(
     if len({item.loss_id for item in inputs.losses}) != len(inputs.losses):
         msg = "Duplicate capacity loss identity"
         raise ValueError(msg)
-    rates = hourly_components(release, when)
+    rates = exact_hourly_components(release, when)
     current = [
         c for c in release.conditions if c.effective_from <= when < c.effective_to
     ]
     paid = next(c.value for c in current if c.kind == "paid_hours")
-    total_loss = sum((loss.hours for loss in inputs.losses), Decimal(0))
-    productive = paid - total_loss
-    if productive <= 0:
-        msg = "Scenario must retain positive productive hours"
-        raise ValueError(msg)
-    if inputs.cover_hours > total_loss:
-        msg = "Incremental cover cannot exceed specified lost hours"
-        raise ValueError(msg)
-    paid_cost = sum(rates.values(), Decimal(0)) * paid
-    cover_cost = inputs.cover_hours * inputs.cover_hourly_cost
-    total = paid_cost + cover_cost
-    exact_total = sum(
-        exact_hourly_components(release, when).values(),
-        Fraction(0),
-    ) * Fraction(paid) + Fraction(inputs.cover_hours) * Fraction(
-        inputs.cover_hourly_cost,
-    )
-    exact_productive = Fraction(paid) - sum(
+    loss_hours = sum(
         (Fraction(loss.hours) for loss in inputs.losses),
         Fraction(0),
     )
-    if Fraction(inputs.cover_hours) > Fraction(paid) - exact_productive:
-        msg = "Incremental cover exceeds the exact lost hours"
-        raise ValueError(msg)
+    exact_productive = Fraction(paid) - loss_hours
     if exact_productive <= 0:
-        msg = "Scenario must retain positive exact productive hours"
+        msg = "Scenario must retain positive productive hours"
         raise ValueError(msg)
+    if Fraction(inputs.cover_hours) > loss_hours:
+        msg = "Incremental cover cannot exceed specified lost hours"
+        raise ValueError(msg)
+    paid_cost = sum(rates.values(), Fraction(0)) * Fraction(paid)
+    cover_cost = Fraction(inputs.cover_hours) * Fraction(inputs.cover_hourly_cost)
+    exact_total = paid_cost + cover_cost
     exact_rate = exact_total / exact_productive
     return CapacityScenarioResult(
         release_id=release.release_id,
         as_of=when,
         paid_hours=paid,
-        productive_hours=productive,
-        paid_cost=paid_cost,
-        incremental_cover_cost=cover_cost,
-        total_cost=total,
-        cost_per_productive_hour=total / productive,
+        productive_hours=_as_decimal(exact_productive),
+        paid_cost=_as_decimal(paid_cost),
+        incremental_cover_cost=_as_decimal(cover_cost),
+        total_cost=_as_decimal(exact_total),
+        cost_per_productive_hour=_as_decimal(exact_rate),
         exact_total_numerator=exact_total.numerator,
         exact_total_denominator=exact_total.denominator,
         exact_productive_rate_numerator=exact_rate.numerator,
