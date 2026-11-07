@@ -46,3 +46,17 @@ quantity. This output is an economic price exposure, not an actual cash or payro
 ledger. KIT work/extensions, pay-cycle timing, progression, actual leave credits,
 family/route eligibility and replacement cover require their separate rules.
 The API neither applies a KIT extension nor reprices a contract automatically.
+
+## Allocate a leave loading cap
+
+Call `allocate_leave_loading_hours` with the eligible portions in payroll
+order, the reviewed cap in hours and the hours already loaded in that cap
+period. Use exact fractions for all three inputs. For a static scenario,
+supply one eligible portion. For dated costing, supply ordered portions
+split wherever the applicable loading rate changes. The result gives the
+loaded hours for each input portion in the same order.
+
+Price base leave pay for all applicable leave hours. Price the loading
+increment using only the returned hours and the applicable rate for each
+portion. Provide the correct cap period and starting consumption for each
+run. Resetting prior consumption within one cap period can overstate loading.
