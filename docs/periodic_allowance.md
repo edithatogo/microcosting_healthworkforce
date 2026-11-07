@@ -14,12 +14,27 @@ justify the period divisor; it is not inferred from a calendar or an annual
 amount. A half-pay portion can use distinct accrual and payment factors if the
 applicable source supports those assumptions.
 
-The entire calculation interval must be covered by one accepted condition.
-Split it explicitly at changes, keeping the full-time hours and annual divisor
-for the same nominal payroll period in each fragment; supply only that
-fragment's actual allocated hours. Selecting smaller full-time hours for each
-fragment can overstate the result. Labels, hours and factors are caller assertions: this
-API does not determine eligibility, payroll dates, leave, overtime, policy
-history or individual entitlements. Allocation hours may not exceed the
-specified full-time hours. This is a separate calculation, not a cash-flow model;
-do not add it to an hourly cost ledger already containing the same allowance.
+Each interval passed to `cost_periodic_allowance` needs one accepted condition
+that covers the entire interval. Use `cost_periodic_allowance_schedule` when a
+nominal period contains a rate change. Pass the whole period and its ordered
+segments. The segments must cover the period contiguously, retain its full-time
+hours and annual divisor, and conserve allocated hours for every combination
+of label, accrual factor and payment factor. The result retains each segment
+and sums exact accrual and payment amounts separately.
+
+Use the condition's actual effective date when splitting. For an increase due
+from the first pay period starting on or after 1 July, a fortnight starting
+24 June keeps its existing rate throughout. The new rate starts on 8 July
+if that is the next period on the supplied payroll calendar.
+
+Supply reviewed eligibility, payroll dates, hours and factors. Allocation
+hours may not exceed the specified full-time hours. When combining ledgers,
+count the allowance once.
+
+For a transfer across releases, use
+`cost_periodic_allowance_across_releases(component, period, allocations)`.
+Each allocation pairs the segment with its applicable condition release.
+Supply the same allowance component and the parent denominators throughout.
+The schedule preserves each segment's release ID and hash and checks the
+classified hours and factors across the whole payroll period. The caller
+supplies the reviewed assignment and facility evidence for each segment.
