@@ -68,3 +68,15 @@ def test_aggregate_axes_preserve_original_formula_lineage() -> None:
     assert_that("AK34" not in cells)
     assert_that(cells["AK35"].source.value == 0)
     assert_that(cells["AK35"].column_name == "annual_leave_lower")
+
+    display = next(
+        t for t in extraction.tables if t.definition.table_id == "WS06-R06-formatted"
+    )
+    labels = {cell.coordinate: cell for cell in display.cells}
+    for row in range(40, 45):
+        for column, unit in (("DC", "cost"), ("DF", "hourly")):
+            cell = labels[f"{column}{row}"]
+            assert_that(
+                cell.column_name == f"salary_{unit}_lower_midpoint_upper_display",
+            )
+            assert_that(cell.role == "presentation")

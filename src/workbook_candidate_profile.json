@@ -14548,13 +14548,13 @@
         },
         {
           "column": "DC",
-          "name": "leave_loading_cost_lower_midpoint_upper_display",
+          "name": "salary_cost_lower_midpoint_upper_display",
           "unit": "text",
           "role": "presentation"
         },
         {
           "column": "DF",
-          "name": "leave_loading_hourly_lower_midpoint_upper_display",
+          "name": "salary_hourly_lower_midpoint_upper_display",
           "unit": "text",
           "role": "presentation"
         },
