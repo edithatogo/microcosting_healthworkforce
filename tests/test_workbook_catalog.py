@@ -67,6 +67,9 @@ def test_intake_preserves_array_formula_range_and_time(tmp_path: Path) -> None:
     catalog = read_workbook_catalog(path, sheet_names=("Array",))
     (rule,) = catalog.validations
     assert_that(rule.sheet == "Array" and "C1" in rule.rule_xml)
+    assert_that(rule.targets == ("C1",))
+    assert_that(rule.formula1 == "1")
+    assert_that(rule.formula2 is None)
     assert_that(read_workbook_catalog(path, sheet_names=("Sheet",)).validations == ())
     (selected,) = catalog.sheets
     formula, clock = selected.cells
@@ -104,6 +107,9 @@ def test_intake_retains_extended_validation(tmp_path: Path) -> None:
         catalog = read_workbook_catalog(extended)
     (rule,) = catalog.validations
     assert_that(rule.sheet == "Sheet")
+    assert_that(rule.targets == ("K6:K55",))
+    assert_that(rule.formula1 == "AllowedOptions")
+    assert_that(rule.formula2 is None)
     assert_that("AllowedOptions" in rule.rule_xml and "K6:K55" in rule.rule_xml)
 
 

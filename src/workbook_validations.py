@@ -19,6 +19,9 @@ class WorkbookValidation:
 
     sheet: str
     rule_xml: str
+    targets: tuple[str, ...] = ()
+    formula1: str | None = None
+    formula2: str | None = None
 
 
 def _read_xml_part(archive: ZipFile, member: str) -> bytes:
@@ -52,5 +55,16 @@ def read_workbook_validations(path: Path) -> tuple[WorkbookValidation, ...]:
                 payload: object = tostring(rule)
                 if isinstance(payload, bytes):
                     payload = payload.decode("utf-8")
-                rules.append(WorkbookValidation(sheet.attrib["name"], payload))
+                target_ranges = rule.get("sqref") or rule.findtext("{*}sqref") or ""
+                rules.append(
+                    WorkbookValidation(
+                        sheet.attrib["name"],
+                        payload,
+                        tuple(target_ranges.split()),
+                        rule.findtext("{*}formula1/{*}f")
+                        or rule.findtext("{*}formula1"),
+                        rule.findtext("{*}formula2/{*}f")
+                        or rule.findtext("{*}formula2"),
+                    ),
+                )
     return tuple(rules)
