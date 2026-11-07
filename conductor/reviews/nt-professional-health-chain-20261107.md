@@ -122,3 +122,23 @@ versus eligibility and retrospective entitlement versus cash. These are source
 and implementation tasks; this batch does not establish a whole-track blocker.
 Workbook unknowns and scientific PSA evidence remain separate open requirements.
 Both tracks remain active.
+
+## Delegate training comparator
+
+The retained General EA clause 23.2 allows up to five paid training days
+per annum for qualifying delegates and nominated representatives. Its
+pay basis excludes shift penalties and overtime. The approval undertaking
+requires a separate comparison with [MA000151 clause 24A](https://awards.fairwork.gov.au/MA000151.html)
+where the award provision is more favourable. Clause 24A.8 uses the pay
+the delegate would have received for the rostered or required hours and
+has separate initial training, subsequent training, cohort and notice
+conditions. The official consolidation through 1 July 2026 records the
+retrospective substitution of clause 24A by PR795803.
+
+For one dated training event, review the two eligibility routes separately.
+Then compare complete pay alternatives for the same exposure. The quote
+bundle engine can retain the ordinary-pay and rostered-pay components and
+select one complete priced alternative. Eligibility, event approval,
+roster, historical award edition and the undertaking's application to the
+case must be established before pricing. The existing synthetic quote
+bundle and paid leave checks qualify the arithmetic only.
