@@ -490,6 +490,7 @@ def test_dated_pharmacy_history_rejects_missing_service() -> None:
             request(),
             e,
             PharmacyHistoryInput(
-                proration=pharmacy_request(), history=dated_pharmacy_history()[1:],
+                proration=pharmacy_request(),
+                history=dated_pharmacy_history()[1:],
             ),
         )
