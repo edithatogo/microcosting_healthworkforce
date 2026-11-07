@@ -65,6 +65,14 @@ def test_aggregate_axes_preserve_original_formula_lineage() -> None:
                     str(hourly.source.value).replace("$", "")
                     == f"={annual_column}{row}/52/{divisor}{row}",
                 )
+    # The aggregate pathologist allowance axis is stored independently of R38.
+    assert_that(cells["AI38"].source.excel_type == "n")
+    assert_that(cells["AJ38"].source.value == cells["AI38"].source.value)
+    assert_that(cells["AH38"].source.value == 0)
+    primary_sheet = next(s for s in catalog.sheets if s.name == "Labour - Prices")
+    primary_cells = {cell.coordinate: cell for cell in primary_sheet.cells}
+    assert_that(primary_cells["R38"].value == "=AVERAGE(R32,R26,R20,R14,R8)")
+
     assert_that("AK34" not in cells)
     assert_that(cells["AK35"].source.value == 0)
     assert_that(cells["AK35"].column_name == "annual_leave_lower")
