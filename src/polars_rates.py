@@ -53,8 +53,7 @@ def productive_hourly_rates(inputs: pl.DataFrame) -> pl.DataFrame:
         ~pl.col(*required).cast(pl.Float64).is_finite().fill_null(value=False),
         ~divisor.is_finite(),
         divisor <= 0,
-        pl.col("hours") <= 0,
-        pl.col("productive") <= 0,
+        pl.col("hours") < 0,
         pl.col("productive") > 1,
     )
     if inputs.select(invalid.any()).item():
