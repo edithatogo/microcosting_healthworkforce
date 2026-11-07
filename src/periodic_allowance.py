@@ -160,8 +160,24 @@ def cost_periodic_allowance_schedule(
     segments: tuple[AllowancePeriod, ...],
 ) -> PeriodicAllowanceSchedule:
     """Price explicit contiguous splits while conserving the parent allocation."""
+    return cost_periodic_allowance_across_releases(
+        component,
+        period,
+        tuple((release, segment) for segment in segments),
+    )
+
+
+def cost_periodic_allowance_across_releases(
+    component: str,
+    period: AllowancePeriod,
+    allocations: tuple[tuple[ConditionRelease, AllowancePeriod], ...],
+) -> PeriodicAllowanceSchedule:
+    """Price each reviewed segment with its own source release."""
     period = AllowancePeriod.model_validate(period.model_dump())
-    segments = tuple(AllowancePeriod.model_validate(s.model_dump()) for s in segments)
+    segments = tuple(
+        AllowancePeriod.model_validate(segment.model_dump())
+        for _, segment in allocations
+    )
     if not segments:
         msg = "Allowance schedule requires at least one segment"
         raise ValueError(msg)
@@ -183,7 +199,10 @@ def cost_periodic_allowance_schedule(
     if _classified_hours(segments) != _classified_hours((period,)):
         msg = "Allowance segments must conserve classified hours and factors"
         raise ValueError(msg)
-    costs = tuple(cost_periodic_allowance(release, component, s) for s in segments)
+    costs = tuple(
+        cost_periodic_allowance(release, component, segment)
+        for (release, _), segment in zip(allocations, segments, strict=True)
+    )
     return PeriodicAllowanceSchedule(
         period,
         costs,

@@ -13,6 +13,7 @@ from src.periodic_allowance import (
     AllowancePeriod,
     AllowancePortion,
     cost_periodic_allowance,
+    cost_periodic_allowance_across_releases,
     cost_periodic_allowance_schedule,
 )
 from src.source_registry import SourceRegistry
@@ -174,3 +175,43 @@ def test_schedule_rejects_gaps_overlaps_and_changed_denominators() -> None:
     changed = parent.model_copy(update={"periods_per_year": Decimal(27)})
     with pytest.raises(ValueError, match="denominators"):
         cost_periodic_allowance_schedule(release(), "training", parent, (changed,))
+
+
+def test_transfer_prices_each_release_and_conserves_hours() -> None:
+    """A transfer retains both releases while sharing one payroll denominator."""
+    first = release()
+    second = first.model_copy(
+        update={
+            "release_id": "second-release",
+            "conditions": (condition("training", "fixed_annual", "3950", "AUD/year"),),
+        },
+    )
+    boundary = date(2026, 6, 8)
+    parent = period(portion("ordinary", "76", "1", "1"))
+    half = period(portion("ordinary", "38", "1", "1"))
+    before = half.model_copy(update={"ends_on": boundary})
+    after = half.model_copy(update={"starts_on": boundary})
+    result = cost_periodic_allowance_across_releases(
+        "training",
+        parent,
+        ((first, before), (second, after)),
+    )
+    assert_that(result.payable == Fraction(5925, 52))
+    assert_that(
+        [item.release_sha256 for item in result.segments]
+        == [release_sha256(first), release_sha256(second)],
+    )
+    with pytest.raises(ValueError, match="conserve"):
+        cost_periodic_allowance_across_releases(
+            "training",
+            parent,
+            (
+                (first, before),
+                (
+                    second,
+                    after.model_copy(
+                        update={"portions": (portion("ordinary", "37", "1", "1"),)},
+                    ),
+                ),
+            ),
+        )
