@@ -192,3 +192,19 @@ def test_outside_rule_period_and_unreviewed_rule_fail_closed() -> None:
             "UTC",
             history,
         )
+
+
+def test_capped_overtime_rejects_bundled_salary() -> None:
+    """A cap cannot recover the ordinary base from composite pay."""
+    original = release()
+    salary, hours = original.conditions
+    bundled = salary.model_copy(update={"included_components": ("shift",)})
+    composite = original.model_copy(update={"conditions": (bundled, hours)})
+    with pytest.raises(ValueError, match="salary without bundled components"):
+        cost_capped_daily_overtime(
+            composite,
+            rule(),
+            activity(),
+            "UTC",
+            DailyHistory(prior_hours=Decimal(0), complete=True),
+        )

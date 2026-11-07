@@ -310,3 +310,41 @@ def test_workbook_origin_roundtrip_requires_reviewed_applicability() -> None:
         invalid = release.model_copy(update={"conditions": (revised,)})
         with pytest.raises(ValueError, match="verified cell applicability"):
             ConditionRelease.model_validate_json(invalid.model_dump_json())
+
+
+@pytest.mark.parametrize(
+    ("factor", "weekly_pay"),
+    [("48.579", "2428.95"), ("52.196", "2609.80")],
+)
+def test_composite_roster_factor_prices_paid_hours(
+    factor: str,
+    weekly_pay: str,
+) -> None:
+    """Use award example factors with synthetic salary and eligibility."""
+    annual_salary = Decimal(factor) * 50 * 52
+    release = ConditionRelease(
+        release_id="synthetic-composite",
+        jurisdiction="QLD",
+        employer="Synthetic employer",
+        classification="Synthetic grade",
+        sources=SourceRegistry(records=(source(),)),
+        conditions=(
+            condition("salary", "salary", str(annual_salary), "AUD/year"),
+            condition("hours", "paid_hours", "1976", "hours/year"),
+        ),
+    )
+    start = datetime(2026, 6, 1, tzinfo=UTC)
+    snapshot = cost_condition_snapshot(release, start.date(), Decimal(38))
+    activity = Activity(
+        activity_id="synthetic-window",
+        resource_id="synthetic-worker",
+        starts_at=start,
+        ends_at=start + timedelta(hours=38),
+        resources=Decimal(1),
+    )
+    dynamic = cost_condition_activity(release, activity, "UTC")
+    for result in (snapshot, dynamic):
+        assert_that(
+            Fraction(result.exact_total_numerator, result.exact_total_denominator)
+            == Fraction(weekly_pay),
+        )
