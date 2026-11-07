@@ -1,7 +1,7 @@
 # Copyright 2026 Dylan. SPDX-License-Identifier: Apache-2.0
 """Test explicit periodic allowance calculation without inferring eligibility."""
 
-from datetime import date
+from datetime import UTC, date, datetime
 from decimal import Decimal
 from fractions import Fraction
 
@@ -9,6 +9,7 @@ import pytest
 
 from src.condition_history import release_sha256
 from src.conditions import ConditionRelease
+from src.period_contributions import ContributionPayment, reconcile_allowance_payment
 from src.periodic_allowance import (
     AllowancePeriod,
     AllowancePortion,
@@ -245,3 +246,30 @@ def test_vehicle_allowance_prorates_mixed_leave_in_one_fortnight() -> None:
         ),
     )
     assert_that(result.payable == result.accrued == Fraction(5925, 208))
+
+
+def test_reconcile_actual_posting_against_payable_allowance() -> None:
+    """Retain the posting and exact difference independently of accrual."""
+    allowance = cost_periodic_allowance(
+        release(),
+        "training",
+        period(portion("half-pay", "19", "1", "0.5")),
+    )
+    payment = ContributionPayment(
+        payment_id="posting",
+        resource_id="staff",
+        allocation_id="worker",
+        component="training",
+        paid_at=datetime(2026, 6, 15, tzinfo=UTC),
+        amount=Decimal("9.50"),
+        evidence="Synthetic payroll posting",
+    )
+    result = reconcile_allowance_payment(allowance, payment)
+    assert_that(result.allowance == allowance and result.payment == payment)
+    assert_that(result.paid_minus_payable == Fraction("9.50") - allowance.payable)
+    assert_that(allowance.payable != allowance.accrued)
+    with pytest.raises(ValueError, match="component does not match"):
+        reconcile_allowance_payment(
+            allowance,
+            payment.model_copy(update={"component": "other"}),
+        )
