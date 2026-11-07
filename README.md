@@ -186,3 +186,9 @@ The examples provide no real award rates or worker eligibility. Source-backed
 accepted releases, roster history and supported rule interactions remain explicit
 requirements; dynamic costing does not mean PSA, and a cost change does not
 establish a cash saving.
+
+Use `microcosting-healthworkforce --workbook-projection` to replay the
+original workbook's four base-case projection years. The stored
+indexation value is interpreted as percentage points and applies to the
+salary-dependent share. The development allowance stays fixed on the
+same productive-time basis as the annual cost.

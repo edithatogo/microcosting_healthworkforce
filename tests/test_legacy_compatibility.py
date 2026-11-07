@@ -142,3 +142,23 @@ def test_compatibility_identity_survives_lossless_table_storage() -> None:
     first = cost_legacy_compatibility(request(), frame, formulas())
     replay = cost_legacy_compatibility(request(), restored, formulas())
     assert_that(first.manifest == replay.manifest)
+
+
+def test_workbook_projection_is_explicit_and_adjusts_fixed_cost() -> None:
+    """Replay four simple-indexation years with the adjusted fixed allowance."""
+    owner = object.__new__(WorkforceRun)
+    owner.formulas = formulas()
+    owner.mapping = {
+        "professional_development_allowance": "development",
+        "productive_time_factor": "productive",
+    }
+    frame = inputs().with_columns(
+        pl.lit(2000.0).alias("development"),
+        pl.lit(0.5).alias("productive"),
+    )
+    workbook = owner.calculate(frame, workbook_projection=True)
+    default = owner.calculate(frame)
+    assert_that(workbook["Calculated_Cost_Mid_Y4"][0] == pytest.approx(104400))
+    assert_that(workbook["Calculated_Hourly_Mid_Y4"][0] == pytest.approx(104400 / 2080))
+    assert_that("Calculated_Cost_Mid_Y5" not in workbook.columns)
+    assert_that("Calculated_Cost_Mid_Y5" in default.columns)
