@@ -356,3 +356,21 @@ def test_allowance_reprices_at_base_salary_boundary() -> None:
         [row.amount for row in dynamic.rows] == [Fraction("4.25"), Fraction("5.10")],
     )
     assert_that(dynamic.exact_total == first.exact_total + second.exact_total)
+
+
+def test_part_time_shift_allowance_uses_part_time_salary_once() -> None:
+    """Apply the NT AHP fraction to the salary for a reviewed part-time role."""
+    rules = (rule("shift", "shift_allowance", ("salary",), "0.034"),)
+    start = datetime(2026, 6, 2, 9, tzinfo=UTC)
+    activity = Activity(
+        activity_id="part-time-week",
+        resource_id="worker",
+        starts_at=start,
+        ends_at=start + timedelta(hours=19),
+        resources=Decimal(1),
+    )
+    dated = cost_derived_activity(release(), activity, "UTC", rules)
+    snapshot = cost_derived_snapshot(release(), start.date(), Decimal(19), rules)
+    allowance = sum((row.amount for row in dated.rows), Fraction(0))
+    assert_that(allowance == snapshot.rows[0].amount == Fraction("32.30"))
+    assert_that(dated.exact_total == snapshot.exact_total == Fraction("982.30"))

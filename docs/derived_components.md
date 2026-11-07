@@ -28,3 +28,14 @@ fall inside the rule's own reviewed entitlement interval. The salary's
 retrospective authority does not automatically approve an allowance or on-cost.
 This is a costing scenario and does not determine worker eligibility, legal
 effect, backpay or cash timing.
+
+## NT Aboriginal Health Practitioner shift allowance
+
+For a verified 38-hour shift role under clauses 37.5–37.6, use a derived
+component with fraction `0.034` and the salary component as its sole base.
+For a part-time appointment, apply the fraction to salary for the paid
+hours being costed. Applying a second FTE factor would reduce the allowance
+twice. Keep appointment eligibility and the effective salary edition with
+the case evidence.
+
+[NTPS Aboriginal Health Practitioner agreement, clauses 37.5–37.6](https://ocpe.nt.gov.au/__data/assets/pdf_file/0007/1588894/ntps-aboriginal-health-practitioner-2025-2029-enterprise-agreement.pdf)
