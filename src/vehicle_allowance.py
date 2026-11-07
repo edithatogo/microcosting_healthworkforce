@@ -121,6 +121,7 @@ class Moca7VehicleAppointment(QuoteModel):
 
     classification_level: int = Field(ge=13, le=29)
     received_manager_allowance_level: int = Field(ge=0)
+    award_vehicle_allowance_selected: bool
     review_evidence: str
 
 
@@ -131,6 +132,9 @@ def moca7_vehicle_level(appointment: Moca7VehicleAppointment) -> Literal[1, 2]:
     establishes appointment coverage and selects the dated amount separately.
     """
     appointment = Moca7VehicleAppointment.model_validate(appointment.model_dump())
+    if appointment.award_vehicle_allowance_selected:
+        msg = "MOCA7 and award vehicle allowances cannot be selected together"
+        raise ValueError(msg)
     upper_classification_start = 25
     manager_override_start = 6
     if (
