@@ -63,3 +63,10 @@ jobs:
           use_oidc: true
           files: coverage.xml
           fail_ci_if_error: true
+      - name: Complete coverage report using GitHub OIDC
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7
+        with:
+          use_oidc: true
+          run_command: send-notifications
+          override_commit: ${{ github.event.pull_request.head.sha || github.sha }}
+          fail_ci_if_error: true
