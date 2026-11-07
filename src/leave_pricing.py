@@ -16,6 +16,32 @@ lazy from src.paid_leave import LeaveExposureRow, PaidLeaveSchedule
 lazy from src.unit_quotes import QuoteQuantity
 
 
+def allocate_leave_loading_hours(
+    eligible_hours: tuple[Fraction, ...],
+    cap_hours: Fraction,
+    prior_loaded_hours: Fraction,
+) -> tuple[Fraction, ...]:
+    """Allocate an explicit loading cap to eligible portions in payroll order.
+
+    Supply the reviewed cap and prior consumption in the same hours unit.
+    The returned hours can price loading separately from base leave pay.
+    """
+    if (
+        cap_hours < 0
+        or not 0 <= prior_loaded_hours <= cap_hours
+        or any(hours < 0 for hours in eligible_hours)
+    ):
+        msg = "Leave loading hours and prior cap consumption must be valid"
+        raise ValueError(msg)
+    remaining = cap_hours - prior_loaded_hours
+    allocated: list[Fraction] = []
+    for hours in eligible_hours:
+        loaded = min(hours, remaining)
+        allocated.append(loaded)
+        remaining -= loaded
+    return tuple(allocated)
+
+
 class LeavePriceSelection(QuoteModel):
     """An explicit price/exposure choice for exactly one schedule interval."""
 

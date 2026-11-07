@@ -9,7 +9,11 @@ from typing import Literal
 
 import pytest
 
-from src.leave_pricing import LeavePriceSelection, price_paid_leave
+from src.leave_pricing import (
+    LeavePriceSelection,
+    allocate_leave_loading_hours,
+    price_paid_leave,
+)
 from src.paid_leave import PaidLeaveSchedule, build_paid_leave
 from tests.checks import assert_that
 from tests.test_normal_pay import allowance, exposure, prices, selection
@@ -299,3 +303,15 @@ def test_choice_json_roundtrip_preserves_rational_exposure() -> None:
     )
     result = price_paid_leave(prices(), selection(), leave, selected)
     assert_that(result.total == Fraction(63000, 73))
+
+
+def test_loading_cap_preserves_prior_consumption_and_partial_portion() -> None:
+    """Only the remaining eligible hours receive the loading."""
+    loaded = allocate_leave_loading_hours(
+        (Fraction(38), Fraction(38), Fraction(38)),
+        Fraction(152),
+        Fraction(181, 2),
+    )
+    assert_that(loaded == (Fraction(38), Fraction(47, 2), Fraction(0)))
+    with pytest.raises(ValueError, match="prior cap consumption"):
+        allocate_leave_loading_hours((Fraction(38),), Fraction(152), Fraction(153))
