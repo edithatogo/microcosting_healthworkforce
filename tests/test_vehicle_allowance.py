@@ -7,14 +7,19 @@ from fractions import Fraction
 
 import pytest
 
-from src.periodic_allowance import cost_periodic_allowance_allocations
+from src.periodic_allowance import (
+    cost_periodic_allowance,
+    cost_periodic_allowance_allocations,
+)
 from src.source_registry import SourceRegistry
 from src.unit_quotes import price_units
 from src.vehicle_allowance import (
+    C24NursingAppointment,
     ExcessVehicleDistance,
     Moca7VehicleAppointment,
     VehicleTravelCase,
     VehicleTravelExclusion,
+    c24_nursing_vehicle_level,
     moca7_vehicle_level,
     price_vehicle_travel,
 )
@@ -235,3 +240,36 @@ def test_excess_vehicle_distance_uses_dated_award_rate() -> None:
     assert_that(result.total == Fraction("19.90"))
     with pytest.raises(ValueError, match="date"):
         price_units(rates, (after.model_copy(update={"quote_id": before.quote_id}),))
+
+
+@pytest.mark.parametrize(("grade", "level"), [("grade_11_band_4", 1), ("grade_12", 2)])
+def test_c24_nursing_vehicle_level(grade: str, level: int) -> None:
+    """Only reviewed EDON grades map to the recurring allowance bands."""
+    appointment = C24NursingAppointment.model_validate(
+        {"classification": grade, "review_evidence": "Synthetic EDON review"},
+    )
+    assert_that(c24_nursing_vehicle_level(appointment) == level)
+    rates = condition_release().model_copy(
+        update={
+            "conditions": (
+                condition("vehicle-1", "fixed_annual", "24097", "AUD/year"),
+                condition("vehicle-2", "fixed_annual", "29260", "AUD/year"),
+            ),
+        },
+    )
+    exposure = period(
+        portion("paid-leave", "38", "1", "1"),
+        portion("half-pay", "19", "1", "0.5"),
+        portion("unpaid", "19", "0", "0"),
+    )
+    result = cost_periodic_allowance(
+        rates,
+        f"vehicle-{c24_nursing_vehicle_level(appointment)}",
+        exposure,
+    )
+    annual = 24097 if level == 1 else 29260
+    assert_that(result.payable == Fraction(annual * 5, 208))
+    with pytest.raises(ValueError, match="classification"):
+        c24_nursing_vehicle_level(
+            appointment.model_copy(update={"classification": "grade_11_band_3"}),
+        )
