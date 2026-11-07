@@ -328,6 +328,25 @@ def test_reconcile_actual_posting_against_payable_allowance() -> None:
     )
     assert_that(excluded.contribution == Fraction(0))
     assert_that(excluded.allowance_reconciliations == (result,))
+    inclusive = basis.model_copy(
+        update={"alternative_id": "inclusive", "bases": ("salary", "training")},
+    )
+    comparison = original.model_copy(
+        update={"alternatives": (original.alternatives[0], inclusive)},
+    )
+    salary = payment.model_copy(
+        update={"payment_id": "salary", "component": "salary", "amount": Decimal(100)},
+    )
+    compared = cost_contribution_payments(
+        prices(),
+        contribution_period(),
+        comparison,
+        (salary,),
+        allowance_reconciliations=(result,),
+    )
+    assert_that(compared.contribution == Fraction("10.95"))
+    totals = {item.amount for item in compared.alternatives}
+    assert_that(totals == {10, Fraction("10.95")})
     with pytest.raises(ValueError, match="Duplicate contribution payment"):
         cost_contribution_payments(
             prices(),
