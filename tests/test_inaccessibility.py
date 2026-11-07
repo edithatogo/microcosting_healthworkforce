@@ -182,7 +182,9 @@ def test_reviewed_category_payments_use_separate_quotes() -> None:
     """Retain category rows and apply employment proration once."""
     rates = release(
         quote(
-            component="inaccessibility-category-1", unit="annum", amount=Decimal(1200),
+            component="inaccessibility-category-1",
+            unit="annum",
+            amount=Decimal(1200),
         ),
         quote(
             quote_id="category-4",
