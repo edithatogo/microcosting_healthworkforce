@@ -32,6 +32,9 @@ from src.leave_pricing import (
     price_separation_loading,
     qualifying_shift_leave_credit,
     select_leave_loading_alternative,
+    victorian_hama_additional_leave_weeks,
+    victorian_hama_leave_loading,
+    victorian_hama_weekend_termination_pay,
     victorian_medical_scientist_leave_loading,
     victorian_medical_scientist_weekend_leave_credit,
 )
@@ -854,17 +857,35 @@ def test_victorian_loading_compares_once_across_a_wage_change() -> None:
         )
 
 
-def test_paid_leave_cli_prices_original_declarations(tmp_path: Path) -> None:
+@pytest.mark.parametrize("hama_loading", [False, True])
+def test_paid_leave_cli_prices_original_declarations(
+    tmp_path: Path,
+    *,
+    hama_loading: bool,
+) -> None:
     """The CLI reconstructs the dated schedule and writes the exact total."""
     leave = schedule()
     hours = selection()
+    selected = choices(leave, second_quote="salary-new")
+    if hama_loading:
+        comparison = LeaveLoadingComparison(
+            rate=Decimal("0.175"),
+            loading_basis_pay=Decimal(400),
+            forgone_penalties=Decimal(65),
+            comparison_id="reviewed-hama-period",
+            evidence="Synthetic reviewed HAMA wage and supplement amounts",
+        )
+        selected = tuple(
+            row.model_copy(update={"loading_comparison": comparison})
+            for row in selected
+        )
     request = LeaveCostRequest(
         policy=leave.policy,
         leave=leave.request,
         hours_rule=hours.rule,
         hours_request=hours.request,
         hours_history=hours.rows,
-        choices=choices(leave, second_quote="salary-new"),
+        choices=selected,
     )
     release_path = tmp_path / "release.json"
     request_path = tmp_path / "request.json"
@@ -881,6 +902,69 @@ def test_paid_leave_cli_prices_original_declarations(tmp_path: Path) -> None:
     ]
     assert_that(leave_main(argv) == 0)
     run = TypeAdapter(LeaveCostRun).validate_json(output.read_bytes())
-    assert_that(run.result.total == Fraction(73500, 73))
+    assert_that(run.result.total == Fraction(73500, 73) + (140 if hama_loading else 0))
     with pytest.raises(FileExistsError):
         leave_main(argv)
+
+
+def test_hama_additional_week_requires_ten_qualifying_weekends_or_nes() -> None:
+    """Exactly four hours is excluded and both routes yield only one week."""
+    credit = victorian_hama_additional_leave_weeks
+    nine = (Fraction(5),) * 9
+    assert_that(credit((*nine, Fraction(4)), nes_shiftworker=False) == 0)
+    ten = (*nine, Fraction("4.01"))
+    assert_that(credit(ten, nes_shiftworker=False) == 1)
+    assert_that(credit(ten, nes_shiftworker=True) == 1)
+    assert_that(credit((), nes_shiftworker=True) == 1)
+    with pytest.raises(ValueError, match="nonnegative"):
+        credit((Fraction(-1),), nes_shiftworker=False)
+
+
+def test_hama_weekend_termination_uses_period_pay() -> None:
+    """The eligible termination increment is exactly one forty-eighth."""
+    price = victorian_hama_weekend_termination_pay
+    assert_that(price(Fraction("24000.24")) == Fraction("500.005"))
+    assert_that(price(Fraction(0)) == 0)
+    with pytest.raises(ValueError, match="nonnegative"):
+        price(Fraction(-1))
+
+
+@pytest.mark.parametrize(("weekend", "expected"), [(10, 175), (100, 190)])
+def test_hama_loading_compares_the_complete_supplement_bundle(
+    weekend: int,
+    expected: int,
+) -> None:
+    """Each supplement can contribute to the alternative that beats the floor."""
+    assert_that(
+        victorian_hama_leave_loading(
+            Fraction(1000),
+            over_agreement_pay=Fraction(20),
+            shift_premiums=Fraction(30),
+            weekend_premiums=Fraction(weekend),
+            in_charge_allowances=Fraction(40),
+        )
+        == Fraction(expected),
+    )
+
+
+def test_hama_grouped_loading_uses_reviewed_ordinary_rate_basis() -> None:
+    """The grouped floor uses reviewed wages, independent of ledger base pay."""
+    leave = schedule()
+    first, second = choices(leave, second_quote="salary-new")
+    comparison = LeaveLoadingComparison(
+        rate=Decimal("0.175"),
+        loading_basis_pay=Decimal(400),
+        forgone_penalties=Decimal(65),
+        comparison_id="reviewed-hama-period",
+        evidence="Synthetic ordinary-rate wages and eligible supplement bundle",
+    )
+    result = price_paid_leave(
+        dated_prices(),
+        selection(),
+        leave,
+        (
+            first.model_copy(update={"loading_comparison": comparison}),
+            second.model_copy(update={"loading_comparison": comparison}),
+        ),
+    )
+    assert_that(result.total == Fraction(73500, 73) + 140)

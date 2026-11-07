@@ -262,11 +262,20 @@ class LeaveLoadingComparison(QuoteModel):
     elected_days: NonnegativeQuantity | None = None
     evidence: str
     comparison_id: str | None = None
+    loading_basis_pay: NonnegativeQuantity | None = None
+
+    def standard_basis(self, base_pay: Fraction) -> Fraction:
+        """Use a reviewed ordinary-rate basis when it differs from ledger pay."""
+        return (
+            base_pay
+            if self.loading_basis_pay is None
+            else Fraction(self.loading_basis_pay)
+        )
 
     def select(self, base_pay: Fraction) -> LeaveLoadingAlternative:
         """Keep supplied election days as an explicitly allocated quantity."""
         return select_leave_loading_alternative(
-            base_pay,
+            self.standard_basis(base_pay),
             Fraction(self.rate),
             None
             if self.forgone_penalties is None
@@ -661,7 +670,9 @@ def _allocate_grouped_loading(
         msg = "Grouped loading requires contiguous cash rows, penalties and one rate"
         raise ValueError(msg)
     floors = [
-        rows[index].pricing.pricing.rows[0].cost * Fraction(rate) for index, _ in group
+        comparison.standard_basis(rows[index].pricing.pricing.rows[0].cost)
+        * Fraction(rate)
+        for index, comparison in group
     ]
     penalties = [Fraction(comparison.forgone_penalties or 0) for _, comparison in group]
     winning = floors if sum(floors) >= sum(penalties) else penalties
@@ -803,3 +814,63 @@ def victorian_medical_scientist_leave_loading(
         raise ValueError(msg)
     standard_loading = min(ordinary_pay * Fraction(7, 40), remaining_loading_cap)
     return max(standard_loading, premium_inclusive_pay - ordinary_pay)
+
+
+def victorian_hama_additional_leave_weeks(
+    ordinary_hours_by_weekend: tuple[Fraction, ...],
+    *,
+    nes_shiftworker: bool,
+) -> int:
+    """Value additional leave for a completed service year under clause 74.4.
+
+    Supply one reviewed ordinary-hours total per distinct weekend, and
+    the applicable NES shiftworker decision for that same service year.
+    """
+    if any(hours < 0 for hours in ordinary_hours_by_weekend):
+        msg = "Ordinary weekend hours must be nonnegative"
+        raise ValueError(msg)
+    qualifying_hours = 4
+    qualifying_weekends = 10
+    count = sum(hours > qualifying_hours for hours in ordinary_hours_by_weekend)
+    return int(nes_shiftworker or count >= qualifying_weekends)
+
+
+def victorian_hama_weekend_termination_pay(period_ordinary_pay: Fraction) -> Fraction:
+    """Value clause 74.4(d) for a reviewed eligible partial-year termination.
+
+    Supply ordinary pay since commencement or the last annual leave entitlement,
+    as applicable to the reviewed period of less than one year.
+    """
+    if period_ordinary_pay < 0:
+        msg = "Termination period ordinary pay must be nonnegative"
+        raise ValueError(msg)
+    return period_ordinary_pay / 48
+
+
+def victorian_hama_leave_loading(
+    ordinary_rate_wages: Fraction,
+    *,
+    over_agreement_pay: Fraction,
+    shift_premiums: Fraction,
+    weekend_premiums: Fraction,
+    in_charge_allowances: Fraction,
+) -> Fraction:
+    """Value clause 74.7(a) for one reviewed, covered leave period.
+
+    Supply ordinary-rate wages for normal hours and the four eligible
+    supplements as separate amounts for the same period and currency.
+    """
+    supplements = (
+        over_agreement_pay,
+        shift_premiums,
+        weekend_premiums,
+        in_charge_allowances,
+    )
+    if any(amount < 0 for amount in supplements):
+        msg = "HAMA leave supplements must be nonnegative"
+        raise ValueError(msg)
+    return select_leave_loading_alternative(
+        ordinary_rate_wages,
+        Fraction(7, 40),
+        sum(supplements, Fraction(0)),
+    ).cash

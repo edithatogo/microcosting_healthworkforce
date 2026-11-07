@@ -105,3 +105,29 @@ def test_paid_cost_avoids_intermediate_hourly_rounding() -> None:
         ),
     )
     assert_that(result.paid_cost == result.total_cost == Decimal(300002))
+
+
+def test_paid_development_leave_reduces_capacity_without_adding_wages() -> None:
+    """Five reviewed days reduce the service denominator within paid hours."""
+    result = capacity_scenario(
+        release(),
+        date(2026, 6, 1),
+        CapacityScenarioInputs(
+            losses=(
+                CapacityLoss(loss_id="annual-leave", hours=Decimal(152)),
+                CapacityLoss(loss_id="paid-development-leave", hours=Decimal(38)),
+            ),
+            cover_hours=Decimal(0),
+            cover_hourly_cost=Decimal(0),
+            losses_disjoint=True,
+        ),
+    )
+    assert_that(result.productive_hours == Decimal(1810))
+    assert_that(result.paid_cost == result.total_cost == Decimal(100000))
+    assert_that(
+        Fraction(
+            result.exact_productive_rate_numerator,
+            result.exact_productive_rate_denominator,
+        )
+        == Fraction(10000, 181),
+    )
