@@ -49,6 +49,21 @@ contribution and exact combined total. The selected contribution is separate
 from base components. A release already containing its named output component
 is rejected to prevent charging it twice. This Python API does not add a CLI mode.
 
+## Reviewed earnings caps
+
+A contribution alternative can carry a `ContributionCap` with a reviewed
+source, a limit, a cap window and prior eligible earnings through the start
+of the costing period. Supply an explicit zero when the period starts at
+the cap window boundary. The source must cover the entire cap window and
+the costing period must fit inside it.
+
+The calculation consumes the remaining earnings base in chronological order.
+The ledger keeps both the gross `base_amount` and the `eligible_base_amount`
+used for capped pricing. For example, a 62,500 limit with 60,000 already
+earned leaves 2,500 available. If the period adds 5,000 of eligible earnings
+at 12%, its capped contribution is 300. Each alternative is priced separately
+before comparing totals.
+
 ## Applicability and limitations
 
 The caller must substantiate the comparison period, eligibility, selected bases
@@ -57,7 +72,7 @@ scope is fixed over the period. Review flags and hashes bind supplied evidence;
 they do not independently establish legal correctness or completeness of earnings.
 
 This method values earned hourly components. It does not infer payment dates,
-statutory ordinary-time earnings, quarterly caps, credits, retrospective payroll,
+statutory ordinary-time earnings, statutory cap selection, credits, retrospective payroll,
 minimum contributions, individual written arrangements or rounding conventions.
 Explicit `required_capabilities` outside this method are rejected. Select another
 qualified method when these conditions matter; do not silently omit them.
