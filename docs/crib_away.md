@@ -84,3 +84,18 @@ an allowance is priced. Repeated calls or combined ledgers require the caller to
 prevent duplicate shifts/resources/economic costs across runs. Actual source
 qualification, roster/exception evidence, calendar and complete direction history
 remain prerequisites for real-case use; no source data is distributed here.
+
+## Ambulance Tasmania missed meal breaks
+
+For a reviewed shift under Part III clause 6(i), pass a count of zero, one
+or two missed breaks to `src.missed_meal_breaks.missed_break_overtime_quantity`
+with unit `break`, the shift-end valuation date and the hourly overtime quote
+ID. Pass the returned hourly quantity to `price_units`. Each missed break adds
+half an hour of paid overtime exposure. Keep this quantity separate from
+elapsed work, directed-away allowances and replacement breaks.
+
+Verify the shift entitlement, applicable payroll boundary and overtime quote.
+Review the relationship to composite wages before adding the result to an
+existing shift cost.
+
+[Ambulance Tasmania Award, Part III clause 6](https://www.tic.tas.gov.au/__data/assets/pdf_file/0007/929248/T15375-No-4-of-2026-Consolidated-Ambulance-Tasmania-Award-S004.pdf)

@@ -30,3 +30,30 @@ def test_invalid_missed_break_quantity(unit: str, count: str) -> None:
     """Require a whole count within the reviewed two-break scope."""
     with pytest.raises(ValueError, match="reviewed missed breaks"):
         missed_break_overtime_quantity(quantity(unit=unit, quantity=Decimal(count)))
+
+
+def test_separate_meal_occurrences_and_overtime() -> None:
+    """Retain all reviewed spoiled-meal occasions beside distinct payments."""
+    rates = release(
+        quote(unit="hour", component="missed-break", amount=Decimal(80)),
+        quote(
+            quote_id="spoiled",
+            component="spoiled-meal",
+            unit="occasion",
+            amount=Decimal("29.20"),
+        ),
+        quote(
+            quote_id="training",
+            component="away-training-meal",
+            unit="occasion",
+            amount=Decimal("29.20"),
+        ),
+    )
+    spoiled = tuple(
+        quantity(quantity_id=f"spoiled-{index}", quote_id="spoiled", unit="occasion")
+        for index in range(3)
+    )
+    training = quantity(quantity_id="training", quote_id="training", unit="occasion")
+    overtime = missed_break_overtime_quantity(quantity(unit="break"))
+    result = price_units(rates, (*spoiled, training, overtime))
+    assert_that(result.total == Fraction("156.80"))
