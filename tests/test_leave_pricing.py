@@ -650,3 +650,9 @@ def test_deferred_loading_prices_both_quotes_on_entitlement_date() -> None:
             timing,
             selected.model_copy(update={"salary_quote_id": "old"}),
         )
+    with pytest.raises(ValueError, match="salary quote and a benchmark quote"):
+        price_advance_loading(
+            release,
+            timing,
+            selected.model_copy(update={"benchmark_quote_id": "new"}),
+        )

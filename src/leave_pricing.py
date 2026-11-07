@@ -265,6 +265,9 @@ def price_advance_loading(
         ),
     )
     salary, benchmark = ledger.rows
+    if (salary.quote.component, benchmark.quote.component) != ("salary", "benchmark"):
+        msg = "Advance loading requires a salary quote and a benchmark quote"
+        raise ValueError(msg)
     amount = min(salary.cost, benchmark.cost) * Fraction(prices.loading_rate)
     return DeferredLeaveLoading(timing, prices, ledger, amount)
 
