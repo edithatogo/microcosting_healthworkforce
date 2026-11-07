@@ -3,7 +3,7 @@
 
 from calendar import monthrange
 from dataclasses import dataclass
-from datetime import date
+from datetime import date, timedelta
 from fractions import Fraction
 from itertools import pairwise
 from typing import Self
@@ -13,7 +13,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class MonthlySalaryRate(BaseModel):
-    """Analyst-supplied annual salary for whole calendar months, end exclusive."""
+    """Analyst-supplied annual salary over a bounded period, end exclusive."""
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
     rate_id: str = Field(min_length=1)
@@ -23,21 +23,16 @@ class MonthlySalaryRate(BaseModel):
 
     @model_validator(mode="after")
     def validate_period(self) -> Self:
-        """Require bounded, month-aligned salary rates."""
-        if (
-            not self.rate_id.strip()
-            or self.effective_from.day != 1
-            or self.effective_to.day != 1
-            or self.effective_to <= self.effective_from
-        ):
-            msg = "Rate periods must be nonempty whole calendar months"
+        """Require bounded salary rates."""
+        if not self.rate_id.strip() or self.effective_to <= self.effective_from:
+            msg = "Rate periods must be nonempty"
             raise ValueError(msg)
         return self
 
 
 @dataclass(frozen=True)
 class MonthlyBudgetRow:
-    """A month's exact prorated salary with its input rate and day count."""
+    """A month/rate segment with its exact salary and calendar-day count."""
 
     month: date
     rate: MonthlySalaryRate
@@ -67,6 +62,30 @@ def _next_month(month: date) -> date:
     )
 
 
+def _month_rows(
+    month: date,
+    first: date,
+    last: date,
+    fte: Decimal,
+    rates: list[MonthlySalaryRate],
+) -> tuple[MonthlyBudgetRow, ...]:
+    """Intersect the covered month with disjoint rate periods."""
+    days = monthrange(month.year, month.month)[1]
+    rows: list[MonthlyBudgetRow] = []
+    for rate in rates:
+        segment_start = max(first, rate.effective_from)
+        if segment_start > last or segment_start >= rate.effective_to:
+            continue
+        segment_end = min(last, rate.effective_to - timedelta(days=1))
+        covered = (segment_end - segment_start).days + 1
+        amount = Fraction(rate.annual_salary) * Fraction(fte) * covered / (12 * days)
+        rows.append(MonthlyBudgetRow(month, rate, covered, days, amount))
+    if sum(row.covered_days for row in rows) != (last - first).days + 1:
+        msg = "Monthly salary rate is missing for a costing day"
+        raise ValueError(msg)
+    return tuple(rows)
+
+
 def monthly_salary_budget(
     start: date,
     end_inclusive: date,
@@ -75,7 +94,7 @@ def monthly_salary_budget(
 ) -> MonthlyBudget:
     """Prorate annual salary/12 by inclusive days in each calendar month.
 
-    Rates are explicit monthly inputs; no rounding, award, leave, on-cost or
+    Rates are explicit dated inputs; no rounding, award, leave, on-cost or
     worker eligibility is inferred. This scenario is not elapsed-hour payroll.
     """
     if type(start) is not date or type(end_inclusive) is not date:
@@ -98,18 +117,10 @@ def monthly_salary_budget(
     month = date(start.year, start.month, 1)
     rows: list[MonthlyBudgetRow] = []
     while month <= end_inclusive:
-        matches = [r for r in ordered if r.effective_from <= month < r.effective_to]
-        if len(matches) != 1:
-            msg = "Monthly salary rate is missing for a costing month"
-            raise ValueError(msg)
         days = monthrange(month.year, month.month)[1]
         first = max(start, month)
         last = min(end_inclusive, date(month.year, month.month, days))
-        covered = (last - first).days + 1
-        amount = (
-            Fraction(matches[0].annual_salary) * Fraction(fte) * covered / (12 * days)
-        )
-        rows.append(MonthlyBudgetRow(month, matches[0], covered, days, amount))
+        rows.extend(_month_rows(month, first, last, fte, ordered))
         if month.year == date.max.year and month.month == date.max.month:
             break
         month = _next_month(month)
