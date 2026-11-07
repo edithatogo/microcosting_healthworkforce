@@ -41,8 +41,15 @@ shift penalties, overtime, leave, escalation or uncertain parameters. Unsupporte
 required capabilities are rejected. Concurrent activities are additive and must
 represent explicit, distinct resource use. A declared review is not legal advice,
 independent source verification, or evidence that a rate is scientifically valid.
-Condition extraction, rule coverage, release governance, semantic workbook mapping,
-and the requested command-line interface remain in the implementation track.
+Complete source acceptance, rule coverage and semantic workbook mapping remain
+in the implementation track. Supported interfaces include the condition
+activity command below, the [snapshot command](condition_snapshot_cli.md), and
+the [unit-quote command](unit_quote_cli.md). These are bounded method interfaces,
+not a dispatcher that composes every award rule.
+
+The [explicit legacy compatibility adapter](legacy_compatibility.md) retains the
+old calculation pipeline and its fallback semantics as a separately selected
+library mode. It does not promote legacy inputs to an accepted v2 release.
 
 ## Table segmentation and condition releases
 
@@ -82,6 +89,10 @@ microcosting-healthworkforce-v2 --release release.json --activity activity.json 
 It validates both input schemas and creates a new result file exclusively; it
 will not overwrite an existing result. The command uses the limited method and
 source assertions described above. The original CLI remains unchanged.
+[Release history](condition_release_history.md) and
+[pay-effective/retrospective authority](pay_period_effective.md) document the
+separate effective-date and knowledge contracts; those methods do not infer cash
+already paid or worker eligibility.
 
 ## Explicit cumulative overtime
 
