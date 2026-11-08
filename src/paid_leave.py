@@ -292,8 +292,10 @@ def build_paid_leave(
         if debit is None
         else Fraction(policy.entitlement_budget_weeks) - debit - unpaid_weeks
     )
-    if remaining is not None and remaining < 0:
-        msg = "Planned leave exceeds the explicitly resolved debit budget"
+    if unpaid_weeks > policy.entitlement_budget_weeks or (
+        remaining is not None and remaining < 0
+    ):
+        msg = "Planned leave exceeds the declared entitlement budget"
         raise ValueError(msg)
     instruction = (
         None
