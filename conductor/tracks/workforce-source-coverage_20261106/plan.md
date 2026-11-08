@@ -540,3 +540,11 @@ rate bases separately. The undergraduate undertaking supplies distinct
 hourly tables, so its dates cannot be used to fill the annual salary
 calendar. These published dates are reference anchors for the applicable
 payroll calendar, which remains to be acquired.
+
+The [26 October 2026 bargaining bulletin](https://ocpe.nt.gov.au/employment-terms-and-conditions/current-enterprise-agreements/enterprise-agreement-negotiations/ntps-nurses-and-midwives-enterprise-agreement/bulletin-5)
+records ongoing negotiations after the August offer lacked endorsement
+from the bargaining representatives. The official search on 8 November
+located no replacement approval. Keep the held 2022–2026 edition as the
+reference and record later operability as unresolved pending a dated
+Commission register check. Nominal expiry alone does not establish
+a replacement or a termination.
