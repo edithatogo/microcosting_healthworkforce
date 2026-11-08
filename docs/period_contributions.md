@@ -133,7 +133,12 @@ calendar and the agency's remittance schedule. Use
 12 working days after a calendar quarter ends. Supply a Boolean
 classification for every intervening date, including non-working
 days. The returned date is conditional on the supplied calendar.
-Keep it separate from the actual remittance timestamp.
+Use the returned date as the conditional receipt deadline. Treasury
+requires one remittance per agency or pay-office code per quarter and
+remittance information at least one day before the EFT. Record the
+information submission, EFT and receipt separately. The costing engine
+calculates expenses and the conditional deadline. Remittance compliance
+requires the actual submission and payment records.
 
 Confirm member agency coverage, employee eligibility and payroll
 component mapping before setting the base. The historical workbook
