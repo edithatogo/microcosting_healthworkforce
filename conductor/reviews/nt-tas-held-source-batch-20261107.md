@@ -194,3 +194,13 @@ award variation (T15353) with operative dates of 11 May and 1 June 2026.
 Check its operative clauses and appointment scope before applying any
 award variation alongside the rural agreement. The summary supplies no
 worked recall examples or payroll interpretation.
+
+The signed [S099 consolidated order No. 2 of 2026](https://www.tic.tas.gov.au/__data/assets/pdf_file/0019/904402/T15353-No-2-of-2026-Consolidated-Medical-Practitioners-Public-Sector-S099.pdf)
+identifies T15353 on page 1, resolving the inconsistent case label in the
+award history. Its enumerated amendments cover operation and savings,
+right to disconnect, and eight leave clauses (41, 42, 44, 45, 52, 56, 58,
+59). The order does not list a recall-clause amendment. Review changed
+leave clauses for paid-capacity and backfill assumptions only after
+confirming the appointment is within S099 and how the applicable
+agreement interacts with it. The award history summary alone is
+insufficient to select revised wage, hours or recall parameters.
