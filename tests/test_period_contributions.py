@@ -668,3 +668,15 @@ def test_quarterly_levy_due_date_rejects_timestamp_boundary() -> None:
     """A timestamp cannot act as a calendar date even at midnight."""
     with pytest.raises(ValueError, match="must be a calendar date"):
         quarterly_levy_due_date(datetime(2026, 3, 31, tzinfo=UTC), {})
+
+
+def test_quarterly_levy_due_date_respects_explicit_office_closure() -> None:
+    """Apply the caller-supplied closure even on an otherwise working day."""
+    end = date(2026, 9, 30)
+    days = [end + timedelta(days=offset) for offset in range(1, 22)]
+    calendar = {
+        day: day.weekday() in range(5) and day != date(2026, 10, 5) for day in days
+    }
+    assert_that(quarterly_levy_due_date(end, calendar) == date(2026, 10, 19))
+    closed_office = calendar | {date(2026, 10, 9): False}
+    assert_that(quarterly_levy_due_date(end, closed_office) == date(2026, 10, 20))
