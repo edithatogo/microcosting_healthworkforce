@@ -55,3 +55,15 @@ def test_main_does_not_raise_exceptions(monkeypatch: pytest.MonkeyPatch) -> None
     monkeypatch.setattr("sys.argv", ["microcosting-healthworkforce", "--help"])
     with pytest.raises(SystemExit, match=r"^0$"):
         main()
+
+
+def test_archive_reports_missing_exact_header(
+    tmp_path: Path,
+    caplog: LogCaptureFixture,
+) -> None:
+    """Surface the skipped historical comparison without adding a result."""
+    runner = WorkforceRun(argparse.Namespace(output_dir=str(tmp_path)))
+    runner.values = [("Leave Loading (%)\t\t",)]
+    runner.validate_delivered_scenario("Annual Leave Loading +10%", pl.DataFrame())
+    assert_that("no exact header" in caplog.text)
+    assert_that(runner.validations == [])

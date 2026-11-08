@@ -2,6 +2,7 @@
 """Polars execution of the delivered workforce model and its configured scenarios."""
 
 import json
+import logging
 import tempfile
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -187,6 +188,11 @@ class WorkforceRun:
         group = target.split("_")[0]
         index = next((i + 1 for i, g in enumerate(self.values[0]) if g == group), None)
         if index is None:
+            logging.getLogger(__name__).warning(
+                "Archived DSA comparison skipped for %s: no exact header for %r",
+                name,
+                group,
+            )
             return
         lookup = {(r[0], r[1]): r[index] for r in self.values[3:28]}
         diff = [
