@@ -817,3 +817,21 @@ contains `period`, `rule`, `activities` and `timezone`. It uses the existing
 roster engine and its explicit history and source checks. The synthetic
 CLI case yields AUD 125 and retains the rule ID in the output ledger.
 All 14 affected CLI and roster tests passed.
+
+A wheel built at 0a3dd16 ran the synthetic roster command outside the
+checkout on Python 3.15.2. The CLI module loaded from the installed wheel
+and the ledger returned AUD 125 and the expected rule ID. The isolated
+installation reused dependencies from the qualified checkout environment.
+Clean dependency installation for this revision and source-backed payroll
+qualification remain separate gates.
+
+The follow-up installed all 25 runtime dependencies from the hash-checked
+lock export into the separate wheel environment. The dependency check
+passed. With PYTHONPATH unset and the working directory outside the checkout,
+the installed roster command produced byte-identical output. This qualifies
+the synthetic roster invocation at 0a3dd16.
+
+The same installed wheel returned AUD 100 for both the static snapshot
+and the equivalent two-hour roster at a constant AUD 50 hourly rate
+with no prior eligible hours. The roster reported zero overtime. This
+checks static and dynamic agreement through the installed CLI.
