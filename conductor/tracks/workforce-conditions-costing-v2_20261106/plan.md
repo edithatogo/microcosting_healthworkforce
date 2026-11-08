@@ -1060,3 +1060,53 @@ The empty percentage sheet is retained separately. All 34 workbook tests
 passed on the receiving source revision. Candidate section status describes
 extraction and classification. Historical provenance and unresolved bounds
 still require separate disposition before use as model inputs.
+
+## Legacy JSON input disposition
+
+The three configuration files at receiving revision 4388649 retain the
+following candidate lineage. Array indices are zero-based.
+
+| File and JSON path | Successor disposition |
+| --- | --- |
+| `data/formulas.json` /formulas/0–2 | Retain annual raw cost, Year 0 total and hourly rate as historical calculation definitions with their parameters and dependencies. |
+| `data/formulas.json` /outputs/0–2 | Retain direct lower and upper workbook columns and the formula-driven midpoint with its source-column mapping. |
+| `data/dsa_scenarios.json` /0–19 | Retain all 20 configured scenarios and ten distinct parameter names, including joint perturbations. Compare archived outputs against their own baselines. |
+| `data/psa_scenarios.json` /0–2 | Retain the superannuation, productive-time and development-allowance distributions as exploratory assumptions. They require empirical qualification for scientific use. |
+
+These paths classify the legacy records as a group. Field-level successor
+links and verified units for each input remain open.
+
+The 12 midpoint input keys at `/outputs/1/parameter_mapping` link to
+`Labour - Prices` across the five jurisdiction blocks:
+
+| Workbook column | Configuration key | Candidate unit |
+| --- | --- | --- |
+| W | base_salary | AUD/year |
+| J | super_rate | fraction |
+| M | avg_penalties | fraction |
+| N | pub_holiday_penalty | fraction |
+| O | private_practice_loading | fraction |
+| P | retention_allowance | fraction |
+| Q | sick_leave | fraction |
+| R | professional_development_allowance | AUD/year |
+| S | annual_leave_weeks | weeks/year |
+| T | annual_leave_loading | fraction |
+| L | productive_time_factor | fraction |
+| K | hours_per_week | hours/week |
+
+These units describe the historical workbook inputs. DSA variations and
+PSA distribution arguments require their own operation and support
+metadata before reuse as successor scenario inputs.
+
+The 20 DSA scenarios contain 21 parameter operations. Seventeen are
+relative multipliers applied as baseline times one plus the configured
+value. Four are additive deltas, two in weeks per year for annual leave
+and two in AUD per year for professional development. Preserve the joint
+scenario as one scenario with two operations.
+
+The PSA runner replaces the entire mapped column with one absolute draw
+per parameter per iteration. The normal superannuation mean and standard
+deviation are fractions. The uniform productive-time endpoints are
+fractions with support from 0.95 to 1.05, including values above one.
+The triangular development endpoints and mode are AUD per year. These
+are exploratory inputs and retain their original support and operations.
