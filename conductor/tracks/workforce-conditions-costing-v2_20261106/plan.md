@@ -988,3 +988,8 @@ payroll calendar. The 2022 date belongs in a separate retrospective salary
 event with entitlement and known-at dates. Keep both separate from the cash
 settlement date. An accepted release still needs Schedule 3 pay-point
 lineage, the appointment scope, the payroll calendar and source custody.
+
+The resolved period now exposes the payroll-local effective date for dated
+conditions. A synthetic Darwin midnight test verifies that a June 15
+commencement stays June 15 even when its UTC timestamp falls on June 14.
+All eight pay-period tests passed.

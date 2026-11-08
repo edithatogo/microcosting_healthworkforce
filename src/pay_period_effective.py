@@ -104,6 +104,11 @@ class ResolvedPeriod(BaseModel):
     starts_at: datetime
     ends_at: datetime
 
+    @property
+    def effective_date(self) -> date:
+        """Return the payroll-local date for date-based condition releases."""
+        return self.starts_at.astimezone(ZoneInfo(self.rule.timezone)).date()
+
 
 def first_full_period(
     rule: FirstFullPeriodRule,
