@@ -70,6 +70,11 @@ class DailyHistory(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
     prior_hours: Decimal = Field(ge=0, allow_inf_nan=False)
     complete: bool
+    time_off_payable_hours: Decimal | None = Field(
+        default=None,
+        ge=0,
+        allow_inf_nan=False,
+    )
 
 
 @dataclass(frozen=True)
@@ -156,19 +161,24 @@ def cost_capped_daily_overtime(
     micros = (elapsed.days * 86400 + elapsed.seconds) * 1000000 + elapsed.microseconds
     remaining = Fraction(micros, 3600000000)
     exact_base = Fraction(base.exact_total_numerator, base.exact_total_denominator)
+    payable_hours = history.time_off_payable_hours
     if (multiplier := rule.time_off_cash_multiplier) is not None:
-        cash = remaining * basis * Fraction(multiplier)
+        cash_hours = remaining if payable_hours is None else Fraction(payable_hours)
+        cash = cash_hours * basis * Fraction(multiplier)
         adjustment = cash - remaining * salary_rate
         return CappedOvertimeResult(
             base,
             rule,
             history.prior_hours,
             basis,
-            (DailyTierAdjustment(Decimal(0), multiplier, remaining, adjustment),),
+            (DailyTierAdjustment(Decimal(0), multiplier, cash_hours, adjustment),),
             exact_base + adjustment,
             time_off_hours=remaining,
             time_off_cash=cash,
         )
+    if payable_hours is not None:
+        msg = "Explicit time-off payable hours require a time-off rule"
+        raise ValueError(msg)
     adjustments = _cash_adjustments(
         rule,
         remaining,

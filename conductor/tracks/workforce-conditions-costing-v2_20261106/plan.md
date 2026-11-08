@@ -958,3 +958,10 @@ operand for this comparison is S32 (160 divided by 40). The transposed
 summary repeats all ten values. This resolves the remaining twelve
 assumed annual-unit definitions as workbook-context units. The original
 instrument bases and scientific applicability remain separate.
+
+The capped overtime API accepts explicit payable hours for the time-off
+cash option. Four worked hours and 4.25 payable hours produce four hours
+of leave credit and AUD 255 cash in the synthetic example. The base
+ledger still uses the original worked interval. The standard tiered cash
+path rejects this input. The API leaves rounding and minimum-duration
+decisions to the reviewed payroll inputs. All 15 focused tests passed.

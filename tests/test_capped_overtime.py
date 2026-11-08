@@ -294,3 +294,20 @@ def test_flat_holiday_cash_replaces_precounted_salary() -> None:
     assert_that(result.total == Fraction(400))
     assert_that(result.adjustments[0].adjustment == Fraction(200))
     assert_that(result.time_off_hours == 0)
+
+
+def test_reviewed_time_off_payable_hours_preserve_worked_credit() -> None:
+    """Price reviewed cash hours without altering the worked interval."""
+    shift = activity()
+    history = DailyHistory(
+        prior_hours=Decimal(0),
+        complete=True,
+        time_off_payable_hours=Decimal("4.25"),
+    )
+    reviewed = rule().model_copy(update={"time_off_cash_multiplier": Decimal("1.5")})
+    result = cost_capped_daily_overtime(release(), reviewed, shift, "UTC", history)
+    assert_that(result.time_off_hours == Fraction(4))
+    assert_that(result.time_off_cash == Fraction(255))
+    assert_that(result.adjustments[0].adjustment == Fraction(55))
+    with pytest.raises(ValueError, match="require a time-off rule"):
+        cost_capped_daily_overtime(release(), rule(), shift, "UTC", history)
