@@ -32,3 +32,39 @@ precedence, quarter-hour and minimum-duration boundaries, recall overlaps and
 time-off choices. The clause alone does not settle every interaction; reject
 unreviewed combinations rather than infer precedence. The private source and
 synthetic arithmetic receipt retains the source hash and clause references.
+
+## Implementation follow-up
+
+The daily capped overtime engine now covers an explicit salary cap and
+signed adjustment to the base ledger. Its synthetic tests check tier
+boundaries, prior history, unchanged allowances and rejection of bundled
+salary. The cumulative-tier and session engines cover separate threshold
+methods. All 20 focused tests across these three engines passed at 224f1d6.
+The complete SA rule still requires current instrument and worker scope,
+and reviewed interaction evidence for rounding, holiday precedence, recall
+and time off in lieu.
+
+## 2026 agreement interaction
+
+The [SA Public Sector Enterprise Agreement (Salaried) 2026](https://www.saet.sa.gov.au/app/uploads/2026/03/SA-Public-Sector-Enterprise-Agreement-Salaried-2026-04032026.pdf)
+links clause 15 to clause 6.1.3 of the Salaried Employees Interim Award.
+That table lists the Medical Physicist ceiling at the top MPH-2 increment.
+The Medical Physicist appendix separately applies the Medical Scientists
+Award safety net and maps clause 6.2 references to MPH-1 registrars, with
+a cross-reference to clause 15. Preserve these as distinct classification
+and clause relationships. Verify the worker classification, applicable
+award and dated salary schedule before choosing a ceiling.
+
+Schedule 1.16 (printed page 96) identifies increment 5 as the top MPH-2
+step. The annual amounts for the first full pay periods on or after
+1 August 2025, 1 July 2026 and 1 July 2027 are AUD 148,041, 153,222 and
+158,202 respectively. Record these dates as schedule triggers. An hourly
+ceiling still requires the applicable payroll period start and salary
+conversion basis, as well as the clause applicability decision above.
+
+For a reviewed case, resolve the Schedule 1.16 trigger with
+[`first_full_period`](../../docs/pay_period_effective.md) using the actual
+contiguous payroll calendar. Use the resulting start to date the ceiling
+only after confirming the agreement and award scope. Keep the annual
+schedule value and reviewed hourly divisor as separate inputs. The
+resolver and capped-overtime tests exercise these steps independently.

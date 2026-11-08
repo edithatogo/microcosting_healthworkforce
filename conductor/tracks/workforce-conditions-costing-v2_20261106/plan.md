@@ -875,3 +875,13 @@ and CLI tests passed.
 Roster results now retain the canonical hash of the validated condition
 release, using the same hash as assignment costing. Older results may omit
 it. All 16 focused roster and CLI tests passed.
+
+The [SA scientist overtime review](../../reviews/sa-scientist-overtime-capability-20261106.md#implementation-follow-up)
+now distinguishes the verified capped salary adjustment from the open
+source and rule interaction requirements.
+
+A synthetic integration test dates the overtime ceiling using the first
+full payroll period resolver. A mid-period trigger resolves to the next
+calendar boundary. The ceiling prices work on that date and rejects work
+on the preceding day. All 14 focused commencement and capped-overtime
+tests passed. Actual SA case applicability and payroll inputs remain open.

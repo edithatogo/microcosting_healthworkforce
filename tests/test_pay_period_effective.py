@@ -6,6 +6,7 @@ from decimal import Decimal
 
 import pytest
 
+from src.capped_overtime import DailyHistory, cost_capped_daily_overtime
 from src.costing import Activity, cost_dynamic
 from src.pay_period_effective import (
     FirstFullPeriodRule,
@@ -15,6 +16,8 @@ from src.pay_period_effective import (
 )
 from src.source_registry import SourceRegistry
 from tests.checks import assert_that
+from tests.test_capped_overtime import activity as overtime_activity
+from tests.test_capped_overtime import rule as capped_rule
 from tests.test_costing import release as flat_release
 from tests.test_roster_costing import release
 from tests.test_source_registry import source
@@ -222,3 +225,34 @@ def test_retrospective_authority_cannot_bypass_source_scope_or_hash() -> None:
             calendar(),
             release().sources,
         )
+
+
+def test_resolved_payroll_start_gates_new_overtime_ceiling() -> None:
+    """The new ceiling starts at the resolved period, after the trigger date."""
+    prices = release()
+    resolved = first_full_period(
+        rule(datetime(2026, 6, 3, tzinfo=UTC)),
+        calendar(),
+        prices.sources,
+    )
+    effective_day = resolved.starts_at.date()
+    assert_that(effective_day == date(2026, 6, 15))
+    ceiling = capped_rule().model_copy(update={"effective_from": effective_day})
+    history = DailyHistory(prior_hours=Decimal(0), complete=True)
+    start = resolved.starts_at
+    shift = overtime_activity().model_copy(
+        update={
+            "starts_at": start,
+            "ends_at": start + timedelta(hours=4),
+        },
+    )
+    result = cost_capped_daily_overtime(prices, ceiling, shift, "UTC", history)
+    assert_that(result.total == Decimal(260))
+    preceding = shift.model_copy(
+        update={
+            "starts_at": start - timedelta(days=1),
+            "ends_at": start - timedelta(days=1) + timedelta(hours=4),
+        },
+    )
+    with pytest.raises(ValueError, match="cover"):
+        cost_capped_daily_overtime(prices, ceiling, preceding, "UTC", history)
