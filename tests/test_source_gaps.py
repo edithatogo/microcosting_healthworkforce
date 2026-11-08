@@ -96,3 +96,11 @@ def test_source_links_reject_unknown_unheld_or_inconsistent_evidence() -> None:
             SourceRegistry(records=(other_jurisdiction,)),
             (candidate,),
         )
+
+
+def test_whitespace_discovery_uri_is_rejected() -> None:
+    """A lead needs a usable source locator before it enters screening."""
+    target = GapTarget("NSW", "nursing", "public")
+    lead = DiscoveryLead("award", "NSW", ("nursing",), "public", "Award", " ")
+    with pytest.raises(ValueError, match="identity, title and URI"):
+        screen_gaps((target,), (lead,))
