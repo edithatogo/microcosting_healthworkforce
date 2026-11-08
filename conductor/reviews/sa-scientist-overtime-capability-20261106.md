@@ -94,3 +94,15 @@ cash-or-leave switch would omit that payment. Preserve the leave credit,
 additional cash and already-counted base as separate quantities. Current
 worker scope, payment basis and the application of the rounding/minimum
 provisions to the public-holiday payment still need review.
+
+For a separately verified public-holiday cash case, clause 6.2.2.4
+provides a flat 2.5 multiplier. Represent that case as one tier starting
+at zero. For an agreed time-off case, use the separate credit and cash
+result. Classify the activity date before selecting either rule, and
+reconcile the salary already counted in the base ledger. The historical
+workbook percentage provides no evidence for that classification.
+
+The synthetic flat holiday cash test prices four hours at a capped
+AUD 40 hourly basis and a 2.5 multiplier. It returns AUD 400 with a
+net adjustment of AUD 200 to the pre-counted base and no time credit.
+All 11 capped-overtime tests passed.
