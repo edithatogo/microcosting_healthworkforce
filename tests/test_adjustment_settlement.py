@@ -12,7 +12,9 @@ from src.adjustment_settlement import (
     AdjustmentSettlement,
     reconcile_adjustment,
 )
+from src.capped_overtime import DailyHistory, cost_capped_daily_overtime
 from tests.checks import assert_that
+from tests.test_capped_overtime import activity, release, rule
 
 
 def test_settlement_retains_signed_lines_and_separate_cash_date() -> None:
@@ -96,3 +98,44 @@ def test_pharmacy_transition_preserves_components_and_effective_boundary() -> No
     assert_that(result.differences == (Fraction("50.15"), Fraction("-10.15")))
     assert_that(result.net_difference == Fraction(40))
     assert_that(result.request.planned_payment_on is None)
+
+
+def test_time_off_cash_settlement_uses_entitlement_not_base_adjustment() -> None:
+    """Settle the cash credit while retaining the time-off hours separately."""
+    shift = activity()
+    overtime = cost_capped_daily_overtime(
+        release(),
+        rule().model_copy(update={"time_off_cash_multiplier": Decimal("1.5")}),
+        shift,
+        "UTC",
+        DailyHistory(prior_hours=Decimal(0), complete=True),
+    )
+    entitled = Decimal(240)
+    assert_that(overtime.time_off_cash == Fraction(entitled))
+    assert_that(overtime.adjustments[0].adjustment == Fraction(40))
+    assert_that(overtime.time_off_hours == Fraction(4))
+    worked_on = shift.starts_at.date()
+    result = reconcile_adjustment(
+        AdjustmentSettlement(
+            case_id="synthetic-holiday",
+            currency="AUD",
+            crystallised_on=worked_on,
+            reviewed_on=worked_on,
+            as_known_on=worked_on,
+            planned_payment_on=None,
+            review_evidence="synthetic payroll review",
+            lines=(
+                AdjustmentLine(
+                    line_id="holiday-cash",
+                    component="overtime cash",
+                    starts_on=worked_on,
+                    ends_on=date(2026, 6, 3),
+                    entitled=entitled,
+                    credited=Decimal(210),
+                    entitlement_evidence="synthetic time-off cash entitlement",
+                    credit_evidence="synthetic payroll posting",
+                ),
+            ),
+        ),
+    )
+    assert_that(result.net_difference == Fraction(30))
