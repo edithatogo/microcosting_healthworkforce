@@ -137,3 +137,16 @@ case, apply the actual-work minimum before rounding the payable duration.
 The wording leaves midpoint ties and allocation of rounded time across
 pay tiers unspecified. Separate review is still needed for public-holiday
 time-off cash and current worker coverage.
+
+Use `quarter_hour_cash_duration` with the reviewed worked duration for
+the applicable calculation group. It returns a duration, including zero
+when the actual-work minimum is unmet. Retain the original activity
+interval. An exact midpoint raises an error and requires a reviewed tie
+decision. Apply the result to cash only after confirming the payment
+method and any tier allocation.
+
+A synthetic integration test passes four hours and eight minutes through
+the rounding helper, then prices 4.25 payable hours at AUD 60. Cash is
+AUD 255. Leave credit and the base cost adjustment use the original
+worked duration. This test assumes the rounding rule applies to the
+time-off cash case. Current payroll applicability remains open.
