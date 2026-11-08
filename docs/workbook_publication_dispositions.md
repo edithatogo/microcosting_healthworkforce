@@ -26,8 +26,8 @@ observation, a zero or a numerical unit.
 On the PSA validation sheet, the scalar's title is a label/header. The following
 scalar retains `unresolved_historical_value` status with an unknown unit and
 estimand. A title does not make it an accepted PSA oracle. The isolated zero on
-the DSA sheet also remains unresolved. Assumed units and all scientific/source
-qualification gaps remain explicit, including the retained failed archive
+the DSA sheet also remains unresolved. The profile records formula-backed annual units for development and leave.
+Scientific and source qualification gaps remain explicit, including the retained failed archive
 interpretation diagnostics. No numeric costing or stochastic method changes.
 
 A private LibreOffice recalculation verified all 120 publication
