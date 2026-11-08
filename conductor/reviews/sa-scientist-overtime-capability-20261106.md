@@ -108,8 +108,10 @@ net adjustment of AUD 200 to the pre-counted base and no time credit.
 All 11 capped-overtime tests passed.
 
 For quarter-hour qualification, keep elapsed activity duration, payable
-cash duration and time-off credit as separate quantities. The current
-engine uses elapsed duration for all three where applicable. Editing the
+cash duration and time-off credit as separate quantities. For a reviewed
+time-off cash election, pass the payable duration through
+`DailyHistory.time_off_payable_hours`. The base ledger and leave credit
+use elapsed work. Standard cash tiers still use elapsed duration. Editing the
 activity endpoints to represent rounded cash hours would also change base
 salary and other hourly components. A payroll receipt should identify
 which duration advances the daily tier and how a rounded amount is
@@ -127,3 +129,11 @@ The synthetic settlement test reconciles AUD 240 of time-off cash against
 a synthetic payroll credit of AUD 210. It retains four hours of time
 credit separately and confirms an AUD 30 cash balance. The AUD 40 costing
 adjustment reflects a different baseline, the salary already counted.
+
+The [November 2025 SAET reprint](https://www.saet.sa.gov.au/app/uploads/2025/11/279p.pdf)
+retains clause 6.2.5. It specifies nearest-quarter-hour cash computation
+subject to at least half an hour actually worked. For a qualifying cash
+case, apply the actual-work minimum before rounding the payable duration.
+The wording leaves midpoint ties and allocation of rounded time across
+pay tiers unspecified. Separate review is still needed for public-holiday
+time-off cash and current worker coverage.
