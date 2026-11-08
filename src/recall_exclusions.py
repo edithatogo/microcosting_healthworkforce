@@ -38,6 +38,7 @@ class RecallHistory:
     previous_commencement: datetime | None
     complete: bool
     method: str | None = None
+    exclusion: timedelta | None = None
 
 
 @dataclass(frozen=True)
@@ -199,6 +200,9 @@ def partition_repeat_recalls(
     if history.previous_commencement is not None and history_method != method:
         msg = "Recall history must use the same exclusion method"
         raise ValueError(msg)
+    if history.exclusion is not None and history.exclusion != exclusion:
+        msg = "Recall history must use the same exclusion duration"
+        raise ValueError(msg)
     ordered = _ordered(episodes, history)
     previous = (
         _utc(history.previous_commencement)
@@ -230,6 +234,7 @@ def partition_repeat_recalls(
         previous,
         complete=True,
         method=method if ordered else history.method,
+        exclusion=exclusion if ordered else history.exclusion,
     )
     return RecallExclusionPlan(method, exclusion, history, tuple(recalls), next_history)
 

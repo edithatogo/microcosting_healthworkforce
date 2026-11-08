@@ -389,3 +389,11 @@ def test_first_commencement_anchor_survives_a_batch_boundary() -> None:
 
     with pytest.raises(ValueError, match="same exclusion method"):
         partition_repeat_recalls(events[2:], window, first.next_history, METHOD)
+
+    with pytest.raises(ValueError, match="same exclusion duration"):
+        partition_repeat_recalls(
+            events[2:],
+            timedelta(minutes=30),
+            first.next_history,
+            method,
+        )

@@ -1157,3 +1157,8 @@ Resumable recall history now records the exclusion method and rejects
 resumption with a different method when an anchor exists. Untagged
 history with a prior commencement retains the legacy rolling meaning.
 All 16 exclusion tests passed.
+
+Recall history now retains the exclusion duration as well as its anchor
+method. A resumed batch rejects a different duration. Older histories
+without a stored duration use the caller-supplied value until a batch
+records it. All 37 recall tests passed.
