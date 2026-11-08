@@ -22,8 +22,8 @@ population growth, or make the values eligible for current costing or workforce
 weighting. The neighbouring card counts, persons counts, persons-per-card ratios
 and selected five-state weight formulas retain their different meanings.
 
-The separate PSA scalar, mixed publication values, isolated zero, assumed units
-and scientific/source applicability gaps retain their existing qualifications.
+The separate PSA scalar, mixed publication values, isolated zero
+and scientific and source applicability gaps retain their existing qualifications.
 No numerical costing path or weighting formula is changed by this metadata fix.
 
 An independent replay against the private recalculation matched all 17
