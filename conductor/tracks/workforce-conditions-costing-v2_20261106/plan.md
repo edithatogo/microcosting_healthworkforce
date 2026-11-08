@@ -1233,3 +1233,14 @@ The first DSA scenario retains both operations in their configured order.
 These links reconcile all archived scenario fields to workbook input
 identities. Linking them to accepted successor conditions still requires a
 reviewed condition release and, for PSA, scientific qualification.
+
+### Half-pay leave and replacement exposure
+
+A synthetic case matching the four-week salary exposure and eight-week
+absence shape identified in the [S099 review](../../reviews/nt-tas-held-source-batch-20261107.md)
+passed through the paid-leave and selected normal-hours pricing paths.
+The schedule retains eight weeks of paid absence, four normal-pay
+equivalent weeks and an unresolved entitlement debit. All 27 focused
+paid-leave tests passed on Python 3.15.2. Use separately declared cover
+quantities and confirm the applicable appointment and leave rules before
+pricing an actual absence.

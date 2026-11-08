@@ -402,3 +402,21 @@ def test_unpaid_accrual_value_cannot_hide_unresolved_review() -> None:
         request(unpaid_accrual_factor=Fraction(0))
     with pytest.raises(ValueError, match="accrual factor"):
         request(unpaid_accrual_review_kind="source_reviewed")
+
+
+def test_four_week_budget_at_half_pay_preserves_eight_weeks_of_absence() -> None:
+    """Keep eight approved weeks of absence and four weeks of salary exposure."""
+    start = date(2026, 2, 1)
+    result = build_paid_leave(
+        policy(full_pay_weeks=4),
+        request(
+            starts_on=start,
+            approved_ends_on=start + timedelta(weeks=8),
+            payment_mode="half",
+        ),
+    )
+    assert_that(result.paid_absence_weeks == Fraction(8))
+    assert_that(result.salary_equivalent_weeks == Fraction(4))
+    assert_that(result.unpaid_absence_weeks == 0)
+    assert_that(result.paid_entitlement_debit_weeks is None)
+    assert_that(salary_cost(result, prices()) == Fraction(252000, 73))
