@@ -196,6 +196,15 @@ response does not establish instrument coverage, currency, rights or scope.
   - [x] Read the GHA edition-22 source manifest and identify reusable public
     sources/failed requests; preserve evidence attribution and private ownership.
 - [ ] Task: Enumerate the target coverage denominator.
+  - The screening register contains 576 unique cells across eight jurisdictions,
+    12 profession families and six sectors. The 96 public-sector cells define
+    the first current-source screening batch. These counts measure review
+    workload. Each cell can contain multiple applicability targets.
+  - Identify each applicability target by industrial system, jurisdiction,
+    employer scope, occupation, classification, pay point, employment basis and
+    effective interval. Link overlapping sector cells to the same target when
+    those dimensions match. Keep unknown dimensions unresolved and count
+    historical recovery separately by workbook row and reference date.
   - [ ] Expand broad families into occupational subtypes, employers/employer
     classes, grades/pay points and employment bases; retain an explicit unknown
     category where scope is not yet enumerated.
