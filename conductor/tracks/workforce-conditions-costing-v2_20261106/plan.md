@@ -1121,3 +1121,13 @@ Boolean FALSE values. The 17 archived flags are produced by the
 comparison against the delivered DSA Values sheet. See the installed
 package and DSA validation checkpoints above for the existing replay
 evidence. The workbook cache alone cannot verify those outcomes.
+
+## Tasmanian repeat-recall applicability
+
+The [held-source review](../../reviews/nt-tas-held-source-batch-20261107.md)
+confirms a payment exclusion for worked and travelling time inside the
+earlier recall window. The engine can preserve actual time while
+partitioning payable time under a rolling previous-commencement method.
+All 15 exclusion tests passed. An accepted release still needs authority
+for the reference recall in chains of three or more calls and for the
+order of exclusion, rounding and minimum payment.
