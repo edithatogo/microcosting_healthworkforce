@@ -204,3 +204,17 @@ leave clauses for paid-capacity and backfill assumptions only after
 confirming the appointment is within S099 and how the applicable
 agreement interacts with it. The award history summary alone is
 insufficient to select revised wage, hours or recall parameters.
+
+The [TASIC 35 reasons](https://www.tic.tas.gov.au/__data/assets/pdf_file/0020/904403/2026-TASIC-35-T15353-of-2026-Variation-of-the-Medical-Practitioners-Awards-TSS-Standard-Conditions.pdf),
+paragraphs 5 and 7–8, resolve the clause-date split. Right to disconnect,
+recreation-leave request management and the specified gender affirmation
+leave amendments start on 1 June 2026. The other listed substantive leave
+amendments start on 11 May 2026. Keep these as clause dates separate from
+publication, payroll and observed leave dates.
+
+For costing, clause 41 changes service eligibility for paid parental leave.
+Clause 56 introduces a half-pay option that separates absence duration from
+paid hours. Clause 59 adds a non-cumulative reproductive leave balance
+with part-time proration. Clause 45(d) changes response timing, which does
+not by itself change the annual recreation leave quantity. Keep eligibility,
+leave balance, actual use and replacement cover as separate inputs.
