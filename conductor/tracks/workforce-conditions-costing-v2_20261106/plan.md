@@ -1115,3 +1115,9 @@ are exploratory inputs and retain their original support and operations.
 An automated snapshot and activity comparison verifies the exact payroll
 salary conversion alongside an annual allowance on the paid-hours basis.
 All 12 snapshot and capacity tests passed.
+
+A read-only cached-value scan of the five DSA sheets found no literal
+Boolean FALSE values. The 17 archived flags are produced by the
+comparison against the delivered DSA Values sheet. See the installed
+package and DSA validation checkpoints above for the existing replay
+evidence. The workbook cache alone cannot verify those outcomes.
