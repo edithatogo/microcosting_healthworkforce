@@ -788,3 +788,15 @@ until their original purpose can be verified.
 
 The workbook profile regression now requires a declared name and role for
 every populated nonheader cell. All 11 affected tests passed.
+
+Direct inspection of the pinned workbook found that PSA Validation A2
+uses General formatting and has no comment or hyperlink. The sheet has
+no local defined names, no workbook-scoped name refers to the sheet,
+and the workbook has no external workbook links. The scalar remains
+an archival comparison value pending the generating calculation, unit
+and weighting evidence.
+
+The legacy runner now logs configured archive comparisons skipped for a
+missing exact header. It preserves the historical comparison outputs.
+Three runner tests passed. Two native projection cases could not complete
+because the local LibreOffice conversion exited with status 1.
