@@ -965,3 +965,9 @@ of leave credit and AUD 255 cash in the synthetic example. The base
 ledger still uses the original worked interval. The standard tiered cash
 path rejects this input. The API leaves rounding and minimum-duration
 decisions to the reviewed payroll inputs. All 15 focused tests passed.
+
+Added a cash-duration helper for the reviewed 30-minute actual-work
+minimum and nearest-quarter-hour rule. It rejects exact midpoint ties
+until a reviewed decision is supplied externally. It leaves tier
+allocation and holiday time-off applicability to the caller. All 17
+capped-overtime tests passed.

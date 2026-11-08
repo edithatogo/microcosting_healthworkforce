@@ -231,3 +231,20 @@ def _cash_adjustments(
         remaining -= hours
         cumulative += hours
     return tuple(adjustments)
+
+
+def quarter_hour_cash_duration(worked: timedelta) -> timedelta:
+    """Apply the actual-work minimum, then round to the nearest quarter hour."""
+    minimum = timedelta(minutes=30)
+    increment = timedelta(minutes=15)
+    if worked < timedelta(0):
+        msg = "Worked duration must be nonnegative"
+        raise ValueError(msg)
+    if worked < minimum:
+        return timedelta(0)
+    quarters, remainder = divmod(worked, increment)
+    twice_remainder = remainder * 2
+    if twice_remainder == increment:
+        msg = "A midpoint requires a reviewed rounding decision"
+        raise ValueError(msg)
+    return increment * (quarters + (twice_remainder > increment))

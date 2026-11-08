@@ -12,6 +12,7 @@ from src.capped_overtime import (
     DailyHistory,
     DailyTier,
     cost_capped_daily_overtime,
+    quarter_hour_cash_duration,
 )
 from src.conditions import ConditionRelease
 from src.costing import Activity
@@ -311,3 +312,21 @@ def test_reviewed_time_off_payable_hours_preserve_worked_credit() -> None:
     assert_that(result.adjustments[0].adjustment == Fraction(55))
     with pytest.raises(ValueError, match="require a time-off rule"):
         cost_capped_daily_overtime(release(), rule(), shift, "UTC", history)
+
+
+@pytest.mark.parametrize(("worked", "payable"), [(29, 0), (30, 30), (37, 30), (38, 45)])
+def test_cash_duration_checks_work_minimum_before_rounding(
+    worked: int,
+    payable: int,
+) -> None:
+    """A rounded-up duration cannot satisfy the actual-work minimum."""
+    assert_that(
+        quarter_hour_cash_duration(timedelta(minutes=worked))
+        == timedelta(minutes=payable),
+    )
+
+
+def test_cash_duration_rejects_unresolved_midpoint() -> None:
+    """Do not infer a tie direction."""
+    with pytest.raises(ValueError, match="midpoint"):
+        quarter_hour_cash_duration(timedelta(minutes=37, seconds=30))
