@@ -62,6 +62,12 @@ must fall within that year. Supply the reviewed annual
 fraction as a decimal or exact fraction, separately from the employment
 fraction. The calculator checks the supplied prior-payment status.
 
+For Queensland Health, match the actual service location to the
+community and category table in MOCA7 clause 8.1.1. Confirm appointment
+coverage and the agreement operative for the service period before
+selecting a quote.
+[QIRC certified MOCA7](https://www.qirc.qld.gov.au/sites/default/files/2025-11/2025_cb128.pdf)
+
 For reviewed concurrent or sequential service across categories, pass
 one `InaccessibilityCategoryPayment` per payable share to
 `price_inaccessibility_category_payments`. Supply the applicable

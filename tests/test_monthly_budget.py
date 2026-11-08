@@ -151,3 +151,22 @@ def test_terminal_month_stops_on_inclusive_assignment_end() -> None:
     amounts = [row.amount for row in result.rows]
     assert_that(amounts == [Fraction(10000), Fraction(5000)])
     assert_that(result.total == Fraction(15000))
+
+
+def test_partial_month_uses_service_rate_across_posting_boundary() -> None:
+    """Keep a partial service month at its own rate when the next rate differs."""
+    february = date(2024, 2, 1)
+    march = date(2024, 3, 1)
+    rates = (
+        rate("service", february, march, "1200"),
+        rate("following", march, date(2024, 4, 1), "2400"),
+    )
+    budget = monthly_salary_budget(
+        date(2024, 2, 15),
+        date(2024, 3, 31),
+        Decimal(1),
+        rates,
+    )
+
+    assert_that([row.month for row in budget.rows] == [february, march])
+    assert_that([row.amount for row in budget.rows] == [Fraction(1500, 29), 200])

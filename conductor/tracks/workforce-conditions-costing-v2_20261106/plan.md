@@ -1325,3 +1325,12 @@ strings and 30 additional Base Salary strings. The latter match the
 PSA-labelled hourly Base Case triplets formatted to whole dollars.
 This verifies the display lineage and explains the pivot-only axis.
 The historical display label does not establish statistical coverage.
+
+### Local Conductor reconciliation
+
+The partial-month regression verifies that a February service segment
+uses its own rate when the following month posts at a different rate.
+The related workbook intake, projection, inaccessibility and vehicle
+changes are represented by their integrated implementations. The
+reconciliation retains later intake and costing behavior on main.
+All 38 focused tests passed on Python 3.15.2.
