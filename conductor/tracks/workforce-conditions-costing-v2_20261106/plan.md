@@ -1049,3 +1049,14 @@ Credited-hours rules now declare eligible employment bases, and history
 must identify its basis. A synthetic full-time history is rejected by a
 part-time and casual rule. Classification and appointment review still
 exclude undergraduate roles and resolve individual eligibility.
+
+## Workbook profile reconciliation
+
+The current profile assigns all 27,929 populated cells to 267 sections.
+There are 67 workbook candidate sections, 199 archive candidate sections
+and one unresolved physical section, the isolated DSA zero at AK39. The
+PSA reference scalar remains unresolved within an archive candidate section.
+The empty percentage sheet is retained separately. All 34 workbook tests
+passed on the receiving source revision. Candidate section status describes
+extraction and classification. Historical provenance and unresolved bounds
+still require separate disposition before use as model inputs.
