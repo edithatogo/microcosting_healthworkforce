@@ -1316,3 +1316,12 @@ leave the generating procedure and remaining bounds unresolved.
 The packaged candidate profile now describes the publication numeric block
 as a distinct historical variant and records the separate bound lineage.
 Eight focused workbook profile and archive mapping tests passed.
+
+The publication display crosswalk also reconciles. In an isolated
+LibreOffice recalculation, all 300 formula-formatted strings in L2:L301
+match the archived strings in R by personnel type, variable and
+jurisdiction. The jurisdiction pivot reproduces all 300 sensitivity
+strings and 30 additional Base Salary strings. The latter match the
+PSA-labelled hourly Base Case triplets formatted to whole dollars.
+This verifies the display lineage and explains the pivot-only axis.
+The historical display label does not establish statistical coverage.
