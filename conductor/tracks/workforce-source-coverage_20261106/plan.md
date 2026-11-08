@@ -50,7 +50,7 @@ The [ACT source review](../../reviews/act-health-professionals-source-20261106.m
 
 ## Northern Territory public-sector discovery — 6 November 2026
 
-The [NT discovery review](../../reviews/nt-public-source-discovery-20261106.md) identifies five official instrument leads and selected approval/operation/nominal-expiry evidence. The selected direct agreement downloads returned HTTP 403, so source bytes, full coverage, variations and individual applicability remain unverified; no NT rates were accepted.
+The [NT discovery review](../../reviews/nt-public-source-discovery-20261106.md) identifies five official instrument leads and selected approval/operation/nominal-expiry evidence. The selected direct agreement downloads returned HTTP 403, and the [held-source batch](../../reviews/nt-tas-held-source-batch-20261107.md) records subsequent internal-browser retrieval with verified hashes. Coverage, variations and individual applicability remain open.
 
 ## Queensland applicability cross-check — 6 November 2026
 
@@ -286,8 +286,8 @@ RX4–RZ7; author intent, employer and actual applicability remain unresolved.
     agreement. The indexed decision was readable, but direct retrieval returned
     HTTP 403. The [FWC register](https://www.fwc.gov.au/documents/agreements/resources/agreements2023.pdf)
     links the matter to instrument AE520978 and decision reference PR764853. The
-    FWC approved-agreement PDF route also returned HTTP 403. Full instrument
-    custody and the operative successor check remain open. The indexed 122-page
+    FWC approved-agreement PDF route also returned HTTP 403. The private [held-source batch](../../reviews/nt-tas-held-source-batch-20261107.md)
+    includes the complete NT nursing PDF. The operative successor check remains open. The indexed 122-page
     OCPE copy did expose clauses 3, 19 and 39. Clause 19 separates retrospective
     salary effects from approval and uses first-full-pay-period triggers for
     2023–2025. Clause 39 separates ordinary full-time rostering from school RN

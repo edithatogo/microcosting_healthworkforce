@@ -105,7 +105,7 @@ The [ACT source review](../../reviews/act-health-professionals-source-20261106.m
 
 ## Northern Territory public-sector discovery — 6 November 2026
 
-The [NT discovery review](../../reviews/nt-public-source-discovery-20261106.md) identifies five official instrument leads and selected approval/operation/nominal-expiry evidence. The selected direct agreement downloads returned HTTP 403, so source bytes, full coverage, variations and individual applicability remain unverified; no NT rates were accepted.
+The [NT discovery review](../../reviews/nt-public-source-discovery-20261106.md) identifies five official instrument leads and selected approval/operation/nominal-expiry evidence. The selected direct agreement downloads returned HTTP 403, and the [held-source batch](../../reviews/nt-tas-held-source-batch-20261107.md) records subsequent internal-browser retrieval with verified hashes. Coverage, variations and individual applicability remain open.
 
 ## Queensland applicability cross-check — 6 November 2026
 
@@ -987,7 +987,8 @@ first-full-pay-period trigger for each 2023–2025 increase. The existing
 payroll calendar. The 2022 date belongs in a separate retrospective salary
 event with entitlement and known-at dates. Keep both separate from the cash
 settlement date. An accepted release still needs Schedule 3 pay-point
-lineage, the appointment scope, the payroll calendar and source custody.
+lineage, appointment scope and the payroll calendar. The [held-source batch](../../reviews/nt-tas-held-source-batch-20261107.md)
+records custody of the agreement.
 
 The resolved period now exposes the payroll-local effective date for dated
 conditions. A synthetic Darwin midnight test verifies that a June 15
