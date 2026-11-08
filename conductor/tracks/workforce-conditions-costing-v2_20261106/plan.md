@@ -1146,3 +1146,14 @@ recall eligibility. A fully excluded repeat call cannot be passed through
 it to recreate a minimum. A combined Tasmanian rule still needs authority
 for whether a partially eligible repeat call attracts any new guarantee
 and how capped travel is allocated around the exclusion boundary.
+
+The recall partitioner now supports a separately selected first-commencement
+anchor. In the synthetic 0, 45 and 90 minute sequence it admits the first
+and third calls and preserves the anchor across batches. Keep one convention
+throughout a history. The award-specific daily reset, minimum composition
+and worker applicability still need separate qualification.
+
+Resumable recall history now records the exclusion method and rejects
+resumption with a different method when an anchor exists. Untagged
+history with a prior commencement retains the legacy rolling meaning.
+All 16 exclusion tests passed.

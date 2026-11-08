@@ -37,6 +37,7 @@ class RecallHistory:
     observed_from: datetime
     previous_commencement: datetime | None
     complete: bool
+    method: str | None = None
 
 
 @dataclass(frozen=True)
@@ -76,7 +77,10 @@ class ExcludedRecall:
 class RecallExclusionPlan:
     """A selected convention, retained evidence and explicit next-batch history."""
 
-    method: Literal["previous_commencement_half_open_v1"]
+    method: Literal[
+        "previous_commencement_half_open_v1",
+        "first_commencement_half_open_v1",
+    ]
     exclusion: timedelta
     history: RecallHistory
     recalls: tuple[ExcludedRecall, ...]
@@ -171,17 +175,29 @@ def partition_repeat_recalls(
     episodes: tuple[RecallEpisode, ...],
     exclusion: timedelta,
     history: RecallHistory,
-    method: Literal["previous_commencement_half_open_v1"],
+    method: Literal[
+        "previous_commencement_half_open_v1",
+        "first_commencement_half_open_v1",
+    ],
 ) -> RecallExclusionPlan:
-    """Exclude time before the immediately previous commencement plus a duration.
+    """Partition time under the selected commencement and exclusion convention.
 
-    Every episode resets the clock, including one whose segments are completely
-    excluded. Intervals are half open and use UTC elapsed time. Commencement is
+    The rolling method resets on every episode. The first-commencement
+    method keeps its anchor until a call starts at or after the cutoff. Its
+    history previous_commencement field carries that anchor between batches.
+    Intervals are half open and use UTC elapsed time. Commencement is
     caller-supplied, at or before its episode's work/travel. The caller separately
     qualifies this convention and its applicability; no minimum is inferred.
     """
-    if method != "previous_commencement_half_open_v1" or exclusion < timedelta(0):
+    if method not in (
+        "previous_commencement_half_open_v1",
+        "first_commencement_half_open_v1",
+    ) or exclusion < timedelta(0):
         msg = "Select the supported exclusion method and a nonnegative duration"
+        raise ValueError(msg)
+    history_method = history.method or "previous_commencement_half_open_v1"
+    if history.previous_commencement is not None and history_method != method:
+        msg = "Recall history must use the same exclusion method"
         raise ValueError(msg)
     ordered = _ordered(episodes, history)
     previous = (
@@ -203,12 +219,17 @@ def partition_repeat_recalls(
             parts.append(RecallPartition(segment, eligible if eligible < end else None))
             through = max(through, end)
         recalls.append(ExcludedRecall(episode, previous, cutoff, tuple(parts)))
-        previous = _utc(episode.commences_at)
+        commencement = _utc(episode.commences_at)
+        if method == "previous_commencement_half_open_v1" or (
+            cutoff is None or commencement >= cutoff
+        ):
+            previous = commencement
     next_history = RecallHistory(
         history.allocation_id,
         through,
         previous,
         complete=True,
+        method=method if ordered else history.method,
     )
     return RecallExclusionPlan(method, exclusion, history, tuple(recalls), next_history)
 
