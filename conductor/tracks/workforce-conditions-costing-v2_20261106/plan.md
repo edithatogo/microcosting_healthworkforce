@@ -443,7 +443,7 @@ real-world values and receipts must not enter public source distributions.
     attach schemas, identity keys, units, roles and source-cell/formula lineage.
   - [ ] Keep nominal/weighted/component variants separate. WM midpoints are weighted;
     MIN/MAX bounds and 95% CI display labels are not new statistical intervals.
-  - [ ] Preserve original DSA baseline/axes and all 17 false archived diagnostics;
+  - [x] Preserve original DSA baseline/axes and all 17 false archived diagnostics;
     do not relabel them as passing checks or force both signs onto one midpoint.
   - [ ] Capture every old JSON parameter/formula/distribution and workbook condition/
     assumption with a candidate v1-to-successor disposition, not silent defaults.
@@ -1278,3 +1278,11 @@ There were no missing or nonnumeric outputs in that block. This qualifies
 the historical formula-to-Values crosswalk. The separate 17 flags compare
 a different computation against those archived values and retain their
 existing disposition.
+
+Replayed the current scenario runner against the archived midpoint columns
+using a fresh recalculated workbook copy. All 17 emitted comparisons
+retained their false within-cent status. Both leave-loading variants
+were skipped under the exact-header rule. This verifies preservation of
+the legacy diagnostic alongside the independent 1,980-cell historical
+recalculation. It does not qualify archived midpoint comparisons as a
+current scenario oracle.
