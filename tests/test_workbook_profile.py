@@ -30,6 +30,8 @@ def test_candidate_profile_reconciles_original_workbook() -> None:
     )
     for table in extraction.tables:
         for cell in table.cells:
+            if cell.source.row not in table.definition.header_rows:
+                assert_that(cell.role is not None and cell.column_name is not None)
             if cell.unit and isinstance(cell.source.value, str):
                 assert_that(cell.source.excel_type == "f")
 

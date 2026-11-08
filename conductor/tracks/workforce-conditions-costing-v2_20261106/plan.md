@@ -775,3 +775,16 @@ the applicable pay-office calendar.
 The levy deadline API now rejects a timestamp supplied as the quarter-end
 date before reading the calendar. This prevents timestamp keys from silently
 producing a timestamp deadline. All 24 period contribution tests passed.
+
+The archive regression now verifies that the isolated AK39 zero has no
+unit, retains the unresolved historical role and stays outside the DSA
+aggregate table. Five archive and publication disposition tests passed.
+
+The pinned extraction audit found zero populated nonheader cells without
+a declared role. Exactly two cells have an unresolved historical role.
+AK39 is the isolated DSA zero and A2 in WS20-R01 is the PSA reference
+scalar with unknown unit and estimand. Keep both outside costing inputs
+until their original purpose can be verified.
+
+The workbook profile regression now requires a declared name and role for
+every populated nonheader cell. All 11 affected tests passed.
