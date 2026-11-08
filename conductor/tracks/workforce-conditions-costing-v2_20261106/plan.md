@@ -1111,3 +1111,7 @@ deviation are fractions. The uniform productive-time endpoints are
 fractions with support from 0.95 to 1.05, including values above one.
 The triangular development endpoints and mode are AUD per year. These
 are exploratory inputs and retain their original support and operations.
+
+An automated snapshot and activity comparison verifies the exact payroll
+salary conversion alongside an annual allowance on the paid-hours basis.
+All 12 snapshot and capacity tests passed.

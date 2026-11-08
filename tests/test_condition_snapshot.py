@@ -8,7 +8,11 @@ from fractions import Fraction
 import pytest
 from pydantic import ValidationError
 
-from src.conditions import cost_condition_activity, cost_condition_snapshot
+from src.conditions import (
+    PayrollSalaryDivisor,
+    cost_condition_activity,
+    cost_condition_snapshot,
+)
 from src.costing import Activity
 from tests.checks import assert_that
 from tests.test_minimum_engagement import example_release
@@ -71,3 +75,32 @@ def test_snapshot_retains_exact_nonterminating_hourly_ratio() -> None:
         Fraction(snapshot.exact_total_numerator, snapshot.exact_total_denominator)
         == Fraction(340, 7),
     )
+
+
+def test_payroll_basis_snapshot_matches_dynamic_cost() -> None:
+    """Use payroll hours for salary and paid hours for the annual allowance."""
+    original = example_release()
+    divisor = PayrollSalaryDivisor(numerator=5947, denominator=3)
+    conditions = tuple(
+        item.model_copy(update={"payroll_salary_divisor": divisor})
+        if item.kind == "salary"
+        else item
+        for item in original.conditions
+    )
+    release = original.model_copy(update={"conditions": conditions})
+    start = datetime(2026, 6, 2, 9, tzinfo=UTC)
+    snapshot = cost_condition_snapshot(release, start.date(), Decimal(1))
+    activity = Activity(
+        activity_id="payroll-shift",
+        resource_id="worker",
+        starts_at=start,
+        ends_at=start + timedelta(hours=1),
+        resources=Decimal(1),
+    )
+    dynamic = cost_condition_activity(release, activity, "UTC")
+    expected = Fraction(300000, 5947) + 1
+    for result in (snapshot, dynamic):
+        assert_that(
+            Fraction(result.exact_total_numerator, result.exact_total_denominator)
+            == expected,
+        )
