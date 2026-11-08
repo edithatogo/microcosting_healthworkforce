@@ -1270,3 +1270,11 @@ Values-only Base Case label. Values contains 1,980 numeric cells across
 these keys and columns. This checks alignment of the archived comparison
 inputs. It does not reproduce the 17 flagged numeric discrepancies or
 establish parity with the current scenario definitions.
+
+Recalculated an isolated copy of the delivered XLSX using the existing
+headless LibreOffice route. All 1,980 archived formula outputs matched the
+corresponding Values cells at relative and absolute tolerances of 1e-9.
+There were no missing or nonnumeric outputs in that block. This qualifies
+the historical formula-to-Values crosswalk. The separate 17 flags compare
+a different computation against those archived values and retain their
+existing disposition.
