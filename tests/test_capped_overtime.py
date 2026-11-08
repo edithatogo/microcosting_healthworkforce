@@ -208,3 +208,48 @@ def test_capped_overtime_rejects_bundled_salary() -> None:
             "UTC",
             DailyHistory(prior_hours=Decimal(0), complete=True),
         )
+
+
+def test_daily_cap_changes_at_midnight_with_separate_history() -> None:
+    """Price each local day with its own cap and daily overtime history."""
+    midnight = datetime(2026, 6, 3, tzinfo=UTC)
+    before = activity().model_copy(
+        update={
+            "starts_at": midnight - timedelta(hours=1),
+            "ends_at": midnight,
+        },
+    )
+    after = activity().model_copy(
+        update={
+            "starts_at": midnight,
+            "ends_at": midnight + timedelta(hours=1),
+        },
+    )
+    old_cap = rule().model_copy(update={"effective_to": midnight.date()})
+    new_cap = rule("45").model_copy(update={"effective_from": midnight.date()})
+    prices = release()
+    first = cost_capped_daily_overtime(
+        prices,
+        old_cap,
+        before,
+        "UTC",
+        DailyHistory(prior_hours=Decimal(3), complete=True),
+    )
+    second = cost_capped_daily_overtime(
+        prices,
+        new_cap,
+        after,
+        "UTC",
+        DailyHistory(prior_hours=Decimal(0), complete=True),
+    )
+    assert_that(first.total == Fraction(80))
+    assert_that(second.total == Fraction(135, 2))
+    overnight = before.model_copy(update={"ends_at": after.ends_at})
+    with pytest.raises(ValueError, match="cannot span local calendar dates"):
+        cost_capped_daily_overtime(
+            prices,
+            old_cap,
+            overnight,
+            "UTC",
+            DailyHistory(prior_hours=Decimal(3), complete=True),
+        )
