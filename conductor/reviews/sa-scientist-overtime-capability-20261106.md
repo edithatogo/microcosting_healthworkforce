@@ -76,3 +76,21 @@ Scientists Award clause 6.2.2 and the MS1-to-MeS1 mapping are confirmed
 for the case. Clause 15 separately names MeS3 for the Salaried Employees
 Interim Award provision it references. The two ceilings cannot be selected
 from the pay schedule alone. The reviewed hourly conversion remains open.
+
+The current capped API prices one local day at a time. The midnight
+regression qualifies an explicit split with separately supplied daily
+history and ceilings. For rounding qualification, retain the original
+worked durations and obtain a payroll example showing whether the
+quarter-hour rule applies to the daily total or separate bouts, how ties
+are handled, and whether the minimum is evaluated before rounding.
+The public historical text and scanned award evidence do not yet settle
+that sequence for a current worker.
+
+Clause 6.2.6 distinguishes ordinary overtime time off in lieu from the
+public-holiday option. With agreement, the leave credit equals overtime
+worked. For public-holiday overtime the clause allows that leave credit
+with a separate cash payment at 1.5 times the applicable rate. A generic
+cash-or-leave switch would omit that payment. Preserve the leave credit,
+additional cash and already-counted base as separate quantities. Current
+worker scope, payment basis and the application of the rounding/minimum
+provisions to the public-holiday payment still need review.
