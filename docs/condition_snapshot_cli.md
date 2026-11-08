@@ -48,7 +48,7 @@ carry provenance inside their pinned releases.
 ## Roster overtime
 
 Run `microcosting-healthworkforce-v2 --release release.json --roster roster.json --output result.json`
-with one worker and one reviewed overtime rule. The roster JSON has four
+with one worker and reviewed overtime rules. The roster JSON has four
 fields.
 
 - `period` supplies `starts_at`, `ends_at`, `history_through`, `prior_hours`
@@ -56,7 +56,9 @@ fields.
   history exactly at the first supplied activity.
 - `rule` supplies the reviewed threshold, salary multiplier, source ID and
   SHA-256, citation and effective interval. Use the applicable rule for
-  the worker and period.
+  the worker and period. Supply one object or an array of successive rules
+  with nonoverlapping effective dates. Eligible hours carry across rule
+  changes within the pay period, and each activity date requires coverage.
 - `activities` supplies all eligible activities from the history boundary
   through the period end, with one resource per activity and no overlap.
 - `timezone` supplies the IANA timezone for condition dates.

@@ -843,3 +843,18 @@ ledger byte for byte.
 
 The public roster CLI regression also verifies that a mismatched rule
 source hash raises an error before any output file is created.
+
+Roster qualification now checks the exclusive overtime rule end at local
+midnight. A shift ending exactly at the boundary prices successfully.
+Extending it by one microsecond requires a rule for the new date and
+is rejected by the single-rule engine. All ten roster tests passed.
+
+The roster API and CLI now accept successive nonoverlapping dated rules.
+The engine carries cumulative eligible hours across local midnight. A
+synthetic shift priced one ordinary hour at AUD 50 and one successor-rule
+overtime hour at AUD 100, preserving both rule IDs. Missing coverage and
+overlapping rule dates are rejected. All 15 affected tests passed.
+
+The roster guide documents the rule object and array forms. The public
+CLI regression checks both forms and preserves single-rule compatibility.
+All 16 affected tests passed.

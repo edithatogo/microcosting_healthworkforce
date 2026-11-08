@@ -4,6 +4,7 @@
 from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal
 from fractions import Fraction
+from itertools import pairwise
 from typing import Self
 from zoneinfo import ZoneInfo
 
@@ -113,15 +114,12 @@ class RosterCostResult(BaseModel):
     rows: tuple[RosterCostRow, ...]
 
 
-def _require_rule_coverage(
+def _require_rule_source(
     release: ConditionRelease,
     rule: OvertimeRule,
     day: date,
     final_day: date,
 ) -> None:
-    if day < rule.effective_from or final_day >= rule.effective_to:
-        msg = "Overtime rule does not cover activity date"
-        raise ValueError(msg)
     for check_day in (day, final_day):
         source = release.sources.require_applicable(
             rule.source_id,
@@ -182,22 +180,54 @@ def _require_single_worker(ordered: list[Activity]) -> None:
         raise ValueError(msg)
 
 
+def _reviewed_rules(
+    rule: OvertimeRule | tuple[OvertimeRule, ...],
+) -> tuple[OvertimeRule, ...]:
+    supplied = (rule,) if isinstance(rule, OvertimeRule) else rule
+    ordered = tuple(
+        sorted(
+            (OvertimeRule.model_validate(item.model_dump()) for item in supplied),
+            key=lambda item: item.effective_from,
+        ),
+    )
+    if any(
+        first.effective_to > second.effective_from
+        for first, second in pairwise(ordered)
+    ):
+        msg = "Overtime rules have overlapping effective dates"
+        raise ValueError(msg)
+    return ordered
+
+
+def _select_rule(
+    rules: tuple[OvertimeRule, ...],
+    day: date,
+    final_day: date,
+) -> OvertimeRule:
+    for rule in rules:
+        if rule.effective_from <= day and final_day < rule.effective_to:
+            return rule
+    msg = "Overtime rule does not cover activity date"
+    raise ValueError(msg)
+
+
 def cost_overtime_period(
     release: ConditionRelease,
     period: PayPeriod,
-    rule: OvertimeRule,
+    rule: OvertimeRule | tuple[OvertimeRule, ...],
     activities: tuple[Activity, ...],
     local_timezone: str,
 ) -> RosterCostResult:
     """Cost one worker's complete period; multiply salary only above threshold.
 
+    Successive rules use the same cumulative eligible hours within the period.
     Other hourly components remain unchanged. The caller must supply all eligible
     hours and an applicable reviewed rule; no eligibility, exclusions, rounding,
     premium stacking or pay-period boundaries are inferred.
     """
     release = ConditionRelease.model_validate(release.model_dump())
     period = PayPeriod.model_validate(period.model_dump())
-    rule = OvertimeRule.model_validate(rule.model_dump())
+    rules = _reviewed_rules(rule)
     zone = ZoneInfo(local_timezone)
     ordered = sorted(
         (Activity.model_validate(a.model_dump()) for a in activities),
@@ -242,7 +272,8 @@ def cost_overtime_period(
             final_day = (
                 (segment.ends_at - timedelta(microseconds=1)).astimezone(zone).date()
             )
-            _require_rule_coverage(release, rule, day, final_day)
+            rule = _select_rule(rules, day, final_day)
+            _require_rule_source(release, rule, day, final_day)
             exact_hours, exact_ordinary, premium_delta = _exact_segment(
                 release,
                 rule,
