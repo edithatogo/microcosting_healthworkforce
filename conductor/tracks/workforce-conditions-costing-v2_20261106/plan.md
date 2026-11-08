@@ -1075,3 +1075,25 @@ following candidate lineage. Array indices are zero-based.
 
 These paths classify the legacy records as a group. Field-level successor
 links and verified units for each input remain open.
+
+The 12 midpoint input keys at `/outputs/1/parameter_mapping` link to
+`Labour - Prices` across the five jurisdiction blocks:
+
+| Workbook column | Configuration key | Candidate unit |
+| --- | --- | --- |
+| W | base_salary | AUD/year |
+| J | super_rate | fraction |
+| M | avg_penalties | fraction |
+| N | pub_holiday_penalty | fraction |
+| O | private_practice_loading | fraction |
+| P | retention_allowance | fraction |
+| Q | sick_leave | fraction |
+| R | professional_development_allowance | AUD/year |
+| S | annual_leave_weeks | weeks/year |
+| T | annual_leave_loading | fraction |
+| L | productive_time_factor | fraction |
+| K | hours_per_week | hours/week |
+
+These units describe the historical workbook inputs. DSA variations and
+PSA distribution arguments require their own operation and support
+metadata before reuse as successor scenario inputs.
