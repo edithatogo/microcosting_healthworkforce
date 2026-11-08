@@ -993,3 +993,30 @@ The resolved period now exposes the payroll-local effective date for dated
 conditions. A synthetic Darwin midnight test verifies that a June 15
 commencement stays June 15 even when its UTC timestamp falls on June 14.
 All eight pay-period tests passed.
+
+Clause 19.8 and the Schedule 3 notes give an ordinary payroll-hour basis
+of annual salary times 12 divided by 313 and then by 76. On a synthetic
+AUD 100,000 salary this gives AUD 50.445603 per hour. The legacy 52-week
+conversion at 38 hours gives AUD 50.607287 per hour. Preserve the
+workbook conversion for historical parity and keep the payroll conversion
+as a separately sourced costing basis. Verify the applicable payroll
+rounding stage before promoting a derived rate.
+
+The equivalent payroll divisor is exactly 5947/3 hours per year. The
+current conditions schema stores paid hours as a finite decimal, so it
+cannot represent that divisor exactly even though the calculation uses
+rational arithmetic. Exact payroll costing needs a sourced rational
+conversion basis. A rounded divisor would change the rate before the
+payroll rounding stage.
+
+The capacity model uses paid hours as actual capacity and multiplies them
+by hourly rates. Keep the payroll salary divisor separate from paid hours
+so a payroll rate can never change productive capacity or annual budget
+cost by implication. The capped overtime basis also needs explicit
+qualification before it can use a payroll-derived salary rate.
+
+The implemented optional rational salary divisor applies to salary and
+salary-based fractions in static and dynamic costing. Annual capacity
+uses paid hours, and capped overtime rejects the separate payroll basis
+until its applicability is qualified. Existing release hashes omit the
+new field when absent.

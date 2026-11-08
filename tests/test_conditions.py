@@ -14,6 +14,7 @@ from src.conditions import (
     WorkbookConditionOrigin,
     cost_condition_activity,
     cost_condition_snapshot,
+    exact_hourly_components,
     hourly_components,
 )
 from src.costing import Activity
@@ -348,3 +349,25 @@ def test_composite_roster_factor_prices_paid_hours(
             Fraction(result.exact_total_numerator, result.exact_total_denominator)
             == Fraction(weekly_pay),
         )
+
+
+def test_payroll_divisor_keeps_payroll_and_capacity_bases_separate() -> None:
+    """A repeating divisor remains exact without changing annual capacity."""
+    salary = condition("salary", "salary", "100000", "AUD/year")
+    salary = Condition.model_validate(
+        salary.model_dump()
+        | {"payroll_salary_divisor": {"numerator": 5947, "denominator": 3}},
+    )
+    release = ConditionRelease(
+        release_id="synthetic-payroll",
+        jurisdiction="QLD",
+        employer="Synthetic employer",
+        classification="Synthetic grade",
+        sources=SourceRegistry(records=(source(),)),
+        conditions=(salary, condition("hours", "paid_hours", "1976", "hours/year")),
+    )
+    day = date(2026, 6, 1)
+    payroll = exact_hourly_components(release, day)
+    assert_that(payroll["salary"] == Fraction(300000, 5947))
+    capacity = exact_hourly_components(release, day, use_payroll_basis=False)
+    assert_that(capacity["salary"] * 1976 == salary.value)
