@@ -65,13 +65,13 @@
         {
           "column": "R",
           "name": "professional_development_allowance",
-          "unit": "AUD/year_assumed",
+          "unit": "AUD/year",
           "role": "value"
         },
         {
           "column": "S",
           "name": "annual_leave",
-          "unit": "weeks/year_assumed",
+          "unit": "weeks/year",
           "role": "value"
         },
         {
@@ -545,13 +545,13 @@
         {
           "column": "R",
           "name": "professional_development_allowance",
-          "unit": "AUD/year_assumed",
+          "unit": "AUD/year",
           "role": "value"
         },
         {
           "column": "S",
           "name": "annual_leave",
-          "unit": "weeks/year_assumed",
+          "unit": "weeks/year",
           "role": "value"
         },
         {
@@ -1025,13 +1025,13 @@
         {
           "column": "R",
           "name": "professional_development_allowance",
-          "unit": "AUD/year_assumed",
+          "unit": "AUD/year",
           "role": "value"
         },
         {
           "column": "S",
           "name": "annual_leave",
-          "unit": "weeks/year_assumed",
+          "unit": "weeks/year",
           "role": "value"
         },
         {
@@ -1505,13 +1505,13 @@
         {
           "column": "R",
           "name": "professional_development_allowance",
-          "unit": "AUD/year_assumed",
+          "unit": "AUD/year",
           "role": "value"
         },
         {
           "column": "S",
           "name": "annual_leave",
-          "unit": "weeks/year_assumed",
+          "unit": "weeks/year",
           "role": "value"
         },
         {
@@ -1985,13 +1985,13 @@
         {
           "column": "R",
           "name": "professional_development_allowance",
-          "unit": "AUD/year_assumed",
+          "unit": "AUD/year",
           "role": "value"
         },
         {
           "column": "S",
           "name": "annual_leave",
-          "unit": "weeks/year_assumed",
+          "unit": "weeks/year",
           "role": "value"
         },
         {
@@ -2459,13 +2459,13 @@
         {
           "column": "R",
           "name": "professional_development_allowance_unweighted_mean",
-          "unit": "AUD/year_assumed",
+          "unit": "AUD/year",
           "role": "archived_aggregate_input"
         },
         {
           "column": "S",
           "name": "annual_leave_unweighted_mean",
-          "unit": "weeks/year_assumed",
+          "unit": "weeks/year",
           "role": "archived_aggregate_input"
         },
         {
@@ -4507,13 +4507,13 @@
         {
           "column": "R",
           "name": "professional_development_allowance",
-          "unit": "AUD/year_assumed",
+          "unit": "AUD/year",
           "role": "value"
         },
         {
           "column": "S",
           "name": "annual_leave",
-          "unit": "weeks/year_assumed",
+          "unit": "weeks/year",
           "role": "value"
         },
         {
@@ -4987,13 +4987,13 @@
         {
           "column": "R",
           "name": "professional_development_allowance",
-          "unit": "AUD/year_assumed",
+          "unit": "AUD/year",
           "role": "value"
         },
         {
           "column": "S",
           "name": "annual_leave",
-          "unit": "weeks/year_assumed",
+          "unit": "weeks/year",
           "role": "value"
         },
         {
@@ -5467,13 +5467,13 @@
         {
           "column": "R",
           "name": "professional_development_allowance",
-          "unit": "AUD/year_assumed",
+          "unit": "AUD/year",
           "role": "value"
         },
         {
           "column": "S",
           "name": "annual_leave",
-          "unit": "weeks/year_assumed",
+          "unit": "weeks/year",
           "role": "value"
         },
         {
@@ -5947,13 +5947,13 @@
         {
           "column": "R",
           "name": "professional_development_allowance",
-          "unit": "AUD/year_assumed",
+          "unit": "AUD/year",
           "role": "value"
         },
         {
           "column": "S",
           "name": "annual_leave",
-          "unit": "weeks/year_assumed",
+          "unit": "weeks/year",
           "role": "value"
         },
         {
@@ -6427,13 +6427,13 @@
         {
           "column": "R",
           "name": "professional_development_allowance",
-          "unit": "AUD/year_assumed",
+          "unit": "AUD/year",
           "role": "value"
         },
         {
           "column": "S",
           "name": "annual_leave",
-          "unit": "weeks/year_assumed",
+          "unit": "weeks/year",
           "role": "value"
         },
         {
@@ -6901,13 +6901,13 @@
         {
           "column": "R",
           "name": "professional_development_allowance_unweighted_mean",
-          "unit": "AUD/year_assumed",
+          "unit": "AUD/year",
           "role": "archived_aggregate_input"
         },
         {
           "column": "S",
           "name": "annual_leave_unweighted_mean",
-          "unit": "weeks/year_assumed",
+          "unit": "weeks/year",
           "role": "archived_aggregate_input"
         },
         {
@@ -9639,37 +9639,37 @@
         {
           "column": "AH",
           "name": "professional_development_lower",
-          "unit": "AUD/year_assumed",
+          "unit": "AUD/year",
           "role": "sensitivity_input"
         },
         {
           "column": "AI",
           "name": "professional_development_midpoint",
-          "unit": "AUD/year_assumed",
+          "unit": "AUD/year",
           "role": "sensitivity_input"
         },
         {
           "column": "AJ",
           "name": "professional_development_upper",
-          "unit": "AUD/year_assumed",
+          "unit": "AUD/year",
           "role": "sensitivity_input"
         },
         {
           "column": "AK",
           "name": "annual_leave_lower",
-          "unit": "weeks/year_assumed",
+          "unit": "weeks/year",
           "role": "sensitivity_input"
         },
         {
           "column": "AL",
           "name": "annual_leave_midpoint",
-          "unit": "weeks/year_assumed",
+          "unit": "weeks/year",
           "role": "sensitivity_input"
         },
         {
           "column": "AM",
           "name": "annual_leave_upper",
-          "unit": "weeks/year_assumed",
+          "unit": "weeks/year",
           "role": "sensitivity_input"
         },
         {
@@ -10479,37 +10479,37 @@
         {
           "column": "AH",
           "name": "professional_development_lower",
-          "unit": "AUD/year_assumed",
+          "unit": "AUD/year",
           "role": "sensitivity_input"
         },
         {
           "column": "AI",
           "name": "professional_development_midpoint",
-          "unit": "AUD/year_assumed",
+          "unit": "AUD/year",
           "role": "sensitivity_input"
         },
         {
           "column": "AJ",
           "name": "professional_development_upper",
-          "unit": "AUD/year_assumed",
+          "unit": "AUD/year",
           "role": "sensitivity_input"
         },
         {
           "column": "AK",
           "name": "annual_leave_lower",
-          "unit": "weeks/year_assumed",
+          "unit": "weeks/year",
           "role": "sensitivity_input"
         },
         {
           "column": "AL",
           "name": "annual_leave_midpoint",
-          "unit": "weeks/year_assumed",
+          "unit": "weeks/year",
           "role": "sensitivity_input"
         },
         {
           "column": "AM",
           "name": "annual_leave_upper",
-          "unit": "weeks/year_assumed",
+          "unit": "weeks/year",
           "role": "sensitivity_input"
         },
         {
@@ -11319,37 +11319,37 @@
         {
           "column": "AH",
           "name": "professional_development_lower",
-          "unit": "AUD/year_assumed",
+          "unit": "AUD/year",
           "role": "sensitivity_input"
         },
         {
           "column": "AI",
           "name": "professional_development_midpoint",
-          "unit": "AUD/year_assumed",
+          "unit": "AUD/year",
           "role": "sensitivity_input"
         },
         {
           "column": "AJ",
           "name": "professional_development_upper",
-          "unit": "AUD/year_assumed",
+          "unit": "AUD/year",
           "role": "sensitivity_input"
         },
         {
           "column": "AK",
           "name": "annual_leave_lower",
-          "unit": "weeks/year_assumed",
+          "unit": "weeks/year",
           "role": "sensitivity_input"
         },
         {
           "column": "AL",
           "name": "annual_leave_midpoint",
-          "unit": "weeks/year_assumed",
+          "unit": "weeks/year",
           "role": "sensitivity_input"
         },
         {
           "column": "AM",
           "name": "annual_leave_upper",
-          "unit": "weeks/year_assumed",
+          "unit": "weeks/year",
           "role": "sensitivity_input"
         },
         {
@@ -12159,37 +12159,37 @@
         {
           "column": "AH",
           "name": "professional_development_lower",
-          "unit": "AUD/year_assumed",
+          "unit": "AUD/year",
           "role": "sensitivity_input"
         },
         {
           "column": "AI",
           "name": "professional_development_midpoint",
-          "unit": "AUD/year_assumed",
+          "unit": "AUD/year",
           "role": "sensitivity_input"
         },
         {
           "column": "AJ",
           "name": "professional_development_upper",
-          "unit": "AUD/year_assumed",
+          "unit": "AUD/year",
           "role": "sensitivity_input"
         },
         {
           "column": "AK",
           "name": "annual_leave_lower",
-          "unit": "weeks/year_assumed",
+          "unit": "weeks/year",
           "role": "sensitivity_input"
         },
         {
           "column": "AL",
           "name": "annual_leave_midpoint",
-          "unit": "weeks/year_assumed",
+          "unit": "weeks/year",
           "role": "sensitivity_input"
         },
         {
           "column": "AM",
           "name": "annual_leave_upper",
-          "unit": "weeks/year_assumed",
+          "unit": "weeks/year",
           "role": "sensitivity_input"
         },
         {
@@ -12999,37 +12999,37 @@
         {
           "column": "AH",
           "name": "professional_development_lower",
-          "unit": "AUD/year_assumed",
+          "unit": "AUD/year",
           "role": "sensitivity_input"
         },
         {
           "column": "AI",
           "name": "professional_development_midpoint",
-          "unit": "AUD/year_assumed",
+          "unit": "AUD/year",
           "role": "sensitivity_input"
         },
         {
           "column": "AJ",
           "name": "professional_development_upper",
-          "unit": "AUD/year_assumed",
+          "unit": "AUD/year",
           "role": "sensitivity_input"
         },
         {
           "column": "AK",
           "name": "annual_leave_lower",
-          "unit": "weeks/year_assumed",
+          "unit": "weeks/year",
           "role": "sensitivity_input"
         },
         {
           "column": "AL",
           "name": "annual_leave_midpoint",
-          "unit": "weeks/year_assumed",
+          "unit": "weeks/year",
           "role": "sensitivity_input"
         },
         {
           "column": "AM",
           "name": "annual_leave_upper",
-          "unit": "weeks/year_assumed",
+          "unit": "weeks/year",
           "role": "sensitivity_input"
         },
         {
@@ -13851,37 +13851,37 @@
         {
           "column": "AH",
           "name": "professional_development_lower",
-          "unit": "AUD/year_assumed",
+          "unit": "AUD/year",
           "role": "archived_scenario_input"
         },
         {
           "column": "AI",
           "name": "professional_development_midpoint",
-          "unit": "AUD/year_assumed",
+          "unit": "AUD/year",
           "role": "archived_scenario_input"
         },
         {
           "column": "AJ",
           "name": "professional_development_upper",
-          "unit": "AUD/year_assumed",
+          "unit": "AUD/year",
           "role": "archived_scenario_input"
         },
         {
           "column": "AK",
           "name": "annual_leave_lower",
-          "unit": "weeks/year_assumed",
+          "unit": "weeks/year",
           "role": "archived_scenario_input"
         },
         {
           "column": "AL",
           "name": "annual_leave_midpoint",
-          "unit": "weeks/year_assumed",
+          "unit": "weeks/year",
           "role": "archived_scenario_input"
         },
         {
           "column": "AM",
           "name": "annual_leave_upper",
-          "unit": "weeks/year_assumed",
+          "unit": "weeks/year",
           "role": "archived_scenario_input"
         },
         {
@@ -17912,13 +17912,13 @@
         {
           "column": "I",
           "name": "professional_development",
-          "unit": "AUD/year_assumed",
+          "unit": "AUD/year",
           "role": "historical_literal"
         },
         {
           "column": "J",
           "name": "annual_leave",
-          "unit": "weeks/year_assumed",
+          "unit": "weeks/year",
           "role": "historical_literal"
         },
         {
@@ -18330,31 +18330,31 @@
         {
           "column": "B",
           "name": "personnel_1",
-          "unit": "AUD/year_assumed",
+          "unit": "AUD/year",
           "role": "historical_literal"
         },
         {
           "column": "C",
           "name": "personnel_2",
-          "unit": "AUD/year_assumed",
+          "unit": "AUD/year",
           "role": "historical_literal"
         },
         {
           "column": "D",
           "name": "personnel_3",
-          "unit": "AUD/year_assumed",
+          "unit": "AUD/year",
           "role": "historical_literal"
         },
         {
           "column": "E",
           "name": "personnel_4",
-          "unit": "AUD/year_assumed",
+          "unit": "AUD/year",
           "role": "historical_literal"
         },
         {
           "column": "F",
           "name": "personnel_5",
-          "unit": "AUD/year_assumed",
+          "unit": "AUD/year",
           "role": "historical_literal"
         }
       ],
@@ -18376,31 +18376,31 @@
         {
           "column": "B",
           "name": "personnel_1",
-          "unit": "weeks/year_assumed",
+          "unit": "weeks/year",
           "role": "historical_literal"
         },
         {
           "column": "C",
           "name": "personnel_2",
-          "unit": "weeks/year_assumed",
+          "unit": "weeks/year",
           "role": "historical_literal"
         },
         {
           "column": "D",
           "name": "personnel_3",
-          "unit": "weeks/year_assumed",
+          "unit": "weeks/year",
           "role": "historical_literal"
         },
         {
           "column": "E",
           "name": "personnel_4",
-          "unit": "weeks/year_assumed",
+          "unit": "weeks/year",
           "role": "historical_literal"
         },
         {
           "column": "F",
           "name": "personnel_5",
-          "unit": "weeks/year_assumed",
+          "unit": "weeks/year",
           "role": "historical_literal"
         }
       ],
@@ -18710,13 +18710,13 @@
         {
           "column": "L",
           "name": "professional_development_allowance",
-          "unit": "AUD/year_assumed",
+          "unit": "AUD/year",
           "role": "value"
         },
         {
           "column": "M",
           "name": "annual_leave",
-          "unit": "weeks/year_assumed",
+          "unit": "weeks/year",
           "role": "value"
         },
         {

@@ -914,3 +914,47 @@ and award penalties. A catalog scan found no populated text containing
 overtime or time off in lieu. Retain the historical averaged penalty
 for workbook replay. Date-specific cash and time credits require separate
 roster inputs and reviewed conditions.
+
+The pinned profile carries 37 annual currency and 37 annual weeks column
+meanings marked assumed across the primary, weighted, DSA, component
+summary and fixed-header sheets. These counts describe column definitions,
+including repeated layouts. The assumed units preserve the workbook
+interpretation while source-unit and applicability review remains open.
+
+Resolved the workbook-context units for columns R and S in the five
+primary Labour - Prices input blocks. The verified component formulas
+carry R directly into annual dollars and divide S by 52 before applying
+annual salary. This establishes the model interpretation for 25 rows.
+External instrument units and the remaining repeated layouts still
+require review. All six workbook profile tests passed.
+
+All 25 weighted-layout midpoint formulas match their primary-layout
+counterparts. The weighted input blocks now use the same workbook-context
+units for professional development and annual leave. The weighted aggregate
+input block retains its separate unit review.
+
+The primary and weighted aggregate inputs preserve the component units.
+In both layouts, R34:R38 and S34:S38 average the five corresponding
+jurisdiction inputs without a unit conversion. The 12 reviewed column
+definitions per unit leave 25 assumed definitions per unit in other layouts.
+All nine workbook profile and weight mapping tests passed.
+
+The DSA formula audit covered all 30 jurisdiction and aggregate rows.
+Each AH:AJ bound is added as annual dollars and each AK:AM bound is
+used in a weeks-per-year expression. The profile now records these
+workbook-context units for all 36 DSA column definitions. AK34 remains
+blank and AK39 remains separate. Seven focused tests passed.
+
+All 25 fixed-header development and leave value pairs match the
+primary layout in order, so the fixed-header profile now carries the
+same workbook units. The component summary contains literal amounts.
+Its five transposed development and leave values match the adjacent
+summary table, but neither layout contains a formula or explicit annual
+frequency. Six definitions per unit remain assumed in the summary.
+
+The component summary unit audit reproduced all ten allowance and leave
+literals from the five jurisdiction inputs per role. The sole formula
+operand for this comparison is S32 (160 divided by 40). The transposed
+summary repeats all ten values. This resolves the remaining twelve
+assumed annual-unit definitions as workbook-context units. The original
+instrument bases and scientific applicability remain separate.
