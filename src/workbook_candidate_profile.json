@@ -18801,7 +18801,7 @@
       "sheet": "Assumptions",
       "area": "A1:B6",
       "status": "workbook_candidate",
-      "purpose": "Five explicit modelling rationales",
+      "purpose": "Five historical modelling rationales including the averaged public-holiday penalty proxy",
       "columns": [
         {
           "column": "A",

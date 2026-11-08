@@ -907,3 +907,10 @@ The time-off result now exposes the exact cash entitlement separately
 from the signed adjustment to pre-counted salary. Zero cash is retained
 for an explicit time-off choice, while the standard cash-only path leaves
 this field absent in meaning. All 17 focused tests passed.
+
+The pinned workbook Assumptions A2:B2 describes the public-holiday
+penalty as an average estimate and distinguishes it from actual work
+and award penalties. A catalog scan found no populated text containing
+overtime or time off in lieu. Retain the historical averaged penalty
+for workbook replay. Date-specific cash and time credits require separate
+roster inputs and reviewed conditions.
