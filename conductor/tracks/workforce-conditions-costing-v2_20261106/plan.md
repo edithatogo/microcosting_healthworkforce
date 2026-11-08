@@ -840,3 +840,6 @@ The [roster CLI guide](../../../docs/condition_snapshot_cli.md#roster-overtime)
 now documents the request fields, complete-history contract and synthetic
 AUD 125 example. The documented invocation reproduced the installed-wheel
 ledger byte for byte.
+
+The public roster CLI regression also verifies that a mismatched rule
+source hash raises an error before any output file is created.

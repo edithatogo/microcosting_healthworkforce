@@ -219,3 +219,21 @@ def test_roster_cli_prices_reviewed_overtime(tmp_path: Path) -> None:
     result = json.loads(output.read_text())
     assert_that(result["total"] == "125")
     assert_that(result["rows"][0]["rule_id"] == "synthetic-overtime")
+
+    rejected_output = tmp_path / "rejected.json"
+    bad_rule = roster.rule.model_copy(update={"source_sha256": "b" * 64})
+    roster_path.write_text(
+        roster.model_copy(update={"rule": bad_rule}).model_dump_json(),
+    )
+    with pytest.raises(ValueError, match="Overtime rule source hash mismatch"):
+        main(
+            [
+                "--release",
+                str(release_path),
+                "--roster",
+                str(roster_path),
+                "--output",
+                str(rejected_output),
+            ],
+        )
+    assert_that(not rejected_output.exists())
