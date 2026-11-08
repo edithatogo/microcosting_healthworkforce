@@ -222,6 +222,8 @@ def test_roster_cli_prices_reviewed_overtime(tmp_path: Path, *, as_array: bool) 
     assert_that(result["total"] == "125")
     assert_that(result["resource_id"] == "worker")
     assert_that(result["allocation_id"] == "allocation")
+    assert_that(result["period"] == roster.period.model_dump(mode="json"))
+    assert_that(result["timezone"] == roster.timezone)
     assert_that(result["rows"][0]["rule_id"] == "synthetic-overtime")
 
     rejected_output = tmp_path / "rejected.json"

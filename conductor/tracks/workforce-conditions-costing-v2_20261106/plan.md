@@ -867,3 +867,7 @@ regression verifies both multipliers. All 16 roster and CLI tests passed.
 Roster results now retain the validated resource and allocation identities
 for reconciliation. Older results can omit both fields. All 16 focused
 roster and CLI tests passed.
+
+Roster results now retain the validated pay period, prior-history boundary
+and timezone. Older results may omit the new fields. All 16 focused roster
+and CLI tests passed.
