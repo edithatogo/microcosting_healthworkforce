@@ -195,6 +195,7 @@ def test_roster_cli_prices_reviewed_overtime(tmp_path: Path, *, as_array: bool) 
             Activity(
                 activity_id="shift",
                 resource_id="worker",
+                allocation_id="allocation",
                 starts_at=datetime(2026, 6, 2, 9, tzinfo=UTC),
                 ends_at=datetime(2026, 6, 2, 11, tzinfo=UTC),
                 resources=Decimal(1),
@@ -219,6 +220,8 @@ def test_roster_cli_prices_reviewed_overtime(tmp_path: Path, *, as_array: bool) 
     )
     result = json.loads(output.read_text())
     assert_that(result["total"] == "125")
+    assert_that(result["resource_id"] == "worker")
+    assert_that(result["allocation_id"] == "allocation")
     assert_that(result["rows"][0]["rule_id"] == "synthetic-overtime")
 
     rejected_output = tmp_path / "rejected.json"

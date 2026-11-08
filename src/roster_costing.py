@@ -114,6 +114,8 @@ class RosterCostResult(BaseModel):
     exact_premium_numerator: int
     exact_premium_denominator: int = Field(gt=0)
     rows: tuple[RosterCostRow, ...]
+    resource_id: str | None = None
+    allocation_id: str | None = None
 
 
 def _require_rule_source(
@@ -312,6 +314,8 @@ def cost_overtime_period(
     exact_total = exact_base + exact_premium
     return RosterCostResult(
         release_id=release.release_id,
+        resource_id=ordered[0].resource_id,
+        allocation_id=ordered[0].allocation_id,
         total=Decimal(exact_total.numerator) / exact_total.denominator,
         ordinary_hours=(
             Decimal(exact_ordinary_total.numerator) / exact_ordinary_total.denominator

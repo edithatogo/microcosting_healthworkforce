@@ -863,3 +863,7 @@ Each roster ledger row now exposes the applied overtime threshold and
 multiplier alongside its rule and source identifiers. Older serialized
 rows remain readable with those fields absent. The successive-rule
 regression verifies both multipliers. All 16 roster and CLI tests passed.
+
+Roster results now retain the validated resource and allocation identities
+for reconciliation. Older results can omit both fields. All 16 focused
+roster and CLI tests passed.
