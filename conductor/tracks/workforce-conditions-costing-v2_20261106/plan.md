@@ -971,3 +971,9 @@ minimum and nearest-quarter-hour rule. It rejects exact midpoint ties
 until a reviewed decision is supplied externally. It leaves tier
 allocation and holiday time-off applicability to the caller. All 17
 capped-overtime tests passed.
+
+The flat cash overtime path accepts separately reviewed payable hours
+for a single tier. The synthetic example prices 4.25 cash hours at
+AUD 100/hour while subtracting only four hours of pre-counted salary.
+Multiple tiers require a reviewed allocation and reject the override.
+All 17 capped-overtime tests passed.

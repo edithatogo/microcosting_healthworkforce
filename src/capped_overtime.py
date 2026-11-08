@@ -70,6 +70,11 @@ class DailyHistory(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
     prior_hours: Decimal = Field(ge=0, allow_inf_nan=False)
     complete: bool
+    flat_cash_payable_hours: Decimal | None = Field(
+        default=None,
+        ge=0,
+        allow_inf_nan=False,
+    )
     time_off_payable_hours: Decimal | None = Field(
         default=None,
         ge=0,
@@ -163,6 +168,9 @@ def cost_capped_daily_overtime(
     exact_base = Fraction(base.exact_total_numerator, base.exact_total_denominator)
     payable_hours = history.time_off_payable_hours
     if (multiplier := rule.time_off_cash_multiplier) is not None:
+        if history.flat_cash_payable_hours is not None:
+            msg = "Flat cash payable hours cannot apply to a time-off rule"
+            raise ValueError(msg)
         cash_hours = remaining if payable_hours is None else Fraction(payable_hours)
         cash = cash_hours * basis * Fraction(multiplier)
         adjustment = cash - remaining * salary_rate
@@ -179,10 +187,10 @@ def cost_capped_daily_overtime(
     if payable_hours is not None:
         msg = "Explicit time-off payable hours require a time-off rule"
         raise ValueError(msg)
-    adjustments = _cash_adjustments(
+    adjustments = _reviewed_cash_adjustments(
         rule,
+        history,
         remaining,
-        Fraction(history.prior_hours),
         basis,
         salary_rate,
     )
@@ -194,6 +202,30 @@ def cost_capped_daily_overtime(
         adjustments,
         exact_base + sum((x.adjustment for x in adjustments), Fraction(0)),
     )
+
+
+def _reviewed_cash_adjustments(
+    rule: CappedDailyRule,
+    history: DailyHistory,
+    worked: Fraction,
+    basis: Fraction,
+    salary_rate: Fraction,
+) -> tuple[DailyTierAdjustment, ...]:
+    if history.flat_cash_payable_hours is None:
+        return _cash_adjustments(
+            rule,
+            worked,
+            Fraction(history.prior_hours),
+            basis,
+            salary_rate,
+        )
+    if len(rule.tiers) != 1:
+        msg = "Explicit flat cash payable hours require a single tier"
+        raise ValueError(msg)
+    hours = Fraction(history.flat_cash_payable_hours)
+    multiplier = rule.tiers[0].multiplier
+    adjustment = hours * basis * Fraction(multiplier) - worked * salary_rate
+    return (DailyTierAdjustment(Decimal(0), multiplier, hours, adjustment),)
 
 
 def _cash_adjustments(

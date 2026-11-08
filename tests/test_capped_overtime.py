@@ -296,6 +296,17 @@ def test_flat_holiday_cash_replaces_precounted_salary() -> None:
     assert_that(result.adjustments[0].adjustment == Fraction(200))
     assert_that(result.time_off_hours == 0)
 
+    history = DailyHistory(
+        prior_hours=Decimal(0),
+        complete=True,
+        flat_cash_payable_hours=Decimal("4.25"),
+    )
+    rounded = cost_capped_daily_overtime(release(), holiday, activity(), "UTC", history)
+    assert_that(rounded.total == Fraction(425))
+    assert_that(rounded.adjustments[0].adjustment == Fraction(225))
+    with pytest.raises(ValueError, match="require a single tier"):
+        cost_capped_daily_overtime(release(), rule(), activity(), "UTC", history)
+
 
 def test_reviewed_time_off_payable_hours_preserve_worked_credit() -> None:
     """Price reviewed cash hours without altering the worked interval."""
