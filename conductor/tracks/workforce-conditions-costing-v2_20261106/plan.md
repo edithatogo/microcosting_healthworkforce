@@ -1249,3 +1249,9 @@ The paid-leave planner now rejects an absence when its known unpaid weeks
 alone exceed the declared entitlement budget. An unresolved paid debit
 still yields an unknown remaining balance for otherwise admissible inputs.
 All 28 focused paid-leave tests, Ruff and basedpyright passed.
+
+The paid-leave budget now also checks the minimum debit across its two
+supported conventions. A half-pay example with 16 unpaid weeks and 18
+normal-pay-equivalent weeks fails with a 33-week budget. With 34 weeks
+it remains feasible under one convention, and the selected debit and
+remaining balance stay unknown. All 29 focused paid-leave tests passed.

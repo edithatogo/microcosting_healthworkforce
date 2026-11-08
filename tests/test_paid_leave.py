@@ -426,3 +426,13 @@ def test_unresolved_paid_debit_cannot_hide_unpaid_overdraw() -> None:
     """Known unpaid weeks exceed the budget under either paid-debit convention."""
     with pytest.raises(ValueError, match="budget"):
         build_paid_leave(policy(entitlement_budget_weeks=33), request())
+
+
+def test_unresolved_half_pay_debit_checks_the_minimum_possible_budget() -> None:
+    """Reject impossible budgets while preserving ambiguity for feasible ones."""
+    half = request(payment_mode="half")
+    with pytest.raises(ValueError, match="budget"):
+        build_paid_leave(policy(entitlement_budget_weeks=33), half)
+    result = build_paid_leave(policy(entitlement_budget_weeks=34), half)
+    assert_that(result.paid_entitlement_debit_weeks is None)
+    assert_that(result.remaining_debit_budget_weeks is None)
