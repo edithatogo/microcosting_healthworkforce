@@ -3,6 +3,7 @@
 
 from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal
+from zoneinfo import ZoneInfo
 
 import pytest
 
@@ -235,7 +236,7 @@ def test_resolved_payroll_start_gates_new_overtime_ceiling() -> None:
         calendar(),
         prices.sources,
     )
-    effective_day = resolved.starts_at.date()
+    effective_day = resolved.effective_date
     assert_that(effective_day == date(2026, 6, 15))
     ceiling = capped_rule().model_copy(update={"effective_from": effective_day})
     history = DailyHistory(prior_hours=Decimal(0), complete=True)
@@ -256,3 +257,19 @@ def test_resolved_payroll_start_gates_new_overtime_ceiling() -> None:
     )
     with pytest.raises(ValueError, match="cover"):
         cost_capped_daily_overtime(prices, ceiling, preceding, "UTC", history)
+
+
+def test_effective_date_uses_local_payroll_midnight() -> None:
+    """A Darwin midnight is still the prior calendar date in UTC."""
+    darwin = ZoneInfo("Australia/Darwin")
+    payroll = PeriodCalendar(
+        calendar_id="synthetic-darwin",
+        boundaries=tuple(datetime(2026, 6, day, tzinfo=darwin) for day in (1, 15, 29)),
+        complete=True,
+    )
+    commencement = rule(datetime(2026, 6, 3, tzinfo=darwin)).model_copy(
+        update={"timezone": darwin.key},
+    )
+    selected = first_full_period(commencement, payroll, release().sources)
+    assert_that(selected.starts_at == datetime(2026, 6, 14, 14, 30, tzinfo=UTC))
+    assert_that(selected.effective_date == date(2026, 6, 15))

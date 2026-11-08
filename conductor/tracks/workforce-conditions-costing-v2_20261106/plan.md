@@ -977,3 +977,19 @@ for a single tier. The synthetic example prices 4.25 cash hours at
 AUD 100/hour while subtracting only four hours of pre-counted salary.
 Multiple tiers require a reviewed allocation and reject the override.
 All 17 capped-overtime tests passed.
+
+## NT nursing salary commencement comparison
+
+[Clause 19 of the NT nursing and midwifery agreement](https://ocpe.nt.gov.au/__data/assets/pdf_file/0003/1262595/ntps-nurses-and-midwives-2022-2026-enterprise-agreement.PDF)
+uses a fixed retrospective date for the 2022 salary increase and a
+first-full-pay-period trigger for each 2023–2025 increase. The existing
+`first_full_period` selector can resolve the latter against an explicit
+payroll calendar. The 2022 date belongs in a separate retrospective salary
+event with entitlement and known-at dates. Keep both separate from the cash
+settlement date. An accepted release still needs Schedule 3 pay-point
+lineage, the appointment scope, the payroll calendar and source custody.
+
+The resolved period now exposes the payroll-local effective date for dated
+conditions. A synthetic Darwin midnight test verifies that a June 15
+commencement stays June 15 even when its UTC timestamp falls on June 14.
+All eight pay-period tests passed.
