@@ -1060,3 +1060,18 @@ The empty percentage sheet is retained separately. All 34 workbook tests
 passed on the receiving source revision. Candidate section status describes
 extraction and classification. Historical provenance and unresolved bounds
 still require separate disposition before use as model inputs.
+
+## Legacy JSON input disposition
+
+The three configuration files at receiving revision 4388649 retain the
+following candidate lineage. Array indices are zero-based.
+
+| File and JSON path | Successor disposition |
+| --- | --- |
+| `data/formulas.json` /formulas/0–2 | Retain annual raw cost, Year 0 total and hourly rate as historical calculation definitions with their parameters and dependencies. |
+| `data/formulas.json` /outputs/0–2 | Retain direct lower and upper workbook columns and the formula-driven midpoint with its source-column mapping. |
+| `data/dsa_scenarios.json` /0–19 | Retain all 20 configured scenarios and ten distinct parameter names, including joint perturbations. Compare archived outputs against their own baselines. |
+| `data/psa_scenarios.json` /0–2 | Retain the superannuation, productive-time and development-allowance distributions as exploratory assumptions. They require empirical qualification for scientific use. |
+
+These paths classify the legacy records as a group. Field-level successor
+links and verified units for each input remain open.
