@@ -443,7 +443,7 @@ real-world values and receipts must not enter public source distributions.
     attach schemas, identity keys, units, roles and source-cell/formula lineage.
   - [ ] Keep nominal/weighted/component variants separate. WM midpoints are weighted;
     MIN/MAX bounds and 95% CI display labels are not new statistical intervals.
-  - [ ] Preserve original DSA baseline/axes and all 17 false archived diagnostics;
+  - [x] Preserve original DSA baseline/axes and all 17 false archived diagnostics;
     do not relabel them as passing checks or force both signs onto one midpoint.
   - [ ] Capture every old JSON parameter/formula/distribution and workbook condition/
     assumption with a candidate v1-to-successor disposition, not silent defaults.
@@ -1255,3 +1255,34 @@ supported conventions. A half-pay example with 16 unpaid weeks and 18
 normal-pay-equivalent weeks fails with a 33-week budget. With 34 weeks
 it remains feasible under one convention, and the selected debit and
 remaining balance stay unknown. All 29 focused paid-leave tests passed.
+
+### Archived DSA Values crosswalk
+
+The first jurisdiction and ALL block of the DSA formula sheet (rows 4–38,
+excluding separator rows) joins one-to-one to DSA Values rows 4–33 on
+jurisdiction and personnel type. All 30 keys are unique in the selected
+blocks. Later repeated ALL blocks are outside this join. Position alone
+would misalign 25 of the first 30 rows.
+
+The 66 output columns AU:DH map to C:BP in Values. Unit and bound headers
+match at all 66 positions. The scenario headers match except for the
+Values-only Base Case label. Values contains 1,980 numeric cells across
+these keys and columns. This checks alignment of the archived comparison
+inputs. It does not reproduce the 17 flagged numeric discrepancies or
+establish parity with the current scenario definitions.
+
+Recalculated an isolated copy of the delivered XLSX using the existing
+headless LibreOffice route. All 1,980 archived formula outputs matched the
+corresponding Values cells at relative and absolute tolerances of 1e-9.
+There were no missing or nonnumeric outputs in that block. This qualifies
+the historical formula-to-Values crosswalk. The separate 17 flags compare
+a different computation against those archived values and retain their
+existing disposition.
+
+Replayed the current scenario runner against the archived midpoint columns
+using a fresh recalculated workbook copy. All 17 emitted comparisons
+retained their false within-cent status. Both leave-loading variants
+were skipped under the exact-header rule. This verifies preservation of
+the legacy diagnostic alongside the independent 1,980-cell historical
+recalculation. It does not qualify archived midpoint comparisons as a
+current scenario oracle.
