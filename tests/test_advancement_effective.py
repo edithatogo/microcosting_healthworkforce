@@ -2,13 +2,18 @@
 """Check later-of commencement and source admission."""
 
 from datetime import date
+from decimal import Decimal
 
 import pytest
 
 from src.advancement_effective import (
     AdvancementEvidence,
     AdvancementRule,
+    CreditedHoursHistory,
+    CreditedHoursRule,
+    DailyServiceCredit,
     resolve_advancement_commencement,
+    resolve_credited_hours_commencement,
 )
 from src.source_registry import SourceRegistry
 from tests.checks import assert_that
@@ -58,3 +63,39 @@ def test_commencement_uses_later_date_and_preserves_evidence(
             evidence,
             registry,
         )
+
+
+def test_credited_hours_crossing_uses_completion_day() -> None:
+    """Preserve the same-day threshold boundary and an unreached threshold."""
+    held = source()
+    day = date(2026, 6, 2)
+    rule = CreditedHoursRule(
+        source_id=held.source_id,
+        source_sha256=held.sha256,
+        citation="Synthetic clause",
+        jurisdiction=held.jurisdiction,
+        employer=held.employers[0],
+        classification=held.classifications[0],
+        as_known_on=day,
+        reviewed=True,
+        threshold_hours=Decimal(1976),
+    )
+    history = CreditedHoursHistory(
+        pay_point="synthetic-point",
+        evidence_id="synthetic-history",
+        evidence_sha256="b" * 64,
+        known_on=day,
+        reviewed=True,
+        complete=True,
+        credits=(DailyServiceCredit(day=day, hours=Decimal(8)),),
+    )
+    sources = SourceRegistry(records=(held,))
+    assert_that(resolve_credited_hours_commencement(rule, history, sources) is None)
+    result = resolve_credited_hours_commencement(
+        rule.model_copy(update={"threshold_hours": Decimal(8)}),
+        history,
+        sources,
+    )
+    if result is None:
+        pytest.fail("Expected threshold completion")
+    assert_that(result.effective_from == day)

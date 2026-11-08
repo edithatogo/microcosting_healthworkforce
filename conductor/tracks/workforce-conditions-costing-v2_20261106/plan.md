@@ -1040,3 +1040,7 @@ advancement to the date the credited-hours threshold is completed. Route
 a reviewed threshold date directly into a dated assignment for this path.
 The application resolver would shift that date. Retain the approved
 classification, prior pay point and evidence horizon with the assignment.
+
+The credited-hours resolver now returns the payroll-local completion date
+from reviewed daily credits for one pay point. Eligibility and the choice
+of next pay point still require reviewed appointment evidence.

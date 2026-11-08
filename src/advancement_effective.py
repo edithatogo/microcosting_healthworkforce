@@ -3,6 +3,8 @@
 
 from dataclasses import dataclass
 from datetime import date, timedelta
+from fractions import Fraction
+lazy from decimal import Decimal
 
 from pydantic import Field
 
@@ -95,3 +97,82 @@ def resolve_advancement_commencement(
         day_after_service,
         effective_from,
     )
+
+
+class DailyServiceCredit(QuoteModel):
+    """Reviewed hours credited to the current pay point on a payroll-local date."""
+
+    day: date
+    hours: Decimal = Field(gt=0, allow_inf_nan=False)
+
+
+class CreditedHoursHistory(QuoteModel):
+    """Complete eligible history for one appointment at one pay point."""
+
+    pay_point: str = Field(min_length=1)
+    evidence_id: str = Field(min_length=1)
+    evidence_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
+    known_on: date
+    reviewed: bool
+    complete: bool
+    credits: tuple[DailyServiceCredit, ...]
+
+
+class CreditedHoursRule(AdvancementRule):
+    """Reviewed scope and the hours needed for same-day progression."""
+
+    threshold_hours: Decimal = Field(gt=0, allow_inf_nan=False)
+
+
+@dataclass(frozen=True)
+class CreditedHoursCommencement:
+    """Retain source and input history for a threshold crossing."""
+
+    rule: CreditedHoursRule
+    history: CreditedHoursHistory
+    source: SourceRecord
+    effective_from: date
+
+
+def resolve_credited_hours_commencement(
+    rule: CreditedHoursRule,
+    history: CreditedHoursHistory,
+    sources: SourceRegistry,
+) -> CreditedHoursCommencement | None:
+    """Find the first crossing date for reviewed credits at the current pay point."""
+    rule = CreditedHoursRule.model_validate(rule.model_dump())
+    history = CreditedHoursHistory.model_validate(history.model_dump())
+    sources = SourceRegistry.model_validate(sources.model_dump())
+    if not (rule.reviewed and history.reviewed and history.complete):
+        msg = "Credited hours require reviewed scope and complete history"
+        raise ValueError(msg)
+    dates = {credit.day for credit in history.credits}
+    if len(dates) != len(history.credits):
+        msg = "Credited hours require one total per date"
+        raise ValueError(msg)
+    if history.known_on > rule.as_known_on or any(
+        day > history.known_on for day in dates
+    ):
+        msg = "Credited hours exceed the knowledge horizon"
+        raise ValueError(msg)
+    total = Fraction(0)
+    for credit in sorted(history.credits, key=lambda item: item.day):
+        total += Fraction(credit.hours)
+        if total < Fraction(rule.threshold_hours):
+            continue
+        source = sources.require_applicable(
+            rule.source_id,
+            credit.day,
+            rule.jurisdiction,
+            rule.employer,
+            rule.classification,
+        )
+        if (
+            source.sha256 != rule.source_sha256
+            or source.retrieved_at is None
+            or source.retrieved_at.date() > rule.as_known_on
+        ):
+            msg = "Progression source must match the held and known edition"
+            raise ValueError(msg)
+        return CreditedHoursCommencement(rule, history, source, credit.day)
+    return None
