@@ -1117,6 +1117,7 @@ salary conversion alongside an annual allowance on the paid-hours basis.
 All 12 snapshot and capacity tests passed.
 
 A read-only cached-value scan of the five DSA sheets found no literal
-Boolean FALSE values. The 17 archived diagnostic outcomes therefore need
-the historical replay receipt or recalculation evidence. The workbook
-cache alone cannot verify their count or pass/fail disposition.
+Boolean FALSE values. The 17 archived flags are produced by the
+comparison against the delivered DSA Values sheet. See the installed
+package and DSA validation checkpoints above for the existing replay
+evidence. The workbook cache alone cannot verify those outcomes.
