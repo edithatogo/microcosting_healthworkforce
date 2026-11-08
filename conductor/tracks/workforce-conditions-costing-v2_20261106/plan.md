@@ -1286,3 +1286,33 @@ were skipped under the exact-header rule. This verifies preservation of
 the legacy diagnostic alongside the independent 1,980-cell historical
 recalculation. It does not qualify archived midpoint comparisons as a
 current scenario oracle.
+
+### DSA long and publication layouts
+
+A keyed comparison of the delivered workbook found all 330 annual/hourly
+long-form rows and all 330 hourly-only rows match the wide Values sheet
+(relative and absolute tolerance 1e-9). The join uses jurisdiction, role
+and sensitivity variable. The raw leave-loading header retains its tabs.
+
+The publication numeric block has 300 rows, excluding Base Case. Two
+explicit aliases join Hours worked and Superannuation to their longer
+Values labels. All 300 midpoints match the hourly long-form archive.
+Only five lower and five upper bounds match. Preserve publication bounds
+as a separate archive variant until their derivation is verified. The
+matching midpoints alone do not establish publication bound parity or
+a statistical confidence interval.
+
+The PSA-labelled hourly sheet contains 30 Base Case rows only. Joining
+those rows by jurisdiction and role shows a repeated publication pattern:
+all 25 jurisdiction rows on each of six axes copy the complete hourly
+Base Case triplet numerically. The axes are annual leave, retention,
+leave loading, private practice, development allowance and sick leave.
+The other four axes do not share that complete-triplet pattern. Across
+all 300 publication rows, 155 lower, 250 midpoint and 150 upper cells
+match the corresponding hourly Base Case value at tolerance 1e-9.
+This establishes repeated value equivalence, while the workbook literals
+leave the generating procedure and remaining bounds unresolved.
+
+The packaged candidate profile now describes the publication numeric block
+as a distinct historical variant and records the separate bound lineage.
+Eight focused workbook profile and archive mapping tests passed.
