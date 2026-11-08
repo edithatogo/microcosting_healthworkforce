@@ -16541,7 +16541,7 @@
       "sheet": "Labour - Prices (DSA, Pub)",
       "area": "A1:H301",
       "status": "archived_candidate",
-      "purpose": "Numeric and formatted publication sensitivity blocks, ALL and jurisdiction rows",
+      "purpose": "Historical hourly publication variant. Midpoints match the DSA hourly archive. Lower and upper literals retain separate lineage and are not statistical confidence limits.",
       "columns": [
         {
           "column": "A",

@@ -1312,3 +1312,7 @@ all 300 publication rows, 155 lower, 250 midpoint and 150 upper cells
 match the corresponding hourly Base Case value at tolerance 1e-9.
 This establishes repeated value equivalence, while the workbook literals
 leave the generating procedure and remaining bounds unresolved.
+
+The packaged candidate profile now describes the publication numeric block
+as a distinct historical variant and records the separate bound lineage.
+Eight focused workbook profile and archive mapping tests passed.
