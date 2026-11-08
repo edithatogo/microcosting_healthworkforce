@@ -11,12 +11,12 @@ import pytest
 
 from src.capacity_costing import CapacityScenarioResult
 from src.conditions import ConditionRelease, ConditionSnapshotResult
-from src.conditions_cli import main
+from src.conditions_cli import RosterRequest, main
 from src.costing import Activity
 from src.source_registry import SourceRegistry
 from tests.checks import assert_that
 from tests.test_conditions import condition
-from tests.test_roster_costing import release
+from tests.test_roster_costing import period, release, rule
 from tests.test_source_registry import source
 
 
@@ -180,3 +180,42 @@ def test_capacity_cli_retains_assumptions_and_exact_total(
     assert_that(result.assumptions.losses[0].loss_id == "leave")
     with pytest.raises(FileExistsError):
         main(args)
+
+
+def test_roster_cli_prices_reviewed_overtime(tmp_path: Path) -> None:
+    """Run the overtime ledger through the public JSON entry point."""
+    release_path = tmp_path / "release.json"
+    release_path.write_text(release().model_dump_json())
+    roster_path = tmp_path / "roster.json"
+    roster = RosterRequest(
+        period=period(),
+        rule=rule(),
+        activities=(
+            Activity(
+                activity_id="shift",
+                resource_id="worker",
+                starts_at=datetime(2026, 6, 2, 9, tzinfo=UTC),
+                ends_at=datetime(2026, 6, 2, 11, tzinfo=UTC),
+                resources=Decimal(1),
+            ),
+        ),
+        timezone="UTC",
+    )
+    roster_path.write_text(roster.model_dump_json())
+    output = tmp_path / "output.json"
+    assert_that(
+        main(
+            [
+                "--release",
+                str(release_path),
+                "--roster",
+                str(roster_path),
+                "--output",
+                str(output),
+            ],
+        )
+        == 0,
+    )
+    result = json.loads(output.read_text())
+    assert_that(result["total"] == "125")
+    assert_that(result["rows"][0]["rule_id"] == "synthetic-overtime")

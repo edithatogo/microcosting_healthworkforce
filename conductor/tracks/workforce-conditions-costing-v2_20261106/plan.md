@@ -810,3 +810,10 @@ An explicit-calendar regression verifies that a hypothetical additional
 weekday closure moves the September 2026 quarter deadline from 19 to
 20 October. All 25 contribution tests passed. Actual office closure
 classification still requires pay-office evidence.
+
+The v2 CLI accepts `--release RELEASE.json --roster ROSTER.json
+--output RESULT.json` for single-worker overtime costing. The roster JSON
+contains `period`, `rule`, `activities` and `timezone`. It uses the existing
+roster engine and its explicit history and source checks. The synthetic
+CLI case yields AUD 125 and retains the rule ID in the output ledger.
+All 14 affected CLI and roster tests passed.
