@@ -523,3 +523,20 @@ remain unverified.
 The [SA overtime review](../../reviews/sa-scientist-overtime-capability-20261106.md#2026-agreement-interaction)
 now records the 2026 agreement clause 15 and Medical Physicist appendix
 relationships. The ceiling remains conditional on worker and award scope.
+
+## NT nursing pay-date discrepancy
+
+The [OCPE nursing salary table](https://ocpe.nt.gov.au/employment-terms-and-conditions/rates-of-pay/nurses-and-midwives)
+labels its rates effective 19 August 2025. The [approved agreement undertaking](https://ocpe.nt.gov.au/media/documents/nt-public-sector-employment-information-about-ntps-employment/information-about-ntps-employment/ntps-nurses-and-midwives-2022-2026-enterprise-agreement.PDF)
+lists 14 August 2025 for the corrected fixed-period undergraduate nursing
+and midwifery rates. The tables cover different employee scopes. Keep their
+dates separate and verify each against the applicable payroll calendar
+before building a dated pay-point release.
+
+Schedule 3 Table 1 confirms the annual salary dates of 22 August 2023,
+20 August 2024 and 19 August 2025. Its notes derive the ordinary hourly
+rate from fortnightly pay divided by 76. Preserve the annual and hourly
+rate bases separately. The undergraduate undertaking supplies distinct
+hourly tables, so its dates cannot be used to fill the annual salary
+calendar. These published dates are reference anchors for the applicable
+payroll calendar, which remains to be acquired.
