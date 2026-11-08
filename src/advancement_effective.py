@@ -110,6 +110,7 @@ class CreditedHoursHistory(QuoteModel):
     """Complete eligible history for one appointment at one pay point."""
 
     pay_point: str = Field(min_length=1)
+    employment_basis: str = Field(min_length=1)
     evidence_id: str = Field(min_length=1)
     evidence_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
     known_on: date
@@ -122,6 +123,7 @@ class CreditedHoursRule(AdvancementRule):
     """Reviewed scope and the hours needed for same-day progression."""
 
     threshold_hours: Decimal = Field(gt=0, allow_inf_nan=False)
+    eligible_employment_bases: frozenset[str] = Field(min_length=1)
 
 
 @dataclass(frozen=True)
@@ -145,6 +147,9 @@ def resolve_credited_hours_commencement(
     sources = SourceRegistry.model_validate(sources.model_dump())
     if not (rule.reviewed and history.reviewed and history.complete):
         msg = "Credited hours require reviewed scope and complete history"
+        raise ValueError(msg)
+    if history.employment_basis not in rule.eligible_employment_bases:
+        msg = "Employment basis is outside the reviewed progression rule"
         raise ValueError(msg)
     dates = {credit.day for credit in history.credits}
     if len(dates) != len(history.credits):

@@ -79,9 +79,11 @@ def test_credited_hours_crossing_uses_completion_day() -> None:
         as_known_on=day,
         reviewed=True,
         threshold_hours=Decimal(1976),
+        eligible_employment_bases=frozenset({"part_time", "casual"}),
     )
     history = CreditedHoursHistory(
         pay_point="synthetic-point",
+        employment_basis="part_time",
         evidence_id="synthetic-history",
         evidence_sha256="b" * 64,
         known_on=day,
@@ -99,3 +101,9 @@ def test_credited_hours_crossing_uses_completion_day() -> None:
     if result is None:
         pytest.fail("Expected threshold completion")
     assert_that(result.effective_from == day)
+    with pytest.raises(ValueError, match="Employment basis"):
+        resolve_credited_hours_commencement(
+            rule,
+            history.model_copy(update={"employment_basis": "full_time"}),
+            sources,
+        )

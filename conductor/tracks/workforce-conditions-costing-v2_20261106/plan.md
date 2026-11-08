@@ -1044,3 +1044,8 @@ classification, prior pay point and evidence horizon with the assignment.
 The credited-hours resolver now returns the payroll-local completion date
 from reviewed daily credits for one pay point. Eligibility and the choice
 of next pay point still require reviewed appointment evidence.
+
+Credited-hours rules now declare eligible employment bases, and history
+must identify its basis. A synthetic full-time history is rejected by a
+part-time and casual rule. Classification and appointment review still
+exclude undergraduate roles and resolve individual eligibility.
