@@ -497,3 +497,7 @@ Use those sources to build a candidate calendar for the confirmed pay-office
 location. The worker location alone cannot establish the calendar used by
 the office or scheme administrator. The office mapping and closure treatment
 remain unverified.
+
+The [SA overtime review](../../reviews/sa-scientist-overtime-capability-20261106.md#2026-agreement-interaction)
+now records the 2026 agreement clause 15 and Medical Physicist appendix
+relationships. The ceiling remains conditional on worker and award scope.
