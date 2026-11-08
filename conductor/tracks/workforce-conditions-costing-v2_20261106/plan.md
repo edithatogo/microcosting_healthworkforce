@@ -1033,3 +1033,10 @@ date requires a verified service or credited-hours history, employment
 basis, pay-point identity and applicable higher-duty or withholding decisions.
 The 1,976-hour progression threshold is separate from the payroll conversion
 divisor and must not populate that field.
+
+The existing advancement resolver applies the later of application receipt
+and the day after service completion. Clause 23 ties part-time and casual
+advancement to the date the credited-hours threshold is completed. Route
+a reviewed threshold date directly into a dated assignment for this path.
+The application resolver would shift that date. Retain the approved
+classification, prior pay point and evidence horizon with the assignment.
