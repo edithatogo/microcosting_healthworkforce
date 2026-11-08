@@ -771,3 +771,7 @@ next year. It excludes the quarter-end date, uses the supplied January
 classifications and rejects a calendar missing the twelfth working day.
 All 23 period contribution tests passed. Actual deadlines still require
 the applicable pay-office calendar.
+
+The levy deadline API now rejects a timestamp supplied as the quarter-end
+date before reading the calendar. This prevents timestamp keys from silently
+producing a timestamp deadline. All 24 period contribution tests passed.
