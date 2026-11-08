@@ -26,6 +26,7 @@ from src.conditions import (
     cost_condition_snapshot,
 )
 from src.costing import Activity
+from src.roster_costing import OvertimeRule, PayPeriod, cost_overtime_period
 from src.unit_quotes import QuoteModel
 lazy from src.reimbursement import ReimbursementPeriod
 
@@ -35,6 +36,15 @@ class AssignmentReimbursementRequest(QuoteModel):
 
     reviewed_subject_id: str
     period: ReimbursementPeriod
+
+
+class RosterRequest(QuoteModel):
+    """Explicit roster history and overtime rule for a single worker."""
+
+    period: PayPeriod
+    rule: OvertimeRule
+    activities: tuple[Activity, ...]
+    timezone: str
 
 
 class SnapshotRequest(SnapshotQuantity):
@@ -148,14 +158,14 @@ def _validate_comparison_options(
         parser.error("--alternative-timeline requires --compare-assignment-request")
 
 
-def main(argv: list[str] | None = None) -> int:
-    """Validate both inputs, then create a new output without overwriting files."""
+def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     sources = parser.add_mutually_exclusive_group(required=True)
     sources.add_argument("--release", type=Path)
     sources.add_argument("--timeline", type=Path)
     inputs = parser.add_mutually_exclusive_group(required=True)
     inputs.add_argument("--activity", type=Path)
+    inputs.add_argument("--roster", type=Path)
     inputs.add_argument("--snapshot", type=Path)
     inputs.add_argument("--capacity", type=Path)
     inputs.add_argument("--assignment-request", type=Path)
@@ -165,6 +175,12 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--workbook-origins", type=Path)
     parser.add_argument("--timezone")
     parser.add_argument("--output", type=Path, required=True)
+    return parser
+
+
+def main(argv: list[str] | None = None) -> int:
+    """Validate both inputs, then create a new output without overwriting files."""
+    parser = _parser()
     args = parser.parse_args(argv)
     _validate_comparison_options(parser, args)
     if args.timeline is not None:
@@ -195,7 +211,16 @@ def main(argv: list[str] | None = None) -> int:
     if args.activity is None and args.timezone is not None:
         parser.error("--timezone applies only to --activity")
     release = _load_release(args.release, args.workbook_origins)
-    if args.capacity is not None:
+    if args.roster is not None:
+        roster = RosterRequest.model_validate_json(args.roster.read_bytes())
+        encoded = cost_overtime_period(
+            release,
+            roster.period,
+            roster.rule,
+            roster.activities,
+            roster.timezone,
+        ).model_dump_json()
+    elif args.capacity is not None:
         capacity = CapacityRequest.model_validate_json(args.capacity.read_bytes())
         assumptions = CapacityScenarioInputs.model_validate_json(
             capacity.model_dump_json(exclude={"as_of"}),
