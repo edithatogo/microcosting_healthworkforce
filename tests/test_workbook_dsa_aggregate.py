@@ -83,6 +83,9 @@ def test_aggregate_axes_preserve_original_formula_lineage() -> None:
     assert_that(len(isolated.cells) == 1)
     assert_that(isolated.cells[0].source.coordinate == "AK39")
     assert_that(isolated.cells[0].source.value == 0)
+    assert_that(isolated.cells[0].unit is None)
+    assert_that(isolated.cells[0].role == "unresolved_historical_value")
+    assert_that("AK39" not in cells)
     assert_that(isolated.definition.status == "physical_region_unresolved")
 
     display = next(
