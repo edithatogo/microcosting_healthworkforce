@@ -306,3 +306,61 @@ def test_overtime_uses_salary_effective_when_threshold_is_crossed() -> None:
     assert_that(result.total == Decimal(140))
     assert_that(result.overtime_hours == Decimal(1))
     assert_that(result.rows[1].condition_ids == ("salary-later", "hours"))
+
+
+def test_overtime_rule_expires_at_local_midnight() -> None:
+    """An exclusive end admits a shift up to midnight but no time after it."""
+    midnight = datetime(2026, 6, 2, 14, tzinfo=UTC)
+    start = midnight - timedelta(hours=1)
+    shift = Activity(
+        activity_id="shift",
+        resource_id="worker",
+        starts_at=start,
+        ends_at=midnight,
+        resources=Decimal(1),
+    )
+    history = period().model_copy(update={"history_through": start})
+    expiring = rule().model_copy(update={"effective_to": date(2026, 6, 3)})
+    result = cost_overtime_period(
+        release(),
+        history,
+        expiring,
+        (shift,),
+        "Australia/Brisbane",
+    )
+    assert_that(result.total == Decimal(50))
+    later = shift.model_copy(update={"ends_at": midnight + timedelta(microseconds=1)})
+    with pytest.raises(ValueError, match="does not cover activity date"):
+        cost_overtime_period(
+            release(),
+            history,
+            expiring,
+            (later,),
+            "Australia/Brisbane",
+        )
+
+    successor = expiring.model_copy(
+        update={
+            "effective_from": date(2026, 6, 3),
+            "effective_to": date(2027, 1, 1),
+            "rule_id": "successor",
+            "multiplier": Decimal(2),
+        },
+    )
+    overnight = shift.model_copy(update={"ends_at": midnight + timedelta(hours=1)})
+    result = cost_overtime_period(
+        release(),
+        history,
+        (successor, expiring),
+        (overnight,),
+        "Australia/Brisbane",
+    )
+    assert_that(result.total == Decimal(150))
+    assert_that(result.overtime_hours == Decimal(1))
+    assert_that(
+        [row.rule_id for row in result.rows] == ["synthetic-overtime", "successor"],
+    )
+    with pytest.raises(ValueError, match="overlapping effective dates"):
+        cost_overtime_period(
+            release(), history, (rule(), successor), (overnight,), "Australia/Brisbane",
+        )

@@ -182,14 +182,15 @@ def test_capacity_cli_retains_assumptions_and_exact_total(
         main(args)
 
 
-def test_roster_cli_prices_reviewed_overtime(tmp_path: Path) -> None:
+@pytest.mark.parametrize("as_array", [False, True])
+def test_roster_cli_prices_reviewed_overtime(tmp_path: Path, *, as_array: bool) -> None:
     """Run the overtime ledger through the public JSON entry point."""
     release_path = tmp_path / "release.json"
     release_path.write_text(release().model_dump_json())
     roster_path = tmp_path / "roster.json"
     roster = RosterRequest(
         period=period(),
-        rule=rule(),
+        rule=(rule(),) if as_array else rule(),
         activities=(
             Activity(
                 activity_id="shift",
@@ -221,7 +222,7 @@ def test_roster_cli_prices_reviewed_overtime(tmp_path: Path) -> None:
     assert_that(result["rows"][0]["rule_id"] == "synthetic-overtime")
 
     rejected_output = tmp_path / "rejected.json"
-    bad_rule = roster.rule.model_copy(update={"source_sha256": "b" * 64})
+    bad_rule = rule().model_copy(update={"source_sha256": "b" * 64})
     roster_path.write_text(
         roster.model_copy(update={"rule": bad_rule}).model_dump_json(),
     )

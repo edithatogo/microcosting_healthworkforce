@@ -42,7 +42,7 @@ class RosterRequest(QuoteModel):
     """Explicit roster history and overtime rule for a single worker."""
 
     period: PayPeriod
-    rule: OvertimeRule
+    rule: OvertimeRule | tuple[OvertimeRule, ...]
     activities: tuple[Activity, ...]
     timezone: str
 
