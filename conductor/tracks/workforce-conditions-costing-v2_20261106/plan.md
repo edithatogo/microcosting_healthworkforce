@@ -1244,3 +1244,8 @@ equivalent weeks and an unresolved entitlement debit. All 27 focused
 paid-leave tests passed on Python 3.15.2. Use separately declared cover
 quantities and confirm the applicable appointment and leave rules before
 pricing an actual absence.
+
+The paid-leave planner now rejects an absence when its known unpaid weeks
+alone exceed the declared entitlement budget. An unresolved paid debit
+still yields an unknown remaining balance for otherwise admissible inputs.
+All 28 focused paid-leave tests, Ruff and basedpyright passed.

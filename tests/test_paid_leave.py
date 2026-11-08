@@ -420,3 +420,9 @@ def test_four_week_budget_at_half_pay_preserves_eight_weeks_of_absence() -> None
     assert_that(result.unpaid_absence_weeks == 0)
     assert_that(result.paid_entitlement_debit_weeks is None)
     assert_that(salary_cost(result, prices()) == Fraction(252000, 73))
+
+
+def test_unresolved_paid_debit_cannot_hide_unpaid_overdraw() -> None:
+    """Known unpaid weeks exceed the budget under either paid-debit convention."""
+    with pytest.raises(ValueError, match="budget"):
+        build_paid_leave(policy(entitlement_budget_weeks=33), request())
