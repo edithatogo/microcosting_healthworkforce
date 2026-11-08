@@ -39,6 +39,11 @@ class CappedDailyRule(BaseModel):
     effective_from: date
     effective_to: date
     reviewed: bool
+    time_off_cash_multiplier: Decimal | None = Field(
+        default=None,
+        ge=0,
+        allow_inf_nan=False,
+    )
 
     @model_validator(mode="after")
     def validate_rule(self) -> Self:
@@ -87,6 +92,7 @@ class CappedOvertimeResult:
     effective_salary_basis: Fraction
     adjustments: tuple[DailyTierAdjustment, ...]
     total: Fraction
+    time_off_hours: Fraction = Fraction(0)
 
 
 def cost_capped_daily_overtime(
@@ -99,7 +105,9 @@ def cost_capped_daily_overtime(
     """Replace counted salary for explicit overtime; retain other base components.
 
     The caller establishes eligibility, the applicable day/rate schedule and cash
-    choice. No holiday precedence, recall grouping, rounding or time off is inferred.
+    choice. An explicit time-off multiplier replaces cash tiers and grants one
+    hour of leave credit per worked hour. Holiday precedence, recall grouping
+    and rounding require separate review.
     The supplied cap and source must apply to the identified worker and day.
     """
     release = ConditionRelease.model_validate(release.model_dump())
@@ -146,7 +154,42 @@ def cost_capped_daily_overtime(
     elapsed = end - start
     micros = (elapsed.days * 86400 + elapsed.seconds) * 1000000 + elapsed.microseconds
     remaining = Fraction(micros, 3600000000)
-    cumulative = Fraction(history.prior_hours)
+    exact_base = Fraction(base.exact_total_numerator, base.exact_total_denominator)
+    if (multiplier := rule.time_off_cash_multiplier) is not None:
+        adjustment = remaining * (basis * Fraction(multiplier) - salary_rate)
+        return CappedOvertimeResult(
+            base,
+            rule,
+            history.prior_hours,
+            basis,
+            (DailyTierAdjustment(Decimal(0), multiplier, remaining, adjustment),),
+            exact_base + adjustment,
+            time_off_hours=remaining,
+        )
+    adjustments = _cash_adjustments(
+        rule,
+        remaining,
+        Fraction(history.prior_hours),
+        basis,
+        salary_rate,
+    )
+    return CappedOvertimeResult(
+        base,
+        rule,
+        history.prior_hours,
+        basis,
+        adjustments,
+        exact_base + sum((x.adjustment for x in adjustments), Fraction(0)),
+    )
+
+
+def _cash_adjustments(
+    rule: CappedDailyRule,
+    remaining: Fraction,
+    cumulative: Fraction,
+    basis: Fraction,
+    salary_rate: Fraction,
+) -> tuple[DailyTierAdjustment, ...]:
     adjustments: list[DailyTierAdjustment] = []
     for index, tier in enumerate(rule.tiers):
         if remaining <= 0:
@@ -174,12 +217,4 @@ def cost_capped_daily_overtime(
         )
         remaining -= hours
         cumulative += hours
-    exact_base = Fraction(base.exact_total_numerator, base.exact_total_denominator)
-    return CappedOvertimeResult(
-        base,
-        rule,
-        history.prior_hours,
-        basis,
-        tuple(adjustments),
-        exact_base + sum((x.adjustment for x in adjustments), Fraction(0)),
-    )
+    return tuple(adjustments)

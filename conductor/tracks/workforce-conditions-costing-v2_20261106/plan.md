@@ -890,3 +890,15 @@ The daily capped overtime regression verifies an explicit midnight split
 with successive ceilings and separate daily histories. The synthetic
 segments cost AUD 80 and AUD 67.50. The single-day API rejects the unsplit
 shift. All eight capped-overtime tests passed.
+
+The SA source review now identifies a public-holiday overtime option
+with both a time credit and additional cash. This interaction requires
+a separate ledger treatment from the existing cash-only daily engine.
+
+The capped daily engine can now price an explicitly reviewed time-off
+choice with one credited hour per worked hour and an explicit cash
+multiplier, including zero. It replaces the already-counted overtime
+salary portion with that cash and retains other base components. The
+synthetic four-hour cases yield four credited hours with AUD 0 or AUD 240
+cash. All 17 focused tests passed. Actual SA use still requires agreement,
+holiday status, cash basis, rounding and minimum-duration evidence.

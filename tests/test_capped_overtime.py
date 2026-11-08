@@ -253,3 +253,21 @@ def test_daily_cap_changes_at_midnight_with_separate_history() -> None:
             "UTC",
             DailyHistory(prior_hours=Decimal(3), complete=True),
         )
+
+
+@pytest.mark.parametrize(("multiplier", "cash"), [("0", 0), ("1.5", 240)])
+def test_agreed_time_off_separates_credit_and_cash(multiplier: str, cash: int) -> None:
+    """Preserve four credited hours and replace salary with explicit cash."""
+    reviewed = rule().model_copy(
+        update={"time_off_cash_multiplier": Decimal(multiplier)},
+    )
+    result = cost_capped_daily_overtime(
+        release(),
+        reviewed,
+        activity(),
+        "UTC",
+        DailyHistory(prior_hours=Decimal(0), complete=True),
+    )
+    assert_that(result.time_off_hours == Fraction(4))
+    assert_that(result.total == Fraction(cash))
+    assert_that(result.adjustments[0].adjustment == Fraction(cash - 200))
