@@ -370,3 +370,22 @@ def test_interleaved_episode_envelopes_fail_even_without_segment_overlap() -> No
             history(),
             METHOD,
         )
+
+
+def test_first_commencement_anchor_survives_a_batch_boundary() -> None:
+    """A fully excluded second call does not extend the first window."""
+    events = tuple(episode(str(t), t, t + 5) for t in (0, 45, 90))
+    method = "first_commencement_half_open_v1"
+    window = timedelta(hours=1)
+    first = partition_repeat_recalls(events[:2], window, history(), method)
+    second = partition_repeat_recalls(events[2:], window, first.next_history, method)
+    whole = partition_repeat_recalls(events, window, history(), method)
+    assert_that(first.recalls + second.recalls == whole.recalls)
+    assert_that(second.next_history == whole.next_history)
+    assert_that(
+        [r.segments[0].eligible_microseconds for r in whole.recalls]
+        == [5 * MINUTE, 0, 5 * MINUTE],
+    )
+
+    with pytest.raises(ValueError, match="same exclusion method"):
+        partition_repeat_recalls(events[2:], window, first.next_history, METHOD)

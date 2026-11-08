@@ -167,3 +167,18 @@ or guess annual/weekly/fortnightly allowance units. Salary sacrifice does not,
 under the checked clause, replace the pre-arrangement salary base for all purposes
 including superannuation; actual arrangement, scope and legislative qualifications
 remain separate. No contemporary source, rate or worker is promoted as accepted.
+
+The [2011–2014 predecessor agreement](https://www.ama.com.au/sites/default/files/2022-03/T14186_Rural_Medical_Practitioners_Agreement_2011_2014.pdf)
+also anchors the one-hour payment exclusion to commencement of the previous
+recall and includes travel. This corroborates the historical wording. It
+supplies no worked example for a three-call chain or a call partly outside
+the hour. A dated interpretation or payroll example covering those cases
+is still needed before selecting the combined method.
+
+The [TIC Medical Practitioners Public Sector Award S099](https://www.tic.tas.gov.au/__data/assets/pdf_file/0020/262424/Medical_Practitioners_Public_Sector_S099.pdf)
+provides a separate comparison at printed page 67. Its call-back clause
+for employees other than specialists and medical administrators expressly
+uses the first recall for a chain and applies the penalty rate after the
+exclusion window. That clause has a one-hour minimum. Keep this rule and
+its scope separate from the rural agreement, which has a two-hour minimum
+and lacks the express first-recall wording in the reviewed provision.
