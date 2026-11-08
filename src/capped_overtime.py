@@ -93,6 +93,7 @@ class CappedOvertimeResult:
     adjustments: tuple[DailyTierAdjustment, ...]
     total: Fraction
     time_off_hours: Fraction = Fraction(0)
+    time_off_cash: Fraction | None = None
 
 
 def cost_capped_daily_overtime(
@@ -156,7 +157,8 @@ def cost_capped_daily_overtime(
     remaining = Fraction(micros, 3600000000)
     exact_base = Fraction(base.exact_total_numerator, base.exact_total_denominator)
     if (multiplier := rule.time_off_cash_multiplier) is not None:
-        adjustment = remaining * (basis * Fraction(multiplier) - salary_rate)
+        cash = remaining * basis * Fraction(multiplier)
+        adjustment = cash - remaining * salary_rate
         return CappedOvertimeResult(
             base,
             rule,
@@ -165,6 +167,7 @@ def cost_capped_daily_overtime(
             (DailyTierAdjustment(Decimal(0), multiplier, remaining, adjustment),),
             exact_base + adjustment,
             time_off_hours=remaining,
+            time_off_cash=cash,
         )
     adjustments = _cash_adjustments(
         rule,
