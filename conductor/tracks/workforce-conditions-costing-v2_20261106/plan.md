@@ -858,3 +858,8 @@ overlapping rule dates are rejected. All 15 affected tests passed.
 The roster guide documents the rule object and array forms. The public
 CLI regression checks both forms and preserves single-rule compatibility.
 All 16 affected tests passed.
+
+Each roster ledger row now exposes the applied overtime threshold and
+multiplier alongside its rule and source identifiers. Older serialized
+rows remain readable with those fields absent. The successive-rule
+regression verifies both multipliers. All 16 roster and CLI tests passed.

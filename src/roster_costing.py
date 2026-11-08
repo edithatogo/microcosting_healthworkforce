@@ -95,6 +95,8 @@ class RosterCostRow(BaseModel):
     source_id: str
     source_sha256: str
     citation: str
+    threshold_hours: Decimal | None = None
+    multiplier: Decimal | None = None
 
 
 class RosterCostResult(BaseModel):
@@ -303,6 +305,8 @@ def cost_overtime_period(
                     source_id=rule.source_id,
                     source_sha256=rule.source_sha256,
                     citation=rule.citation,
+                    threshold_hours=rule.threshold_hours,
+                    multiplier=rule.multiplier,
                 ),
             )
     exact_total = exact_base + exact_premium

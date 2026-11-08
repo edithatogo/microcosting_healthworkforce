@@ -9,7 +9,12 @@ import pytest
 
 from src.conditions import ConditionRelease
 from src.costing import Activity
-from src.roster_costing import OvertimeRule, PayPeriod, cost_overtime_period
+from src.roster_costing import (
+    OvertimeRule,
+    PayPeriod,
+    RosterCostRow,
+    cost_overtime_period,
+)
 from src.source_registry import SourceRegistry
 from tests.checks import assert_that
 from tests.test_conditions import condition
@@ -360,6 +365,11 @@ def test_overtime_rule_expires_at_local_midnight() -> None:
     assert_that(
         [row.rule_id for row in result.rows] == ["synthetic-overtime", "successor"],
     )
+    assert_that([row.multiplier for row in result.rows] == [Decimal("1.5"), Decimal(2)])
+    assert_that(all(row.threshold_hours == Decimal(40) for row in result.rows))
+    old_row = result.rows[0].model_dump_json(exclude={"threshold_hours", "multiplier"})
+    restored = RosterCostRow.model_validate_json(old_row)
+    assert_that(restored.threshold_hours is None and restored.multiplier is None)
     with pytest.raises(ValueError, match="overlapping effective dates"):
         cost_overtime_period(
             release(),
