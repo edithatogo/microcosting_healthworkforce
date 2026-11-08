@@ -362,5 +362,9 @@ def test_overtime_rule_expires_at_local_midnight() -> None:
     )
     with pytest.raises(ValueError, match="overlapping effective dates"):
         cost_overtime_period(
-            release(), history, (rule(), successor), (overnight,), "Australia/Brisbane",
+            release(),
+            history,
+            (rule(), successor),
+            (overnight,),
+            "Australia/Brisbane",
         )
