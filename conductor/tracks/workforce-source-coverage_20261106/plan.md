@@ -480,3 +480,11 @@ these data can support replacement weights.
 Source screening now rejects whitespace-only lead identities, titles and
 locators. Five focused screening tests passed. Lead validation preserves
 the distinction between discovery and assessed applicability.
+
+Appendix A of the [Queensland Treasury scheme guidelines](https://www.treasury.qld.gov.au/files/Long-Service-Leave-Central-Scheme-Guidelines-2.pdf)
+confirms one remittance per agency or pay-office code per quarter and
+requires the remittance information at least one day before the EFT.
+The twelfth working day is the receipt deadline. Keep the information
+submission, actual EFT and calculated receipt deadline separate. Appendix A
+does not specify which local holidays or office closures count as working
+days, so retain the applicable pay-office calendar as an explicit input.
