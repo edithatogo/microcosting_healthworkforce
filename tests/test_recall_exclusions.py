@@ -397,3 +397,16 @@ def test_first_commencement_anchor_survives_a_batch_boundary() -> None:
             first.next_history,
             method,
         )
+
+
+def test_reviewed_observation_boundary_starts_a_new_recall_clock() -> None:
+    """A caller-supplied reset admits work that carry-over would exclude."""
+    first, second = episode("first", 0, 5), episode("second", 30, 35)
+    method = "first_commencement_half_open_v1"
+    window = timedelta(hours=1)
+    initial = partition_repeat_recalls((first,), window, history(), method)
+    carried = partition_repeat_recalls((second,), window, initial.next_history, method)
+    reset = RecallHistory("worker", second.commences_at, None, complete=True)
+    restarted = partition_repeat_recalls((second,), window, reset, method)
+    assert_that(carried.recalls[0].segments[0].eligible_microseconds == 0)
+    assert_that(restarted.recalls[0].segments[0].eligible_microseconds == 5 * MINUTE)

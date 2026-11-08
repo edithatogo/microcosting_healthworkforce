@@ -1162,3 +1162,9 @@ Recall history now retains the exclusion duration as well as its anchor
 method. A resumed batch rejects a different duration. Older histories
 without a stored duration use the caller-supplied value until a batch
 records it. All 37 recall tests passed.
+
+A synthetic reset test confirms that a new complete observation window
+with no prior anchor admits a call that would be excluded under carry-over.
+This uses an explicit caller-supplied boundary. The award-specific definition
+of a day or night and treatment of a recall spanning that boundary remain
+open. All 17 recall exclusion tests passed.
