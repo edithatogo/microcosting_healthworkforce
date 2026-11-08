@@ -410,3 +410,33 @@ def test_reviewed_observation_boundary_starts_a_new_recall_clock() -> None:
     restarted = partition_repeat_recalls((second,), window, reset, method)
     assert_that(carried.recalls[0].segments[0].eligible_microseconds == 0)
     assert_that(restarted.recalls[0].segments[0].eligible_microseconds == 5 * MINUTE)
+
+
+def test_excluded_work_does_not_require_payment_rate_coverage() -> None:
+    """A noon exclusion boundary prices only the ten eligible afternoon minutes."""
+    prior = RecallHistory(
+        "worker",
+        START + timedelta(minutes=75),
+        START + timedelta(minutes=60),
+        complete=True,
+    )
+    plan = partition_repeat_recalls(
+        (episode("crossing", 110, 130),),
+        timedelta(hours=1),
+        prior,
+        METHOD,
+    )
+    original = release()
+    afternoon = original.model_copy(update={"rates": (original.rates[1],)})
+    priced = cost_eligible_recalls(afternoon, "staff", plan)
+    assert_that([row.rate_id for row in priced.ledger.rows] == ["afternoon"])
+    assert_that(
+        Fraction(
+            priced.ledger.exact_total_numerator,
+            priced.ledger.exact_total_denominator,
+        )
+        == Fraction(35, 3),
+    )
+    part = priced.plan.recalls[0].segments[0]
+    assert_that(part.excluded_microseconds == 10 * MINUTE)
+    assert_that(part.eligible_microseconds == 10 * MINUTE)
