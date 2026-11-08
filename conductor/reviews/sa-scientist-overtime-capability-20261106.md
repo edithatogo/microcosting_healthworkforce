@@ -106,3 +106,24 @@ The synthetic flat holiday cash test prices four hours at a capped
 AUD 40 hourly basis and a 2.5 multiplier. It returns AUD 400 with a
 net adjustment of AUD 200 to the pre-counted base and no time credit.
 All 11 capped-overtime tests passed.
+
+For quarter-hour qualification, keep elapsed activity duration, payable
+cash duration and time-off credit as separate quantities. The current
+engine uses elapsed duration for all three where applicable. Editing the
+activity endpoints to represent rounded cash hours would also change base
+salary and other hourly components. A payroll receipt should identify
+which duration advances the daily tier and how a rounded amount is
+apportioned when it crosses a tier boundary.
+
+Use [adjustment settlement](../../docs/pay_period_effective.md) once a
+reviewed cash entitlement and the actual payroll credit are available.
+Match both amounts to the same overtime component and earning interval.
+Keep leave hours in the time-credit record and retain the original roster
+interval. The settlement computes the cash difference and can record a
+planned payment date. It takes the reviewed entitlement as input, so
+it cannot supply the missing rounding or tier allocation decision.
+
+The synthetic settlement test reconciles AUD 240 of time-off cash against
+a synthetic payroll credit of AUD 210. It retains four hours of time
+credit separately and confirms an AUD 30 cash balance. The AUD 40 costing
+adjustment reflects a different baseline, the salary already counted.
