@@ -1097,3 +1097,16 @@ The 12 midpoint input keys at `/outputs/1/parameter_mapping` link to
 These units describe the historical workbook inputs. DSA variations and
 PSA distribution arguments require their own operation and support
 metadata before reuse as successor scenario inputs.
+
+The 20 DSA scenarios contain 21 parameter operations. Seventeen are
+relative multipliers applied as baseline times one plus the configured
+value. Four are additive deltas, two in weeks per year for annual leave
+and two in AUD per year for professional development. Preserve the joint
+scenario as one scenario with two operations.
+
+The PSA runner replaces the entire mapped column with one absolute draw
+per parameter per iteration. The normal superannuation mean and standard
+deviation are fractions. The uniform productive-time endpoints are
+fractions with support from 0.95 to 1.05, including values above one.
+The triangular development endpoints and mode are AUD per year. These
+are exploratory inputs and retain their original support and operations.
