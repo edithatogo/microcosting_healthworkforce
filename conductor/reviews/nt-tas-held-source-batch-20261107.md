@@ -182,3 +182,39 @@ uses the first recall for a chain and applies the penalty rate after the
 exclusion window. That clause has a one-hour minimum. Keep this rule and
 its scope separate from the rural agreement, which has a two-hour minimum
 and lacks the express first-recall wording in the reviewed provision.
+
+## Rural medical decision chronology
+
+The [Commission decision summary](https://www.tic.tas.gov.au/decisions_issued/decision_summaries/2028)
+records the rural 2025 agreement as effective from 1 January 2025 through
+30 December 2026 and records cancellation of the 2022 agreement. Keep
+agreement operability separate from the two wage increase anchors and the
+actual first full pay period. The summary also lists a separate medical
+award variation (T15353) with operative dates of 11 May and 1 June 2026.
+Check its operative clauses and appointment scope before applying any
+award variation alongside the rural agreement. The summary supplies no
+worked recall examples or payroll interpretation.
+
+The signed [S099 consolidated order No. 2 of 2026](https://www.tic.tas.gov.au/__data/assets/pdf_file/0019/904402/T15353-No-2-of-2026-Consolidated-Medical-Practitioners-Public-Sector-S099.pdf)
+identifies T15353 on page 1, resolving the inconsistent case label in the
+award history. Its enumerated amendments cover operation and savings,
+right to disconnect, and eight leave clauses (41, 42, 44, 45, 52, 56, 58,
+59). The order does not list a recall-clause amendment. Review changed
+leave clauses for paid-capacity and backfill assumptions only after
+confirming the appointment is within S099 and how the applicable
+agreement interacts with it. The award history summary alone is
+insufficient to select revised wage, hours or recall parameters.
+
+The [TASIC 35 reasons](https://www.tic.tas.gov.au/__data/assets/pdf_file/0020/904403/2026-TASIC-35-T15353-of-2026-Variation-of-the-Medical-Practitioners-Awards-TSS-Standard-Conditions.pdf),
+paragraphs 5 and 7–8, resolve the clause-date split. Right to disconnect,
+recreation-leave request management and the specified gender affirmation
+leave amendments start on 1 June 2026. The other listed substantive leave
+amendments start on 11 May 2026. Keep these as clause dates separate from
+publication, payroll and observed leave dates.
+
+For costing, clause 41 changes service eligibility for paid parental leave.
+Clause 56 introduces a half-pay option that separates absence duration from
+paid hours. Clause 59 adds a non-cumulative reproductive leave balance
+with part-time proration. Clause 45(d) changes response timing, which does
+not by itself change the annual recreation leave quantity. Keep eligibility,
+leave balance, actual use and replacement cover as separate inputs.

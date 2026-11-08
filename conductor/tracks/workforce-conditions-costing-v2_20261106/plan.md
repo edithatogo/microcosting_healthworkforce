@@ -447,6 +447,9 @@ real-world values and receipts must not enter public source distributions.
     do not relabel them as passing checks or force both signs onto one midpoint.
   - [ ] Capture every old JSON parameter/formula/distribution and workbook condition/
     assumption with a candidate v1-to-successor disposition, not silent defaults.
+    The historical sensitivity input links below cover all configured DSA and
+    PSA operations. Condition and assumption links to an accepted successor
+    release remain open.
 - [~] Task: Document and qualify complete semantic incorporation.
   - [ ] Reconcile semantic coverage to all 20 sheets/94 regions and record the
     original Year 0–4 versus current default Year 0–5 horizon distinction.
@@ -455,6 +458,10 @@ real-world values and receipts must not enter public source distributions.
 - [ ] Task: Phase Verification & Checkpoint (refer to ../../workflow.md).
   - [ ] Manually trace representative tables/units/aggregates back to exact cells;
     retain unresolved semantics and independent source acceptance boundaries.
+    The packaged profile no longer carries assumed unit labels. The annual-unit
+    audit below establishes workbook calculation units, while source instrument
+    bases, historical workbook discrepancies and remaining semantic checks stay
+    open.
 
 ## Phase 3: Source-backed condition registry and immutable successor bundle
 
@@ -1226,3 +1233,14 @@ The first DSA scenario retains both operations in their configured order.
 These links reconcile all archived scenario fields to workbook input
 identities. Linking them to accepted successor conditions still requires a
 reviewed condition release and, for PSA, scientific qualification.
+
+### Half-pay leave and replacement exposure
+
+A synthetic case matching the four-week salary exposure and eight-week
+absence shape identified in the [S099 review](../../reviews/nt-tas-held-source-batch-20261107.md)
+passed through the paid-leave and selected normal-hours pricing paths.
+The schedule retains eight weeks of paid absence, four normal-pay
+equivalent weeks and an unresolved entitlement debit. All 27 focused
+paid-leave tests passed on Python 3.15.2. Use separately declared cover
+quantities and confirm the applicable appointment and leave rules before
+pricing an actual absence.
