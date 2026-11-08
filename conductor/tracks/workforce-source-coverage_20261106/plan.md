@@ -280,6 +280,19 @@ RX4–RZ7; author intent, employer and actual applicability remain unresolved.
 ## Phase 3: Missing jurisdictions and broader public-sector workforce
 
 - [ ] Task: Acquire ACT, NT and TAS public-sector instrument chains.
+  - NT nursing and midwifery: the [OCPE copy of FWC approval 2023 FWCA 2406](https://ocpe.nt.gov.au/__data/assets/pdf_file/0003/1262595/ntps-nurses-and-midwives-2022-2026-enterprise-agreement.PDF)
+    identifies AG2023/2310, operation from 9 August 2023, nominal expiry on
+    9 August 2026 and an attached employer undertaking that forms part of the
+    agreement. The indexed decision was readable, but direct retrieval returned
+    HTTP 403. The [FWC register](https://www.fwc.gov.au/documents/agreements/resources/agreements2023.pdf)
+    links the matter to instrument AE520978 and decision reference PR764853. The
+    FWC approved-agreement PDF route also returned HTTP 403. Full instrument
+    custody and the operative successor check remain open. The indexed 122-page
+    OCPE copy did expose clauses 3, 19 and 39. Clause 19 separates retrospective
+    salary effects from approval and uses first-full-pay-period triggers for
+    2023–2025. Clause 39 separates ordinary full-time rostering from school RN
+    averaging. Overtime triggers also differ by employment basis. Resolve
+    appointment, roster and pay calendar before admitting conditions.
   - [ ] Include health/medical/nursing and general professional/technical/support
     streams, with employer and classification mappings.
   - [ ] Distinguish agreement approval, conditions commencement, wage-effective
