@@ -68,3 +68,11 @@ contiguous payroll calendar. Use the resulting start to date the ceiling
 only after confirming the agreement and award scope. Keep the annual
 schedule value and reviewed hourly divisor as separate inputs. The
 resolver and capped-overtime tests exercise these steps independently.
+
+For medical scientists, the 2026 salary schedule lists the fifth MeS1
+increment at AUD 89,764 from the first full pay period on or after
+1 July 2026. Treat it as a candidate annual basis only if the Medical
+Scientists Award clause 6.2.2 and the MS1-to-MeS1 mapping are confirmed
+for the case. Clause 15 separately names MeS3 for the Salaried Employees
+Interim Award provision it references. The two ceilings cannot be selected
+from the pay schedule alone. The reviewed hourly conversion remains open.
