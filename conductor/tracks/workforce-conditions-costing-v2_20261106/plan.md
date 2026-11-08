@@ -902,3 +902,8 @@ salary portion with that cash and retains other base components. The
 synthetic four-hour cases yield four credited hours with AUD 0 or AUD 240
 cash. All 17 focused tests passed. Actual SA use still requires agreement,
 holiday status, cash basis, rounding and minimum-duration evidence.
+
+The time-off result now exposes the exact cash entitlement separately
+from the signed adjustment to pre-counted salary. Zero cash is retained
+for an explicit time-off choice, while the standard cash-only path leaves
+this field absent in meaning. All 17 focused tests passed.

@@ -60,6 +60,7 @@ def test_capped_tiers_adjust_already_counted_salary_once() -> None:
         DailyHistory(prior_hours=Decimal(0), complete=True),
     )
     assert_that(result.total == Fraction(260))
+    assert_that(result.time_off_cash is None)
     assert_that(
         sum((x.adjustment for x in result.adjustments), Fraction(0)) == Fraction(60),
     )
@@ -269,5 +270,6 @@ def test_agreed_time_off_separates_credit_and_cash(multiplier: str, cash: int) -
         DailyHistory(prior_hours=Decimal(0), complete=True),
     )
     assert_that(result.time_off_hours == Fraction(4))
+    assert_that(result.time_off_cash == Fraction(cash))
     assert_that(result.total == Fraction(cash))
     assert_that(result.adjustments[0].adjustment == Fraction(cash - 200))
