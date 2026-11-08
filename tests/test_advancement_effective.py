@@ -71,7 +71,7 @@ def test_credited_hours_crossing_uses_completion_day() -> None:
     day = date(2026, 6, 2)
     rule = CreditedHoursRule(
         source_id=held.source_id,
-        source_sha256=held.sha256,
+        source_sha256="a" * 64,
         citation="Synthetic clause",
         jurisdiction=held.jurisdiction,
         employer=held.employers[0],
