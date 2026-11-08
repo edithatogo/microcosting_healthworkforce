@@ -1168,3 +1168,34 @@ with no prior anchor admits a call that would be excluded under carry-over.
 This uses an explicit caller-supplied boundary. The award-specific definition
 of a day or night and treatment of a recall spanning that boundary remain
 open. All 17 recall exclusion tests passed.
+
+### NSW Health workbook comparison targets
+
+The [restricted budget template review](../../reviews/workforce-budget-template-discovery-20261106.md)
+supports comparison cases for these parts of the model:
+
+| HWCC group | Comparison target | Evidence needed for parity |
+| --- | --- | --- |
+| 02–03 | Classification-to-award lookup and dated rate selection | Governing instrument, grade and year crosswalk, and worked base and rated hours |
+| 04 | Contract-period and public-holiday proration | Pay-calendar boundaries, employment type and expected prorated amounts |
+| 06 | Contracted-hours and FTE conversion | Configured averaging period, ordinary hours denominator and worked FTE cases |
+| 07–08 | Overtime, shift payments and budget loadings | Worked roster crossing thresholds with expected component amounts and payment bases |
+
+Keep HWCC budget phasing, cost-centre enrichment and export orchestration
+separate from workforce costing calculations. Group descriptions establish
+which cases to compare. Source cells and expected values are required to test
+parity. Queensland Health search hits are candidate comparators pending the
+source-coverage track's checks.
+
+The historical NSW extraction distinguishes position budget inputs from award
+and specialist rate lookups, pay calendar and the formula catalogue. Its
+traceability register leaves worked test cases open. Keep exact private source
+locators with the restricted evidence. For public parity tests, use synthetic
+inputs and independently derived expected results with documented rule bases.
+
+The synthetic repeat-recall boundary case aligns the exclusion cutoff with an
+effective-dated rate change. Ten excluded minutes remain in the evidence even
+when the release has no payment rate for them. The ten eligible minutes price
+at the successor rate, exactly AUD 35/3. All 18 focused exclusion tests passed
+on Python 3.15.2. Tasmanian minimum, rounding and crossing-call applicability
+still require a dated interpretation or worked payroll evidence.

@@ -548,3 +548,13 @@ located no replacement approval. Keep the held 2022–2026 edition as the
 reference and record later operability as unresolved pending a dated
 Commission register check. Nominal expiry alone does not establish
 a replacement or a termination.
+
+### Budget template applicability
+
+The [structural review](../../reviews/workforce-budget-template-discovery-20261106.md)
+already covers the three Queensland SharePoint leads and the NSW calculator.
+The repeated title search corroborates discovery. Use the two later Queensland
+examples to compare calculation categories and seek template-owner confirmation
+of edition, scope and reuse rights. Keep the 2018 workbook as historical
+context. Verify employer, classification and effective dates against the
+governing instrument before applying any condition.
