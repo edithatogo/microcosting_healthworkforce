@@ -871,3 +871,7 @@ roster and CLI tests passed.
 Roster results now retain the validated pay period, prior-history boundary
 and timezone. Older results may omit the new fields. All 16 focused roster
 and CLI tests passed.
+
+Roster results now retain the canonical hash of the validated condition
+release, using the same hash as assignment costing. Older results may omit
+it. All 16 focused roster and CLI tests passed.
