@@ -36,3 +36,9 @@ all 60 formatted share strings. The share strings use the first
 jurisdiction's midpoint-cost denominator for the mean, minimum
 and maximum, then format each result to one decimal percentage point.
 These are historical display ranges.
+
+The `Assumptions` sheet at A2:B2 identifies the public-holiday input as
+an average across years and within each state. The historical calculation
+uses that salary-linked proxy. An activity ledger needs the dated holiday
+classification, actual hours and applicable instrument before pricing any
+holiday payment or time credit.
