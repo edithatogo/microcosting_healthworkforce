@@ -1301,3 +1301,14 @@ Only five lower and five upper bounds match. Preserve publication bounds
 as a separate archive variant until their derivation is verified. The
 matching midpoints alone do not establish publication bound parity or
 a statistical confidence interval.
+
+The PSA-labelled hourly sheet contains 30 Base Case rows only. Joining
+those rows by jurisdiction and role shows a repeated publication pattern:
+all 25 jurisdiction rows on each of six axes copy the complete hourly
+Base Case triplet numerically. The axes are annual leave, retention,
+leave loading, private practice, development allowance and sick leave.
+The other four axes do not share that complete-triplet pattern. Across
+all 300 publication rows, 155 lower, 250 midpoint and 150 upper cells
+match the corresponding hourly Base Case value at tolerance 1e-9.
+This establishes repeated value equivalence, while the workbook literals
+leave the generating procedure and remaining bounds unresolved.
