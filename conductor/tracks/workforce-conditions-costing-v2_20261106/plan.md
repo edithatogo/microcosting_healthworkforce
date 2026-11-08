@@ -1286,3 +1286,18 @@ were skipped under the exact-header rule. This verifies preservation of
 the legacy diagnostic alongside the independent 1,980-cell historical
 recalculation. It does not qualify archived midpoint comparisons as a
 current scenario oracle.
+
+### DSA long and publication layouts
+
+A keyed comparison of the delivered workbook found all 330 annual/hourly
+long-form rows and all 330 hourly-only rows match the wide Values sheet
+(relative and absolute tolerance 1e-9). The join uses jurisdiction, role
+and sensitivity variable. The raw leave-loading header retains its tabs.
+
+The publication numeric block has 300 rows, excluding Base Case. Two
+explicit aliases join Hours worked and Superannuation to their longer
+Values labels. All 300 midpoints match the hourly long-form archive.
+Only five lower and five upper bounds match. Preserve publication bounds
+as a separate archive variant until their derivation is verified. The
+matching midpoints alone do not establish publication bound parity or
+a statistical confidence interval.
