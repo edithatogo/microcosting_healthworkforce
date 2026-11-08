@@ -1020,3 +1020,16 @@ salary-based fractions in static and dynamic costing. Annual capacity
 uses paid hours, and capped overtime rejects the separate payroll basis
 until its applicability is qualified. Existing release hashes omit the
 new field when absent.
+
+## NT nursing pay-point progression
+
+[Clause 23 of the approved agreement](https://ocpe.nt.gov.au/__data/assets/pdf_file/0003/1262595/ntps-nurses-and-midwives-2022-2026-enterprise-agreement.PDF)
+uses service at the current pay point for ordinary advancement. It allows
+12 months of continuous service or 12 months of broken service within the
+preceding 24 months. Part-time and casual progression instead uses 1,976
+hours at the current increment and excludes RUSON and RUSOM employees.
+The assignment engine can price a declared pay-point change. Deriving its
+date requires a verified service or credited-hours history, employment
+basis, pay-point identity and applicable higher-duty or withholding decisions.
+The 1,976-hour progression threshold is separate from the payroll conversion
+divisor and must not populate that field.
