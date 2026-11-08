@@ -1137,3 +1137,12 @@ a window anchored at the first recall. Calls starting at minutes 0, 45
 and 90 each contain five minutes of work. The rolling method pays only
 the first five minutes. A first-call anchor would also allow the third
 call. The existing test qualifies the rolling calculation only.
+
+The recall tests also cover grouped minimum windows, dated pricing of
+eligible intervals and a standalone quantity method that caps each journey,
+rounds the combined duration and then applies a minimum. All 36 recall
+tests passed. The standalone method requires positive work and independent
+recall eligibility. A fully excluded repeat call cannot be passed through
+it to recreate a minimum. A combined Tasmanian rule still needs authority
+for whether a partially eligible repeat call attracts any new guarantee
+and how capped travel is allocated around the exclusion boundary.
