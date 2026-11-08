@@ -885,3 +885,8 @@ full payroll period resolver. A mid-period trigger resolves to the next
 calendar boundary. The ceiling prices work on that date and rejects work
 on the preceding day. All 14 focused commencement and capped-overtime
 tests passed. Actual SA case applicability and payroll inputs remain open.
+
+The daily capped overtime regression verifies an explicit midnight split
+with successive ceilings and separate daily histories. The synthetic
+segments cost AUD 80 and AUD 67.50. The single-day API rejects the unsplit
+shift. All eight capped-overtime tests passed.
