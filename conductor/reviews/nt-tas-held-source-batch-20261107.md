@@ -182,3 +182,15 @@ uses the first recall for a chain and applies the penalty rate after the
 exclusion window. That clause has a one-hour minimum. Keep this rule and
 its scope separate from the rural agreement, which has a two-hour minimum
 and lacks the express first-recall wording in the reviewed provision.
+
+## Rural medical decision chronology
+
+The [Commission decision summary](https://www.tic.tas.gov.au/decisions_issued/decision_summaries/2028)
+records the rural 2025 agreement as effective from 1 January 2025 through
+30 December 2026 and records cancellation of the 2022 agreement. Keep
+agreement operability separate from the two wage increase anchors and the
+actual first full pay period. The summary also lists a separate medical
+award variation (T15353) with operative dates of 11 May and 1 June 2026.
+Check its operative clauses and appointment scope before applying any
+award variation alongside the rural agreement. The summary supplies no
+worked recall examples or payroll interpretation.
