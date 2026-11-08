@@ -1199,3 +1199,30 @@ when the release has no payment rate for them. The ten eligible minutes price
 at the successor rate, exactly AUD 35/3. All 18 focused exclusion tests passed
 on Python 3.15.2. Tasmanian minimum, rounding and crossing-call applicability
 still require a dated interpretation or worked payroll evidence.
+
+### Historical sensitivity input links
+
+Each row below joins the archived scenario field to the same parameter key in
+`formulas.json` at `/outputs/1/parameter_mapping`. The workbook column and
+historical unit are defined in the midpoint mapping above. A dash indicates
+that the archived configuration contains no scenario operation for that key.
+
+| Parameter key | DSA operation pointers | PSA distribution pointer |
+| --- | --- | --- |
+| `base_salary` | — | — |
+| `super_rate` | `/0/variations/0`, `/1/variations/0` | `/0/distribution` |
+| `avg_penalties` | `/4/variation`, `/5/variation` | — |
+| `pub_holiday_penalty` | `/6/variation`, `/7/variation` | — |
+| `private_practice_loading` | `/8/variation`, `/9/variation` | — |
+| `retention_allowance` | `/10/variation`, `/11/variation` | — |
+| `sick_leave` | `/12/variation`, `/13/variation` | — |
+| `professional_development_allowance` | `/14/variation`, `/15/variation` | `/2/distribution` |
+| `annual_leave_weeks` | `/16/variation`, `/17/variation` | — |
+| `annual_leave_loading` | `/18/variation`, `/19/variation` | — |
+| `productive_time_factor` | `/0/variations/1`, `/2/variation`, `/3/variation` | `/1/distribution` |
+| `hours_per_week` | — | — |
+
+The first DSA scenario retains both operations in their configured order.
+These links reconcile all archived scenario fields to workbook input
+identities. Linking them to accepted successor conditions still requires a
+reviewed condition release and, for PSA, scientific qualification.
