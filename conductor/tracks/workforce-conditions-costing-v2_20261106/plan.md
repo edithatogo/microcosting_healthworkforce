@@ -835,3 +835,8 @@ The same installed wheel returned AUD 100 for both the static snapshot
 and the equivalent two-hour roster at a constant AUD 50 hourly rate
 with no prior eligible hours. The roster reported zero overtime. This
 checks static and dynamic agreement through the installed CLI.
+
+The [roster CLI guide](../../../docs/condition_snapshot_cli.md#roster-overtime)
+now documents the request fields, complete-history contract and synthetic
+AUD 125 example. The documented invocation reproduced the installed-wheel
+ledger byte for byte.
