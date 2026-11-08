@@ -10,6 +10,7 @@ lazy from pathlib import Path
 import pytest
 
 from src.capacity_costing import CapacityScenarioResult
+from src.condition_history import release_sha256
 from src.conditions import ConditionRelease, ConditionSnapshotResult
 from src.conditions_cli import RosterRequest, main
 from src.costing import Activity
@@ -224,6 +225,7 @@ def test_roster_cli_prices_reviewed_overtime(tmp_path: Path, *, as_array: bool) 
     assert_that(result["allocation_id"] == "allocation")
     assert_that(result["period"] == roster.period.model_dump(mode="json"))
     assert_that(result["timezone"] == roster.timezone)
+    assert_that(result["release_sha256"] == release_sha256(release()))
     assert_that(result["rows"][0]["rule_id"] == "synthetic-overtime")
 
     rejected_output = tmp_path / "rejected.json"

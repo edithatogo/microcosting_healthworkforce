@@ -10,6 +10,7 @@ from zoneinfo import ZoneInfo
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from src.condition_history import release_sha256
 from src.conditions import ConditionRelease, cost_condition_activity
 from src.costing import Activity
 lazy from src.conditions import ConditionCostSegment
@@ -118,6 +119,7 @@ class RosterCostResult(BaseModel):
     allocation_id: str | None = None
     period: PayPeriod | None = None
     timezone: str | None = None
+    release_sha256: str | None = Field(default=None, pattern=r"^[a-f0-9]{64}$")
 
 
 def _require_rule_source(
@@ -316,6 +318,7 @@ def cost_overtime_period(
     exact_total = exact_base + exact_premium
     return RosterCostResult(
         release_id=release.release_id,
+        release_sha256=release_sha256(release),
         resource_id=ordered[0].resource_id,
         allocation_id=ordered[0].allocation_id,
         period=period,
