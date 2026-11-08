@@ -273,3 +273,24 @@ def test_agreed_time_off_separates_credit_and_cash(multiplier: str, cash: int) -
     assert_that(result.time_off_cash == Fraction(cash))
     assert_that(result.total == Fraction(cash))
     assert_that(result.adjustments[0].adjustment == Fraction(cash - 200))
+
+
+def test_flat_holiday_cash_replaces_precounted_salary() -> None:
+    """Apply the supplied holiday tier to all four authorised hours."""
+    holiday = rule().model_copy(
+        update={
+            "tiers": (
+                DailyTier(starts_at_hours=Decimal(0), multiplier=Decimal("2.5")),
+            ),
+        },
+    )
+    result = cost_capped_daily_overtime(
+        release(),
+        holiday,
+        activity(),
+        "UTC",
+        DailyHistory(prior_hours=Decimal(0), complete=True),
+    )
+    assert_that(result.total == Fraction(400))
+    assert_that(result.adjustments[0].adjustment == Fraction(200))
+    assert_that(result.time_off_hours == 0)
