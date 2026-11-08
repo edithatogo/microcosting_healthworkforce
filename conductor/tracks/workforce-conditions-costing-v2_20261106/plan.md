@@ -1131,3 +1131,9 @@ partitioning payable time under a rolling previous-commencement method.
 All 15 exclusion tests passed. An accepted release still needs authority
 for the reference recall in chains of three or more calls and for the
 order of exclusion, rounding and minimum payment.
+
+The three-call regression distinguishes the selected rolling method from
+a window anchored at the first recall. Calls starting at minutes 0, 45
+and 90 each contain five minutes of work. The rolling method pays only
+the first five minutes. A first-call anchor would also allow the third
+call. The existing test qualifies the rolling calculation only.
