@@ -441,7 +441,11 @@ synthetic amounts. The [published approval decision and agreement](https://ocpe.
 identify the undertaking as a term of the agreement and locate it at
 Annexure A on PDF page 3. The searchable text shows only the annexure
 heading, so applicability review still requires a legible page image or
-transcription. Actual payroll conversion remains a separate evidence gap.
+transcription. Match any replacement copy against FWC agreement AE532390,
+approval [2026] FWCA 749 and matter AG2026/305 before checking whether the
+undertaking modifies clause 46 or clause 80.19. The official download routes
+returned HTTP 403 from the CLI and the local filename search found no copy.
+Actual payroll conversion remains a separate evidence gap.
 Clause 80.19(d) governs the extended half-pay period and leave accrual.
 Clause 80.19(h) separately limits counted service to the full-pay equivalent.
 Keep these quantities separate from the monetary allowance calculation.

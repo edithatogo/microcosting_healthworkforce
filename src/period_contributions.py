@@ -487,6 +487,9 @@ def quarterly_levy_due_date(
     working_days: dict[date, bool],
 ) -> date:
     """Find the twelfth working day using explicit calendar-day classifications."""
+    if type(quarter_end) is not date:
+        msg = "Levy period end must be a calendar date"
+        raise ValueError(msg)
     if (quarter_end.month, quarter_end.day) not in (
         (3, 31),
         (6, 30),

@@ -662,3 +662,9 @@ def test_quarterly_levy_due_date_uses_next_year_calendar() -> None:
     del calendar[due]
     with pytest.raises(ValueError, match="complete working-day calendar"):
         quarterly_levy_due_date(end, calendar)
+
+
+def test_quarterly_levy_due_date_rejects_timestamp_boundary() -> None:
+    """A timestamp cannot act as a calendar date even at midnight."""
+    with pytest.raises(ValueError, match="must be a calendar date"):
+        quarterly_levy_due_date(datetime(2026, 3, 31, tzinfo=UTC), {})
