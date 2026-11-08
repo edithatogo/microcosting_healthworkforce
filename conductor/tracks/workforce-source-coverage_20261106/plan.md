@@ -476,3 +476,7 @@ industry, workplace geography and the workplace imputation flag. Basic
 provides hours bands. Pro lists a separate hours worked field. A native
 export must still verify industry class selection and suppression before
 these data can support replacement weights.
+
+Source screening now rejects whitespace-only lead identities, titles and
+locators. Five focused screening tests passed. Lead validation preserves
+the distinction between discovery and assessed applicability.

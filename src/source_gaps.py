@@ -57,7 +57,10 @@ def screen_gaps(
     if len({lead.lead_id for lead in leads}) != len(leads):
         msg = "Duplicate discovery lead identity"
         raise ValueError(msg)
-    if any(not all((lead.lead_id, lead.title, lead.uri)) for lead in leads):
+    if any(
+        not all(value.strip() for value in (lead.lead_id, lead.title, lead.uri))
+        for lead in leads
+    ):
         msg = "Discovery leads require identity, title and URI"
         raise ValueError(msg)
     return tuple(
