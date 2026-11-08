@@ -805,3 +805,8 @@ Hosted main CI at 12c50e5 passed all 999 tests, including all nine legacy
 compatibility cases and both workbook projections that failed to start
 locally. This verifies the hosted LibreOffice path. The macOS conversion
 failure remains open. [Hosted CI receipt](https://github.com/edithatogo/microcosting_healthworkforce/actions/runs/42429103464)
+
+An explicit-calendar regression verifies that a hypothetical additional
+weekday closure moves the September 2026 quarter deadline from 19 to
+20 October. All 25 contribution tests passed. Actual office closure
+classification still requires pay-office evidence.

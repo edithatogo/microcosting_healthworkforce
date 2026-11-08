@@ -488,3 +488,12 @@ The twelfth working day is the receipt deadline. Keep the information
 submission, actual EFT and calculated receipt deadline separate. Appendix A
 does not specify which local holidays or office closures count as working
 days, so retain the applicable pay-office calendar as an explicit input.
+
+Queensland publishes separate [statewide](https://www.qld.gov.au/recreation/travel/holidays/public),
+[show](https://www.qld.gov.au/recreation/travel/holidays/show) and
+[special holiday](https://www.qld.gov.au/recreation/travel/holidays/special)
+calendars. The show and special holiday schedules identify local areas.
+Use those sources to build a candidate calendar for the confirmed pay-office
+location. The worker location alone cannot establish the calendar used by
+the office or scheme administrator. The office mapping and closure treatment
+remain unverified.
