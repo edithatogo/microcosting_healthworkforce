@@ -647,3 +647,18 @@ def test_quarterly_levy_due_date_requires_complete_calendar() -> None:
         quarterly_levy_due_date(end, calendar)
     with pytest.raises(ValueError, match="quarter boundary"):
         quarterly_levy_due_date(date(2026, 3, 30), calendar)
+
+
+def test_quarterly_levy_due_date_uses_next_year_calendar() -> None:
+    """Exclude quarter end and stop once the twelfth working day is reached."""
+    end = date(2026, 12, 31)
+    due = date(2027, 1, 19)
+    new_year = date(2027, 1, 1)
+    calendar = {end: True}
+    for offset in range(1, (due - end).days + 1):
+        day = end + timedelta(days=offset)
+        calendar[day] = day.weekday() in range(5) and day != new_year
+    assert_that(quarterly_levy_due_date(end, calendar) == due)
+    del calendar[due]
+    with pytest.raises(ValueError, match="complete working-day calendar"):
+        quarterly_levy_due_date(end, calendar)

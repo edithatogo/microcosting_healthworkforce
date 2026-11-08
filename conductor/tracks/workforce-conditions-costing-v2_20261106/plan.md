@@ -732,3 +732,42 @@ Queensland holiday scenarios yield 20 April and 19 October respectively.
 Main CI and Security passed at 334f8eb. An actual deadline still requires
 the applicable pay-office calendar, and the calculated date remains
 separate from the actual remittance timestamp.
+
+The NT half-pay regression checks full and half payment when one nominal
+allowance period spans a rate change. It verifies exact accrued and payable
+amounts and retains both condition IDs. All 14 periodic allowance tests
+passed on Python 3.15.2. Actual payroll application remains open pending
+the Annexure A and conversion evidence in the source-coverage track.
+
+The pinned archive profile maps the leave-loading group at BK1:BP28.
+Direct workbook inspection confirmed the raw BK1 label has two trailing
+tabs and row 3 uses LL, MP and UL in both units. BL and BO are the
+annual and hourly midpoint columns. The separate salary summary at
+BK29:BP33 shares the group header. Preserve both regions and the legacy
+unmatched result when comparing archived diagnostics.
+
+The workbook profile regression now checks the raw BK1 header and both
+midpoint mappings in the detail and summary regions. All six profile
+tests passed on Python 3.15.2.
+
+Archive regression also verifies all six lower, midpoint and upper column
+meanings and units for both regions. The legacy comparison still reads its
+original exact-match groups and retains the delivered diagnostic history.
+
+The focused dynamic qualification passed 37 tests across assignment,
+roster, recall and cost properties. Existing cases cover snapshot parity
+at constant rates, wage and classification boundaries, elapsed time across
+a repeated DST hour, prior-hours overtime and segmentation invariance.
+These tests use synthetic releases. Source-backed rule interaction
+qualification and the final package gate remain open.
+
+A synthetic overnight roster test crosses the overtime threshold at a wage
+boundary. The result is AUD 140 for one ordinary hour at AUD 50 and one
+overtime hour at AUD 60 × 1.5. The ledger retains the later salary condition.
+All nine roster tests passed on Python 3.15.2.
+
+The levy calendar regression covers a December quarter rolling into the
+next year. It excludes the quarter-end date, uses the supplied January
+classifications and rejects a calendar missing the twelfth working day.
+All 23 period contribution tests passed. Actual deadlines still require
+the applicable pay-office calendar.

@@ -154,7 +154,8 @@ def test_split_period_retains_nominal_denominator_and_condition_lineage(
     assert_that(scheduled.payable == before.payable + after.payable)
 
 
-def test_schedule_conserves_hours_across_rate_change() -> None:
+@pytest.mark.parametrize("payment_factor", ["1", "0.5"])
+def test_schedule_conserves_hours_across_rate_change(payment_factor: str) -> None:
     """Price the same nominal period once across two explicitly allocated rates."""
     first = condition("first", "fixed_annual", "1975", "AUD/year").model_copy(
         update={"component": "training", "effective_to": date(2026, 6, 8)},
@@ -163,17 +164,18 @@ def test_schedule_conserves_hours_across_rate_change() -> None:
         update={"component": "training", "effective_from": date(2026, 6, 8)},
     )
     dated = release().model_copy(update={"conditions": (first, second)})
-    parent = period(portion("ordinary", "76", "1", "1"))
+    parent = period(portion("ordinary", "76", "1", payment_factor))
     segments = (
-        period(portion("ordinary", "38", "1", "1")).model_copy(
+        period(portion("ordinary", "38", "1", payment_factor)).model_copy(
             update={"ends_on": date(2026, 6, 8)},
         ),
-        period(portion("ordinary", "38", "1", "1")).model_copy(
+        period(portion("ordinary", "38", "1", payment_factor)).model_copy(
             update={"starts_on": date(2026, 6, 8)},
         ),
     )
     result = cost_periodic_allowance_schedule(dated, "training", parent, segments)
-    assert_that(result.accrued == result.payable == Fraction(5925, 52))
+    assert_that(result.accrued == Fraction(5925, 52))
+    assert_that(result.payable == result.accrued * Fraction(payment_factor))
     assert_that(
         [c.condition.condition_id for c in result.segments] == ["first", "second"],
     )

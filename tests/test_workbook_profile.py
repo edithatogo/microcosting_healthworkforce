@@ -156,3 +156,32 @@ def test_publication_comparisons_preserve_formula_derived_roles() -> None:
     third = {cell.coordinate: cell for cell in tables["WS10-R01-comparison-3"].cells}
     assert_that(third["BE15"].source.value == "BS")
     assert_that(third["BE16"].column_name == "bioinformatics_staff_over_lab_technician")
+
+
+def test_archived_leave_loading_preserves_header_and_midpoints() -> None:
+    """Distinguish the archived leave-loading detail from its salary summary."""
+    catalog = read_workbook_catalog(Path("data/Labour Model - v3, 20240328.xlsx"))
+    profile = load_candidate_profile()
+    extraction = extract_tables(catalog, profile.table_definitions(catalog.sha256))
+    tables = {table.definition.table_id: table for table in extraction.tables}
+    detail = {cell.coordinate: cell for cell in tables["WS07-R01-leave_loading"].cells}
+    summary = {
+        cell.coordinate: cell for cell in tables["WS07-R01-summary_salary"].cells
+    }
+    assert_that(detail["BK1"].source.value == "Leave Loading (%)\t\t")
+    for columns, frequency, unit in (
+        (["BK", "BL", "BM"], "annual", "AUD/year"),
+        (["BN", "BO", "BP"], "hourly", "AUD/hour"),
+    ):
+        for column, label, bound in zip(
+            columns,
+            ("LL", "MP", "UL"),
+            ("lower", "midpoint", "upper"),
+            strict=True,
+        ):
+            assert_that(detail[f"{column}3"].source.value == label)
+            detail_cell = detail[f"{column}4"]
+            summary_cell = summary[f"{column}29"]
+            assert_that(detail_cell.column_name == f"leave_loading_{frequency}_{bound}")
+            assert_that(summary_cell.column_name == f"salary_{frequency}_{bound}")
+            assert_that(detail_cell.unit == summary_cell.unit == unit)
