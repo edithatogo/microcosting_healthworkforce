@@ -28,6 +28,14 @@ class WorkbookConditionOrigin(BaseModel):
     review_evidence: str = Field(min_length=1)
 
 
+class PayrollSalaryDivisor(BaseModel):
+    """Exact annual divisor sourced by the enclosing salary condition."""
+
+    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
+    numerator: int = Field(gt=0)
+    denominator: int = Field(gt=0)
+
+
 class Condition(BaseModel):
     """A single versioned condition; acceptance is an explicit reviewer assertion."""
 
@@ -46,6 +54,7 @@ class Condition(BaseModel):
     retrospective: RetrospectiveAuthority | None = None
     included_components: tuple[str, ...] = ()
     workbook_origin: WorkbookConditionOrigin | None = None
+    payroll_salary_divisor: PayrollSalaryDivisor | None = None
 
     @model_validator(mode="after")
     def valid_condition(self) -> Self:
@@ -56,6 +65,9 @@ class Condition(BaseModel):
             "fixed_annual": "AUD/year",
             "salary_fraction": "fraction",
         }
+        if self.payroll_salary_divisor is not None and self.kind != "salary":
+            msg = "Payroll divisor requires a salary condition"
+            raise ValueError(msg)
         if self.unit != units[self.kind]:
             msg = "Condition unit does not match its rule kind"
             raise ValueError(msg)
@@ -186,12 +198,15 @@ def hourly_components(release: ConditionRelease, when: date) -> dict[str, Decima
         msg = "Exactly one salary and paid-hours condition must cover the date"
         raise ValueError(msg)
     salary, paid_hours = salaries[0], hours[0]
-    result = {salary.component: salary.value / paid_hours.value}
+    divisor = salary.payroll_salary_divisor
+    numerator = paid_hours.value if divisor is None else Decimal(divisor.numerator)
+    denominator = 1 if divisor is None else divisor.denominator
+    result = {salary.component: salary.value * denominator / numerator}
     for item in current:
         if item.kind == "fixed_annual":
             result[item.component] = item.value / paid_hours.value
         elif item.kind == "salary_fraction":
-            result[item.component] = salary.value * item.value / paid_hours.value
+            result[item.component] = salary.value * item.value * denominator / numerator
     return result
 
 
@@ -224,6 +239,8 @@ class ConditionCostResult(BaseModel):
 def exact_hourly_components(
     release: ConditionRelease,
     when: date,
+    *,
+    use_payroll_basis: bool = True,
 ) -> dict[str, Fraction]:
     """Keep annual condition ratios exact until the caller chooses rounding."""
     release = ConditionRelease.model_validate(release.model_dump())
@@ -237,12 +254,18 @@ def exact_hourly_components(
         raise ValueError(msg)
     salary = Fraction(salaries[0].value)
     annual_hours = Fraction(hours[0].value)
-    components = {salaries[0].component: salary / annual_hours}
+    divisor = salaries[0].payroll_salary_divisor
+    salary_hours = (
+        Fraction(divisor.numerator, divisor.denominator)
+        if use_payroll_basis and divisor is not None
+        else annual_hours
+    )
+    components = {salaries[0].component: salary / salary_hours}
     for item in current:
         if item.kind == "fixed_annual":
             components[item.component] = Fraction(item.value) / annual_hours
         elif item.kind == "salary_fraction":
-            components[item.component] = salary * Fraction(item.value) / annual_hours
+            components[item.component] = salary * Fraction(item.value) / salary_hours
     return components
 
 

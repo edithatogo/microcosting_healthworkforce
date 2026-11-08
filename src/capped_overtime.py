@@ -106,6 +106,21 @@ class CappedOvertimeResult:
     time_off_cash: Fraction | None = None
 
 
+def _uncapped_salary_rate(release: ConditionRelease, day: date) -> Fraction:
+    current = [
+        c for c in release.conditions if c.effective_from <= day < c.effective_to
+    ]
+    salary = next(c for c in current if c.kind == "salary")
+    if salary.included_components:
+        msg = "Capped overtime requires salary without bundled components"
+        raise ValueError(msg)
+    if salary.payroll_salary_divisor is not None:
+        msg = "Capped overtime requires a separately qualified payroll salary basis"
+        raise ValueError(msg)
+    paid_hours = next(c for c in current if c.kind == "paid_hours")
+    return Fraction(salary.value) / Fraction(paid_hours.value)
+
+
 def cost_capped_daily_overtime(
     release: ConditionRelease,
     rule: CappedDailyRule,
@@ -152,15 +167,7 @@ def cost_capped_daily_overtime(
         msg = "Capped overtime source hash mismatch"
         raise ValueError(msg)
     base = cost_condition_activity(release, activity, local_timezone)
-    current = [
-        c for c in release.conditions if c.effective_from <= day < c.effective_to
-    ]
-    salary = next(c for c in current if c.kind == "salary")
-    if salary.included_components:
-        msg = "Capped overtime requires salary without bundled components"
-        raise ValueError(msg)
-    paid_hours = next(c for c in current if c.kind == "paid_hours")
-    salary_rate = Fraction(salary.value) / Fraction(paid_hours.value)
+    salary_rate = _uncapped_salary_rate(release, day)
     basis = min(salary_rate, Fraction(rule.salary_cap_hourly))
     elapsed = end - start
     micros = (elapsed.days * 86400 + elapsed.seconds) * 1000000 + elapsed.microseconds

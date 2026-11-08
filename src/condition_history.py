@@ -39,6 +39,8 @@ def release_sha256(release: ConditionRelease) -> str:
     if legacy:
         payload.pop("as_known_at")
     for item in payload["conditions"]:
+        if item["payroll_salary_divisor"] is None:
+            item.pop("payroll_salary_divisor")
         if item["workbook_origin"] is None:
             item.pop("workbook_origin")
         if legacy:

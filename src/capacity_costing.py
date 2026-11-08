@@ -75,7 +75,7 @@ def capacity_scenario(
     if len({item.loss_id for item in inputs.losses}) != len(inputs.losses):
         msg = "Duplicate capacity loss identity"
         raise ValueError(msg)
-    rates = exact_hourly_components(release, when)
+    rates = exact_hourly_components(release, when, use_payroll_basis=False)
     current = [
         c for c in release.conditions if c.effective_from <= when < c.effective_to
     ]
