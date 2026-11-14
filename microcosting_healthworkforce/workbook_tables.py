@@ -8,7 +8,10 @@ from typing import TYPE_CHECKING
 from openpyxl.utils.cell import column_index_from_string, range_boundaries
 
 if TYPE_CHECKING:
-    from microcosting_healthworkforce.workbook_catalog import CellRecord, WorkbookCatalog
+    from microcosting_healthworkforce.workbook_catalog import (
+        CellRecord,
+        WorkbookCatalog,
+    )
 
 
 @dataclass(frozen=True)

@@ -73,7 +73,10 @@ def execute(entrypoint: str, inputs: dict[str, Any], folder: Path) -> pl.DataFra
     runner.mapping = parameter_mapping(inputs["formulas"])
     spec_path = folder / "scenarios.json"
     spec_path.write_text(json.dumps(inputs["scenarios"]))
-    with patch("microcosting_healthworkforce.workbook_run.config.PSA_SCENARIOS_FILE_PATH", str(spec_path)):
+    with patch(
+        "microcosting_healthworkforce.workbook_run.config.PSA_SCENARIOS_FILE_PATH",
+        str(spec_path),
+    ):
         runner.run_psa()
     return pl.read_csv(folder / "psa_results.csv")
 

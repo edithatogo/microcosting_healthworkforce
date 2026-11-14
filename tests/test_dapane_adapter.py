@@ -16,7 +16,6 @@ from pydantic import TypeAdapter
 
 from microcosting_healthworkforce.dapane_adapter import (
     DapaneQuoteBinding,
-    JsonObject,
     build_dapane_request,
     evaluate_dapane,
     export_dapane_quotes,
@@ -29,6 +28,8 @@ from microcosting_healthworkforce.unit_quotes import (
     price_units,
 )
 from tests.checks import assert_that
+
+lazy from microcosting_healthworkforce.dapane_adapter import JsonObject
 
 _EXAMPLES = Path(__file__).resolve().parents[1] / "examples" / "dapane"
 _PIN = "9cd5e8bb48b29186b7fd4ea911f914c0e0dbf4f3fc188a1f6728cbe65947ec60"

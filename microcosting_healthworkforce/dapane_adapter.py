@@ -9,11 +9,11 @@ encodes an explicit hour-to-minute denominator for the shared Rust evaluator.
 import json
 import re
 from datetime import date
-from decimal import Decimal
 from fractions import Fraction
 from hashlib import sha256
 from importlib import import_module
 from typing import Literal, Protocol, Self, cast
+lazy from decimal import Decimal
 lazy from typing import NoReturn
 
 from pydantic import Field, TypeAdapter, model_validator
@@ -271,14 +271,19 @@ def load_dapane_quotes_json(text: str, *, expected_sha256: str) -> JsonObject:
     come from the caller's selected release. Rebuilding prevents a substituted
     exported amount, component, date or source from disagreeing with its snapshot.
     """
-    if not isinstance(expected_sha256, str) or _DIGEST.fullmatch(expected_sha256) is None:
+    if (
+        not isinstance(expected_sha256, str)
+        or _DIGEST.fullmatch(expected_sha256) is None
+    ):
         message = "An explicit lowercase SHA-256 release pin is required"
         raise ValueError(message)
     payload = strict_json_object(text)
     if payload.get("artifact_sha256") != expected_sha256:
         message = "Quotation artifact pin mismatch"
         raise ValueError(message)
-    unsigned = {key: value for key, value in payload.items() if key != "artifact_sha256"}
+    unsigned = {
+        key: value for key, value in payload.items() if key != "artifact_sha256"
+    }
     if _sha256(unsigned) != expected_sha256:
         message = "Quotation artifact content digest mismatch"
         raise ValueError(message)
@@ -301,7 +306,10 @@ def load_dapane_quotes_json(text: str, *, expected_sha256: str) -> JsonObject:
 def _exact(value: Decimal | Fraction) -> JsonValue:
     """Encode the supplied number exactly; this performs no valuation."""
     if isinstance(value, Fraction):
-        return {"numerator": str(value.numerator), "denominator": str(value.denominator)}
+        return {
+            "numerator": str(value.numerator),
+            "denominator": str(value.denominator),
+        }
     return format(value, "f")
 
 
