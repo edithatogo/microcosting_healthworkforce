@@ -28,7 +28,6 @@ from microcosting_healthworkforce.unit_quotes import (
     price_units,
 )
 from tests.checks import assert_that
-
 lazy from microcosting_healthworkforce.dapane_adapter import JsonObject
 
 _EXAMPLES = Path(__file__).resolve().parents[1] / "examples" / "dapane"
@@ -172,7 +171,7 @@ def test_hash_does_not_bypass_provider_or_release_identity(
 )
 def test_json_rejects_duplicates_and_inexact_numeric_literals(text: str) -> None:
     """Transport must not hide a substituted key or coerce floating amounts."""
-    with pytest.raises(ValueError, match="Duplicate|floating|nonfinite"):
+    with pytest.raises(ValueError, match=r"Duplicate|floating|nonfinite"):
         strict_json_object(text)
 
 
@@ -182,14 +181,14 @@ def test_json_rejects_oversize_nesting_and_invalid_top_level() -> None:
         strict_json_object('{"payload":"' + "x" * 2_000_000 + '"}')
     with pytest.raises(ValueError, match="nesting"):
         strict_json_object('{"value":' + "[" * 70 + "0" + "]" * 70 + "}")
-    with pytest.raises(ValueError, match="object"):
+    with pytest.raises(TypeError, match="object"):
         strict_json_object("[]")
 
 
 @pytest.mark.parametrize("pin", ["", "A" * 64, "0" * 63, "0" * 64])
 def test_external_pin_is_required(pin: str) -> None:
     """An artifact cannot authenticate itself by carrying its own digest."""
-    with pytest.raises(ValueError, match="pin|SHA-256"):
+    with pytest.raises(ValueError, match=r"pin|SHA-256"):
         load_dapane_quotes_json(json.dumps(artifact()), expected_sha256=pin)
 
 
@@ -222,7 +221,7 @@ def test_binding_cannot_relabel_components_or_infer_denominators(
 ) -> None:
     """The source's component and explicit supported unit relation are binding."""
     binding = public_bindings()[1].model_copy(update=updates)
-    with pytest.raises(ValueError, match="component|unit|absent|integer"):
+    with pytest.raises(ValueError, match=r"component|unit|absent|integer"):
         export_dapane_quotes(public_release(), (binding,))
 
 
@@ -272,7 +271,7 @@ def test_legacy_exact_value_and_digest_contract_remain_distinct() -> None:
         update={
             "quote_id": release.quotes[0].quote_id,
             "unit": "hour",
-            "quantity": Decimal("1"),
+            "quantity": Decimal(1),
         },
     )
     original = price_units(release, (quantity,))
@@ -322,7 +321,7 @@ def test_decimal_expansion_is_bounded_before_fixed_point_encoding(amount: str) -
     release = public_release()
     quote = release.quotes[0].model_copy(update={"amount": Decimal(amount)})
     candidate = release.model_copy(update={"quotes": (quote,)})
-    with pytest.raises(ValueError, match="digits|scale|unsigned"):
+    with pytest.raises(ValueError, match=r"digits|scale|unsigned"):
         export_dapane_quotes(candidate, public_bindings())
 
 
@@ -352,7 +351,7 @@ def test_quantity_transport_has_the_same_precision_bounds(
 ) -> None:
     """Exact quantities also fail before oversized decimal or rational output."""
     quantity = exposure().model_copy(update={"quantity": value})
-    with pytest.raises(ValueError, match="digits|scale|precision"):
+    with pytest.raises(ValueError, match=r"digits|scale|precision"):
         build_dapane_request(
             json.dumps(artifact()),
             (quantity,),
@@ -363,7 +362,7 @@ def test_quantity_transport_has_the_same_precision_bounds(
 
 
 def test_source_kind_is_not_implicitly_promoted() -> None:
-    """Only the explicit public-reference profile or labelled synthetic input exports."""
+    """Only public-reference or explicitly synthetic source profiles export."""
     release = public_release()
     original = release.sources.records[0]
     unqualified_source = original.model_copy(update={"kind": "unqualified_source"})

@@ -16,13 +16,20 @@ def test_legacy_and_canonical_import_orders_preserve_identity(first: str) -> Non
 import importlib
 import pickle
 import sys
+from importlib.resources import files
 first = sys.argv[1]
 second = "src" if first != "src" else "microcosting_healthworkforce"
 a = importlib.import_module(first + ".unit_quotes")
 b = importlib.import_module(second + ".unit_quotes")
+assert importlib.import_module(first) is importlib.import_module(second)
 assert a is b
 assert a.UnitQuoteRelease is b.UnitQuoteRelease
 assert a.__spec__.name == "microcosting_healthworkforce.unit_quotes"
+profile = "workbook_candidate_profile.json"
+assert (
+    files(first).joinpath(profile).read_bytes()
+    == files(second).joinpath(profile).read_bytes()
+)
 old_class = pickle.loads(b"csrc.unit_quotes\\nUnitQuoteRelease\\n.")
 assert old_class is a.UnitQuoteRelease
 assert pickle.loads(pickle.dumps(a.UnitQuoteRelease)) is a.UnitQuoteRelease

@@ -57,7 +57,19 @@ jobs:
           for command in microcosting-healthworkforce microcosting-healthworkforce-v2 microcosting-healthworkforce-units microcosting-healthworkforce-leave; do
             "$RUNNER_TEMP/workforce-wheel/bin/$command" --help
           done
-          "$RUNNER_TEMP/workforce-wheel/bin/python" -c 'import importlib; a = importlib.import_module("src.unit_quotes"); b = importlib.import_module("microcosting_healthworkforce.unit_quotes"); assert a is b; assert a.UnitQuoteRelease is b.UnitQuoteRelease'
+          "$RUNNER_TEMP/workforce-wheel/bin/python" -I - <<'PY'
+          import importlib
+          from importlib.resources import files
+          from microcosting_healthworkforce.workbook_profile import load_candidate_profile
+
+          a = importlib.import_module("src.unit_quotes")
+          b = importlib.import_module("microcosting_healthworkforce.unit_quotes")
+          assert a is b
+          assert a.UnitQuoteRelease is b.UnitQuoteRelease
+          assert load_candidate_profile().definitions
+          name = "workbook_candidate_profile.json"
+          assert files("src").joinpath(name).read_bytes() == files("microcosting_healthworkforce").joinpath(name).read_bytes()
+          PY
       - name: Profile synthetic formula contracts
         run: uv run --no-sync python -m cProfile -o profile.out -m pytest tests/test_formula_engine.py --disable-socket --allow-unix-socket --timeout=120 -q
       - name: Upload coverage using GitHub OIDC

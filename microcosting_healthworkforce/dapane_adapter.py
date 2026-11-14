@@ -24,7 +24,7 @@ from microcosting_healthworkforce.unit_quotes import (
     UnitQuoteRelease,
 )
 
-type JsonValue = None | bool | int | str | list[JsonValue] | dict[str, JsonValue]
+type JsonValue = bool | int | str | list[JsonValue] | dict[str, JsonValue] | None
 type JsonObject = dict[str, JsonValue]
 
 _SCHEMA = "workforce-dapane-quotes/1"
@@ -98,7 +98,7 @@ def _object(value: JsonValue) -> JsonObject:
     """Require an object at a structural contract boundary."""
     if not isinstance(value, dict):
         message = "Expected a JSON object"
-        raise ValueError(message)
+        raise TypeError(message)
     return value
 
 
@@ -106,7 +106,7 @@ def _array(value: JsonValue) -> list[JsonValue]:
     """Require an array at a structural contract boundary."""
     if not isinstance(value, list):
         message = "Expected a JSON array"
-        raise ValueError(message)
+        raise TypeError(message)
     return value
 
 
@@ -114,11 +114,11 @@ def _string(value: JsonValue) -> str:
     """Require a string without coercing a numeric or absent identifier."""
     if not isinstance(value, str):
         message = "Expected a JSON string"
-        raise ValueError(message)
+        raise TypeError(message)
     return value
 
 
-def strict_json_object(text: str) -> JsonObject:
+def strict_json_object(text: object) -> JsonObject:
     """Read bounded JSON with duplicate-key and binary-float rejection."""
     if not isinstance(text, str):
         message = "JSON input must be text"
@@ -178,10 +178,7 @@ def _decimal(value: Decimal) -> str:
         message = "Dapane transport requires finite unsigned decimal values"
         raise ValueError(message)
     number = value.as_tuple()
-    exponent = number.exponent
-    if not isinstance(exponent, int):
-        message = "Dapane transport requires a finite decimal exponent"
-        raise ValueError(message)
+    exponent = cast("int", number.exponent)
     scale = max(-exponent, 0)
     digits = max(len(number.digits) + exponent, 1) + scale
     if digits > _MAX_NUMERIC_DIGITS or scale > _MAX_DECIMAL_SCALE:
@@ -297,7 +294,7 @@ def export_dapane_quotes(
     return result
 
 
-def load_dapane_quotes_json(text: str, *, expected_sha256: str) -> JsonObject:
+def load_dapane_quotes_json(text: str, *, expected_sha256: object) -> JsonObject:
     """Verify an independently supplied pin and regenerate every exported quote.
 
     A self-consistent hash is not source authorization. The expected pin must

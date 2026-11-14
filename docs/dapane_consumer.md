@@ -119,10 +119,21 @@ missing-column behavior, workbook source assertions and original output artifact
 remain under their existing contracts. Namespace-induced engine-file fingerprints
 change; numerical history must not be relabelled as a new source edition.
 
-## Verification status
+## Verification
 
-The pinned Python 3.15.2 environment and original locked dependencies installed
-successfully before the local execution environment became unavailable. Hosted
-CI and the Dapane coordinating track provide subsequent exact-head runtime and
-independently installed two-consumer evidence. Initial implementation commits do
-not establish passed checks or complete the broader workforce research tracks.
+The provider CI runs the full suite with LibreOffice Calc, locked dependencies and
+exact Python 3.15.2. It also checks formatting, lint, strict types and Bandit before
+building and exercising the wheel outside the checkout. The installed check
+includes historical console names, shared legacy/canonical model identity and
+the bundled workbook profile. Source-only adapter and namespace checks can be
+run with:
+
+```sh
+uv run --no-sync pytest tests/test_dapane_adapter.py tests/test_namespace_compatibility.py --disable-socket --allow-unix-socket --timeout=120
+```
+
+The coordinating Dapane track records exact provider commits and installed-wheel
+evidence for the separate Python 3.15.2 and 3.15.1 environments. Its checks compare
+the provider artifact with the independent genomic consumer and native Rust
+valuation. These bounded checks do not complete the broader workforce research
+tracks.

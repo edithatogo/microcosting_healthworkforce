@@ -79,7 +79,9 @@ class _LegacyFinder(MetaPathFinder):
         if canonical_spec is None:
             return None
         alias_spec = spec_from_loader(
-            fullname, _LegacyLoader(canonical), origin=canonical_spec.origin
+            fullname,
+            _LegacyLoader(canonical),
+            origin=canonical_spec.origin,
         )
         if alias_spec is not None:
             alias_spec.has_location = canonical_spec.has_location
@@ -87,3 +89,5 @@ class _LegacyFinder(MetaPathFinder):
 
 
 sys.meta_path.insert(0, _LegacyFinder())
+# Preserve importlib.resources and root identity for callers of the old package.
+sys.modules[__name__] = import_module("microcosting_healthworkforce")

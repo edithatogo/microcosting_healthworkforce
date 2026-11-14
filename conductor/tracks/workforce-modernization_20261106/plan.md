@@ -252,12 +252,20 @@ packet, with broader documentation/artifact inventory work still pending.
 
 Coordinating track: [Dapane Python consumers](https://github.com/edithatogo/dapane/tree/main/conductor/tracks/python_two_consumers_20261108).
 
-- [~] Provide the canonical `microcosting_healthworkforce` namespace with explicit legacy import and console compatibility.
-- [~] Export immutable, source-selected quotation artifacts and delegate valuation to installed Dapane.
-- [~] Qualify one bounded public HP3.1 hourly reference and exact minute transport.
-- [ ] Verify provider gates and independently installed wheels on the pinned Python 3.15.2 runtime.
-- [ ] Record source, compatibility and rollback evidence; retain broader source and scientific acceptance separately.
+- [x] Provide the canonical `microcosting_healthworkforce` namespace with explicit legacy import and console compatibility.
+- [x] Export immutable, source-selected quotation artifacts and delegate valuation to installed Dapane.
+- [x] Qualify one bounded public HP3.1 hourly reference and exact minute transport.
+- [~] Verify provider gates and independently installed wheels on the pinned Python 3.15.2 runtime.
+- [x] Record source, compatibility and rollback evidence; retain broader source and scientific acceptance separately.
 
 The changes use public source observations and synthetic resource quantities.
 No private source packet, original workbook receipt, payroll eligibility or
 scientific PSA acceptance is promoted by this handoff.
+
+Provider review corrected bounded decimal expansion, module origins and bundled
+profile lookup. The exact Python 3.15.2 local environment passes Ruff formatting
+and lint, strict basedpyright, Bandit, and 64 focused adapter/namespace/profile
+tests. The full local run passes 1,082 tests with 91.17% coverage; three native
+workbook tests require the unavailable LibreOffice executable. The unchanged
+hosted gate installs that dependency and retains all three tests. PR #305 and the
+coordinating track record subsequent exact-head and installed-wheel evidence.

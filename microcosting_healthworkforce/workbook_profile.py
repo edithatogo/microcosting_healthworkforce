@@ -64,7 +64,7 @@ class CandidateProfile(BaseModel):
 def load_candidate_profile() -> CandidateProfile:
     """Read bundled metadata; raw workbook contents are not included."""
     content = (
-        files("src")
+        files("microcosting_healthworkforce")
         .joinpath("workbook_candidate_profile.json")
         .read_text(
             encoding="utf-8",
