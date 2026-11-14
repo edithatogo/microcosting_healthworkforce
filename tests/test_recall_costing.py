@@ -6,8 +6,8 @@ from fractions import Fraction
 
 import pytest
 
-from src.recall_costing import cost_recall_windows
-from src.recall_windows import RecallEvent
+from microcosting_healthworkforce.recall_costing import cost_recall_windows
+from microcosting_healthworkforce.recall_windows import RecallEvent
 from tests.checks import assert_that
 from tests.test_costing import release
 

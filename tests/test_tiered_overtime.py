@@ -7,9 +7,13 @@ from fractions import Fraction
 
 import pytest
 
-from src.costing import Activity
-from src.roster_costing import PayPeriod
-from src.tiered_overtime import OvertimeTier, TieredOvertimeRule, cost_tiered_overtime
+from microcosting_healthworkforce.costing import Activity
+from microcosting_healthworkforce.roster_costing import PayPeriod
+from microcosting_healthworkforce.tiered_overtime import (
+    OvertimeTier,
+    TieredOvertimeRule,
+    cost_tiered_overtime,
+)
 from tests.checks import assert_that
 from tests.test_roster_costing import release
 

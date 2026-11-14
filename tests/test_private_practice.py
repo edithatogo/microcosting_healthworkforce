@@ -7,7 +7,7 @@ from fractions import Fraction
 
 import pytest
 
-from src.private_practice import (
+from microcosting_healthworkforce.private_practice import (
     PrivatePracticeComparison,
     compare_private_practice_wages,
 )

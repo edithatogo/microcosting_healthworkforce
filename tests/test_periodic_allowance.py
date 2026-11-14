@@ -8,21 +8,21 @@ from fractions import Fraction
 
 import pytest
 
-from src.condition_history import release_sha256
-from src.conditions import ConditionRelease
-from src.period_contributions import (
+from microcosting_healthworkforce.condition_history import release_sha256
+from microcosting_healthworkforce.conditions import ConditionRelease
+from microcosting_healthworkforce.period_contributions import (
     ContributionPayment,
     cost_contribution_payments,
     reconcile_allowance_payment,
 )
-from src.periodic_allowance import (
+from microcosting_healthworkforce.periodic_allowance import (
     AllowancePeriod,
     AllowancePortion,
     cost_periodic_allowance,
     cost_periodic_allowance_across_releases,
     cost_periodic_allowance_schedule,
 )
-from src.source_registry import SourceRegistry
+from microcosting_healthworkforce.source_registry import SourceRegistry
 from tests.checks import assert_that
 from tests.test_conditions import condition
 from tests.test_period_contributions import START, prices, rule

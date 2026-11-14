@@ -7,7 +7,10 @@ from fractions import Fraction
 
 import pytest
 
-from src.monthly_budget import MonthlySalaryRate, monthly_salary_budget
+from microcosting_healthworkforce.monthly_budget import (
+    MonthlySalaryRate,
+    monthly_salary_budget,
+)
 from tests.checks import assert_that
 
 

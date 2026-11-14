@@ -7,7 +7,7 @@ import polars as pl
 from hypothesis import given
 from hypothesis import strategies as st
 
-from src.polars_rates import annual_to_rates
+from microcosting_healthworkforce.polars_rates import annual_to_rates
 from tests.checks import assert_that
 
 

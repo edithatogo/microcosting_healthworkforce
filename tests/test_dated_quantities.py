@@ -9,7 +9,7 @@ from zoneinfo import ZoneInfo
 import pytest
 from pydantic import ValidationError
 
-from src.costing import (
+from microcosting_healthworkforce.costing import (
     DatedResourceUse,
     ResourceUse,
     cost_dated_quantities,

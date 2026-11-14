@@ -7,13 +7,13 @@ from fractions import Fraction
 
 import pytest
 
-from src.periodic_allowance import (
+from microcosting_healthworkforce.periodic_allowance import (
     cost_periodic_allowance,
     cost_periodic_allowance_allocations,
 )
-from src.source_registry import SourceRegistry
-from src.unit_quotes import price_units
-from src.vehicle_allowance import (
+from microcosting_healthworkforce.source_registry import SourceRegistry
+from microcosting_healthworkforce.unit_quotes import price_units
+from microcosting_healthworkforce.vehicle_allowance import (
     C24NursingAppointment,
     ExcessVehicleDistance,
     Moca7VehicleAppointment,

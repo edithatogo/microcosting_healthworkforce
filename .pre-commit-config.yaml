@@ -19,7 +19,7 @@ repos:
         types_or: [python, pyi]
       - id: bandit
         name: Bandit
-        entry: uv run --locked bandit -r src
+        entry: uv run --locked bandit -r microcosting_healthworkforce
         language: system
         pass_filenames: false
         types: [python]

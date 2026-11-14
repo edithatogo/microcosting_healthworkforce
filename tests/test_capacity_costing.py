@@ -7,8 +7,12 @@ from fractions import Fraction
 
 import pytest
 
-from src.capacity_costing import CapacityLoss, CapacityScenarioInputs, capacity_scenario
-from src.leave_pricing import sa_part_time_study_paid_hours
+from microcosting_healthworkforce.capacity_costing import (
+    CapacityLoss,
+    CapacityScenarioInputs,
+    capacity_scenario,
+)
+from microcosting_healthworkforce.leave_pricing import sa_part_time_study_paid_hours
 from tests.checks import assert_that
 from tests.test_roster_costing import release
 

@@ -12,7 +12,7 @@ from polars import DataFrame
 from polars.testing import assert_series_equal
 lazy from _pytest.logging import LogCaptureFixture
 
-from src.formula_engine import apply_formulas, load_formulas
+from microcosting_healthworkforce.formula_engine import apply_formulas, load_formulas
 from tests.checks import assert_that
 
 # --- Tests for load_formulas ---

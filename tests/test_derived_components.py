@@ -7,9 +7,9 @@ from fractions import Fraction
 
 import pytest
 
-from src.conditions import ConditionRelease
-from src.costing import Activity
-from src.derived_components import (
+from microcosting_healthworkforce.conditions import ConditionRelease
+from microcosting_healthworkforce.costing import Activity
+from microcosting_healthworkforce.derived_components import (
     DerivedComponentRule,
     cost_derived_activity,
     cost_derived_snapshot,

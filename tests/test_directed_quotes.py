@@ -7,7 +7,7 @@ from fractions import Fraction
 
 import pytest
 
-from src.directed_quotes import (
+from microcosting_healthworkforce.directed_quotes import (
     DirectedQuoteCase,
     DirectedQuoteRule,
     QuoteExclusion,
@@ -17,7 +17,7 @@ from tests.checks import assert_that
 from tests.test_crib_away import release
 from tests.test_exclusive_quotes import rule
 from tests.test_highest_quotes import case, fact
-lazy from src.unit_quotes import UnitQuoteRelease
+lazy from microcosting_healthworkforce.unit_quotes import UnitQuoteRelease
 
 TWO_COMPONENTS = 2
 

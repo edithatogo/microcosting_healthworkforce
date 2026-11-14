@@ -11,8 +11,12 @@ lazy from pathlib import Path
 import pytest
 from pydantic import TypeAdapter
 
-from src.unit_quotes import QuoteQuantity, UnitQuoteRelease, price_units
-from src.unit_quotes_cli import UnitQuoteRun, main
+from microcosting_healthworkforce.unit_quotes import (
+    QuoteQuantity,
+    UnitQuoteRelease,
+    price_units,
+)
+from microcosting_healthworkforce.unit_quotes_cli import UnitQuoteRun, main
 from tests.checks import assert_that
 from tests.test_unit_quotes import quantity, quote, release
 

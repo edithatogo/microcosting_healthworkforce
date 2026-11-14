@@ -6,8 +6,8 @@ lazy from pathlib import Path
 import openpyxl
 import pytest
 
-from src.workbook_catalog import read_workbook_catalog
-from src.workbook_tables import (
+from microcosting_healthworkforce.workbook_catalog import read_workbook_catalog
+from microcosting_healthworkforce.workbook_tables import (
     ColumnMeaning,
     TableDefinition,
     extract_tables,

@@ -7,18 +7,18 @@ from decimal import Decimal
 
 import pytest
 
-from src.condition_history import (
+from microcosting_healthworkforce.condition_history import (
     ConditionHistory,
     ReleaseEdition,
     ReleasePin,
     release_sha256,
 )
-from src.conditions import (
+from microcosting_healthworkforce.conditions import (
     ConditionRelease,
     cost_condition_activity,
     cost_condition_snapshot,
 )
-from src.costing import Activity
+from microcosting_healthworkforce.costing import Activity
 from tests.checks import assert_that
 from tests.test_conditions import condition
 from tests.test_roster_costing import release

@@ -7,8 +7,8 @@ from fractions import Fraction
 
 import pytest
 
-from src.condition_history import release_sha256
-from src.conditions import (
+from microcosting_healthworkforce.condition_history import release_sha256
+from microcosting_healthworkforce.conditions import (
     Condition,
     ConditionRelease,
     WorkbookConditionOrigin,
@@ -17,8 +17,8 @@ from src.conditions import (
     exact_hourly_components,
     hourly_components,
 )
-from src.costing import Activity
-from src.source_registry import SourceRegistry
+from microcosting_healthworkforce.costing import Activity
+from microcosting_healthworkforce.source_registry import SourceRegistry
 from tests.checks import assert_that
 from tests.test_source_registry import source
 

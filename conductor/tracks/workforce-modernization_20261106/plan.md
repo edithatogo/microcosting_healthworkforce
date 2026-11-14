@@ -247,3 +247,17 @@ parity; audit/output additions still need scoped implementation. Phases 3/4
 performance and reader trials remain unstarted, not silently adopted. Phase 5
 runtime/tool alignment and package/hosted gates are complete for the current
 packet, with broader documentation/artifact inventory work still pending.
+
+## Dapane Python consumer handoff — 15 November 2026
+
+Coordinating track: [Dapane Python consumers](https://github.com/edithatogo/dapane/tree/main/conductor/tracks/python_two_consumers_20261108).
+
+- [~] Provide the canonical `microcosting_healthworkforce` namespace with explicit legacy import and console compatibility.
+- [~] Export immutable, source-selected quotation artifacts and delegate valuation to installed Dapane.
+- [~] Qualify one bounded public HP3.1 hourly reference and exact minute transport.
+- [ ] Verify provider gates and independently installed wheels on the pinned Python 3.15.2 runtime.
+- [ ] Record source, compatibility and rollback evidence; retain broader source and scientific acceptance separately.
+
+The changes use public source observations and synthetic resource quantities.
+No private source packet, original workbook receipt, payroll eligibility or
+scientific PSA acceptance is promoted by this handoff.

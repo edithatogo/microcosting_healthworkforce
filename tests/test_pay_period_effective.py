@@ -7,15 +7,18 @@ from zoneinfo import ZoneInfo
 
 import pytest
 
-from src.capped_overtime import DailyHistory, cost_capped_daily_overtime
-from src.costing import Activity, cost_dynamic
-from src.pay_period_effective import (
+from microcosting_healthworkforce.capped_overtime import (
+    DailyHistory,
+    cost_capped_daily_overtime,
+)
+from microcosting_healthworkforce.costing import Activity, cost_dynamic
+from microcosting_healthworkforce.pay_period_effective import (
     FirstFullPeriodRule,
     PeriodCalendar,
     RetrospectiveAuthority,
     first_full_period,
 )
-from src.source_registry import SourceRegistry
+from microcosting_healthworkforce.source_registry import SourceRegistry
 from tests.checks import assert_that
 from tests.test_capped_overtime import activity as overtime_activity
 from tests.test_capped_overtime import rule as capped_rule

@@ -6,7 +6,7 @@ from decimal import Decimal
 
 import pytest
 
-from src.advancement_effective import (
+from microcosting_healthworkforce.advancement_effective import (
     AdvancementEvidence,
     AdvancementRule,
     CreditedHoursHistory,
@@ -15,7 +15,7 @@ from src.advancement_effective import (
     resolve_advancement_commencement,
     resolve_credited_hours_commencement,
 )
-from src.source_registry import SourceRegistry
+from microcosting_healthworkforce.source_registry import SourceRegistry
 from tests.checks import assert_that
 from tests.test_source_registry import source
 

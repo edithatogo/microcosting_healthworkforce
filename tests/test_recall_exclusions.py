@@ -8,7 +8,7 @@ from zoneinfo import ZoneInfo
 
 import pytest
 
-from src.recall_exclusions import (
+from microcosting_healthworkforce.recall_exclusions import (
     RecallEpisode,
     RecallHistory,
     RecallSegment,

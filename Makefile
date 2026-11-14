@@ -19,7 +19,7 @@ typecheck:
 	uv run --locked basedpyright
 
 security:
-	uv run --locked bandit -r src
+	uv run --locked bandit -r microcosting_healthworkforce
 
 all:
 	make format-check

@@ -9,8 +9,8 @@ import polars as pl
 import pytest
 lazy from _pytest.logging import LogCaptureFixture
 
-from src.main import main
-from src.workbook_run import WorkforceRun
+from microcosting_healthworkforce.main import main
+from microcosting_healthworkforce.workbook_run import WorkforceRun
 from tests.checks import assert_that
 
 
@@ -23,7 +23,7 @@ def test_workforce_runner_reports_exploratory_psa(
     scenarios = tmp_path / "scenarios.json"
     scenarios.write_text("[]")
     monkeypatch.setattr(
-        "src.workbook_run.config.PSA_SCENARIOS_FILE_PATH",
+        "microcosting_healthworkforce.workbook_run.config.PSA_SCENARIOS_FILE_PATH",
         str(scenarios),
     )
 
@@ -34,10 +34,10 @@ def test_workforce_runner_reports_exploratory_psa(
         return None
 
     monkeypatch.setattr(
-        "src.workbook_run.run_psa_analysis",
+        "microcosting_healthworkforce.workbook_run.run_psa_analysis",
         synthetic_psa,
     )
-    monkeypatch.setattr("src.workbook_run.plot_psa", skip_plot)
+    monkeypatch.setattr("microcosting_healthworkforce.workbook_run.plot_psa", skip_plot)
     runner = WorkforceRun(
         argparse.Namespace(output_dir=str(tmp_path), psa_iterations=1, seed=1),
     )

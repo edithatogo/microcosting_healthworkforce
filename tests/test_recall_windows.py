@@ -6,7 +6,7 @@ from zoneinfo import ZoneInfo
 
 import pytest
 
-from src.recall_windows import RecallEvent, plan_recall_windows
+from microcosting_healthworkforce.recall_windows import RecallEvent, plan_recall_windows
 from tests.checks import assert_that
 
 START = datetime(2026, 6, 1, tzinfo=UTC)

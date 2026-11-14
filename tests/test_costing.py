@@ -7,7 +7,7 @@ from fractions import Fraction
 
 import pytest
 
-from src.costing import (
+from microcosting_healthworkforce.costing import (
     Activity,
     CostRelease,
     RatePeriod,
@@ -15,7 +15,7 @@ from src.costing import (
     cost_dynamic,
     cost_static,
 )
-from src.source_registry import SourceRegistry
+from microcosting_healthworkforce.source_registry import SourceRegistry
 from tests.checks import assert_that
 from tests.test_source_registry import source
 

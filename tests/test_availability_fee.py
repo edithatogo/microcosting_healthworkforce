@@ -5,7 +5,10 @@ from fractions import Fraction
 
 import pytest
 
-from src.availability_fee import AvailabilityInstalment, price_availability_instalment
+from microcosting_healthworkforce.availability_fee import (
+    AvailabilityInstalment,
+    price_availability_instalment,
+)
 from tests.checks import assert_that
 from tests.test_unit_quotes import quantity, quote, release
 

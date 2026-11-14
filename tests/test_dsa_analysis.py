@@ -10,12 +10,12 @@ import polars as pl
 import pytest
 lazy from _pytest.logging import LogCaptureFixture
 
-from src.dsa_analysis import (
+from microcosting_healthworkforce.dsa_analysis import (
     load_dsa_scenarios,
     report_dsa_results,
     run_dsa_analysis,
 )
-from src.formula_engine import apply_formulas
+from microcosting_healthworkforce.formula_engine import apply_formulas
 from tests.checks import assert_that
 
 EXPECTED_150 = 150

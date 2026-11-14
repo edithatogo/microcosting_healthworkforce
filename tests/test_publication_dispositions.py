@@ -3,9 +3,9 @@
 
 from pathlib import Path
 
-from src.workbook_catalog import read_workbook_catalog
-from src.workbook_profile import load_candidate_profile
-from src.workbook_tables import TableExtraction, extract_tables
+from microcosting_healthworkforce.workbook_catalog import read_workbook_catalog
+from microcosting_healthworkforce.workbook_profile import load_candidate_profile
+from microcosting_healthworkforce.workbook_tables import TableExtraction, extract_tables
 from tests.checks import assert_that
 
 

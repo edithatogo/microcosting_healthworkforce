@@ -49,13 +49,13 @@ dependencies = [
 ]
 
 [project.scripts]
-microcosting-healthworkforce = "src.main:main"
-microcosting-healthworkforce-v2 = "src.conditions_cli:main"
-microcosting-healthworkforce-units = "src.unit_quotes_cli:main"
-microcosting-healthworkforce-leave = "src.leave_cli:main"
+microcosting-healthworkforce = "microcosting_healthworkforce.main:main"
+microcosting-healthworkforce-v2 = "microcosting_healthworkforce.conditions_cli:main"
+microcosting-healthworkforce-units = "microcosting_healthworkforce.unit_quotes_cli:main"
+microcosting-healthworkforce-leave = "microcosting_healthworkforce.leave_cli:main"
 
 [tool.setuptools]
-packages = ["src"]
+packages = ["microcosting_healthworkforce", "src"]
 
 [dependency-groups]
 profiling = ["scalene"]
@@ -79,7 +79,7 @@ dev = [
 [tool.basedpyright]
 typeCheckingMode = "strict"
 pythonVersion = "3.15"
-include = ["src", "tests"]
+include = ["microcosting_healthworkforce", "src", "tests"]
 
 [tool.setuptools.package-data]
-src = ["workbook_candidate_profile.json"]
+microcosting_healthworkforce = ["workbook_candidate_profile.json"]

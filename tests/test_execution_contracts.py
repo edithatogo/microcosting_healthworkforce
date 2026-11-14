@@ -5,7 +5,7 @@ import polars as pl
 import pytest
 from pandera.errors import SchemaError
 
-from src.workbook_run import PSA_SCHEMA
+from microcosting_healthworkforce.workbook_run import PSA_SCHEMA
 
 
 def test_positive_iteration_contract() -> None:

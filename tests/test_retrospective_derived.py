@@ -7,8 +7,11 @@ from fractions import Fraction
 
 import pytest
 
-from src.costing import Activity
-from src.derived_components import cost_derived_activity, cost_derived_snapshot
+from microcosting_healthworkforce.costing import Activity
+from microcosting_healthworkforce.derived_components import (
+    cost_derived_activity,
+    cost_derived_snapshot,
+)
 from tests.checks import assert_that
 from tests.test_derived_components import rule
 from tests.test_retrospective_conditions import retrospective_release

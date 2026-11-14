@@ -1,0 +1,26 @@
+[
+  {
+    "provider_quote_id": "qld-hp3p1-hour-reference-20260901",
+    "quote_id": "qld-hp3p1-hour-20260901",
+    "target": "laboratory-scientist",
+    "unit": "hour",
+    "per_quantity": "1",
+    "components": [
+      "base_salary"
+    ],
+    "component_basis": "Direct published base hourly reference only; no on-cost, loading, allowance or productive-time adjustment is included.",
+    "price_year": 2026
+  },
+  {
+    "provider_quote_id": "qld-hp3p1-hour-reference-20260901",
+    "quote_id": "qld-hp3p1-minute-20260901",
+    "target": "laboratory-scientist",
+    "unit": "minute",
+    "per_quantity": "60",
+    "components": [
+      "base_salary"
+    ],
+    "component_basis": "Direct published base hourly reference only; no on-cost, loading, allowance or productive-time adjustment is included.",
+    "price_year": 2026
+  }
+]

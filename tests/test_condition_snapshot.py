@@ -8,12 +8,12 @@ from fractions import Fraction
 import pytest
 from pydantic import ValidationError
 
-from src.conditions import (
+from microcosting_healthworkforce.conditions import (
     PayrollSalaryDivisor,
     cost_condition_activity,
     cost_condition_snapshot,
 )
-from src.costing import Activity
+from microcosting_healthworkforce.costing import Activity
 from tests.checks import assert_that
 from tests.test_minimum_engagement import example_release
 

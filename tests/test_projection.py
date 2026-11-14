@@ -6,7 +6,7 @@ from decimal import Decimal
 import polars as pl
 import pytest
 
-from src.projection import (
+from microcosting_healthworkforce.projection import (
     project_workbook_costs,
     project_workbook_pda_amount,
     project_workbook_vehicle_amounts,

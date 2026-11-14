@@ -8,8 +8,8 @@ from zoneinfo import ZoneInfo
 
 import pytest
 
-from src.costing import Activity
-from src.session_overtime import (
+from microcosting_healthworkforce.costing import Activity
+from microcosting_healthworkforce.session_overtime import (
     SessionOvertimeRule,
     WorkSession,
     cost_session_overtime,

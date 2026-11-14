@@ -10,12 +10,12 @@ from pathlib import Path
 import pytest
 from pydantic import TypeAdapter, ValidationError
 
-from src.assignment_costing import (
+from microcosting_healthworkforce.assignment_costing import (
     AssignmentCost,
     cost_assignment_activities,
     cost_assignment_snapshot,
 )
-from src.assignment_requests import (
+from microcosting_healthworkforce.assignment_requests import (
     AssignmentActivitiesRequest,
     AssignmentRequest,
     AssignmentSnapshotRequest,
@@ -23,14 +23,17 @@ from src.assignment_requests import (
     cost_assignment_with_reimbursements,
     run_assignment_request,
 )
-from src.conditions_cli import main
-from src.leave_pricing import (
+from microcosting_healthworkforce.conditions_cli import main
+from microcosting_healthworkforce.leave_pricing import (
     nsw_online_study_leave_hours,
     vic_hama_historical_study_leave_hours,
     vic_scientist_development_credit_balance,
     vic_scientist_ungranted_development_leave_credit,
 )
-from src.reimbursement import ReimbursementClaim, ReimbursementPeriod
+from microcosting_healthworkforce.reimbursement import (
+    ReimbursementClaim,
+    ReimbursementPeriod,
+)
 from tests.checks import assert_that
 from tests.test_assignment_costing import CHANGE, activity, timeline
 

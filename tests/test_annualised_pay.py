@@ -8,15 +8,15 @@ from zoneinfo import ZoneInfo
 
 import pytest
 
-from src.annualised_pay import (
+from microcosting_healthworkforce.annualised_pay import (
     AnnualisedPayRequest,
     AnnualisedPayRule,
     ReviewSettlement,
     WagePeriodEvidence,
     compare_annualised_pay,
 )
-from src.pay_period_effective import PeriodCalendar
-from src.source_registry import SourceRegistry
+from microcosting_healthworkforce.pay_period_effective import PeriodCalendar
+from microcosting_healthworkforce.source_registry import SourceRegistry
 from tests.checks import assert_that
 from tests.test_source_registry import source
 

@@ -5,7 +5,10 @@
 import polars as pl
 import pytest
 
-from src.validation import validate_dsa_results, validate_psa_results
+from microcosting_healthworkforce.validation import (
+    validate_dsa_results,
+    validate_psa_results,
+)
 from tests.checks import assert_that
 
 

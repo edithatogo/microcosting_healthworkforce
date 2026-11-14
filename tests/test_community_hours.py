@@ -5,7 +5,7 @@ from fractions import Fraction
 
 import pytest
 
-from src.community_hours import (
+from microcosting_healthworkforce.community_hours import (
     price_tas_rural_community_hours,
     tas_rural_base_community_hours,
     tas_rural_community_hours,

@@ -8,7 +8,7 @@ lazy from pathlib import Path
 import pytest
 from pydantic import ValidationError
 
-from src.source_registry import SourceRecord, SourceRegistry
+from microcosting_healthworkforce.source_registry import SourceRecord, SourceRegistry
 from tests.checks import assert_that
 
 

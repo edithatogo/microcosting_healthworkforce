@@ -39,11 +39,11 @@ jobs:
       - name: Verify selected runtime
         run: .venv/bin/python -c 'import sys; print(sys.version); assert sys.version_info[:3] == (3, 15, 2)'
       - name: Test model contracts and workbook loader
-        run: uv run --no-sync pytest --disable-socket --allow-unix-socket --timeout=120 --cov=src --cov-report=xml --cov-fail-under=75
-      - run: uv run --no-sync ruff format --check .
+        run: uv run --no-sync pytest --disable-socket --allow-unix-socket --timeout=120 --cov=microcosting_healthworkforce --cov-report=xml --cov-fail-under=75
+      - run: uv run --no-sync ruff format --check --diff .
       - run: uv run --no-sync ruff check .
       - run: uv run --no-sync basedpyright
-      - run: uv run --no-sync bandit -r src
+      - run: uv run --no-sync bandit -r microcosting_healthworkforce
       - run: uv build --wheel
       - name: Exercise installed wheel outside the checkout
         shell: bash
@@ -54,7 +54,10 @@ jobs:
           uv pip install --python "$RUNNER_TEMP/workforce-wheel/bin/python" --no-deps dist/*.whl
           cd "$RUNNER_TEMP"
           "$RUNNER_TEMP/workforce-wheel/bin/python" -c 'import sys; print(sys.version); assert sys.version_info[:3] == (3, 15, 2)'
-          "$RUNNER_TEMP/workforce-wheel/bin/microcosting-healthworkforce" --help
+          for command in microcosting-healthworkforce microcosting-healthworkforce-v2 microcosting-healthworkforce-units microcosting-healthworkforce-leave; do
+            "$RUNNER_TEMP/workforce-wheel/bin/$command" --help
+          done
+          "$RUNNER_TEMP/workforce-wheel/bin/python" -c 'import importlib; a = importlib.import_module("src.unit_quotes"); b = importlib.import_module("microcosting_healthworkforce.unit_quotes"); assert a is b; assert a.UnitQuoteRelease is b.UnitQuoteRelease'
       - name: Profile synthetic formula contracts
         run: uv run --no-sync python -m cProfile -o profile.out -m pytest tests/test_formula_engine.py --disable-socket --allow-unix-socket --timeout=120 -q
       - name: Upload coverage using GitHub OIDC

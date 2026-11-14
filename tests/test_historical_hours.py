@@ -7,13 +7,13 @@ from fractions import Fraction
 
 import pytest
 
-from src.historical_hours import (
+from microcosting_healthworkforce.historical_hours import (
     HistoricalHours,
     HoursHistoryRequest,
     NormalHoursRule,
     select_normal_hours,
 )
-from src.source_registry import SourceRegistry
+from microcosting_healthworkforce.source_registry import SourceRegistry
 from tests.checks import assert_that
 from tests.test_source_registry import source
 

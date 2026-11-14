@@ -9,7 +9,7 @@ from unittest.mock import MagicMock, patch
 import polars as pl
 import pytest
 
-from src.reporting import (
+from microcosting_healthworkforce.reporting import (
     plot_dsa_tornado,
     plot_psa_histogram,
     save_base_case_results,
@@ -58,7 +58,7 @@ def test_save_base_case_results(
 
 @patch("polars.DataFrame.write_csv")
 @patch("pathlib.Path.mkdir")
-@patch("src.reporting.plot_dsa_tornado")
+@patch("microcosting_healthworkforce.reporting.plot_dsa_tornado")
 def test_save_dsa_results(
     mock_plot: MagicMock,
     mock_makedirs: MagicMock,
@@ -90,7 +90,7 @@ def test_save_dsa_results(
 
 
 @patch("polars.DataFrame.write_csv")
-@patch("src.reporting.plot_psa_histogram")
+@patch("microcosting_healthworkforce.reporting.plot_psa_histogram")
 def test_save_psa_results(
     mock_plot: MagicMock,
     mock_to_csv: MagicMock,
@@ -103,7 +103,7 @@ def test_save_psa_results(
 
 
 @pytest.mark.usefixtures("mock_reporting_data")
-@patch("src.reporting.plt.savefig")
+@patch("microcosting_healthworkforce.reporting.plt.savefig")
 def test_plot_dsa_tornado(
     mock_savefig: MagicMock,
 ) -> None:
@@ -118,7 +118,7 @@ def test_plot_dsa_tornado(
     mock_savefig.assert_called_once()
 
 
-@patch("src.reporting.plt.savefig")
+@patch("microcosting_healthworkforce.reporting.plt.savefig")
 def test_plot_psa_histogram(
     mock_savefig: MagicMock,
     mock_reporting_data: dict[str, Any],
