@@ -4,7 +4,7 @@
 import pytest
 from pydantic import ValidationError
 
-from src.contracts import FORMULA_ADAPTER, parameter_mapping
+from microcosting_healthworkforce.contracts import FORMULA_ADAPTER, parameter_mapping
 from tests.checks import assert_that
 
 

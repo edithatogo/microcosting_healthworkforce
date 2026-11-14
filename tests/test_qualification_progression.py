@@ -6,14 +6,14 @@ from fractions import Fraction
 
 import pytest
 
-from src.qualification_progression import (
+from microcosting_healthworkforce.qualification_progression import (
     ProgressionBarrier,
     ProgressionRequest,
     WeeklyQualificationAllowance,
     assess_progression,
     price_progression_week,
 )
-from src.source_registry import SourceRegistry
+from microcosting_healthworkforce.source_registry import SourceRegistry
 from tests.checks import assert_that
 from tests.test_source_registry import source
 from tests.test_unit_quotes import quote, release

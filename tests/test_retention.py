@@ -7,7 +7,7 @@ from fractions import Fraction
 
 import pytest
 
-from src.retention import (
+from microcosting_healthworkforce.retention import (
     DatedPharmacyPortion,
     PharmacyHistoryInput,
     PharmacyRetentionProration,
@@ -26,7 +26,7 @@ from src.retention import (
 )
 from tests.checks import assert_that
 from tests.test_crib_away import release
-lazy from src.unit_quotes import UnitQuoteRelease
+lazy from microcosting_healthworkforce.unit_quotes import UnitQuoteRelease
 
 
 def request(**changes: object) -> RetentionAssessment:

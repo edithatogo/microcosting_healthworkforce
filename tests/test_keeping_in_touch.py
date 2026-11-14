@@ -6,7 +6,7 @@ from fractions import Fraction
 
 import pytest
 
-from src.keeping_in_touch import (
+from microcosting_healthworkforce.keeping_in_touch import (
     KeepingInTouchRule,
     KITContext,
     KITExtension,
@@ -15,8 +15,8 @@ from src.keeping_in_touch import (
     KITWork,
     evaluate_kit,
 )
-from src.source_registry import SourceRegistry
-from src.unit_quotes import price_units
+from microcosting_healthworkforce.source_registry import SourceRegistry
+from microcosting_healthworkforce.unit_quotes import price_units
 from tests.checks import assert_that
 from tests.test_normal_pay import prices
 from tests.test_source_registry import source

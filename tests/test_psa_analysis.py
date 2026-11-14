@@ -11,8 +11,8 @@ import pytest
 from pydantic import ValidationError
 lazy from _pytest.logging import LogCaptureFixture
 
-from src.formula_engine import apply_formulas
-from src.psa_analysis import (
+from microcosting_healthworkforce.formula_engine import apply_formulas
+from microcosting_healthworkforce.psa_analysis import (
     load_psa_scenarios,
     report_psa_results,
     run_psa_analysis,

@@ -11,9 +11,9 @@ lazy from pathlib import Path
 import pytest
 from pydantic import TypeAdapter
 
-from src.leave_cli import LeaveCostRequest, LeaveCostRun
-from src.leave_cli import main as leave_main
-from src.leave_pricing import (
+from microcosting_healthworkforce.leave_cli import LeaveCostRequest, LeaveCostRun
+from microcosting_healthworkforce.leave_cli import main as leave_main
+from microcosting_healthworkforce.leave_pricing import (
     AdvanceLeaveTermination,
     AdvanceLoadingPrices,
     AdvanceLoadingTiming,
@@ -49,13 +49,13 @@ from src.leave_pricing import (
     victorian_medical_scientist_leave_loading,
     victorian_medical_scientist_weekend_leave_credit,
 )
-from src.paid_leave import PaidLeaveSchedule, build_paid_leave
+from microcosting_healthworkforce.paid_leave import PaidLeaveSchedule, build_paid_leave
 from tests.checks import assert_that
 from tests.test_normal_pay import allowance, exposure, prices, selection
 from tests.test_paid_leave import policy, request
 from tests.test_unit_quotes import quantity, quote, release
-lazy from src.leave_pricing import PricedLeave
-lazy from src.unit_quotes import UnitQuoteRelease
+lazy from microcosting_healthworkforce.leave_pricing import PricedLeave
+lazy from microcosting_healthworkforce.unit_quotes import UnitQuoteRelease
 
 START = date(2026, 11, 7)
 MID = START + timedelta(weeks=1)

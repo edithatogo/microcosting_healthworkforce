@@ -10,12 +10,12 @@ lazy from pathlib import Path
 import polars as pl
 import pytest
 
-from src.contracts import parameter_mapping
-from src.formula_engine import apply_formulas
-from src.psa_analysis import run_psa_analysis
-from src.workbook_run import WorkforceRun
+from microcosting_healthworkforce.contracts import parameter_mapping
+from microcosting_healthworkforce.formula_engine import apply_formulas
+from microcosting_healthworkforce.psa_analysis import run_psa_analysis
+from microcosting_healthworkforce.workbook_run import WorkforceRun
 from tests.checks import assert_that
-lazy from src.contracts import FormulaDocument
+lazy from microcosting_healthworkforce.contracts import FormulaDocument
 
 
 @pytest.fixture
@@ -73,7 +73,10 @@ def execute(entrypoint: str, inputs: dict[str, Any], folder: Path) -> pl.DataFra
     runner.mapping = parameter_mapping(inputs["formulas"])
     spec_path = folder / "scenarios.json"
     spec_path.write_text(json.dumps(inputs["scenarios"]))
-    with patch("src.workbook_run.config.PSA_SCENARIOS_FILE_PATH", str(spec_path)):
+    with patch(
+        "microcosting_healthworkforce.workbook_run.config.PSA_SCENARIOS_FILE_PATH",
+        str(spec_path),
+    ):
         runner.run_psa()
     return pl.read_csv(folder / "psa_results.csv")
 

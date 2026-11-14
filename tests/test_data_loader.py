@@ -1,9 +1,12 @@
 # Copyright 2026 Dylan. SPDX-License-Identifier: Apache-2.0
 """Verify original workbook identity rows and positive reference costs."""
 
-from src import config
-from src.data_loader import load_and_clean_data, load_dsa_validation_data
-from src.numeric import numeric
+from microcosting_healthworkforce import config
+from microcosting_healthworkforce.data_loader import (
+    load_and_clean_data,
+    load_dsa_validation_data,
+)
+from microcosting_healthworkforce.numeric import numeric
 from tests.checks import assert_that
 
 EXPECTED_25 = 25

@@ -12,7 +12,7 @@ from openpyxl.workbook.defined_name import DefinedName
 from openpyxl.worksheet.datavalidation import DataValidation
 from openpyxl.worksheet.formula import ArrayFormula
 
-from src.workbook_catalog import read_workbook_catalog
+from microcosting_healthworkforce.workbook_catalog import read_workbook_catalog
 from tests.checks import assert_that
 
 

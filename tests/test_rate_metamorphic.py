@@ -9,7 +9,10 @@ from hypothesis import given
 from hypothesis import strategies as st
 from polars.testing import assert_frame_equal
 
-from src.polars_rates import annual_to_rates, productive_hourly_rates
+from microcosting_healthworkforce.polars_rates import (
+    annual_to_rates,
+    productive_hourly_rates,
+)
 from tests.checks import assert_that
 
 

@@ -8,12 +8,15 @@ import pytest
 from polars.testing import assert_frame_equal
 from pydantic import ValidationError
 
-from src.data_loader import load_and_clean_data
-from src.formula_engine import load_formulas
-from src.legacy_compatibility import CompatibilityRequest, cost_legacy_compatibility
-from src.workbook_run import WorkforceRun
+from microcosting_healthworkforce.data_loader import load_and_clean_data
+from microcosting_healthworkforce.formula_engine import load_formulas
+from microcosting_healthworkforce.legacy_compatibility import (
+    CompatibilityRequest,
+    cost_legacy_compatibility,
+)
+from microcosting_healthworkforce.workbook_run import WorkforceRun
 from tests.checks import assert_that
-lazy from src.contracts import FormulaDocument
+lazy from microcosting_healthworkforce.contracts import FormulaDocument
 
 
 def request() -> CompatibilityRequest:

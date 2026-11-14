@@ -7,8 +7,8 @@ from fractions import Fraction
 
 import pytest
 
-from src.costing import Activity
-from src.derived_schedule import (
+from microcosting_healthworkforce.costing import Activity
+from microcosting_healthworkforce.derived_schedule import (
     DerivedSchedule,
     RuleSeries,
     cost_scheduled_activity,

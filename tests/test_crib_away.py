@@ -8,9 +8,14 @@ from zoneinfo import ZoneInfo
 
 import pytest
 
-from src.crib_away import CribAwayRule, CribOccasion, CribShift, price_crib_away
-from src.source_registry import SourceRegistry
-from src.unit_quotes import UnitQuote, UnitQuoteRelease
+from microcosting_healthworkforce.crib_away import (
+    CribAwayRule,
+    CribOccasion,
+    CribShift,
+    price_crib_away,
+)
+from microcosting_healthworkforce.source_registry import SourceRegistry
+from microcosting_healthworkforce.unit_quotes import UnitQuote, UnitQuoteRelease
 from tests.checks import assert_that
 from tests.test_source_registry import source
 

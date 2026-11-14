@@ -4,8 +4,8 @@
 
 import polars as pl
 
-from src.calculations import run_calculation_pipeline
-from src.formula_engine import load_formulas
+from microcosting_healthworkforce.calculations import run_calculation_pipeline
+from microcosting_healthworkforce.formula_engine import load_formulas
 from tests.checks import assert_that
 
 

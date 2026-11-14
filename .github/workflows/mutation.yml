@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   pull_request:
     paths:
-      - src/polars_rates.py
+      - microcosting_healthworkforce/polars_rates.py
       - tests/test_rate_metamorphic.py
       - tests/test_cost_properties.py
       - .github/workflows/mutation.yml
@@ -29,7 +29,7 @@ jobs:
       - name: Mutate rate contracts
         run: >-
           uv run --no-sync pytest tests/test_rate_metamorphic.py tests/test_cost_properties.py
-          --gremlins --gremlin-targets=src/polars_rates.py
+          --gremlins --gremlin-targets=microcosting_healthworkforce/polars_rates.py
           --gremlin-report=console,json --gremlin-executor=subprocess
           --gremlin-workers=2 --gremlin-mutant-timeout=30 --gremlin-coverage-timeout=120
           --strict-pardons --max-pardons=0

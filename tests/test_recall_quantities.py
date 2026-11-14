@@ -7,7 +7,10 @@ from fractions import Fraction
 
 import pytest
 
-from src.recall_quantities import RecallQuantityPolicy, quantify_recall
+from microcosting_healthworkforce.recall_quantities import (
+    RecallQuantityPolicy,
+    quantify_recall,
+)
 from tests.checks import assert_that
 
 MINUTE = 60000000

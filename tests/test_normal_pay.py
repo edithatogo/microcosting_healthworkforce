@@ -8,14 +8,24 @@ from fractions import Fraction
 
 import pytest
 
-from src.historical_hours import NormalHoursSelection, select_normal_hours
-from src.normal_pay import HoursPricingRequest, price_selected_hours
-from src.source_registry import SourceRegistry
+from microcosting_healthworkforce.historical_hours import (
+    NormalHoursSelection,
+    select_normal_hours,
+)
+from microcosting_healthworkforce.normal_pay import (
+    HoursPricingRequest,
+    price_selected_hours,
+)
+from microcosting_healthworkforce.source_registry import SourceRegistry
 from tests.checks import assert_that
 from tests.test_historical_hours import history, request, rule
 from tests.test_source_registry import source
 from tests.test_unit_quotes import quantity, quote, release
-lazy from src.unit_quotes import QuoteQuantity, UnitQuote, UnitQuoteRelease
+lazy from microcosting_healthworkforce.unit_quotes import (
+    QuoteQuantity,
+    UnitQuote,
+    UnitQuoteRelease,
+)
 
 
 def selection() -> NormalHoursSelection:

@@ -7,15 +7,15 @@ from fractions import Fraction
 
 import pytest
 
-from src.capped_overtime import (
+from microcosting_healthworkforce.capped_overtime import (
     CappedDailyRule,
     DailyHistory,
     DailyTier,
     cost_capped_daily_overtime,
     quarter_hour_cash_duration,
 )
-from src.conditions import ConditionRelease
-from src.costing import Activity
+from microcosting_healthworkforce.conditions import ConditionRelease
+from microcosting_healthworkforce.costing import Activity
 from tests.checks import assert_that
 from tests.test_conditions import condition
 from tests.test_roster_costing import release

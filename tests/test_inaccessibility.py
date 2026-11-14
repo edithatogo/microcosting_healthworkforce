@@ -8,7 +8,7 @@ from typing import Literal
 
 import pytest
 
-from src.inaccessibility import (
+from microcosting_healthworkforce.inaccessibility import (
     InaccessibilityCategoryPayment,
     InaccessibilityFirstPayment,
     InaccessibilityRecurringPayment,

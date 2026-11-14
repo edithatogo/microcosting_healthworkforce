@@ -3,14 +3,14 @@
 
 import pytest
 
-from src.source_gaps import (
+from microcosting_healthworkforce.source_gaps import (
     CandidateSourceLink,
     DiscoveryLead,
     GapTarget,
     link_held_candidates,
     screen_gaps,
 )
-from src.source_registry import SourceRegistry
+from microcosting_healthworkforce.source_registry import SourceRegistry
 from tests.checks import assert_that
 from tests.test_source_registry import source
 

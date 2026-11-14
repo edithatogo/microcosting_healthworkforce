@@ -7,10 +7,13 @@ from fractions import Fraction
 
 import pytest
 
-from src.conditions import ConditionRelease
-from src.costing import Activity
-from src.minimum_engagement import MinimumEngagementRule, cost_minimum_engagement
-from src.source_registry import SourceRegistry
+from microcosting_healthworkforce.conditions import ConditionRelease
+from microcosting_healthworkforce.costing import Activity
+from microcosting_healthworkforce.minimum_engagement import (
+    MinimumEngagementRule,
+    cost_minimum_engagement,
+)
+from microcosting_healthworkforce.source_registry import SourceRegistry
 from tests.checks import assert_that
 from tests.test_conditions import condition
 from tests.test_source_registry import source

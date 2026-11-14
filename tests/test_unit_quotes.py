@@ -7,8 +7,8 @@ from fractions import Fraction
 
 import pytest
 
-from src.source_registry import SourceRegistry
-from src.unit_quotes import (
+from microcosting_healthworkforce.source_registry import SourceRegistry
+from microcosting_healthworkforce.unit_quotes import (
     QuoteQuantity,
     UnitQuote,
     UnitQuoteRelease,

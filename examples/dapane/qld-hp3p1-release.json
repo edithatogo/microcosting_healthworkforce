@@ -1,0 +1,55 @@
+{
+  "release_id": "qld-health-hp3p1-reference-20261115",
+  "method_id": "direct_unit_quote_v1",
+  "currency": "AUD",
+  "as_known_on": "2026-11-15",
+  "jurisdiction": "QLD",
+  "employer": "Queensland Health",
+  "classification": "HP3 pay point 1 (published reference only)",
+  "sources": {
+    "schema_version": 1,
+    "records": [
+      {
+        "source_id": "qld-health-hp-reference-20261009",
+        "title": "Queensland Health health practitioners published wage reference",
+        "uri": "https://www.health.qld.gov.au/hrpolicies/wage-rates/health-practitioners#table36083",
+        "edition": "2026-10-09-published-table",
+        "jurisdiction": "QLD",
+        "kind": "published_wage_reference",
+        "holding": "held",
+        "authority": "primary",
+        "applicability": "verified",
+        "sha256": "6948663378e34af05b8dbf91d8799ad1dc14ee831136dc57165d3241d1af17ff",
+        "retrieved_at": "2026-11-14T22:54:49Z",
+        "published_on": "2026-10-09",
+        "effective_from": "2026-09-01",
+        "effective_to": null,
+        "verified_through": "2026-11-16",
+        "nominal_expiry": null,
+        "employers": [
+          "Queensland Health"
+        ],
+        "classifications": [
+          "HP3 pay point 1 (published reference only)"
+        ],
+        "supersedes": [],
+        "reason": "One public HP3.1 table cell is source checked for a bounded research reference. Hourly rates are expressly reference values. No actual worker eligibility, payroll entitlement, superannuation, allowances, leave loading or productive-time conversion is asserted. Verification horizon ends after the 15 November observation; it is not a legal expiry date. Timestamp records the source verification receipt in this session."
+      }
+    ]
+  },
+  "quotes": [
+    {
+      "quote_id": "qld-hp3p1-hour-reference-20260901",
+      "component": "base_salary",
+      "unit": "hour",
+      "amount": "46.0658",
+      "starts_on": "2026-09-01",
+      "ends_on": "2026-11-16",
+      "known_from": "2026-11-15",
+      "source_id": "qld-health-hp-reference-20261009",
+      "source_sha256": "6948663378e34af05b8dbf91d8799ad1dc14ee831136dc57165d3241d1af17ff",
+      "citation": "2026-09-01 table, HP3 pay point 1, Per hour 76 hours column; note 3 reference-purpose qualification. Page last updated 2026-10-09.",
+      "status": "accepted"
+    }
+  ]
+}

@@ -7,19 +7,19 @@ from fractions import Fraction
 
 import pytest
 
-from src.assignment_requests import (
+from microcosting_healthworkforce.assignment_requests import (
     AssignmentActivitiesRequest,
     AssignmentSnapshotRequest,
 )
-from src.costing import Activity
-from src.relief_history import (
+from microcosting_healthworkforce.costing import Activity
+from microcosting_healthworkforce.relief_history import (
     ReliefDay,
     ReliefRule,
     ReliefSpell,
     cost_relief,
     qualify_relief,
 )
-from src.source_registry import SourceRegistry
+from microcosting_healthworkforce.source_registry import SourceRegistry
 from tests.checks import assert_that
 from tests.test_assignment_costing import timeline
 from tests.test_source_registry import source

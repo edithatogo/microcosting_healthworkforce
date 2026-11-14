@@ -4,7 +4,7 @@
 
 import pytest
 
-from src.formula_parser import evaluate_expression
+from microcosting_healthworkforce.formula_parser import evaluate_expression
 from tests.checks import assert_that
 
 EXPECTED_3 = 3

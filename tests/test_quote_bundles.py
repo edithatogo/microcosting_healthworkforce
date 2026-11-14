@@ -7,8 +7,8 @@ from fractions import Fraction
 
 import pytest
 
-from src.highest_quotes import HighestQuoteRule
-from src.quote_bundles import (
+from microcosting_healthworkforce.highest_quotes import HighestQuoteRule
+from microcosting_healthworkforce.quote_bundles import (
     QuoteBundleCase,
     QuoteBundleDefinition,
     QuoteBundleFacts,
@@ -16,7 +16,7 @@ from src.quote_bundles import (
     QuoteBundleRule,
     price_highest_quote_bundles,
 )
-from src.unit_quotes import UnitQuoteRelease
+from microcosting_healthworkforce.unit_quotes import UnitQuoteRelease
 from tests.checks import assert_that
 from tests.test_crib_away import release
 from tests.test_exclusive_quotes import rule

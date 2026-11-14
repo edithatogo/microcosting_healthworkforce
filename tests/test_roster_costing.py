@@ -7,15 +7,15 @@ from fractions import Fraction
 
 import pytest
 
-from src.conditions import ConditionRelease
-from src.costing import Activity
-from src.roster_costing import (
+from microcosting_healthworkforce.conditions import ConditionRelease
+from microcosting_healthworkforce.costing import Activity
+from microcosting_healthworkforce.roster_costing import (
     OvertimeRule,
     PayPeriod,
     RosterCostRow,
     cost_overtime_period,
 )
-from src.source_registry import SourceRegistry
+from microcosting_healthworkforce.source_registry import SourceRegistry
 from tests.checks import assert_that
 from tests.test_conditions import condition
 from tests.test_source_registry import source

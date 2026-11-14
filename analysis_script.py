@@ -18,8 +18,8 @@ def inspect_raw_headers(file_path: str, sheet_name: str) -> None:
 
 
 if __name__ == "__main__":
-    from src import config
-    from src.data_loader import load_and_clean_data
+    from microcosting_healthworkforce import config
+    from microcosting_healthworkforce.data_loader import load_and_clean_data
 
     sys.stdout.write(
         str(

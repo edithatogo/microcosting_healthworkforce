@@ -8,7 +8,7 @@ from zoneinfo import ZoneInfo
 
 import pytest
 
-from src.exclusive_quotes import (
+from microcosting_healthworkforce.exclusive_quotes import (
     ExclusiveQuoteAllocation,
     ExclusiveQuoteRule,
     price_exclusive_quotes,

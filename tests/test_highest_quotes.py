@@ -7,8 +7,8 @@ from fractions import Fraction
 
 import pytest
 
-from src.exclusive_quotes import QuoteExposureWindow
-from src.highest_quotes import (
+from microcosting_healthworkforce.exclusive_quotes import QuoteExposureWindow
+from microcosting_healthworkforce.highest_quotes import (
     HighestQuoteCase,
     HighestQuoteRule,
     QuoteEligibility,

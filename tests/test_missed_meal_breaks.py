@@ -6,8 +6,10 @@ from fractions import Fraction
 
 import pytest
 
-from src.missed_meal_breaks import missed_break_overtime_quantity
-from src.unit_quotes import price_units
+from microcosting_healthworkforce.missed_meal_breaks import (
+    missed_break_overtime_quantity,
+)
+from microcosting_healthworkforce.unit_quotes import price_units
 from tests.checks import assert_that
 from tests.test_unit_quotes import quantity, quote, release
 

@@ -7,15 +7,15 @@ from fractions import Fraction
 
 import pytest
 
-from src.historical_hours import select_normal_hours
-from src.normal_pay import price_selected_hours
-from src.paid_leave import (
+from microcosting_healthworkforce.historical_hours import select_normal_hours
+from microcosting_healthworkforce.normal_pay import price_selected_hours
+from microcosting_healthworkforce.paid_leave import (
     PaidLeavePolicy,
     PaidLeaveRequest,
     PaidLeaveSchedule,
     build_paid_leave,
 )
-from src.source_registry import SourceRegistry
+from microcosting_healthworkforce.source_registry import SourceRegistry
 from tests.checks import assert_that
 from tests.test_historical_hours import (
     history as hours_history,
@@ -29,7 +29,7 @@ from tests.test_historical_hours import (
 from tests.test_normal_pay import exposure, prices
 from tests.test_source_registry import source
 from tests.test_unit_quotes import quote, release
-lazy from src.unit_quotes import UnitQuoteRelease
+lazy from microcosting_healthworkforce.unit_quotes import UnitQuoteRelease
 
 
 def policy(**changes: object) -> PaidLeavePolicy:

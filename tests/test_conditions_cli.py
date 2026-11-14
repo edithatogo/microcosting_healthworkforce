@@ -9,12 +9,15 @@ lazy from pathlib import Path
 
 import pytest
 
-from src.capacity_costing import CapacityScenarioResult
-from src.condition_history import release_sha256
-from src.conditions import ConditionRelease, ConditionSnapshotResult
-from src.conditions_cli import RosterRequest, main
-from src.costing import Activity
-from src.source_registry import SourceRegistry
+from microcosting_healthworkforce.capacity_costing import CapacityScenarioResult
+from microcosting_healthworkforce.condition_history import release_sha256
+from microcosting_healthworkforce.conditions import (
+    ConditionRelease,
+    ConditionSnapshotResult,
+)
+from microcosting_healthworkforce.conditions_cli import RosterRequest, main
+from microcosting_healthworkforce.costing import Activity
+from microcosting_healthworkforce.source_registry import SourceRegistry
 from tests.checks import assert_that
 from tests.test_conditions import condition
 from tests.test_roster_costing import period, release, rule

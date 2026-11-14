@@ -8,7 +8,7 @@ from fractions import Fraction
 import pytest
 from pydantic import TypeAdapter
 
-from src.reimbursement import (
+from microcosting_healthworkforce.reimbursement import (
     LeaveSchemeReconciliation,
     ReimbursementCarryDecision,
     ReimbursementClaim,

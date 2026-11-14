@@ -7,12 +7,15 @@ from fractions import Fraction
 
 import pytest
 
-from src.adjustment_settlement import (
+from microcosting_healthworkforce.adjustment_settlement import (
     AdjustmentLine,
     AdjustmentSettlement,
     reconcile_adjustment,
 )
-from src.capped_overtime import DailyHistory, cost_capped_daily_overtime
+from microcosting_healthworkforce.capped_overtime import (
+    DailyHistory,
+    cost_capped_daily_overtime,
+)
 from tests.checks import assert_that
 from tests.test_capped_overtime import activity, release, rule
 

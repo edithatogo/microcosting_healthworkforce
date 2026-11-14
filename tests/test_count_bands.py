@@ -7,16 +7,16 @@ from fractions import Fraction
 
 import pytest
 
-from src.count_bands import (
+from microcosting_healthworkforce.count_bands import (
     CountBand,
     CountBandCase,
     CountBandFact,
     CountBandRule,
     price_count_bands,
 )
-from src.exclusive_quotes import QuoteExposureWindow
-from src.source_registry import SourceRegistry
-from src.unit_quotes import UnitQuote, UnitQuoteRelease
+from microcosting_healthworkforce.exclusive_quotes import QuoteExposureWindow
+from microcosting_healthworkforce.source_registry import SourceRegistry
+from microcosting_healthworkforce.unit_quotes import UnitQuote, UnitQuoteRelease
 from tests.checks import assert_that
 from tests.test_exclusive_quotes import allocation, rule
 from tests.test_source_registry import source

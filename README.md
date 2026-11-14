@@ -27,13 +27,13 @@ Beyond simple cost translation, this tool is designed to support advanced analys
 
 ## Core Components
 
--   `src/main.py`: The main entry point that orchestrates the data loading, calculation, and validation process.
--   `src/data_loader.py`: Handles reading and cleaning the Excel data.
--   `src/formula_engine.py`: Calculates the foundational "Year 0" annual costs based on definitions in `data/formulas.json`.
--   `src/projection.py`: Takes the Year 0 costs and projects them into the future.
--   `src/rate_converter.py`: Converts annual costs for each year into time-based rates.
--   `src/sensitivity_analysis.py`: Runs Deterministic Sensitivity Analysis (DSA) based on scenarios defined in `data/dsa_scenarios.json`.
--   `src/formula_parser.py`: Safely evaluates the mathematical expressions defined in the formulas.
+-   `microcosting_healthworkforce/main.py`: The main entry point that orchestrates the data loading, calculation, and validation process.
+-   `microcosting_healthworkforce/data_loader.py`: Handles reading and cleaning the Excel data.
+-   `microcosting_healthworkforce/formula_engine.py`: Calculates the foundational "Year 0" annual costs based on definitions in `data/formulas.json`.
+-   `microcosting_healthworkforce/projection.py`: Takes the Year 0 costs and projects them into the future.
+-   `microcosting_healthworkforce/rate_converter.py`: Converts annual costs for each year into time-based rates.
+-   `microcosting_healthworkforce/sensitivity_analysis.py`: Runs Deterministic Sensitivity Analysis (DSA) based on scenarios defined in `data/dsa_scenarios.json`.
+-   `microcosting_healthworkforce/formula_parser.py`: Safely evaluates the mathematical expressions defined in the formulas.
 -   `data/formulas.json`: A JSON file that defines the parameters, expressions, and output mappings for all calculations.
 -   `data/dsa_scenarios.json`: Defines the scenarios (e.g., parameter to vary, amount of variation) to be run by the DSA module.
 
@@ -192,3 +192,11 @@ original workbook's four base-case projection years. The stored
 indexation value is interpreted as percentage points and applies to the
 salary-dependent share. The development allowance stays fixed on the
 same productive-time basis as the annual cost.
+
+## Dapane and canonical Python imports
+
+Use `microcosting_healthworkforce` for new integrations. Existing console names and
+legacy `src` imports retain explicit compatibility. The [Dapane consumer](docs/dapane_consumer.md)
+exports immutable public-source quotation snapshots and keeps all shared valuation
+in the optional native Dapane package. Provider and genomics environments retain
+their own exact Python pins.

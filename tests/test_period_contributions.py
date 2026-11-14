@@ -7,8 +7,8 @@ from fractions import Fraction
 
 import pytest
 
-from src.costing import Activity, CostRelease, ResourceUse
-from src.period_contributions import (
+from microcosting_healthworkforce.costing import Activity, CostRelease, ResourceUse
+from microcosting_healthworkforce.period_contributions import (
     ContributionAlternative,
     ContributionCap,
     ContributionFactor,
