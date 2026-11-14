@@ -75,9 +75,15 @@ class _LegacyFinder(MetaPathFinder):
         if not fullname.startswith("src.") or fullname.count(".") != 1:
             return None
         canonical = _PREFIX + fullname.removeprefix("src.")
-        if find_spec(canonical) is None:
+        canonical_spec = find_spec(canonical)
+        if canonical_spec is None:
             return None
-        return spec_from_loader(fullname, _LegacyLoader(canonical))
+        alias_spec = spec_from_loader(
+            fullname, _LegacyLoader(canonical), origin=canonical_spec.origin
+        )
+        if alias_spec is not None:
+            alias_spec.has_location = canonical_spec.has_location
+        return alias_spec
 
 
 sys.meta_path.insert(0, _LegacyFinder())

@@ -311,3 +311,79 @@ def test_optional_consumer_passes_the_request_to_installed_dapane() -> None:
         )
     assert_that(result == {"boundary": "native"})
     assert_that(kernel.request is not None)
+
+
+@pytest.mark.parametrize(
+    "amount",
+    ["1E+1000000000", "1E-1000000000", "1E+96", "1E-37", "-0"],
+)
+def test_decimal_expansion_is_bounded_before_fixed_point_encoding(amount: str) -> None:
+    """Compact exponent inputs cannot allocate huge strings or lose precision."""
+    release = public_release()
+    quote = release.quotes[0].model_copy(update={"amount": Decimal(amount)})
+    candidate = release.model_copy(update={"quotes": (quote,)})
+    with pytest.raises(ValueError, match="digits|scale|unsigned"):
+        export_dapane_quotes(candidate, public_bindings())
+
+
+def test_modest_exponent_is_exact_transport_without_numeric_revaluation() -> None:
+    """A small synthetic exponent preserves the amount's exact decimal value."""
+    release = public_release()
+    quote = release.quotes[0].model_copy(update={"amount": Decimal("1E+2")})
+    candidate = release.model_copy(update={"quotes": (quote,)})
+    exported = export_dapane_quotes(candidate, public_bindings())
+    quotes = cast("list[JsonObject]", exported["quotes"])
+    snapshot = cast("JsonObject", exported["release_snapshot"])
+    original_quotes = cast("list[JsonObject]", snapshot["quotes"])
+    assert_that(original_quotes[0]["amount"] == "1E+2")
+    assert_that([item["amount"] for item in quotes] == ["100", "100"])
+    pin = cast("str", exported["artifact_sha256"])
+    assert_that(
+        load_dapane_quotes_json(json.dumps(exported), expected_sha256=pin) == exported,
+    )
+
+
+@pytest.mark.parametrize(
+    "value",
+    [Decimal("1E+1000000000"), Decimal("1E-37"), Fraction(10**96), Fraction(1, 10**96)],
+)
+def test_quantity_transport_has_the_same_precision_bounds(
+    value: Decimal | Fraction,
+) -> None:
+    """Exact quantities also fail before oversized decimal or rational output."""
+    quantity = exposure().model_copy(update={"quantity": value})
+    with pytest.raises(ValueError, match="digits|scale|precision"):
+        build_dapane_request(
+            json.dumps(artifact()),
+            (quantity,),
+            expected_sha256=_PIN,
+            run_id="overlarge",
+            knowledge_cutoff=date(2026, 11, 15),
+        )
+
+
+def test_source_kind_is_not_implicitly_promoted() -> None:
+    """Only the explicit public-reference profile or labelled synthetic input exports."""
+    release = public_release()
+    original = release.sources.records[0]
+    unqualified_source = original.model_copy(update={"kind": "unqualified_source"})
+    unqualified_registry = release.sources.model_copy(
+        update={"records": (unqualified_source,)},
+    )
+    with pytest.raises(ValueError, match="source kind"):
+        export_dapane_quotes(
+            release.model_copy(update={"sources": unqualified_registry}),
+            public_bindings(),
+        )
+    synthetic_source = original.model_copy(update={"kind": "synthetic"})
+    synthetic_registry = release.sources.model_copy(
+        update={"records": (synthetic_source,)},
+    )
+    synthetic = export_dapane_quotes(
+        release.model_copy(update={"sources": synthetic_registry}),
+        public_bindings(),
+    )
+    quotes = cast("list[JsonObject]", synthetic["quotes"])
+    source = cast("JsonObject", quotes[0]["source"])
+    assert_that(source["evidence"] == "synthetic")
+    assert_that(source["validation"] == "unvalidated")

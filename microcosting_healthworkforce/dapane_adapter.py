@@ -30,6 +30,9 @@ type JsonObject = dict[str, JsonValue]
 _SCHEMA = "workforce-dapane-quotes/1"
 _MAX_BYTES = 2_000_000
 _MAX_DEPTH = 64
+_MAX_NUMERIC_DIGITS = 96
+_MAX_DECIMAL_SCALE = 36
+_MAX_NUMERIC_BITS = 320
 _DIGEST = re.compile(r"^[a-f0-9]{64}$")
 
 
@@ -169,6 +172,36 @@ def _json_model(value: QuoteModel) -> JsonObject:
     return strict_json_object(value.model_dump_json())
 
 
+def _decimal(value: Decimal) -> str:
+    """Bound exact decimal expansion before allocating a fixed-point string."""
+    if not value.is_finite() or value.is_signed():
+        message = "Dapane transport requires finite unsigned decimal values"
+        raise ValueError(message)
+    number = value.as_tuple()
+    exponent = number.exponent
+    if not isinstance(exponent, int):
+        message = "Dapane transport requires a finite decimal exponent"
+        raise ValueError(message)
+    scale = max(-exponent, 0)
+    digits = max(len(number.digits) + exponent, 1) + scale
+    if digits > _MAX_NUMERIC_DIGITS or scale > _MAX_DECIMAL_SCALE:
+        message = "Decimal transport exceeds 96 digits or scale 36"
+        raise ValueError(message)
+    return format(value, "f")
+
+
+def _unsigned_integer(value: int) -> str:
+    """Bound a rational component before decimal string conversion."""
+    if value < 0 or value.bit_length() > _MAX_NUMERIC_BITS:
+        message = "Rational transport exceeds the unsigned precision limit"
+        raise ValueError(message)
+    encoded = str(value)
+    if len(encoded) > _MAX_NUMERIC_DIGITS:
+        message = "Rational transport exceeds 96 digits"
+        raise ValueError(message)
+    return encoded
+
+
 def _export_quote(
     release: UnitQuoteRelease,
     binding: DapaneQuoteBinding,
@@ -203,7 +236,7 @@ def _export_quote(
         "kind": "resource_use",
         "target": binding.target,
         "unit": binding.unit,
-        "amount": format(quote.amount, "f"),
+        "amount": _decimal(quote.amount),
         "per_quantity": binding.per_quantity,
         "currency": release.currency,
         "price_year": binding.price_year,
@@ -307,10 +340,10 @@ def _exact(value: Decimal | Fraction) -> JsonValue:
     """Encode the supplied number exactly; this performs no valuation."""
     if isinstance(value, Fraction):
         return {
-            "numerator": str(value.numerator),
-            "denominator": str(value.denominator),
+            "numerator": _unsigned_integer(value.numerator),
+            "denominator": _unsigned_integer(value.denominator),
         }
-    return format(value, "f")
+    return _decimal(value)
 
 
 def build_dapane_request(

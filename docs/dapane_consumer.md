@@ -89,6 +89,9 @@ The parser rejects duplicate object keys at every level, floating and nonfinite
 numeric tokens, unknown or substituted envelope fields, missing pins, inconsistent
 source/quote projections, excessive nesting and payloads above 2 MB. Price year is
 a strict integer. Amounts and quantities never traverse binary floating point.
+Before fixed-point or rational string conversion, transport enforces Dapane's
+96-digit numeric and 36-place decimal-scale limits. Compact huge exponents cannot
+expand into unbounded strings.
 A new internally consistent hash alone does not authorize a source: callers pin
 the chosen release independently.
 
